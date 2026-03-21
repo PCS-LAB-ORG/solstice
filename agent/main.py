@@ -11,6 +11,7 @@ from agent.classifier import classify_diffs
 from agent.approver import run_approval
 from agent.writer import write_approved_tasks, update_state, bootstrap_state, write_unclassified_log
 from agent.watcher import start_watching
+from agent.reporter import generate_report
 
 # Module-level logger — handlers configured in main() after DATA_DIR exists
 logger = logging.getLogger(__name__)
@@ -100,6 +101,11 @@ def run_pipeline(csv_path: Path) -> None:
     if approved:
         write_approved_tasks(approved, PENDING_TASKS_FILE)
         logger.info("%d tasks written to pending_tasks.csv", len(approved))
+        report_path = generate_report()
+        logger.info("Report generated: %s", report_path)
+        print(f"Report → {report_path}")
+        import subprocess
+        subprocess.Popen(["open", str(report_path)])
 
     expiry_flagged = {d["account_id"] for d in diffs if d.get("expiry_risk")}
     update_state(state, valid_accounts, STATE_FILE, expiry_flagged=expiry_flagged)

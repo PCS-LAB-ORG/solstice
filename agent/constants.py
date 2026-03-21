@@ -57,7 +57,7 @@ STATUSES = [
     "Kick Off Scheduled", "Customer Engaged", "In Progress",
     "Customer Acceptance", "PS", "Completed", "On Hold",
     "Backoff", "Sales Hold", "Blocked: Tech limitation",
-    "Churning/Churned", "Cancelled",
+    "Churning/Churned", "Cancelled", "Dev testing",
 ]
 
 REGIONS = [

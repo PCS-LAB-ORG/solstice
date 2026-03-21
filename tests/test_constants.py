@@ -6,7 +6,7 @@ from agent.constants import (
 )
 
 def test_status_count():
-    assert len(STATUSES) == 15
+    assert len(STATUSES) == 16
 
 def test_region_count():
     assert len(REGIONS) == 11

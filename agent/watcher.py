@@ -8,21 +8,32 @@ from watchdog.observers import Observer
 
 logger = logging.getLogger(__name__)
 
+_DEBOUNCE_S = 5  # seconds — ignore repeat events for the same file within this window
+
 
 class CsvDropHandler(FileSystemEventHandler):
-    """Calls callback(path) when a CSV file is created or modified in the watched directory."""
+    """Calls callback(path) when a CSV file is created or modified in the watched directory.
+    Debounced: the same file is processed at most once per _DEBOUNCE_S seconds."""
 
     def __init__(self, callback: Callable[[Path], None]):
         super().__init__()
         self._callback = callback
+        self._last_processed: dict[str, float] = {}
 
     def _handle(self, event) -> None:
         if event.is_directory:
             return
         path = Path(event.src_path)
-        if path.suffix.lower() == ".csv":
-            logger.info("CSV detected: %s", path)
-            self._callback(path)
+        if path.suffix.lower() != ".csv":
+            return
+        now = time.monotonic()
+        last = self._last_processed.get(str(path), 0)
+        if now - last < _DEBOUNCE_S:
+            logger.debug("Debounced duplicate event for %s", path.name)
+            return
+        self._last_processed[str(path)] = now
+        logger.info("CSV detected: %s", path)
+        self._callback(path)
 
     def on_created(self, event) -> None:
         self._handle(event)

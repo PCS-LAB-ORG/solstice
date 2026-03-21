@@ -37,7 +37,7 @@ def validate_accounts(
                 "region": acc.get("sales_region", ""),
                 "file": csv_filename,
             })
-            logger.warning("INVALID_ACCOUNT_ID: %s (file=%s)", account_id, csv_filename)
+            logger.debug("INVALID_ACCOUNT_ID: %s (file=%s)", account_id, csv_filename)
             continue
 
         # Rule 2: EMEA region check (empty region passes — unknown, not confirmed non-EMEA)
@@ -49,7 +49,7 @@ def validate_accounts(
                 "region": region,
                 "file": csv_filename,
             })
-            logger.warning(
+            logger.debug(
                 "NON_EMEA_REGION: %s region=%s (file=%s)", account_id, region, csv_filename
             )
             continue
