@@ -13,10 +13,11 @@ pip3 install -r requirements.txt
 ```bash
 # Terminal 1: agent (watcher + pipeline + approval)
 cd Solstice
-python3 agent/main.py
+python3 run.py
+# or: python3 -m agent.main
 
 # Terminal 2: status API (optional)
-python3 agent/api.py
+python3 -m agent.api
 # → http://localhost:8100/status
 ```
 
