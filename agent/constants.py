@@ -1,12 +1,19 @@
+import re
 from pathlib import Path
 
 # --- Paths ---
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
+INBOX_DIR = DATA_DIR / "inbox"
 STATE_FILE = DATA_DIR / "state.json"
 PENDING_TASKS_FILE = DATA_DIR / "pending_tasks.csv"
 PENDING_REVIEW_LOG = DATA_DIR / "pending_review.log"
 AGENT_LOG = DATA_DIR / "agent.log"
+VALIDATION_ERRORS_LOG = DATA_DIR / "validation_errors.log"
+
+# Salesforce account IDs are 15 or 18 alphanumeric characters.
+# "TRUE" (4 chars) and "FALSE" (5 chars) are rejected by the length check.
+SALESFORCE_ID_PATTERN = re.compile(r"^[a-zA-Z0-9]{15,18}$")
 
 # --- CSV Column Mapping (by index — column 0 header is '\xa0\xa0', non-breaking spaces) ---
 CSV_COL_ACCOUNT_ID = 0
