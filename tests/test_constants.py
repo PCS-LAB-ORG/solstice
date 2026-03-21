@@ -2,7 +2,7 @@ from agent.constants import (
     STATUSES, REGIONS, BLOCKER_COLS, ESCALATION_STATUSES,
     OUTREACH_STATUSES, TASK_CATEGORIES, CSV_COL_ACCOUNT_ID,
     CSV_COL_STATUS, CSV_COL_SALES_REGION, CSV_COL_EXPIRATION_DATE,
-    CSV_COL_KICKOFF_DATE, SYSTEM_PROMPT, DATA_DIR,
+    CSV_COL_KICKOFF_DATE_HEADER, SYSTEM_PROMPT, DATA_DIR,
 )
 
 def test_status_count():
@@ -32,7 +32,7 @@ def test_account_id_col_is_index_zero():
     assert CSV_COL_ACCOUNT_ID == 0
 
 def test_kickoff_date_col_has_newline():
-    assert "\n" in CSV_COL_KICKOFF_DATE
+    assert "\n" in CSV_COL_KICKOFF_DATE_HEADER
 
 def test_system_prompt_lists_six_classifiable_categories():
     for cat in ["ESCALATION", "CUSTOMER_OUTREACH", "BLOCKER_REVIEW",

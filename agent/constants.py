@@ -19,10 +19,12 @@ CSV_COL_SALES_REGION = 10
 CSV_COL_COMMENTS = 12
 CSV_COL_EXPIRATION_DATE = 13
 CSV_COL_PS_ENGAGED = 36
-CSV_COL_KICKOFF_DATE_IDX = 35   # column index
-CSV_COL_KICKOFF_DATE = "Kickoff\nDate"  # actual CSV column header (contains literal newline)
+CSV_COL_KICKOFF_DATE = 35   # column index
+CSV_COL_KICKOFF_DATE_HEADER = "Kickoff\nDate"  # actual CSV column header (contains literal newline)
 CSV_COL_EMAIL_SENT = 41
+# Columns 6-9, 11, 14-34, 37-40 exist in the CSV but are not used by the agent
 
+# Indices 16-30, skipping 19 ('CSP') which is not a blocker column
 BLOCKER_COL_INDICES = [16, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
 BLOCKER_COLS = [
     "APIs usage / custom integrations / scripts (blocker)",
@@ -40,7 +42,8 @@ BLOCKER_COLS = [
     "Linux Functions without External Package URL (blocker)",
     "app-embeded protection capabilities (blocker)",
 ]
-assert len(BLOCKER_COL_INDICES) == len(BLOCKER_COLS) == 14
+if len(BLOCKER_COL_INDICES) != len(BLOCKER_COLS):
+    raise ValueError(f"BLOCKER_COL_INDICES ({len(BLOCKER_COL_INDICES)}) and BLOCKER_COLS ({len(BLOCKER_COLS)}) must match")
 
 STATUSES = [
     "Ready To Engage", "Account team contacted", "Upgrade Email Sent",
@@ -55,6 +58,7 @@ REGIONS = [
     "Gulf/North Africa", "Nordics", "SEUR", "Saudi/LBS", "Turkey/SA", "UKI",
 ]
 
+# UNCLASSIFIED is a code-side fallback (set when Claude API fails) — never emitted by the LLM
 TASK_CATEGORIES = [
     "ESCALATION", "CUSTOMER_OUTREACH", "BLOCKER_REVIEW",
     "STATUS_UPDATE", "PS_ENGAGEMENT", "EXPIRY_RISK", "UNCLASSIFIED",
