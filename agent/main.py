@@ -4,8 +4,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from agent.constants import DATA_DIR, STATE_FILE, PENDING_TASKS_FILE, PENDING_REVIEW_LOG, AGENT_LOG
+from agent.constants import DATA_DIR, INBOX_DIR, STATE_FILE, PENDING_TASKS_FILE, PENDING_REVIEW_LOG, AGENT_LOG, VALIDATION_ERRORS_LOG
 from agent.differ import parse_csv, compute_diffs
+from agent.validator import validate_accounts, write_validation_errors
 from agent.classifier import classify_diffs
 from agent.approver import run_approval
 from agent.writer import write_approved_tasks, update_state, bootstrap_state, write_unclassified_log
@@ -40,11 +41,19 @@ def run_pipeline(csv_path: Path) -> None:
         logger.warning("CSV produced 0 accounts — skipping pipeline")
         return
 
-    diffs = compute_diffs(new_accounts, state)
+    valid_accounts, invalid_entries = validate_accounts(new_accounts, csv_filename=csv_path.name)
+    if invalid_entries:
+        write_validation_errors(invalid_entries, VALIDATION_ERRORS_LOG)
+        logger.warning("%d invalid rows written to validation_errors.log", len(invalid_entries))
+    if not valid_accounts:
+        logger.warning("No valid EMEA accounts after validation — skipping pipeline")
+        return
+
+    diffs = compute_diffs(valid_accounts, state)
     if not diffs:
         logger.info("No changes detected.")
         print("No changes detected.")
-        update_state(state, new_accounts, STATE_FILE)
+        update_state(state, valid_accounts, STATE_FILE)
         return
 
     logger.info("%d diffs detected", len(diffs))
@@ -93,12 +102,13 @@ def run_pipeline(csv_path: Path) -> None:
         logger.info("%d tasks written to pending_tasks.csv", len(approved))
 
     expiry_flagged = {d["account_id"] for d in diffs if d.get("expiry_risk")}
-    update_state(state, new_accounts, STATE_FILE, expiry_flagged=expiry_flagged)
+    update_state(state, valid_accounts, STATE_FILE, expiry_flagged=expiry_flagged)
     logger.info("Pipeline complete.")
 
 
 def main():
     DATA_DIR.mkdir(exist_ok=True)
+    INBOX_DIR.mkdir(exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s — %(message)s",
@@ -107,8 +117,8 @@ def main():
             logging.StreamHandler(sys.stdout),
         ],
     )
-    print("Solstice Agent — watching", DATA_DIR, "for CSV drops. Ctrl+C to stop.")
-    start_watching(DATA_DIR, callback=run_pipeline)
+    print(f"Solstice Agent — watching {INBOX_DIR} for CSV drops. Ctrl+C to stop.")
+    start_watching(INBOX_DIR, callback=run_pipeline)
 
 
 if __name__ == "__main__":
