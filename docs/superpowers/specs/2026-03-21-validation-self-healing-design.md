@@ -38,11 +38,18 @@ Three issues observed in production run:
 
 **Interface:**
 ```python
-def validate_accounts(accounts: dict) -> tuple[dict, list[dict]]:
+def validate_accounts(accounts: dict, csv_filename: str = "") -> tuple[dict, list[dict]]:
     """
     Returns (valid_accounts, invalid_entries).
     valid_accounts: {account_id: account_dict} — safe to pass to compute_diffs()
-    invalid_entries: list of {account_id, reason, row_data} — written to validation_errors.log
+    invalid_entries: list of {"account_id": str, "reason": str, "region": str, "file": str}
+    csv_filename: basename of the source CSV, included in log entries for traceability.
+    """
+
+def write_validation_errors(invalid_entries: list[dict], log_file: Path) -> None:
+    """
+    Appends invalid_entries to log_file. Creates the file if it does not exist.
+    One line per entry in the format shown below.
     """
 ```
 
@@ -50,8 +57,8 @@ def validate_accounts(accounts: dict) -> tuple[dict, list[dict]]:
 
 | Rule | Condition | Action |
 |---|---|---|
-| Valid Salesforce ID | `account_id` matches `^[a-zA-Z0-9]{15,18}$` AND does not equal `"TRUE"` or `"FALSE"` | Skip + log if invalid |
-| EMEA region | `sales_region` is in `REGIONS` constant OR `sales_region` is empty | Skip + log if non-EMEA region present |
+| Valid Salesforce ID | `account_id` matches `^[a-zA-Z0-9]{15,18}$` | Skip + log if invalid. `"TRUE"` (4 chars) and `"FALSE"` (5 chars) are already rejected by the length check — no explicit exclusion needed. |
+| EMEA region | `sales_region` is in `REGIONS` constant OR `sales_region` is empty | Skip + log if non-EMEA region detected. Empty region passes (region unknown, not confirmed non-EMEA). |
 
 **Note:** `#N/A` field values are NOT a validation failure — they pass through to Claude for classification.
 
@@ -69,8 +76,8 @@ Updated `run_pipeline()` flow:
 
 ```
 parse_csv(csv_path)
-  → validate_accounts(accounts)        # NEW — splits valid/invalid
-  → write_validation_errors(invalid)   # NEW — appends to validation_errors.log
+  → validate_accounts(accounts, csv_filename=csv_path.name)   # NEW — splits valid/invalid
+  → write_validation_errors(invalid, VALIDATION_ERRORS_LOG)   # NEW — appends to log
   → compute_diffs(valid_accounts, state)
   → classify_diffs(diffs)
   → run_approval(tasks)
@@ -89,7 +96,8 @@ Add to `constants.py`:
 INBOX_DIR = DATA_DIR / "inbox"
 VALIDATION_ERRORS_LOG = DATA_DIR / "validation_errors.log"
 SALESFORCE_ID_PATTERN = re.compile(r"^[a-zA-Z0-9]{15,18}$")
-NON_EMEA_SKIP_IF_PRESENT = True  # skip non-EMEA; False = pass through
+# Non-EMEA accounts are always skipped — no flag needed.
+# REGIONS constant (already present) is the source of truth for EMEA membership.
 ```
 
 ---
@@ -103,7 +111,7 @@ Tests cover all validation rules and edge cases:
 | `test_valid_account_passes` | Standard Salesforce ID + EMEA region → included in valid |
 | `test_false_account_id_rejected` | account_id="FALSE" → invalid, logged |
 | `test_true_account_id_rejected` | account_id="TRUE" → invalid, logged |
-| `test_empty_account_id_rejected` | account_id="" → invalid, logged |
+| `test_empty_account_id_rejected` | account_id="" → invalid, logged. Defense-in-depth: `parse_csv()` already filters these, but `validate_accounts()` must also reject them in case it is called independently. |
 | `test_non_emea_region_rejected` | sales_region="LATAM" → invalid, logged |
 | `test_empty_region_passes` | sales_region="" → valid (region unknown, not confirmed non-EMEA) |
 | `test_na_value_passes` | status="#N/A" → valid (passes through to Claude) |
@@ -118,7 +126,7 @@ Tests cover all validation rules and edge cases:
 
 | File | Change |
 |---|---|
-| `agent/constants.py` | Add `INBOX_DIR`, `VALIDATION_ERRORS_LOG`, `SALESFORCE_ID_PATTERN` |
+| `agent/constants.py` | Add `INBOX_DIR`, `VALIDATION_ERRORS_LOG`, `SALESFORCE_ID_PATTERN` (remove `NON_EMEA_SKIP_IF_PRESENT`) |
 | `agent/validator.py` | New — `validate_accounts()`, `write_validation_errors()` |
 | `agent/main.py` | Wire validator into pipeline; watch `INBOX_DIR`; create inbox on startup |
 | `tests/test_validator.py` | New — 11 backtests |
