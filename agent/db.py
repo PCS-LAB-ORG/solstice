@@ -295,45 +295,90 @@ def upsert_account(conn: sqlite3.Connection, account_id: str, acc: dict) -> bool
     """
     Update or insert one account. Returns True if status changed.
     Writes status change to status_history automatically.
+    Full debug logging on every write. Never raises — logs errors and returns False.
     """
-    existing = conn.execute(
-        "SELECT status FROM accounts WHERE account_id=?", (account_id,)
-    ).fetchone()
+    try:
+        existing = conn.execute(
+            "SELECT status FROM accounts WHERE account_id=?", (account_id,)
+        ).fetchone()
 
-    old_status = existing["status"] if existing else None
-    new_status = acc.get("status", "")
-    status_changed = old_status != new_status and old_status is not None
+        old_status = existing["status"] if existing else None
+        new_status = acc.get("status", "")
+        status_changed = old_status != new_status and old_status is not None
 
-    conn.execute("""
-        INSERT OR REPLACE INTO accounts
-        (account_id, customer_name, arr, active_cse, backup_cse, status,
-         status_changed_at, expiration_date, expiry_alerted_date, ps_engaged,
-         kickoff_date, comments, sales_region, email_sent, last_seen)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    """, (
-        account_id,
-        acc.get("customer_name",""), acc.get("arr",""),
-        acc.get("active_cse",""), acc.get("backup_cse",""),
-        new_status, acc.get("status_changed_at",""),
-        acc.get("expiration_date",""), acc.get("expiry_alerted_date"),
-        acc.get("ps_engaged",""), acc.get("kickoff_date",""),
-        acc.get("comments",""), acc.get("sales_region",""),
-        acc.get("email_sent",""), acc.get("last_seen",""),
-    ))
-
-    if status_changed:
         conn.execute("""
-            INSERT INTO status_history (account_id, old_status, new_status, changed_at, source)
-            VALUES (?,?,?,?,?)
-        """, (account_id, old_status, new_status,
-              datetime.now(timezone.utc).isoformat(), "pipeline"))
+            INSERT OR REPLACE INTO accounts
+            (account_id, customer_name, arr, active_cse, backup_cse, status,
+             status_changed_at, expiration_date, expiry_alerted_date, ps_engaged,
+             kickoff_date, comments, sales_region, email_sent, last_seen)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (
+            account_id,
+            acc.get("customer_name",""), acc.get("arr",""),
+            acc.get("active_cse",""), acc.get("backup_cse",""),
+            new_status, acc.get("status_changed_at",""),
+            acc.get("expiration_date",""), acc.get("expiry_alerted_date"),
+            acc.get("ps_engaged",""), acc.get("kickoff_date",""),
+            acc.get("comments",""), acc.get("sales_region",""),
+            acc.get("email_sent",""), acc.get("last_seen",""),
+        ))
+        logger.debug("DB upsert: %s | customer=%s | status=%s | cse=%s",
+                     account_id, acc.get("customer_name","?"), new_status, acc.get("active_cse","?"))
 
-    # blockers
-    conn.execute("DELETE FROM account_blockers WHERE account_id=?", (account_id,))
-    for b in acc.get("blockers", []):
-        conn.execute("INSERT OR IGNORE INTO account_blockers VALUES (?,?)", (account_id, b))
+        if status_changed:
+            conn.execute("""
+                INSERT INTO status_history (account_id, old_status, new_status, changed_at, source)
+                VALUES (?,?,?,?,?)
+            """, (account_id, old_status, new_status,
+                  datetime.now(timezone.utc).isoformat(), "pipeline"))
+            logger.info("DB status_history: %s | %s → %s",
+                        acc.get("customer_name", account_id), old_status, new_status)
 
-    return status_changed
+        # blockers
+        conn.execute("DELETE FROM account_blockers WHERE account_id=?", (account_id,))
+        for b in acc.get("blockers", []):
+            conn.execute("INSERT OR IGNORE INTO account_blockers VALUES (?,?)", (account_id, b))
+
+        return status_changed
+
+    except Exception as e:
+        logger.error("DB upsert FAILED for %s (%s): %s", account_id, acc.get("customer_name","?"), e)
+        return False
+
+
+def sync_all(state_file: Path, db_path: Path = DB_PATH) -> dict:
+    """
+    Full sync: read state.json → upsert every account into DB.
+    Called at startup and after every pipeline run.
+    Returns {synced, errors, status_changes}.
+    """
+    try:
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+        accounts = state.get("accounts", {})
+    except Exception as e:
+        logger.error("DB sync_all: failed to read state.json: %s", e)
+        return {"synced": 0, "errors": 1, "status_changes": 0}
+
+    counts = {"synced": 0, "errors": 0, "status_changes": 0}
+    try:
+        init_db(db_path)
+        with get_db(db_path) as conn:
+            for account_id, acc in accounts.items():
+                try:
+                    changed = upsert_account(conn, account_id, acc)
+                    counts["synced"] += 1
+                    if changed:
+                        counts["status_changes"] += 1
+                except Exception as e:
+                    logger.error("DB sync_all row error %s: %s", account_id, e)
+                    counts["errors"] += 1
+    except Exception as e:
+        logger.error("DB sync_all connection error: %s", e)
+        counts["errors"] += 1
+
+    logger.info("DB sync_all complete: synced=%d errors=%d status_changes=%d",
+                counts["synced"], counts["errors"], counts["status_changes"])
+    return counts
 
 
 def load_accounts(path: Path = DB_PATH) -> dict:

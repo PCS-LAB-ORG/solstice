@@ -1098,10 +1098,10 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .signal-dot {{ font-size:14px; }}
 .subtype-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:2px 6px; border-radius:3px; border:1px solid; font-weight:700; letter-spacing:0.06em; display:inline-block; margin-bottom:3px; }}
 .sd-text {{ font-size:11.5px; color:var(--muted); line-height:1.4; margin-top:2px; }}
-.ai-field {{ font-size:12px; color:var(--text); line-height:1.45; margin-bottom:3px; }}
+.ai-field {{ font-size:12.5px; color:var(--text); line-height:1.5; margin-bottom:4px; }}
 .ai-field:last-child {{ margin-bottom:0; }}
-.ai-label {{ font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-right:5px; }}
-.ai-accountable {{ background:#FFFBEB; border-left:2px solid #F59E0B; padding:2px 6px; border-radius:0 4px 4px 0; }}
+.ai-label {{ font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#5EEAD4; margin-right:6px; display:block; margin-bottom:1px; }}
+.ai-accountable {{ background:rgba(245,158,11,0.15); border-left:2px solid #F59E0B; padding:4px 8px; border-radius:0 4px 4px 0; color:#FCD34D; font-weight:600; font-size:13px; }}
 .blocker-tags {{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }}
 .blocker-tag {{ font-family:'Geist Mono',monospace; font-size:9.5px; padding:2px 6px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; white-space:nowrap; }}
 .status-chip {{ font-family:'Geist Mono',monospace; font-size:10px; font-weight:500; padding:2px 7px; border-radius:4px; border:1px solid; white-space:nowrap; }}
@@ -1360,12 +1360,28 @@ function toggleNav() {{
 (function() {{
   function applyNavWidth() {{
     var w = window.innerWidth;
-    var navW = w >= 1400 ? '240px' : w >= 1100 ? '200px' : w >= 900 ? '160px' : '0px';
+    var navW, showLabels;
+    if (w >= 1600)      {{ navW = '240px'; showLabels = true; }}
+    else if (w >= 1280) {{ navW = '200px'; showLabels = true; }}
+    else if (w >= 1024) {{ navW = '180px'; showLabels = true; }}
+    else if (w >= 800)  {{ navW = '48px';  showLabels = false; }}  // icon-only rail
+    else                {{ navW = '0px';   showLabels = false; }}   // hidden, burger shows
     document.documentElement.style.setProperty('--nav-w', navW);
-    // Show/hide labels at narrow widths
     document.querySelectorAll('.sidenav-label,.sidenav-count,.sidenav-title,.sidenav-toggle-all').forEach(function(el) {{
-      el.style.display = parseInt(navW) >= 160 ? '' : 'none';
+      el.style.display = showLabels ? '' : 'none';
     }});
+    // Icon-only mode: show dots only
+    document.querySelectorAll('.sidenav-dot').forEach(function(el) {{
+      el.style.display = parseInt(navW) >= 48 ? '' : 'none';
+    }});
+    // Adjust padding for icon-only
+    document.querySelectorAll('.nav-item').forEach(function(el) {{
+      el.style.justifyContent = showLabels ? '' : 'center';
+      el.style.padding = showLabels ? '' : '0.5rem 0';
+    }});
+    // Content padding adjusts with nav
+    var mainPad = w >= 1280 ? '2.5rem 3rem' : w >= 800 ? '1.25rem 1.5rem' : '1rem';
+    document.querySelectorAll('.wrap').forEach(function(el) {{ el.style.padding = mainPad; }});
   }}
   applyNavWidth();
   window.addEventListener('resize', applyNavWidth);

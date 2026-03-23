@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from agent.constants import PENDING_TASKS_HEADER
-from agent.db import get_db, init_db, upsert_account, DB_PATH
+from agent.db import sync_all, DB_PATH
 
 logger = logging.getLogger(__name__)
 
