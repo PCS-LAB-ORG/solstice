@@ -20,13 +20,14 @@ from agent.constants import PENDING_TASKS_FILE, STATE_FILE, SALESFORCE_ID_PATTER
 OUTPUTS_DIR = Path(__file__).parent.parent / "outputs"
 
 CATEGORY_COLORS: dict[str, tuple[str, str]] = {
-    "ESCALATION":        ("#C62828", "#FFF0F0"),
-    "EXPIRY_RISK":       ("#BF5000", "#FFF4EC"),
-    "CUSTOMER_OUTREACH": ("#1055A8", "#EAF2FF"),
-    "BLOCKER_REVIEW":    ("#5D4037", "#F4EFEC"),
-    "STATUS_UPDATE":     ("#00695C", "#E4F5F3"),
-    "PS_ENGAGEMENT":     ("#4527A0", "#F0EBFF"),
-    "UNCLASSIFIED":      ("#555555", "#F2F2F2"),
+    "SENTIMENT_RISK":        ("#9C1C1C", "#FFF0F0"),
+    "DELIVERY_IMPACT":       ("#BF5000", "#FFF4EC"),
+    "DEPLOYMENT_IMPACT":     ("#C62828", "#FEF2F2"),
+    "TECHNICAL_STABILITY":   ("#5D4037", "#F4EFEC"),
+    "RELATIONSHIP_RECOVERY": ("#4527A0", "#F0EBFF"),
+    "AUDIT_COMPLIANCE":      ("#1055A8", "#EAF2FF"),
+    "PROJECT_CLOSURE":       ("#00695C", "#E4F5F3"),
+    "UNCLASSIFIED":          ("#555555", "#F2F2F2"),
 }
 
 PRIORITY_COLOR: dict[str, str] = {

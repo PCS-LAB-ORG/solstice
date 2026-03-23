@@ -67,8 +67,14 @@ REGIONS = [
 
 # UNCLASSIFIED is a code-side fallback (set when Claude API fails) — never emitted by the LLM
 TASK_CATEGORIES = [
-    "ESCALATION", "CUSTOMER_OUTREACH", "BLOCKER_REVIEW",
-    "STATUS_UPDATE", "PS_ENGAGEMENT", "EXPIRY_RISK", "UNCLASSIFIED",
+    "SENTIMENT_RISK",       # Executive/CISO sentiment at risk, trust issues
+    "DELIVERY_IMPACT",      # Migration delivery delayed or blocked; AHM impact
+    "DEPLOYMENT_IMPACT",    # Active deployment stalled, causing disruption
+    "TECHNICAL_STABILITY",  # BSOD, CPU, platform instability, performance regressions
+    "RELATIONSHIP_RECOVERY",# Executive-level recovery needed; EBR, formal assurance
+    "AUDIT_COMPLIANCE",     # Regulatory/audit requirements, RCAs, DR obligations
+    "PROJECT_CLOSURE",      # Wrapping up completed deployments, formal closure
+    "UNCLASSIFIED",         # Fallback — classifier failed
 ]
 
 ESCALATION_STATUSES = ["Backoff", "Sales Hold", "Churning/Churned", "Cancelled"]
@@ -85,8 +91,14 @@ CLASSIFIER_RETRY_DELAY_S = 5
 
 SYSTEM_PROMPT = (
     "You are a Prisma Cloud CC Migration task classifier for the EMEA team.\n"
-    "Classify each account change into exactly one category from: "
-    "ESCALATION, CUSTOMER_OUTREACH, BLOCKER_REVIEW, STATUS_UPDATE, PS_ENGAGEMENT, EXPIRY_RISK.\n"
+    "Classify each account change into exactly one category from:\n"
+    "  SENTIMENT_RISK — executive or CISO sentiment at risk, trust or relationship issues.\n"
+    "  DELIVERY_IMPACT — migration delivery delayed or blocked; AHM impact.\n"
+    "  DEPLOYMENT_IMPACT — active deployment stalled, causing operational disruption.\n"
+    "  TECHNICAL_STABILITY — platform instability, BSOD, CPU spikes, performance regressions.\n"
+    "  RELATIONSHIP_RECOVERY — executive-level recovery needed; EBR or formal assurance required.\n"
+    "  AUDIT_COMPLIANCE — regulatory or audit obligations, RCAs, DR requirements.\n"
+    "  PROJECT_CLOSURE — wrapping up completed deployments, formal project closure.\n"
     "Assign priority: HIGH, MEDIUM, or LOW.\n"
     "Write a one-sentence suggested_action in imperative form "
     "(e.g. \"Escalate to regional manager — account moved to Sales Hold\").\n"

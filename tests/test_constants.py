@@ -26,7 +26,7 @@ def test_task_categories_contains_unclassified():
     assert "UNCLASSIFIED" in TASK_CATEGORIES
 
 def test_task_categories_count():
-    assert len(TASK_CATEGORIES) == 7
+    assert len(TASK_CATEGORIES) == 8
 
 def test_account_id_col_is_index_zero():
     assert CSV_COL_ACCOUNT_ID == 0
@@ -34,9 +34,10 @@ def test_account_id_col_is_index_zero():
 def test_kickoff_date_col_has_newline():
     assert "\n" in CSV_COL_KICKOFF_DATE_HEADER
 
-def test_system_prompt_lists_six_classifiable_categories():
-    for cat in ["ESCALATION", "CUSTOMER_OUTREACH", "BLOCKER_REVIEW",
-                "STATUS_UPDATE", "PS_ENGAGEMENT", "EXPIRY_RISK"]:
+def test_system_prompt_lists_seven_classifiable_categories():
+    for cat in ["SENTIMENT_RISK", "DELIVERY_IMPACT", "DEPLOYMENT_IMPACT",
+                "TECHNICAL_STABILITY", "RELATIONSHIP_RECOVERY",
+                "AUDIT_COMPLIANCE", "PROJECT_CLOSURE"]:
         assert cat in SYSTEM_PROMPT
 
 def test_data_dir_points_to_data_folder():
