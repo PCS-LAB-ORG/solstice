@@ -302,8 +302,9 @@ def _action_section(accounts: dict) -> str:
         last_col_header  = "Last Contact" if is_outreach else "Since"
         notes_header     = "<th>Notes / Next Steps</th>" if is_outreach else ""
         blocked_headers  = "<th>Region</th><th>CSE</th><th>Since</th><th>Blockers</th>" if is_blocked else f"<th>Status</th><th>Region</th><th>CSE</th><th>{last_col_header}</th>{notes_header}"
+        group_id = "group-" + group_name.lower().replace(" / ", "-").replace(" ", "-").replace("/", "-")
         html += f"""
-        <div class="action-group">
+        <div class="action-group" id="{group_id}">
           <div class="action-group-hdr" style="border-left-color:{cfg['dot']}">
             <span class="ag-dot" style="background:{cfg['dot']}"></span>
             <span class="ag-name" style="color:{cfg['color']}">{group_name}</span>
@@ -400,14 +401,34 @@ def _status_chart(accounts: dict) -> str:
     values_js  = json.dumps(values)
     colors_js  = json.dumps(colors)
 
-    # Table rows
+    # Status → section anchor mapping
+    STATUS_ANCHOR = {
+        "Ready To Engage":        "group-ready-to-engage",
+        "Account team contacted":  "group-account-team-contacted",
+        "Sales Hold":              "group-churning-sales-hold",
+        "Churning/Churned":        "group-churning-sales-hold",
+        "Backoff":                 "group-escalation-risk",
+        "Cancelled":               "group-escalation-risk",
+        "Blocked: Tech limitation":"group-blocked",
+        "On Hold":                 "group-on-hold",
+        "Completed":               "section-completed",
+    }
+    anchors_js = json.dumps({s: STATUS_ANCHOR.get(s, "") for s, _ in ordered})
+
+    # Table rows — clickable when anchor exists
     table_rows = ""
     for i, (status, count) in enumerate(ordered):
         pct = round(count / total * 100, 1)
         color = colors[i]
+        anchor = STATUS_ANCHOR.get(status, "")
+        if anchor:
+            row_attrs = f'class="chart-row-link" onclick="jumpTo(\'{anchor}\')" title="Jump to {status} section"'
+        else:
+            row_attrs = 'class="chart-row-plain"'
+        arrow = ' <span class="chart-arrow">↓</span>' if anchor else ""
         table_rows += f"""
-        <tr>
-          <td><span class="chart-dot" style="background:{color}"></span>{status}</td>
+        <tr {row_attrs}>
+          <td><span class="chart-dot" style="background:{color}"></span>{status}{arrow}</td>
           <td class="chart-count">{count}</td>
           <td class="chart-pct">{pct}%</td>
         </tr>"""
@@ -415,7 +436,7 @@ def _status_chart(accounts: dict) -> str:
     return f"""
     <div class="chart-wrap">
       <div class="chart-canvas-wrap">
-        <canvas id="statusChart" width="280" height="280"></canvas>
+        <canvas id="statusChart" width="280" height="280" style="cursor:pointer"></canvas>
         <div class="chart-centre">
           <div class="chart-centre-n">{total}</div>
           <div class="chart-centre-l">accounts</div>
@@ -429,20 +450,37 @@ def _status_chart(accounts: dict) -> str:
       </div>
     </div>
     <script>
+    var STATUS_ANCHORS = {anchors_js};
+
+    function jumpTo(id) {{
+      var el = document.getElementById(id);
+      if (el) {{ el.scrollIntoView({{ behavior: 'smooth', block: 'start' }}); }}
+    }}
+
     (function() {{
       var ctx = document.getElementById('statusChart').getContext('2d');
-      new Chart(ctx, {{
+      var chart = new Chart(ctx, {{
         type: 'doughnut',
         data: {{
           labels: {labels_js},
-          datasets: [{{ data: {values_js}, backgroundColor: {colors_js}, borderWidth: 2, borderColor: '#F7F5F1', hoverOffset: 6 }}]
+          datasets: [{{ data: {values_js}, backgroundColor: {colors_js}, borderWidth: 2, borderColor: '#F7F5F1', hoverOffset: 8 }}]
         }},
         options: {{
           cutout: '68%',
           plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{
-            label: function(c) {{ return ' ' + c.label + ': ' + c.raw + ' (' + Math.round(c.raw/{total}*1000)/10 + '%)'; }}
+            label: function(c) {{
+              var anchor = STATUS_ANCHORS[c.label];
+              var suffix = anchor ? ' →' : '';
+              return ' ' + c.label + ': ' + c.raw + ' (' + Math.round(c.raw/{total}*1000)/10 + '%)' + suffix;
+            }}
           }} }} }},
-          animation: {{ animateRotate: true, duration: 800 }}
+          animation: {{ animateRotate: true, duration: 800 }},
+          onClick: function(evt, elements) {{
+            if (!elements.length) return;
+            var label = chart.data.labels[elements[0].index];
+            var anchor = STATUS_ANCHORS[label];
+            if (anchor) jumpTo(anchor);
+          }}
         }}
       }});
     }})();
@@ -588,6 +626,10 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .chart-dot {{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:7px; flex-shrink:0; vertical-align:middle; }}
 .chart-count {{ font-family:'Fraunces',serif; font-size:1rem; font-weight:600; text-align:right; width:50px; }}
 .chart-pct {{ font-family:'Geist Mono',monospace; font-size:11px; color:var(--muted); text-align:right; width:50px; }}
+.chart-row-link {{ cursor:pointer; }}
+.chart-row-link:hover td {{ background:#F0EDE6; }}
+.chart-row-plain {{ cursor:default; }}
+.chart-arrow {{ font-size:10px; color:var(--muted); margin-left:4px; }}
 
 /* Footer */
 .footer {{ text-align:center; padding:1.8rem; font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; color:#C5BFB5; border-top:1px solid var(--border); margin-top:1rem; }}
@@ -649,7 +691,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
   </section>
 
   <!-- SECTION 3: Completed -->
-  <section>
+  <section id="section-completed">
     {_section_header("Completed", "Accounts that reached Completed status — migration done", n_completed)}
     {completed_html}
   </section>
