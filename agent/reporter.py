@@ -320,7 +320,7 @@ def _action_section(accounts: dict) -> str:
             if ai_owner and ai_owner != cse:
                 notes_parts.append(f'<div class="ai-field"><span class="ai-label">Owner</span> {ai_owner}</div>')
             if ai_accountable:
-                notes_parts.append(f'<div class="ai-field ai-accountable"><span class="ai-label">Accountable</span> {ai_accountable}</div>')
+                notes_parts.append(f'<div class="ai-field ai-accountable"><span class="ai-label">Accountable</span><span class="ai-accountable-value">{ai_accountable}</span></div>')
             if not notes_parts and raw_comments:
                 notes_parts.append(f'<span class="notes-text">{raw_comments[:200]}{"…" if len(raw_comments) > 200 else ""}</span>')
             elif not notes_parts and is_outreach:
@@ -1168,7 +1168,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .pri-wrap {{ margin-left:auto; display:flex; align-items:center; gap:5px; }}
 .pri-dot {{ width:7px; height:7px; border-radius:50%; display:inline-block; }}
 .pri-txt {{ font-family:'Geist Mono',monospace; font-size:9.5px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; }}
-.card-name {{ font-family:'Fraunces',serif; font-size:1.05rem; font-weight:600; color:var(--ink); line-height:1.2; margin-top:0.15rem; }}
+.card-name {{ font-family:'Fraunces',serif; font-size:1.05rem; font-weight:600; color:#E6EDF3; line-height:1.2; margin-top:0.15rem; }}
 .card-id {{ font-family:'Geist Mono',monospace; font-size:10.5px; color:var(--muted); }}
 .card-meta {{ font-size:12px; color:var(--muted); font-weight:500; }}
 .card-action {{ font-family:'Fraunces',serif; font-size:13.5px; font-style:italic; font-weight:400; line-height:1.6; color:var(--text); background:var(--bg); border-radius:5px; padding:0.6rem 0.75rem; margin-top:0.15rem; }}
@@ -1193,11 +1193,11 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .acct-tbl td {{ padding:0.6rem 1rem; border-bottom:1px solid var(--border); vertical-align:middle; }}
 .acct-tbl tr:last-child td {{ border-bottom:none; }}
 .acct-tbl tr:hover td {{ background:#1C2128; }}
-.tbl-name {{ font-weight:600; color:var(--ink); font-size:13px; }}
-.tbl-region,.tbl-cse,.tbl-date,.tbl-exp {{ font-family:'Geist Mono',monospace; font-size:11px; color:var(--muted); white-space:nowrap; }}
+.tbl-name {{ font-weight:600; color:#E6EDF3; font-size:13px; }}
+.tbl-region,.tbl-cse,.tbl-date,.tbl-exp {{ font-family:'Geist Mono',monospace; font-size:11px; color:#8B949E; white-space:nowrap; }}
 .tbl-notes {{ max-width:340px; }}
-.notes-text {{ font-size:12px; color:var(--text); line-height:1.45; display:block; }}
-.notes-none {{ font-size:11px; color:#C5BFB5; font-style:italic; font-family:'Geist Mono',monospace; }}
+.notes-text {{ font-size:12.5px; color:#E6EDF3; line-height:1.5; display:block; }}
+.notes-none {{ font-size:11px; color:#6B7280; font-style:italic; font-family:'Geist Mono',monospace; }}
 .no-owner-inline {{ font-family:'Geist Mono',monospace; font-size:10px; color:#DC2626; font-weight:700; letter-spacing:0.05em; }}
 .xcheck-green {{ font-family:'Geist Mono',monospace; font-size:9px; color:#065F46; background:#DCFCE7; border:1px solid #86EFAC; padding:1px 5px; border-radius:3px; margin-top:3px; display:inline-block; cursor:help; }}
 .xcheck-blocked {{ font-family:'Geist Mono',monospace; font-size:9px; color:#7F1D1D; background:#FEF2F2; border:1px solid #FCA5A5; padding:1px 5px; border-radius:3px; margin-top:3px; display:inline-block; cursor:help; }}
@@ -1217,10 +1217,12 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .signal-dot {{ font-size:14px; }}
 .subtype-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:2px 6px; border-radius:3px; border:1px solid; font-weight:700; letter-spacing:0.06em; display:inline-block; margin-bottom:3px; }}
 .sd-text {{ font-size:11.5px; color:var(--muted); line-height:1.4; margin-top:2px; }}
-.ai-field {{ font-size:12.5px; color:var(--text); line-height:1.5; margin-bottom:4px; }}
+.ai-field {{ font-size:13px; color:#E6EDF3; line-height:1.55; margin-bottom:6px; padding:4px 0; }}
 .ai-field:last-child {{ margin-bottom:0; }}
-.ai-label {{ font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#5EEAD4; margin-right:6px; display:block; margin-bottom:1px; }}
-.ai-accountable {{ background:rgba(245,158,11,0.15); border-left:2px solid #F59E0B; padding:4px 8px; border-radius:0 4px 4px 0; color:#FCD34D; font-weight:600; font-size:13px; }}
+.ai-label {{ font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:#5EEAD4; display:block; margin-bottom:3px; font-weight:600; }}
+.ai-accountable {{ background:rgba(245,158,11,0.2); border-left:3px solid #F59E0B; padding:6px 10px; border-radius:0 5px 5px 0; }}
+.ai-accountable .ai-label {{ color:#F59E0B; }}
+.ai-accountable-value {{ color:#FDE68A; font-weight:700; font-size:13px; display:block; }}
 .blocker-tags {{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }}
 .blocker-tag {{ font-family:'Geist Mono',monospace; font-size:9.5px; padding:2px 6px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; white-space:nowrap; }}
 .status-chip {{ font-family:'Geist Mono',monospace; font-size:10px; font-weight:500; padding:2px 7px; border-radius:4px; border:1px solid; white-space:nowrap; }}
@@ -1251,22 +1253,22 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .week-empty {{ font-size:10px; color:#C5BFB5; font-style:italic; padding:4px; }}
 
 /* Alert Banner */
-.alert-banner {{ display:flex; justify-content:space-between; align-items:flex-start; background:#7F1D1D; color:#FEF2F2; padding:1rem 2rem; gap:1rem; border-bottom:3px solid #DC2626; }}
-.alert-left {{ display:flex; align-items:flex-start; gap:1rem; }}
-.alert-icon {{ font-family:'Fraunces',serif; font-size:1.6rem; font-weight:700; color:#FCA5A5; flex-shrink:0; line-height:1; margin-top:2px; }}
-.alert-title {{ font-weight:600; font-size:13.5px; margin-bottom:0.6rem; color:#FEF2F2; letter-spacing:0.01em; }}
-.alert-body {{ display:flex; flex-wrap:wrap; gap:0.5rem; }}
-.alert-item {{ display:flex; flex-direction:column; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:0.4rem 0.75rem; min-width:160px; }}
-.alert-acct {{ font-size:12px; font-weight:600; color:#FEF2F2; }}
-.alert-owner {{ font-family:'Geist Mono',monospace; font-size:10px; color:#FCA5A5; margin-top:2px; }}
-.alert-no-owner {{ color:#F87171; font-weight:700; letter-spacing:0.05em; }}
+.alert-banner {{ display:flex; justify-content:space-between; align-items:flex-start; background:#450A0A; color:#FEF2F2; padding:1rem 2rem; gap:1rem; border-bottom:3px solid #DC2626; border-top:1px solid #7F1D1D; }}
+.alert-left {{ display:flex; align-items:flex-start; gap:1rem; width:100%; }}
+.alert-icon {{ font-family:'Fraunces',serif; font-size:1.6rem; font-weight:700; color:#F87171; flex-shrink:0; line-height:1; margin-top:2px; }}
+.alert-title {{ font-weight:700; font-size:13px; margin-bottom:0.5rem; color:#FECACA; letter-spacing:0.01em; }}
+.alert-body {{ display:flex; flex-wrap:wrap; gap:0.4rem; }}
+.alert-item {{ display:flex; flex-direction:column; background:rgba(220,38,38,0.15); border:1px solid rgba(248,113,113,0.3); border-radius:5px; padding:0.35rem 0.65rem; min-width:140px; }}
+.alert-acct {{ font-size:12px; font-weight:600; color:#FEF2F2 !important; }}
+.alert-owner {{ font-family:'Geist Mono',monospace; font-size:9.5px; color:#FCA5A5 !important; margin-top:2px; }}
+.alert-no-owner {{ color:#F87171 !important; font-weight:700; letter-spacing:0.05em; }}
 .alert-close {{ background:none; border:none; color:#FCA5A5; font-size:1.1rem; cursor:pointer; padding:0.25rem 0.5rem; flex-shrink:0; line-height:1; opacity:0.7; }}
 .alert-close:hover {{ opacity:1; }}
-.dq-group {{ margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.1); }}
+.dq-group {{ margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid rgba(248,113,113,0.25); }}
 .dq-group:first-child {{ margin-top:0.4rem; padding-top:0; border-top:none; }}
-.dq-group-title {{ font-size:11.5px; font-weight:600; color:#FEF2F2; margin-bottom:0.4rem; }}
-.dq-count {{ display:inline-block; font-family:'Fraunces',serif; font-size:1.1rem; font-weight:700; color:#FCA5A5; margin-right:0.4rem; line-height:1; }}
-.dq-desc {{ font-weight:400; color:#FECACA; font-style:italic; }}
+.dq-group-title {{ font-size:11.5px; font-weight:700; color:#FECACA; margin-bottom:0.4rem; }}
+.dq-count {{ display:inline-block; font-family:'Fraunces',serif; font-size:1.1rem; font-weight:700; color:#F87171; margin-right:0.4rem; line-height:1; }}
+.dq-desc {{ font-weight:400; color:#FCA5A5; font-style:italic; }}
 
 /* Chart */
 .chart-wrap {{ display:grid; grid-template-columns:280px 1fr; gap:2rem; align-items:center; width:100%; }}
