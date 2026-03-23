@@ -448,11 +448,26 @@ def _blocked_milestone_section(accounts: dict) -> tuple[str, int]:
         milestone_cat = bd.get("milestone_category", "")
         cat_html = f'<span class="ms-cat">{milestone_cat}</span>' if milestone_cat else ""
 
+        # Detail notes — upgrade notes + health notes + exec delay
+        upgrade_notes = bd.get("upgrade_notes","").replace("\n"," ").replace("\r","").strip()
+        health_notes  = bd.get("health_notes","").replace("\n"," ").replace("\r","").strip()
+        exec_delay    = bd.get("exec_delay","").strip()
+        details_html  = ""
+        if upgrade_notes:
+            short = upgrade_notes[:180] + ("…" if len(upgrade_notes) > 180 else "")
+            details_html += f'<div class="detail-row"><span class="detail-lbl">Upgrade</span>{short}</div>'
+        if health_notes:
+            short = health_notes[:120] + ("…" if len(health_notes) > 120 else "")
+            details_html += f'<div class="detail-row"><span class="detail-lbl">Health</span>{short}</div>'
+        if exec_delay:
+            details_html += f'<div class="detail-row"><span class="detail-lbl">Exec delay until</span>{exec_delay}</div>'
+
         rows_html += f"""
         <tr>
           <td class="tbl-name">
             {name}{_lf(acc)}
             <div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap">{team_html}{cat_html}</div>
+            {f'<div class="detail-block">{details_html}</div>' if details_html else ''}
           </td>
           <td class="tbl-cse">{cse_html}</td>
           <td style="text-align:center">{_milestone(bd.get('m3_complete'), bd.get('m3_planned',''))}</td>
@@ -1212,6 +1227,9 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .ms-blank {{ color:#D1D5DB; }}
 .ms-cat {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; }}
 .signal-dot {{ font-size:14px; }}
+.detail-block {{ margin-top:5px; display:flex; flex-direction:column; gap:3px; }}
+.detail-row {{ font-size:11px; color:#8B949E; line-height:1.4; }}
+.detail-lbl {{ font-family:'Geist Mono',monospace; font-size:8.5px; text-transform:uppercase; letter-spacing:0.1em; color:#5EEAD4; margin-right:5px; }}
 .subtype-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:2px 6px; border-radius:3px; border:1px solid; font-weight:700; letter-spacing:0.06em; display:inline-block; margin-bottom:3px; }}
 .sd-text {{ font-size:11.5px; color:var(--muted); line-height:1.4; margin-top:2px; }}
 .ai-field {{ font-size:13px; color:#E6EDF3; line-height:1.55; margin-bottom:6px; padding:4px 0; }}
