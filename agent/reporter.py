@@ -80,6 +80,21 @@ STATUS_GROUPS = {
         "dot": "#93C5FD",
         "desc": "Parked — awaiting customer or internal action",
     },
+    "Active Migration": {
+        "statuses": ["In Progress", "Customer Engaged", "Kick Off Scheduled",
+                     "Customer Acceptance", "PS", "Upgrade Email Sent", "Dev testing"],
+        "color": "#065F46",
+        "bg": "#F0FDF4",
+        "dot": "#4ADE80",
+        "desc": "Migration actively underway — monitor for blockers",
+    },
+    "No Status": {
+        "statuses": ["", "Blank"],
+        "color": "#6B7280",
+        "bg": "#F9FAFB",
+        "dot": "#D1D5DB",
+        "desc": "Missing status — data quality issue, update the sheet",
+    },
 }
 
 
@@ -225,7 +240,7 @@ def _action_section(accounts: dict) -> str:
         rows = [
             (acc_id, acc)
             for acc_id, acc in accounts.items()
-            if acc.get("status") in cfg["statuses"]
+            if (acc.get("status") or "") in cfg["statuses"]
             and acc.get("customer_name", "").strip()
         ]
         if not rows:
@@ -411,6 +426,15 @@ def _status_chart(accounts: dict) -> str:
         "Cancelled":               "group-escalation-risk",
         "Blocked: Tech limitation":"group-blocked",
         "On Hold":                 "group-on-hold",
+        "In Progress":             "group-active-migration",
+        "Customer Engaged":        "group-active-migration",
+        "Kick Off Scheduled":      "group-active-migration",
+        "Customer Acceptance":     "group-active-migration",
+        "PS":                      "group-active-migration",
+        "Upgrade Email Sent":      "group-active-migration",
+        "Dev testing":             "group-active-migration",
+        "Blank":                   "group-no-status",
+        "":                        "group-no-status",
         "Completed":               "section-completed",
     }
     anchors_js = json.dumps({s: STATUS_ANCHOR.get(s, "") for s, _ in ordered})
