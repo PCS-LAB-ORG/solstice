@@ -4,12 +4,19 @@ import sys
 import warnings
 from pathlib import Path
 
-warnings.filterwarnings("ignore", category=FutureWarning, module="google")
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="urllib3")
-
 sys.path.insert(0, str(Path(__file__).parent))
 
-from agent.main import main
+from agent.llm import ensure_ollama
 
 if __name__ == "__main__":
+    # Ensure Ollama is running before starting the agent — starts it if needed, never restarts
+    print("Checking Ollama...")
+    try:
+        ensure_ollama()
+        print("✓ Ollama ready")
+    except RuntimeError as e:
+        print(f"✗ {e}")
+        sys.exit(1)
+
+    from agent.main import main
     main()

@@ -22,10 +22,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from agent.constants import (
-    STATE_FILE, VERTEX_PROJECT, VERTEX_REGION, VERTEX_MODEL,
-    CLASSIFIER_RETRY_DELAY_S,
-)
+from agent.constants import STATE_FILE, CLASSIFIER_RETRY_DELAY_S
+from agent.llm import chat
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +45,6 @@ ENRICHER_PROMPT = (
 )
 
 
-def _get_client():
-    from anthropic import AnthropicVertex
-    return AnthropicVertex(project_id=VERTEX_PROJECT, region=VERTEX_REGION)
-
-
 def _comments_hash(comments: str) -> str:
     return hashlib.md5(comments.encode("utf-8")).hexdigest()
 
@@ -65,41 +58,38 @@ def _needs_enrichment(acc: dict) -> bool:
     return existing.get("comments_hash") != _comments_hash(comments)
 
 
-def _enrich_batch(client, batch: list[dict]) -> list[dict]:
-    """Send one batch to Claude. Returns list of enrichment dicts."""
+def _enrich_batch(batch: list[dict]) -> list[dict]:
+    """Send one batch to Ollama. Returns list of enrichment dicts."""
     payload = [
         {
-            "account_id": acc["account_id"],
+            "account_id":    acc["account_id"],
             "customer_name": acc.get("customer_name", ""),
-            "cse": acc.get("active_cse", ""),
-            "status": acc.get("status", ""),
-            "comments": (acc.get("comments") or "")[:600],  # cap comment length
+            "cse":           acc.get("active_cse", ""),
+            "status":        acc.get("status", ""),
+            "comments":      (acc.get("comments") or "")[:600],
         }
         for acc in batch
     ]
 
     for attempt in range(2):
         try:
-            response = client.messages.create(
-                model=VERTEX_MODEL,
-                max_tokens=1500,
-                system=ENRICHER_PROMPT,
-                messages=[{"role": "user", "content": json.dumps({"accounts": payload})}],
-            )
-            raw = response.content[0].text.strip()
+            raw = chat(json.dumps({"accounts": payload}), system_prompt=ENRICHER_PROMPT, expect_json=True)
+            raw = raw.strip()
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
                 if raw.startswith("json"):
                     raw = raw[4:]
-            results = json.loads(raw)
-            if isinstance(results, list):
-                return results
+            parsed = json.loads(raw)
+            # Handle {accounts: [...]} or [...] response
+            if isinstance(parsed, dict) and "accounts" in parsed:
+                parsed = parsed["accounts"]
+            if isinstance(parsed, list):
+                return parsed
         except Exception as e:
             logger.error("Enricher attempt %d failed: %s", attempt + 1, e)
             if attempt == 0:
                 time.sleep(CLASSIFIER_RETRY_DELAY_S)
 
-    # Fallback — return nulls for this batch
     return [{"account_id": acc["account_id"], "blocker": None, "owner": None, "accountable": None}
             for acc in batch]
 
@@ -124,14 +114,13 @@ def enrich_accounts(state_file: Path = STATE_FILE) -> dict:
         return {"enriched": 0, "skipped": len(accounts)}
 
     logger.info("Enricher: %d accounts need enrichment (batch size %d)", len(to_enrich), BATCH_SIZE)
-    client = _get_client()
     now = datetime.now(timezone.utc).isoformat()
     enriched_count = 0
 
     for i in range(0, len(to_enrich), BATCH_SIZE):
         batch = to_enrich[i:i + BATCH_SIZE]
         logger.info("Enricher: processing batch %d-%d of %d", i + 1, i + len(batch), len(to_enrich))
-        results = _enrich_batch(client, batch)
+        results = _enrich_batch(batch)
 
         # Write results back into accounts
         result_by_id = {r["account_id"]: r for r in results}
