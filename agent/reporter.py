@@ -767,32 +767,61 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     ps_html, n_ps               = _ps_section(accounts)
     status_chart      = _status_chart(accounts)
 
-    # No-status alert banner
-    no_status_accounts = [
-        acc for acc in accounts.values()
-        if not (acc.get("status") or "").strip()
-        and acc.get("customer_name", "").strip()
-    ]
-    no_status_items = "".join(
-        f'<div class="alert-item">'
-        f'<span class="alert-acct">{acc.get("customer_name","—")}</span>'
-        f'<span class="alert-owner">'
-        + (acc.get("active_cse") or '<span class="alert-no-owner">⚠ NO OWNER</span>')
-        + f'</span></div>'
-        for acc in sorted(no_status_accounts, key=lambda a: a.get("customer_name",""))
-    )
-    no_status_banner = f"""
+    # ── Data Quality Alert — cross-checks all 3 CSVs ──────────────────────────
+    from agent.constants import STATUSES as _STATUSES
+    OUTREACH_ST = {"Ready To Engage", "Account team contacted"}
+
+    _no_status     = [a for a in accounts.values() if not (a.get("status") or "").strip() and a.get("customer_name","").strip()]
+    _unknown_st    = [a for a in accounts.values() if (a.get("status") or "").strip() and a.get("status") not in _STATUSES]
+    _no_cse        = [a for a in accounts.values() if a.get("customer_name","").strip() and not (a.get("active_cse") or "").strip()]
+    _stale_tracker = [a for a in accounts.values() if a.get("status") in OUTREACH_ST and (a.get("blocked_data") or {}).get("signal") == "green"]
+    _no_email      = [a for a in accounts.values() if a.get("status") in OUTREACH_ST and not (a.get("email_sent") or "").strip()]
+
+    def _dq_items(accs, label_field="customer_name", extra_field=None):
+        items = ""
+        for a in sorted(accs, key=lambda x: x.get("customer_name","")):
+            owner = a.get("active_cse") or '<span class="alert-no-owner">⚠ NO OWNER</span>'
+            extra = f' <span style="font-size:9px;opacity:.7">({a.get(extra_field,"")})</span>' if extra_field and a.get(extra_field) else ""
+            items += (f'<div class="alert-item"><span class="alert-acct">{a.get("customer_name","—")}</span>'
+                      f'<span class="alert-owner">{owner}{extra}</span></div>')
+        return items
+
+    dq_sections = []
+    if _no_status:
+        dq_sections.append(("No Status", len(_no_status), "EMEA tracker has no status — update immediately", _dq_items(_no_status)))
+    if _unknown_st:
+        dq_sections.append(("Invalid Status", len(_unknown_st), "Status value not in the known list", _dq_items(_unknown_st, extra_field="status")))
+    if _no_cse:
+        dq_sections.append(("No Owner / CSE", len(_no_cse), "No CSE assigned — who is responsible?", _dq_items(_no_cse)))
+    if _stale_tracker:
+        dq_sections.append(("Stale EMEA Tracker", len(_stale_tracker), "Blocked CSV shows ✅ green but EMEA tracker not updated — chase CSE to update sheet", _dq_items(_stale_tracker)))
+    if _no_email:
+        dq_sections.append(("In Outreach — No Email on Record", len(_no_email), "Status says outreach started but no email_sent date in sheet", _dq_items(_no_email)))
+
+    total_dq = sum(s[1] for s in dq_sections)
+
+    if dq_sections:
+        dq_body = "".join(
+            f'<div class="dq-group">'
+            f'<div class="dq-group-title"><span class="dq-count">{n}</span>{title} — <span class="dq-desc">{desc}</span></div>'
+            f'<div class="alert-body">{items}</div>'
+            f'</div>'
+            for title, n, desc, items in dq_sections
+        )
+        no_status_banner = f"""
     <div class="alert-banner" id="alert-banner">
       <div class="alert-left">
         <span class="alert-icon">!</span>
-        <div>
+        <div style="flex:1">
           <div class="alert-title">
-            {len(no_status_accounts)} account{'s' if len(no_status_accounts) != 1 else ''} missing status — chase the owners to update the tracker
+            {total_dq} data quality issues across {len(dq_sections)} categories — all 3 CSVs cross-checked
           </div>
-          <div class="alert-body">{no_status_items}</div>
+          {dq_body}
         </div>
       </div>
-    </div>""" if no_status_accounts else ""
+    </div>"""
+    else:
+        no_status_banner = ""
     total_accounts    = len(accounts)
 
     # Open Graph summary for Slack unfurling
@@ -942,6 +971,11 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .alert-no-owner {{ color:#F87171; font-weight:700; letter-spacing:0.05em; }}
 .alert-close {{ background:none; border:none; color:#FCA5A5; font-size:1.1rem; cursor:pointer; padding:0.25rem 0.5rem; flex-shrink:0; line-height:1; opacity:0.7; }}
 .alert-close:hover {{ opacity:1; }}
+.dq-group {{ margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.1); }}
+.dq-group:first-child {{ margin-top:0.4rem; padding-top:0; border-top:none; }}
+.dq-group-title {{ font-size:11.5px; font-weight:600; color:#FEF2F2; margin-bottom:0.4rem; }}
+.dq-count {{ display:inline-block; font-family:'Fraunces',serif; font-size:1.1rem; font-weight:700; color:#FCA5A5; margin-right:0.4rem; line-height:1; }}
+.dq-desc {{ font-weight:400; color:#FECACA; font-style:italic; }}
 
 /* Chart */
 .chart-wrap {{ display:flex; gap:2.5rem; align-items:flex-start; flex-wrap:wrap; }}
