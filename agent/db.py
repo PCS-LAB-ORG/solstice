@@ -1,0 +1,449 @@
+"""
+db.py — SQLite database for Solstice Agent.
+
+Tables:
+  accounts         — core account data from EMEA tracker
+  account_blockers — active blocker tags per account
+  blocked_data     — milestone + signal data from blocked accounts CSV
+  ps_data          — PS engagement data from PS tracker CSV
+  ai_enrichment    — Claude-extracted blocker/owner/accountable
+  status_history   — every status change detected by the pipeline
+  approved_tasks   — tasks approved by the user
+  validation_errors— rows rejected by the validator
+
+Usage:
+  from agent.db import get_db, init_db, migrate_from_state
+  db = get_db()
+"""
+from __future__ import annotations
+import json
+import logging
+import sqlite3
+from datetime import datetime, timezone
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+DB_PATH = Path(__file__).parent.parent / "data" / "solstice.db"
+
+
+def get_db(path: Path = DB_PATH) -> sqlite3.Connection:
+    """Return a connection with row_factory=sqlite3.Row."""
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA foreign_keys=ON")
+    return conn
+
+
+def init_db(path: Path = DB_PATH) -> None:
+    """Create all tables if they don't exist."""
+    with get_db(path) as conn:
+        conn.executescript("""
+        -- Core account data (from EMEA tracker CSV)
+        CREATE TABLE IF NOT EXISTS accounts (
+            account_id          TEXT PRIMARY KEY,
+            customer_name       TEXT,
+            arr                 TEXT,
+            active_cse          TEXT,
+            backup_cse          TEXT,
+            status              TEXT,
+            status_changed_at   TEXT,
+            expiration_date     TEXT,
+            expiry_alerted_date TEXT,
+            ps_engaged          TEXT,
+            kickoff_date        TEXT,
+            comments            TEXT,
+            sales_region        TEXT,
+            email_sent          TEXT,
+            last_seen           TEXT,
+            created_at          TEXT DEFAULT (datetime('now'))
+        );
+
+        -- Active blocker tags per account (checkbox columns from EMEA tracker)
+        CREATE TABLE IF NOT EXISTS account_blockers (
+            account_id   TEXT REFERENCES accounts(account_id) ON DELETE CASCADE,
+            blocker_name TEXT,
+            PRIMARY KEY (account_id, blocker_name)
+        );
+
+        -- Milestone + signal data (from blocked accounts CSV)
+        CREATE TABLE IF NOT EXISTS blocked_data (
+            account_id          TEXT PRIMARY KEY REFERENCES accounts(account_id) ON DELETE CASCADE,
+            area                TEXT,
+            region              TEXT,
+            district            TEXT,
+            cohort              TEXT,
+            team                TEXT,
+            is_cs_team          INTEGER DEFAULT 0,
+            m3_complete         INTEGER DEFAULT 0,
+            m3_planned          TEXT,
+            m8_started          INTEGER DEFAULT 0,
+            m8_planned          TEXT,
+            m9_complete         INTEGER DEFAULT 0,
+            m9_planned          TEXT,
+            upgrade_notes       TEXT,
+            health_notes        TEXT,
+            exec_delay          TEXT,
+            status_detail       TEXT,
+            signal              TEXT,
+            subtype             TEXT,
+            milestone_category  TEXT,
+            notes               TEXT,
+            merged_at           TEXT
+        );
+
+        -- PS engagement data (from PS tracker CSV)
+        CREATE TABLE IF NOT EXISTS ps_data (
+            account_id        TEXT PRIMARY KEY REFERENCES accounts(account_id) ON DELETE CASCADE,
+            ps_name           TEXT,
+            country           TEXT,
+            psc               TEXT,
+            psc_shadow        TEXT,
+            pm                TEXT,
+            ps_status         TEXT,
+            clarizen_id       TEXT,
+            timeline          TEXT,
+            notes             TEXT,
+            match_confidence  REAL,
+            matched_name      TEXT,
+            merged_at         TEXT
+        );
+
+        -- Claude AI enrichment (blocker/owner/accountable from comments)
+        CREATE TABLE IF NOT EXISTS ai_enrichment (
+            account_id      TEXT PRIMARY KEY REFERENCES accounts(account_id) ON DELETE CASCADE,
+            blocker         TEXT,
+            owner           TEXT,
+            accountable     TEXT,
+            comments_hash   TEXT,
+            enriched_at     TEXT
+        );
+
+        -- Status change history — every change detected by the pipeline
+        CREATE TABLE IF NOT EXISTS status_history (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id  TEXT REFERENCES accounts(account_id) ON DELETE CASCADE,
+            old_status  TEXT,
+            new_status  TEXT,
+            changed_at  TEXT,
+            source      TEXT DEFAULT 'pipeline'  -- 'pipeline' | 'migration'
+        );
+
+        -- Approved tasks (from terminal approval flow)
+        CREATE TABLE IF NOT EXISTS approved_tasks (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id       TEXT,
+            customer_name    TEXT,
+            region           TEXT,
+            cse              TEXT,
+            category         TEXT,
+            priority         TEXT,
+            suggested_action TEXT,
+            old_value        TEXT,
+            new_value        TEXT,
+            detected_at      TEXT,
+            approved_at      TEXT DEFAULT (datetime('now'))
+        );
+
+        -- Validation errors (rows rejected by validator)
+        CREATE TABLE IF NOT EXISTS validation_errors (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id TEXT,
+            reason     TEXT,
+            region     TEXT,
+            file       TEXT,
+            logged_at  TEXT DEFAULT (datetime('now'))
+        );
+
+        -- Indexes for common queries
+        CREATE INDEX IF NOT EXISTS idx_accounts_status      ON accounts(status);
+        CREATE INDEX IF NOT EXISTS idx_accounts_cse         ON accounts(active_cse);
+        CREATE INDEX IF NOT EXISTS idx_accounts_region      ON accounts(sales_region);
+        CREATE INDEX IF NOT EXISTS idx_status_history_acct  ON status_history(account_id);
+        CREATE INDEX IF NOT EXISTS idx_status_history_date  ON status_history(changed_at);
+        CREATE INDEX IF NOT EXISTS idx_blocked_signal       ON blocked_data(signal);
+        CREATE INDEX IF NOT EXISTS idx_approved_tasks_date  ON approved_tasks(detected_at);
+        """)
+    logger.info("Database initialised: %s", path)
+
+
+def migrate_from_state(state_file: Path, path: Path = DB_PATH) -> dict:
+    """
+    One-time migration from state.json → SQLite.
+    Idempotent — safe to run multiple times (uses INSERT OR REPLACE).
+    """
+    state = json.loads(state_file.read_text(encoding="utf-8"))
+    accounts = state.get("accounts", {})
+    now = datetime.now(timezone.utc).isoformat()
+
+    counts = {"accounts": 0, "blockers": 0, "blocked_data": 0,
+              "ps_data": 0, "ai_enrichment": 0, "status_history": 0}
+
+    with get_db(path) as conn:
+        for account_id, acc in accounts.items():
+            # accounts
+            conn.execute("""
+                INSERT OR REPLACE INTO accounts
+                (account_id, customer_name, arr, active_cse, backup_cse, status,
+                 status_changed_at, expiration_date, expiry_alerted_date, ps_engaged,
+                 kickoff_date, comments, sales_region, email_sent, last_seen)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, (
+                account_id,
+                acc.get("customer_name", ""),
+                acc.get("arr", ""),
+                acc.get("active_cse", ""),
+                acc.get("backup_cse", ""),
+                acc.get("status", ""),
+                acc.get("status_changed_at", ""),
+                acc.get("expiration_date", ""),
+                acc.get("expiry_alerted_date"),
+                acc.get("ps_engaged", ""),
+                acc.get("kickoff_date", ""),
+                acc.get("comments", ""),
+                acc.get("sales_region", ""),
+                acc.get("email_sent", ""),
+                acc.get("last_seen", now),
+            ))
+            counts["accounts"] += 1
+
+            # blockers
+            conn.execute("DELETE FROM account_blockers WHERE account_id=?", (account_id,))
+            for b in acc.get("blockers", []):
+                conn.execute("INSERT OR IGNORE INTO account_blockers VALUES (?,?)", (account_id, b))
+                counts["blockers"] += 1
+
+            # blocked_data
+            bd = acc.get("blocked_data")
+            if bd:
+                conn.execute("""
+                    INSERT OR REPLACE INTO blocked_data
+                    (account_id, area, region, district, cohort, team, is_cs_team,
+                     m3_complete, m3_planned, m8_started, m8_planned,
+                     m9_complete, m9_planned, upgrade_notes, health_notes,
+                     exec_delay, status_detail, signal, subtype, milestone_category, notes, merged_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (
+                    account_id,
+                    bd.get("area",""), bd.get("region",""), bd.get("district",""),
+                    bd.get("cohort",""), bd.get("team",""), int(bd.get("is_cs_team", False)),
+                    int(bd.get("m3_complete", False)), bd.get("m3_planned",""),
+                    int(bd.get("m8_started", False)), bd.get("m8_planned",""),
+                    int(bd.get("m9_complete", False)), bd.get("m9_planned",""),
+                    bd.get("upgrade_notes",""), bd.get("health_notes",""),
+                    bd.get("exec_delay",""), bd.get("status_detail",""),
+                    bd.get("signal",""), bd.get("subtype"),
+                    bd.get("milestone_category",""), bd.get("notes",""),
+                    bd.get("merged_at", now),
+                ))
+                counts["blocked_data"] += 1
+
+            # ps_data
+            ps = acc.get("ps_data")
+            if ps:
+                conn.execute("""
+                    INSERT OR REPLACE INTO ps_data
+                    (account_id, ps_name, country, psc, psc_shadow, pm, ps_status,
+                     clarizen_id, timeline, notes, match_confidence, matched_name, merged_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (
+                    account_id,
+                    ps.get("ps_name",""), ps.get("country",""),
+                    ps.get("psc",""), ps.get("psc_shadow",""), ps.get("pm",""),
+                    ps.get("ps_status",""), ps.get("clarizen_id",""),
+                    ps.get("timeline",""), ps.get("notes",""),
+                    ps.get("match_confidence"), ps.get("matched_name",""),
+                    ps.get("merged_at", now),
+                ))
+                counts["ps_data"] += 1
+
+            # ai_enrichment
+            ai = acc.get("ai_enrichment")
+            if ai:
+                conn.execute("""
+                    INSERT OR REPLACE INTO ai_enrichment
+                    (account_id, blocker, owner, accountable, comments_hash, enriched_at)
+                    VALUES (?,?,?,?,?,?)
+                """, (
+                    account_id,
+                    ai.get("blocker"), ai.get("owner"), ai.get("accountable"),
+                    ai.get("comments_hash",""), ai.get("enriched_at", now),
+                ))
+                counts["ai_enrichment"] += 1
+
+            # status_history — seed from status_changed_at
+            changed_at = acc.get("status_changed_at", "")
+            status = acc.get("status", "")
+            if status and changed_at:
+                existing = conn.execute(
+                    "SELECT 1 FROM status_history WHERE account_id=? AND new_status=? AND source='migration'",
+                    (account_id, status)
+                ).fetchone()
+                if not existing:
+                    conn.execute("""
+                        INSERT INTO status_history (account_id, old_status, new_status, changed_at, source)
+                        VALUES (?,?,?,?,?)
+                    """, (account_id, None, status, changed_at, "migration"))
+                    counts["status_history"] += 1
+
+    logger.info("Migration complete: %s", counts)
+    return counts
+
+
+def upsert_account(conn: sqlite3.Connection, account_id: str, acc: dict) -> bool:
+    """
+    Update or insert one account. Returns True if status changed.
+    Writes status change to status_history automatically.
+    """
+    existing = conn.execute(
+        "SELECT status FROM accounts WHERE account_id=?", (account_id,)
+    ).fetchone()
+
+    old_status = existing["status"] if existing else None
+    new_status = acc.get("status", "")
+    status_changed = old_status != new_status and old_status is not None
+
+    conn.execute("""
+        INSERT OR REPLACE INTO accounts
+        (account_id, customer_name, arr, active_cse, backup_cse, status,
+         status_changed_at, expiration_date, expiry_alerted_date, ps_engaged,
+         kickoff_date, comments, sales_region, email_sent, last_seen)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (
+        account_id,
+        acc.get("customer_name",""), acc.get("arr",""),
+        acc.get("active_cse",""), acc.get("backup_cse",""),
+        new_status, acc.get("status_changed_at",""),
+        acc.get("expiration_date",""), acc.get("expiry_alerted_date"),
+        acc.get("ps_engaged",""), acc.get("kickoff_date",""),
+        acc.get("comments",""), acc.get("sales_region",""),
+        acc.get("email_sent",""), acc.get("last_seen",""),
+    ))
+
+    if status_changed:
+        conn.execute("""
+            INSERT INTO status_history (account_id, old_status, new_status, changed_at, source)
+            VALUES (?,?,?,?,?)
+        """, (account_id, old_status, new_status,
+              datetime.now(timezone.utc).isoformat(), "pipeline"))
+
+    # blockers
+    conn.execute("DELETE FROM account_blockers WHERE account_id=?", (account_id,))
+    for b in acc.get("blockers", []):
+        conn.execute("INSERT OR IGNORE INTO account_blockers VALUES (?,?)", (account_id, b))
+
+    return status_changed
+
+
+def load_accounts(path: Path = DB_PATH) -> dict:
+    """
+    Load all accounts from DB into the same dict structure as state.json.
+    Used by reporter and other components for backward compatibility.
+    """
+    with get_db(path) as conn:
+        accounts = {}
+        for row in conn.execute("SELECT * FROM accounts"):
+            aid = row["account_id"]
+            acc = dict(row)
+
+            # blockers
+            acc["blockers"] = [r["blocker_name"] for r in
+                conn.execute("SELECT blocker_name FROM account_blockers WHERE account_id=?", (aid,))]
+
+            # blocked_data
+            bd = conn.execute("SELECT * FROM blocked_data WHERE account_id=?", (aid,)).fetchone()
+            if bd:
+                bd_dict = dict(bd)
+                bd_dict["is_cs_team"] = bool(bd_dict.get("is_cs_team"))
+                bd_dict["m3_complete"] = bool(bd_dict.get("m3_complete"))
+                bd_dict["m8_started"]  = bool(bd_dict.get("m8_started"))
+                bd_dict["m9_complete"] = bool(bd_dict.get("m9_complete"))
+                acc["blocked_data"] = bd_dict
+
+            # ps_data
+            ps = conn.execute("SELECT * FROM ps_data WHERE account_id=?", (aid,)).fetchone()
+            if ps:
+                acc["ps_data"] = dict(ps)
+
+            # ai_enrichment
+            ai = conn.execute("SELECT * FROM ai_enrichment WHERE account_id=?", (aid,)).fetchone()
+            if ai:
+                acc["ai_enrichment"] = dict(ai)
+
+            accounts[aid] = acc
+
+    return accounts
+
+
+def completed_by_week(path: Path = DB_PATH) -> dict[str, list[dict]]:
+    """
+    Return accounts that completed (status=Completed OR m9_complete=1) grouped by ISO week.
+    Uses status_history for pipeline-detected completions, blocked_data.m9_complete as fallback.
+    Format: {"2026-W12": [{customer_name, cse, date}], ...}
+    """
+    from datetime import date
+    results: dict[str, list[dict]] = {}
+
+    with get_db(path) as conn:
+        # From status_history — pipeline-detected completions
+        for row in conn.execute("""
+            SELECT a.customer_name, a.active_cse, sh.changed_at
+            FROM status_history sh
+            JOIN accounts a ON a.account_id = sh.account_id
+            WHERE sh.new_status = 'Completed'
+            ORDER BY sh.changed_at
+        """):
+            try:
+                dt = datetime.fromisoformat(row["changed_at"].replace("Z","+00:00"))
+                week_key = dt.strftime("%Y-W%W")
+                results.setdefault(week_key, []).append({
+                    "customer_name": row["customer_name"],
+                    "cse":           row["active_cse"],
+                    "date":          dt.strftime("%d %b %Y"),
+                    "source":        "pipeline",
+                })
+            except Exception:
+                pass
+
+        # From accounts directly (current Completed status)
+        for row in conn.execute("""
+            SELECT a.account_id, a.customer_name, a.active_cse, a.status_changed_at
+            FROM accounts a
+            WHERE a.status = 'Completed'
+        """):
+            try:
+                dt = datetime.fromisoformat((row["status_changed_at"] or "").replace("Z","+00:00"))
+                week_key = dt.strftime("%Y-W%W")
+                # Avoid duplicates with status_history
+                existing = [e["customer_name"] for e in results.get(week_key, [])]
+                if row["customer_name"] not in existing:
+                    results.setdefault(week_key, []).append({
+                        "customer_name": row["customer_name"],
+                        "cse":           row["active_cse"],
+                        "date":          dt.strftime("%d %b %Y"),
+                        "source":        "state",
+                    })
+            except Exception:
+                pass
+
+    return dict(sorted(results.items()))
+
+
+if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s — %(message)s")
+    from agent.constants import STATE_FILE, DATA_DIR
+
+    print("Initialising database...")
+    init_db()
+    print("Migrating from state.json...")
+    counts = migrate_from_state(STATE_FILE)
+    print(f"  accounts:      {counts['accounts']}")
+    print(f"  blockers:      {counts['blockers']}")
+    print(f"  blocked_data:  {counts['blocked_data']}")
+    print(f"  ps_data:       {counts['ps_data']}")
+    print(f"  ai_enrichment: {counts['ai_enrichment']}")
+    print(f"  status_history:{counts['status_history']}")
+    print(f"\nDB: {DB_PATH}")
