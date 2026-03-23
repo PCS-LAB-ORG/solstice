@@ -735,17 +735,17 @@ def _weekly_view(accounts: dict) -> str:
 
         # M9 done rows (green)
         done_rows = "".join(
-            f'<div class="week-row week-done">✓ {r["name"]}<span class="week-cse">{r["cse"]}</span></div>'
+            f'<div class="week-row week-done">✓ {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span></div>'
             for r in sorted(m9_done, key=lambda x: x["name"])
         )
         # M9 planned rows
         m9_rows = "".join(
-            f'<div class="week-row week-m9">M9 {r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
+            f'<div class="week-row week-m9">M9 {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
             for r in sorted(m9_list, key=lambda x: x["name"])
         )
         # M8 planned rows
         m8_rows = "".join(
-            f'<div class="week-row week-m8">M8 {r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
+            f'<div class="week-row week-m8">M8 {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
             for r in sorted(m8_list, key=lambda x: x["name"])
         )
 
@@ -1210,12 +1210,12 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .dq-desc {{ font-weight:400; color:#FECACA; font-style:italic; }}
 
 /* Chart */
-.chart-wrap {{ display:flex; gap:2rem; align-items:center; width:100%; }}
-.chart-canvas-wrap {{ position:relative; width:280px; height:280px; flex-shrink:0; }}
+.chart-wrap {{ display:grid; grid-template-columns:280px 1fr; gap:2rem; align-items:center; width:100%; }}
+.chart-canvas-wrap {{ position:relative; width:280px; height:280px; }}
 .chart-centre {{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none; }}
 .chart-centre-n {{ font-family:'Fraunces',serif; font-size:2.2rem; font-weight:700; color:var(--text); line-height:1; }}
 .chart-centre-l {{ font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }}
-.chart-table-wrap {{ flex:1; overflow-x:auto; }}
+.chart-table-wrap {{ overflow-x:auto; min-width:0; }}
 .chart-tbl {{ width:100%; border-collapse:collapse; }}
 .chart-tbl th {{ font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0.4rem 0.75rem; text-align:left; border-bottom:1px solid var(--border); }}
 .chart-tbl td {{ padding:0.35rem 0.75rem; font-size:12.5px; border-bottom:1px solid var(--border); vertical-align:middle; }}
