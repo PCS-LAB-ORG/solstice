@@ -52,12 +52,19 @@ STATUS_GROUPS = {
         "dot": "#F59E0B",
         "desc": "Initial contact made — chase for response",
     },
-    "Churning / Sales Hold": {
-        "statuses": ["Churning/Churned", "Sales Hold"],
+    "Sales Hold": {
+        "statuses": ["Sales Hold"],
+        "color": "#7C2D12",
+        "bg": "#FFF7ED",
+        "dot": "#EA580C",
+        "desc": "CRITICAL — blocked by RFE, RFP or competition; someone is stopping progress",
+    },
+    "Churning / Churned": {
+        "statuses": ["Churning/Churned"],
         "color": "#7F1D1D",
         "bg": "#FEF2F2",
         "dot": "#DC2626",
-        "desc": "Critical — account churning or frozen by sales",
+        "desc": "Customer at risk of leaving or already churned",
     },
     "Escalation Risk": {
         "statuses": ["Backoff", "Cancelled"],
@@ -600,7 +607,7 @@ def _status_chart(accounts: dict) -> str:
     STATUS_COLORS = {
         "Account team contacted": "#F59E0B",
         "Ready To Engage":        "#10B981",
-        "Sales Hold":             "#EF4444",
+        "Sales Hold":             "#EA580C",
         "Churning/Churned":       "#DC2626",
         "Blocked: Tech limitation": "#A1887F",
         "In Progress":            "#6366F1",
@@ -630,8 +637,8 @@ def _status_chart(accounts: dict) -> str:
     STATUS_ANCHOR = {
         "Ready To Engage":        "group-ready-to-engage",
         "Account team contacted":  "group-account-team-contacted",
-        "Sales Hold":              "group-churning-sales-hold",
-        "Churning/Churned":        "group-churning-sales-hold",
+        "Sales Hold":              "group-sales-hold",
+        "Churning/Churned":        "group-churning-churned",
         "Backoff":                 "group-escalation-risk",
         "Cancelled":               "group-escalation-risk",
         "Blocked: Tech limitation":"group-blocked",
