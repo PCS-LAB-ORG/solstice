@@ -614,6 +614,64 @@ def _ps_section(accounts: dict) -> tuple[str, int]:
     </div>""", len(ps_accounts)
 
 
+def _status_history_section() -> tuple[str, int]:
+    """Show status changes per account from DB status_history table."""
+    try:
+        from agent.db import get_db
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.sales_region,
+                       sh.old_status, sh.new_status, sh.changed_at, sh.source,
+                       a.live_fire, a.live_fire_dc
+                FROM status_history sh
+                JOIN accounts a ON a.account_id = sh.account_id
+                WHERE sh.new_status IS NOT NULL AND sh.new_status != ''
+                ORDER BY sh.changed_at DESC
+            """).fetchall()
+        if not rows:
+            return '<div class="empty-sm">No status changes recorded yet — changes will appear after the next pipeline run detects a diff.</div>', 0
+        # Group by account
+        from collections import defaultdict
+        by_account: dict = defaultdict(list)
+        meta: dict = {}
+        for r in rows:
+            name = r["customer_name"]
+            by_account[name].append(r)
+            if name not in meta:
+                meta[name] = {"cse": r["active_cse"] or "—", "region": r["sales_region"] or "—",
+                               "live_fire": r["live_fire"], "live_fire_dc": r["live_fire_dc"] or ""}
+        html = ""
+        for name in sorted(by_account, key=lambda n: by_account[n][0]["changed_at"], reverse=True):
+            changes = by_account[name]
+            m = meta[name]
+            lf = _lf(m)
+            rows_html = "".join(
+                f'<tr>'
+                f'<td class="tbl-date">{r["changed_at"][:10]}</td>'
+                f'<td><span class="status-chip" style="color:var(--muted);background:rgba(255,255,255,0.05);border-color:var(--border)">{r["old_status"] or "—"}</span></td>'
+                f'<td><span style="color:var(--muted)">→</span></td>'
+                f'<td><span class="status-chip" style="color:#5EEAD4;background:rgba(20,184,166,0.1);border-color:rgba(20,184,166,0.3)">{r["new_status"]}</span></td>'
+                f'<td class="tbl-region" style="font-size:9px;opacity:.6">{r["source"]}</td>'
+                f'</tr>'
+                for r in changes
+            )
+            html += f"""
+            <div style="margin-bottom:1.25rem">
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
+                <span class="tbl-name">{name}{lf}</span>
+                <span class="tbl-region">{m["region"]}</span>
+                <span class="tbl-cse" style="margin-left:auto">{m["cse"]}</span>
+              </div>
+              <table class="acct-tbl" style="font-size:12px">
+                <thead><tr><th>Date</th><th>From</th><th></th><th>To</th><th>Source</th></tr></thead>
+                <tbody>{rows_html}</tbody>
+              </table>
+            </div>"""
+        return html, len(by_account)
+    except Exception as e:
+        return f'<div class="empty-sm">Status history unavailable: {e}</div>', 0
+
+
 def _completed_section(accounts: dict) -> str:
     """Build the Completed accounts table."""
     completed = [
@@ -926,6 +984,7 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     task_cards        = _task_cards(tasks)
     action_html, n_action = _action_section(accounts)
     completed_html, n_completed = _completed_section(accounts)
+    history_html, n_history     = _status_history_section()
     weekly_html, n_weeks        = _weekly_view(accounts)
     milestone_html, n_milestone = _blocked_milestone_section(accounts)
     stall_html, n_stalls        = _stall_section(accounts)
@@ -1302,6 +1361,9 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
     <a class="sidenav-item" href="#section-milestones" onclick="expandSection('section-milestones')">
       <span class="sidenav-dot"></span><span class="sidenav-label">Milestone Tracker</span><span class="sidenav-count">{n_milestone}</span>
     </a>
+    <a class="sidenav-item" href="#section-history" onclick="expandSection('section-history')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">Status History</span><span class="sidenav-count" id="nb-history">{n_history}</span>
+    </a>
     <a class="sidenav-item" href="#section-completed" onclick="expandSection('section-completed')">
       <span class="sidenav-dot"></span><span class="sidenav-label">Completed</span><span class="sidenav-count">{n_completed}</span>
     </a>
@@ -1368,6 +1430,14 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
       <span class="toggle-icon">▾</span>
     </div>
     <div class="sec-body">{milestone_html}</div>
+  </section>
+
+  <section id="section-history" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-history')">
+      {_section_header("Status History", "Status changes per account — tracked by pipeline", n_history)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{history_html}</div>
   </section>
 
   <section id="section-completed" class="collapsible-section">
