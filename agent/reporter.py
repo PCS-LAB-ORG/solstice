@@ -278,6 +278,16 @@ def _action_section(accounts: dict) -> str:
                 except Exception:
                     pass
 
+            # Cross-check: blocked CSV signal vs EMEA tracker status
+            bd_signal = (acc.get("blocked_data") or {}).get("signal", "")
+            cross_check_html = ""
+            if bd_signal == "green" and is_outreach:
+                cross_check_html = '<span class="xcheck-green" title="Blocked accounts CSV shows ✅ green — EMEA tracker status may be stale">✅ Tracker outdated</span>'
+            elif bd_signal == "blocked":
+                cross_check_html = '<span class="xcheck-blocked" title="Blocked accounts CSV confirms 🛑 blocked">🛑</span>'
+            elif bd_signal == "at_risk":
+                cross_check_html = '<span class="xcheck-risk" title="Blocked accounts CSV shows 👎 at risk">👎</span>'
+
             # Blockers tags — shown for all groups when present
             blocker_html = ""
             if blockers:
@@ -317,7 +327,7 @@ def _action_section(accounts: dict) -> str:
                 combined_notes = f'{blocker_content}{"<div style=\'margin-top:4px\'>" + notes_html + "</div>" if notes_html else ""}'
                 rows_html += f"""
                 <tr>
-                  <td class="tbl-name">{name}</td>
+                  <td class="tbl-name">{name}{f"<div>{cross_check_html}</div>" if cross_check_html else ""}</td>
                   <td class="tbl-region">{region}</td>
                   <td class="tbl-cse">{cse_html}</td>
                   <td class="tbl-date">{changed}</td>
@@ -326,7 +336,7 @@ def _action_section(accounts: dict) -> str:
             else:
                 rows_html += f"""
                 <tr>
-                  <td class="tbl-name">{name}{blocker_html}</td>
+                  <td class="tbl-name">{name}{blocker_html}{f"<div>{cross_check_html}</div>" if cross_check_html else ""}</td>
                   <td><span class="status-chip" style="color:{cfg['color']};background:{cfg['bg']};border-color:{cfg['dot']}55">{status}</span></td>
                   <td class="tbl-region">{region}</td>
                   <td class="tbl-cse">{cse_html}</td>
@@ -895,6 +905,9 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .notes-text {{ font-size:12px; color:var(--text); line-height:1.45; display:block; }}
 .notes-none {{ font-size:11px; color:#C5BFB5; font-style:italic; font-family:'Geist Mono',monospace; }}
 .no-owner-inline {{ font-family:'Geist Mono',monospace; font-size:10px; color:#DC2626; font-weight:700; letter-spacing:0.05em; }}
+.xcheck-green {{ font-family:'Geist Mono',monospace; font-size:9px; color:#065F46; background:#DCFCE7; border:1px solid #86EFAC; padding:1px 5px; border-radius:3px; margin-top:3px; display:inline-block; cursor:help; }}
+.xcheck-blocked {{ font-size:11px; cursor:help; }}
+.xcheck-risk {{ font-size:11px; cursor:help; }}
 .psc-shadow {{ color:var(--muted); font-size:10px; }}
 .cs-team-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#DBEAFE; color:#1D4ED8; border:1px solid #93C5FD; font-weight:600; }}
 .named-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#F3F4F6; color:#6B7280; border:1px solid #D1D5DB; }}
