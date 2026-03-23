@@ -639,6 +639,9 @@ def _weekly_view(accounts: dict) -> str:
     for acc in accounts.values():
         bd = acc.get("blocked_data") or {}
         if not bd: continue
+        # Only show accounts where M3 is complete and not hard-blocked
+        if not bd.get("m3_complete"): continue
+        if bd.get("signal") == "blocked": continue
         name   = acc.get("customer_name", "—")
         cse    = acc.get("active_cse") or "—"
         status = acc.get("status", "—")
