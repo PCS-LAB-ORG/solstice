@@ -290,12 +290,10 @@ def _action_section(accounts: dict) -> str:
             # Cross-check: blocked CSV signal vs EMEA tracker status
             bd_signal = (acc.get("blocked_data") or {}).get("signal", "")
             cross_check_html = ""
-            if bd_signal == "green" and is_outreach:
-                cross_check_html = '<span class="xcheck-green tooltip-wrap">✅ Tracker outdated<span class="tooltip-text">Blocked accounts CSV shows ✅ green — outreach complete. EMEA tracker status is stale and needs updating by the CSE.</span></span>'
-            elif bd_signal == "blocked":
-                cross_check_html = '<span class="xcheck-blocked tooltip-wrap">🛑 Confirmed blocked<span class="tooltip-text">Blocked accounts CSV confirms this account is hard blocked. Check Status Detail in Milestone Tracker.</span></span>'
+            if bd_signal == "blocked":
+                cross_check_html = '<span class="xcheck-blocked tooltip-wrap">🛑 Blocked<span class="tooltip-text">Blocked accounts CSV confirms hard blocked. See Milestone Tracker for details.</span></span>'
             elif bd_signal == "at_risk":
-                cross_check_html = '<span class="xcheck-risk tooltip-wrap">👎 At risk<span class="tooltip-text">Blocked accounts CSV flags this account as at risk or behind. Check Status Detail in Milestone Tracker.</span></span>'
+                cross_check_html = '<span class="xcheck-risk tooltip-wrap">👎 At risk<span class="tooltip-text">Blocked accounts CSV flags as at risk or behind schedule.</span></span>'
 
             # Blockers tags — shown for all groups when present
             blocker_html = ""
@@ -998,7 +996,7 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     _no_status     = [a for a in accounts.values() if not (a.get("status") or "").strip() and a.get("customer_name","").strip()]
     _unknown_st    = [a for a in accounts.values() if (a.get("status") or "").strip() and a.get("status") not in _STATUSES]
     _no_cse        = [a for a in accounts.values() if a.get("customer_name","").strip() and not (a.get("active_cse") or "").strip()]
-    _stale_tracker = [a for a in accounts.values() if a.get("status") in OUTREACH_ST and (a.get("blocked_data") or {}).get("signal") == "green"]
+    # Removed: stale_tracker — not actionable (blocked CSV is the better source, drives Open Actions directly)
     _no_email      = [a for a in accounts.values() if a.get("status") in OUTREACH_ST and not (a.get("email_sent") or "").strip()]
 
     def _dq_items(accs, label_field="customer_name", extra_field=None):
@@ -1017,8 +1015,7 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
         dq_sections.append(("Invalid Status", len(_unknown_st), "Status value not in the known list", _dq_items(_unknown_st, extra_field="status")))
     if _no_cse:
         dq_sections.append(("No Owner / CSE", len(_no_cse), "No CSE assigned — who is responsible?", _dq_items(_no_cse)))
-    if _stale_tracker:
-        dq_sections.append(("Stale EMEA Tracker", len(_stale_tracker), "Blocked CSV shows ✅ green but EMEA tracker not updated — chase CSE to update sheet", _dq_items(_stale_tracker)))
+    # Stale tracker removed — not actionable noise
     if _no_email:
         dq_sections.append(("In Outreach — No Email on Record", len(_no_email), "Status says outreach started but no email_sent date in sheet", _dq_items(_no_email)))
 
