@@ -12,6 +12,7 @@ from agent.approver import run_approval
 from agent.writer import write_approved_tasks, update_state, bootstrap_state, write_unclassified_log
 from agent.watcher import start_watching
 from agent.reporter import generate_report
+from agent.enricher import enrich_accounts
 
 # Module-level logger — handlers configured in main() after DATA_DIR exists
 logger = logging.getLogger(__name__)
@@ -109,6 +110,12 @@ def run_pipeline(csv_path: Path) -> None:
 
     expiry_flagged = {d["account_id"] for d in diffs if d.get("expiry_risk")}
     update_state(state, valid_accounts, STATE_FILE, expiry_flagged=expiry_flagged)
+
+    # AI enrichment — extract blocker/owner/accountable from comments
+    print("Running AI enrichment on comments...")
+    enrich_result = enrich_accounts(STATE_FILE)
+    logger.info("Enrichment done: %d enriched, %d cached", enrich_result["enriched"], enrich_result["skipped"])
+
     logger.info("Pipeline complete.")
 
 

@@ -280,14 +280,27 @@ def _action_section(accounts: dict) -> str:
                 )
                 blocker_html = f'<div class="blocker-tags">{tags}</div>'
 
-            # Comments shown for ALL groups — critical intel like MTN's paused migration
+            # AI enrichment — blocker / owner / accountable extracted from comments
+            enrichment  = acc.get("ai_enrichment") or {}
+            ai_blocker  = enrichment.get("blocker")
+            ai_owner    = enrichment.get("owner")
+            ai_accountable = enrichment.get("accountable")
+
+            # Build notes cell: AI enrichment first, raw comments as fallback
             raw_comments = (acc.get("comments") or "").replace("\r\n", " ").replace("\n", " ").strip()
-            if raw_comments:
-                notes_html = f'<span class="notes-text">{raw_comments[:200]}{"…" if len(raw_comments) > 200 else ""}</span>'
-            elif is_outreach:
-                notes_html = '<span class="notes-none">No data available</span>'
-            else:
-                notes_html = ""
+            notes_parts = []
+            if ai_blocker:
+                notes_parts.append(f'<div class="ai-field"><span class="ai-label">Blocker</span> {ai_blocker}</div>')
+            if ai_owner and ai_owner != cse:
+                notes_parts.append(f'<div class="ai-field"><span class="ai-label">Owner</span> {ai_owner}</div>')
+            if ai_accountable:
+                notes_parts.append(f'<div class="ai-field ai-accountable"><span class="ai-label">Accountable</span> {ai_accountable}</div>')
+            if not notes_parts and raw_comments:
+                notes_parts.append(f'<span class="notes-text">{raw_comments[:200]}{"…" if len(raw_comments) > 200 else ""}</span>')
+            elif not notes_parts and is_outreach:
+                notes_parts.append('<span class="notes-none">No data available</span>')
+
+            notes_html = "".join(notes_parts)
 
             # CSE — flag missing owner inline
             cse_html = cse if cse and cse != "—" else '<span class="no-owner-inline">⚠ NO OWNER</span>'
@@ -674,6 +687,10 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .notes-text {{ font-size:12px; color:var(--text); line-height:1.45; display:block; }}
 .notes-none {{ font-size:11px; color:#C5BFB5; font-style:italic; font-family:'Geist Mono',monospace; }}
 .no-owner-inline {{ font-family:'Geist Mono',monospace; font-size:10px; color:#DC2626; font-weight:700; letter-spacing:0.05em; }}
+.ai-field {{ font-size:12px; color:var(--text); line-height:1.45; margin-bottom:3px; }}
+.ai-field:last-child {{ margin-bottom:0; }}
+.ai-label {{ font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-right:5px; }}
+.ai-accountable {{ background:#FFFBEB; border-left:2px solid #F59E0B; padding:2px 6px; border-radius:0 4px 4px 0; }}
 .blocker-tags {{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }}
 .blocker-tag {{ font-family:'Geist Mono',monospace; font-size:9.5px; padding:2px 6px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; white-space:nowrap; }}
 .status-chip {{ font-family:'Geist Mono',monospace; font-size:10px; font-weight:500; padding:2px 7px; border-radius:4px; border:1px solid; white-space:nowrap; }}
