@@ -130,7 +130,7 @@ def merge_into_state(ps_records: list[dict], state_file: Path) -> dict:
                 logger.debug("Low-confidence match: %r → %r (%.2f)", rec["ps_name"], best_name, score)
         else:
             unmatched.append(rec["ps_name"])
-            logger.warning("No match for PS account: %r (best score %.2f)", rec["ps_name"], score)
+            logger.debug("No match for PS account: %r (best score %.2f) — not in EMEA tracker", rec["ps_name"], score)
 
     state["accounts"] = accounts
     state["ps_last_updated"] = now

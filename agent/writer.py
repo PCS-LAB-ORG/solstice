@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from agent.constants import PENDING_TASKS_HEADER
+from agent.db import get_db, init_db, upsert_account, DB_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,16 @@ def update_state(
         {"last_run": now, "accounts": state_accounts},
         indent=2, ensure_ascii=False,
     ))
+
+    # Sync to SQLite DB
+    try:
+        init_db()
+        with get_db() as conn:
+            for account_id, acc in state_accounts.items():
+                upsert_account(conn, account_id, acc)
+    except Exception as e:
+        logger.warning("DB sync failed (non-fatal): %s", e)
+
     logger.info("State updated: %d accounts", len(state_accounts))
 
 
