@@ -282,11 +282,11 @@ def _action_section(accounts: dict) -> str:
             bd_signal = (acc.get("blocked_data") or {}).get("signal", "")
             cross_check_html = ""
             if bd_signal == "green" and is_outreach:
-                cross_check_html = '<span class="xcheck-green" title="Blocked accounts CSV shows ✅ green — EMEA tracker status may be stale">✅ Tracker outdated</span>'
+                cross_check_html = '<span class="xcheck-green tooltip-wrap">✅ Tracker outdated<span class="tooltip-text">Blocked accounts CSV shows ✅ green — outreach complete. EMEA tracker status is stale and needs updating by the CSE.</span></span>'
             elif bd_signal == "blocked":
-                cross_check_html = '<span class="xcheck-blocked" title="Blocked accounts CSV confirms 🛑 blocked">🛑</span>'
+                cross_check_html = '<span class="xcheck-blocked tooltip-wrap">🛑 Confirmed blocked<span class="tooltip-text">Blocked accounts CSV confirms this account is hard blocked. Check Status Detail in Milestone Tracker.</span></span>'
             elif bd_signal == "at_risk":
-                cross_check_html = '<span class="xcheck-risk" title="Blocked accounts CSV shows 👎 at risk">👎</span>'
+                cross_check_html = '<span class="xcheck-risk tooltip-wrap">👎 At risk<span class="tooltip-text">Blocked accounts CSV flags this account as at risk or behind. Check Status Detail in Milestone Tracker.</span></span>'
 
             # Blockers tags — shown for all groups when present
             blocker_html = ""
@@ -1050,8 +1050,11 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .notes-none {{ font-size:11px; color:#C5BFB5; font-style:italic; font-family:'Geist Mono',monospace; }}
 .no-owner-inline {{ font-family:'Geist Mono',monospace; font-size:10px; color:#DC2626; font-weight:700; letter-spacing:0.05em; }}
 .xcheck-green {{ font-family:'Geist Mono',monospace; font-size:9px; color:#065F46; background:#DCFCE7; border:1px solid #86EFAC; padding:1px 5px; border-radius:3px; margin-top:3px; display:inline-block; cursor:help; }}
-.xcheck-blocked {{ font-size:11px; cursor:help; }}
-.xcheck-risk {{ font-size:11px; cursor:help; }}
+.xcheck-blocked {{ font-family:'Geist Mono',monospace; font-size:9px; color:#7F1D1D; background:#FEF2F2; border:1px solid #FCA5A5; padding:1px 5px; border-radius:3px; margin-top:3px; display:inline-block; cursor:help; }}
+.xcheck-risk {{ font-family:'Geist Mono',monospace; font-size:9px; color:#92400E; background:#FEF3C7; border:1px solid #FCD34D; padding:1px 5px; border-radius:3px; margin-top:3px; display:inline-block; cursor:help; }}
+.tooltip-wrap {{ position:relative; }}
+.tooltip-text {{ display:none; position:absolute; left:0; top:calc(100% + 4px); z-index:999; background:#1A1209; color:#F7F5F1; font-family:'DM Sans',sans-serif; font-size:11px; line-height:1.45; padding:6px 10px; border-radius:6px; width:240px; white-space:normal; box-shadow:0 4px 16px rgba(0,0,0,0.25); pointer-events:none; }}
+.tooltip-wrap:hover .tooltip-text {{ display:block; }}
 .psc-shadow {{ color:var(--muted); font-size:10px; }}
 .cs-team-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#DBEAFE; color:#1D4ED8; border:1px solid #93C5FD; font-weight:600; }}
 .named-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#F3F4F6; color:#6B7280; border:1px solid #D1D5DB; }}
@@ -1176,28 +1179,28 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 
 <div class="wrap">
 
-  <!-- SECTION 0: Status Overview -->
+  <!-- SECTION 0: Weekly Tracker — exec summary top -->
+  <section id="section-weekly">
+    {_section_header("Weekly Tracker", "M8 / M9 milestones by North America week · 4 weeks back · current · 6 weeks ahead", n_weeks)}
+    {weekly_html}
+  </section>
+
+  <!-- SECTION 1: Status Overview -->
   <section>
     {_section_header("Status Overview", "Distribution of all EMEA accounts by current migration status", total_accounts)}
     {status_chart}
   </section>
 
-  <!-- SECTION 1: Approved Tasks -->
+  <!-- SECTION 2: Approved Tasks -->
   <section>
     {_section_header("Approved Tasks", "Actions reviewed and approved in this session", total_tasks)}
     <div class="grid">{task_cards}</div>
   </section>
 
-  <!-- SECTION 2: What To Do Next -->
+  <!-- SECTION 3: What To Do Next -->
   <section>
     {_section_header("What To Do Next", "Accounts requiring follow-up based on current status", n_action)}
     {action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}
-  </section>
-
-  <!-- SECTION 3: Weekly Completion View -->
-  <section id="section-weekly">
-    {_section_header("Weekly Tracker", "M8 / M9 milestones by North America week · 4 weeks back · current · 6 weeks ahead", n_weeks)}
-    {weekly_html}
   </section>
 
   <!-- SECTION 4: Milestone Stalls -->
