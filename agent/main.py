@@ -14,8 +14,10 @@ from agent.watcher import start_watching
 from agent.reporter import generate_report
 from agent.enricher import enrich_accounts
 from agent.blocked_parser import load_and_merge as merge_blocked
+from agent.ps_parser import load_and_merge as merge_ps
 
 BLOCKED_CSV = DATA_DIR / "blocked_accounts.csv"
+PS_CSV      = DATA_DIR / "ps_tracker.csv"
 
 # Module-level logger — handlers configured in main() after DATA_DIR exists
 logger = logging.getLogger(__name__)
@@ -118,6 +120,11 @@ def run_pipeline(csv_path: Path) -> None:
     if BLOCKED_CSV.exists():
         b = merge_blocked(BLOCKED_CSV, STATE_FILE)
         logger.info("Blocked merge: %d matched, %d core-rep-blocking", b["matched"], b["core_rep_blocking"])
+
+    # Merge PS tracker data if file exists
+    if PS_CSV.exists():
+        p = merge_ps(PS_CSV, STATE_FILE)
+        logger.info("PS merge: %d matched, %d unmatched, %d low-confidence", p["matched"], p["unmatched"], p["low_confidence"])
 
     # AI enrichment — extract blocker/owner/accountable from comments
     print("Running AI enrichment on comments...")

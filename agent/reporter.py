@@ -451,6 +451,71 @@ def _blocked_milestone_section(accounts: dict) -> tuple[str, int]:
     </div>""", len(rows_with_data)
 
 
+def _ps_section(accounts: dict) -> tuple[str, int]:
+    """Build PS Engagement section from accounts with ps_data."""
+    ps_accounts = [
+        (aid, acc, acc["ps_data"])
+        for aid, acc in accounts.items()
+        if acc.get("ps_data") and acc.get("customer_name", "").strip()
+    ]
+    if not ps_accounts:
+        return '<div class="empty-sm">No PS data loaded. Drop ps_tracker.csv into data/.</div>', 0
+
+    # Sort: active first (In Progress, Starting), then On Hold, then blank
+    status_order = {"In Progress": 0, "Starting": 1, "Pending IKO": 2, "On Hold": 3, "Completed": 4, "": 9}
+    ps_accounts.sort(key=lambda x: (status_order.get(x[2].get("ps_status", ""), 9), x[1].get("customer_name", "")))
+
+    PS_STATUS_STYLE = {
+        "In Progress": ("#065F46", "#ECFDF5"),
+        "Starting":    ("#1D4ED8", "#EFF6FF"),
+        "Pending IKO": ("#92400E", "#FFFBEB"),
+        "On Hold":     ("#6B7280", "#F3F4F6"),
+        "Completed":   ("#15803D", "#F0FDF4"),
+    }
+
+    rows_html = ""
+    for aid, acc, ps in ps_accounts:
+        name        = acc.get("customer_name", "—")
+        cse         = acc.get("active_cse") or ""
+        cse_html    = cse if cse else '<span class="no-owner-inline">⚠ NO OWNER</span>'
+        psc         = ps.get("psc") or "—"
+        psc_shadow  = ps.get("psc_shadow") or ""
+        pm          = ps.get("pm") or "—"
+        ps_status   = ps.get("ps_status") or "—"
+        clarizen    = ps.get("clarizen_id") or "—"
+        timeline    = ps.get("timeline") or "—"
+        conf        = ps.get("match_confidence", 0)
+
+        ps_color, ps_bg = PS_STATUS_STYLE.get(ps_status, ("#6B7280", "#F9FAFB"))
+        psc_html = psc
+        if psc_shadow:
+            psc_html += f'<span class="psc-shadow"> / {psc_shadow}</span>'
+
+        conf_color = "#16A34A" if conf >= 0.95 else "#D97706"
+        rows_html += f"""
+        <tr>
+          <td class="tbl-name">{name}<div style="margin-top:2px"><span class="cs-team-badge">PS</span></div></td>
+          <td class="tbl-cse">{cse_html}</td>
+          <td class="tbl-cse">{psc_html}</td>
+          <td class="tbl-cse">{pm}</td>
+          <td><span class="status-chip" style="color:{ps_color};background:{ps_bg};border-color:{ps_color}44">{ps_status}</span></td>
+          <td class="tbl-region">{clarizen}</td>
+          <td class="tbl-notes" style="font-size:11.5px;color:var(--muted)">{timeline}</td>
+          <td style="font-family:'Geist Mono',monospace;font-size:9px;color:{conf_color}">{conf:.0%}</td>
+        </tr>"""
+
+    return f"""
+    <div class="tbl-wrap">
+      <table class="acct-tbl">
+        <thead><tr>
+          <th>Customer</th><th>CSE</th><th>PSC</th><th>PM</th>
+          <th>PS Status</th><th>Clarizen</th><th>Timeline</th><th>Match</th>
+        </tr></thead>
+        <tbody>{rows_html}</tbody>
+      </table>
+    </div>""", len(ps_accounts)
+
+
 def _completed_section(accounts: dict) -> str:
     """Build the Completed accounts table."""
     completed = [
@@ -648,6 +713,7 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     action_html, n_action = _action_section(accounts)
     completed_html, n_completed = _completed_section(accounts)
     milestone_html, n_milestone = _blocked_milestone_section(accounts)
+    ps_html, n_ps               = _ps_section(accounts)
     status_chart      = _status_chart(accounts)
 
     # No-status alert banner
@@ -788,6 +854,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .notes-text {{ font-size:12px; color:var(--text); line-height:1.45; display:block; }}
 .notes-none {{ font-size:11px; color:#C5BFB5; font-style:italic; font-family:'Geist Mono',monospace; }}
 .no-owner-inline {{ font-family:'Geist Mono',monospace; font-size:10px; color:#DC2626; font-weight:700; letter-spacing:0.05em; }}
+.psc-shadow {{ color:var(--muted); font-size:10px; }}
 .cs-team-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#DBEAFE; color:#1D4ED8; border:1px solid #93C5FD; font-weight:600; }}
 .named-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#F3F4F6; color:#6B7280; border:1px solid #D1D5DB; }}
 .ms-done {{ color:#16A34A; font-size:13px; font-weight:700; }}
@@ -903,7 +970,13 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
     {action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}
   </section>
 
-  <!-- SECTION 3: Milestone Tracker -->
+  <!-- SECTION 3: PS Engagement -->
+  <section id="section-ps">
+    {_section_header("PS Engagement", f"Professional Services assignments · {n_ps} accounts matched · PSC = PS Consultant", n_ps)}
+    {ps_html}
+  </section>
+
+  <!-- SECTION 4: Milestone Tracker -->
   <section id="section-milestones">
     {_section_header("Milestone Tracker", f"M3 / M8 / M9 progress · {n_milestone} accounts · CS team + Named · Core Rep Blocking flagged first", n_milestone)}
     {milestone_html}
