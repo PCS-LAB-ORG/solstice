@@ -828,7 +828,7 @@ def _status_chart(accounts: dict) -> str:
         type: 'doughnut',
         data: {{
           labels: {labels_js},
-          datasets: [{{ data: {values_js}, backgroundColor: {colors_js}, borderWidth: 2, borderColor: '#F7F5F1', hoverOffset: 8 }}]
+          datasets: [{{ data: {values_js}, backgroundColor: {colors_js}, borderWidth: 2, borderColor: '#0D1117', hoverOffset: 8 }}]
         }},
         options: {{
           cutout: '68%',
@@ -971,12 +971,12 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
 <style>
 *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
 :root {{
-  --bg:     #F7F5F1;
-  --card:   #FFFFFF;
-  --text:   #1A1209;
-  --muted:  #7C776E;
-  --border: #E5E1D8;
-  --ink:    #0F1923;
+  --bg:     #0D1117;
+  --card:   #161B22;
+  --text:   #E6EDF3;
+  --muted:  #7D8590;
+  --border: #21262D;
+  --ink:    #010409;
 }}
 body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }}
 
@@ -1011,7 +1011,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .sidenav {{ width:var(--nav-w); transition:width 0.2s; }}
 .hdr, .stats, .alert-banner, #main-wrap, .footer {{ margin-left:var(--nav-w); transition:margin-left 0.2s; }}
 
-.hdr {{ background: var(--ink); color: #F7F5F1; padding: 2.5rem 3rem 2.2rem; position: relative; overflow: hidden; }}
+.hdr {{ background: #161B22; color: #E6EDF3; border-bottom: 1px solid #21262D; padding: 2.5rem 3rem 2.2rem; position: relative; overflow: hidden; }}
 .hdr::after {{ content:''; position:absolute; bottom:-80px; right:-80px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.03); pointer-events:none; }}
 .hdr-eye {{ font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:#6A8099; margin-bottom:0.5rem; }}
 .hdr-title {{ font-family:'Fraunces',serif; font-size:clamp(2.4rem,5vw,3.8rem); font-weight:700; letter-spacing:-0.025em; line-height:1; }}
@@ -1034,7 +1034,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .wrap {{ max-width:1300px; margin:0 auto; padding:2.5rem 3rem; display:flex; flex-direction:column; gap:3.5rem; }}
 
 /* Section headers */
-.sec-hdr {{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:2px solid var(--ink); }}
+.sec-hdr {{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:2px solid #30363D; }}
 .sec-title {{ font-family:'Fraunces',serif; font-size:1.6rem; font-weight:700; letter-spacing:-0.02em; }}
 .sec-sub {{ font-size:12px; color:var(--muted); margin-top:0.2rem; font-family:'Geist Mono',monospace; letter-spacing:0.04em; }}
 .sec-count {{ font-family:'Fraunces',serif; font-size:2.8rem; font-weight:600; color:var(--muted); line-height:1; }}
@@ -1068,11 +1068,11 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 /* Tables */
 .tbl-wrap {{ overflow-x:auto; border-radius:8px; border:1px solid var(--border); }}
 .acct-tbl {{ width:100%; border-collapse:collapse; background:var(--card); }}
-.acct-tbl thead tr {{ background:#F2EFE9; }}
+.acct-tbl thead tr {{ background:#1C2128; }}
 .acct-tbl th {{ font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0.6rem 1rem; text-align:left; font-weight:500; border-bottom:1px solid var(--border); white-space:nowrap; }}
 .acct-tbl td {{ padding:0.6rem 1rem; border-bottom:1px solid var(--border); vertical-align:middle; }}
 .acct-tbl tr:last-child td {{ border-bottom:none; }}
-.acct-tbl tr:hover td {{ background:#FAFAF7; }}
+.acct-tbl tr:hover td {{ background:#1C2128; }}
 .tbl-name {{ font-weight:600; color:var(--ink); font-size:13px; }}
 .tbl-region,.tbl-cse,.tbl-date,.tbl-exp {{ font-family:'Geist Mono',monospace; font-size:11px; color:var(--muted); white-space:nowrap; }}
 .tbl-notes {{ max-width:340px; }}
@@ -1157,7 +1157,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .chart-tbl th {{ font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0.4rem 0.75rem; text-align:left; border-bottom:1px solid var(--border); }}
 .chart-tbl td {{ padding:0.35rem 0.75rem; font-size:12.5px; border-bottom:1px solid var(--border); vertical-align:middle; }}
 .chart-tbl tr:last-child td {{ border-bottom:none; }}
-.chart-tbl tr:hover td {{ background:#FAFAF7; }}
+.chart-tbl tr:hover td {{ background:#1C2128; }}
 .chart-dot {{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:7px; flex-shrink:0; vertical-align:middle; }}
 .chart-count {{ font-family:'Fraunces',serif; font-size:1rem; font-weight:600; text-align:right; width:50px; }}
 .chart-pct {{ font-family:'Geist Mono',monospace; font-size:11px; color:var(--muted); text-align:right; width:50px; }}
