@@ -536,6 +536,34 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     action_html, n_action = _action_section(accounts)
     completed_html, n_completed = _completed_section(accounts)
     status_chart      = _status_chart(accounts)
+
+    # No-status alert banner
+    no_status_accounts = [
+        acc for acc in accounts.values()
+        if not (acc.get("status") or "").strip()
+        and acc.get("customer_name", "").strip()
+    ]
+    no_status_items = "".join(
+        f'<div class="alert-item">'
+        f'<span class="alert-acct">{acc.get("customer_name","—")}</span>'
+        f'<span class="alert-owner">'
+        + (acc.get("active_cse") or '<span class="alert-no-owner">⚠ NO OWNER</span>')
+        + f'</span></div>'
+        for acc in sorted(no_status_accounts, key=lambda a: a.get("customer_name",""))
+    )
+    no_status_banner = f"""
+    <div class="alert-banner" id="alert-banner">
+      <div class="alert-left">
+        <span class="alert-icon">!</span>
+        <div>
+          <div class="alert-title">
+            {len(no_status_accounts)} account{'s' if len(no_status_accounts) != 1 else ''} missing status — chase the owners to update the tracker
+          </div>
+          <div class="alert-body">{no_status_items}</div>
+        </div>
+      </div>
+      <button class="alert-close" onclick="document.getElementById('alert-banner').style.display='none'">✕</button>
+    </div>""" if no_status_accounts else ""
     total_accounts    = len(accounts)
 
     # Open Graph summary for Slack unfurling
@@ -655,6 +683,19 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .empty {{ grid-column:1/-1; text-align:center; padding:5rem; font-family:'Fraunces',serif; font-size:1.1rem; font-style:italic; color:var(--muted); }}
 .empty-sm {{ padding:2rem; text-align:center; font-family:'Fraunces',serif; font-style:italic; color:var(--muted); font-size:1rem; }}
 
+/* Alert Banner */
+.alert-banner {{ display:flex; justify-content:space-between; align-items:flex-start; background:#7F1D1D; color:#FEF2F2; padding:1rem 2rem; gap:1rem; border-bottom:3px solid #DC2626; }}
+.alert-left {{ display:flex; align-items:flex-start; gap:1rem; }}
+.alert-icon {{ font-family:'Fraunces',serif; font-size:1.6rem; font-weight:700; color:#FCA5A5; flex-shrink:0; line-height:1; margin-top:2px; }}
+.alert-title {{ font-weight:600; font-size:13.5px; margin-bottom:0.6rem; color:#FEF2F2; letter-spacing:0.01em; }}
+.alert-body {{ display:flex; flex-wrap:wrap; gap:0.5rem; }}
+.alert-item {{ display:flex; flex-direction:column; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:0.4rem 0.75rem; min-width:160px; }}
+.alert-acct {{ font-size:12px; font-weight:600; color:#FEF2F2; }}
+.alert-owner {{ font-family:'Geist Mono',monospace; font-size:10px; color:#FCA5A5; margin-top:2px; }}
+.alert-no-owner {{ color:#F87171; font-weight:700; letter-spacing:0.05em; }}
+.alert-close {{ background:none; border:none; color:#FCA5A5; font-size:1.1rem; cursor:pointer; padding:0.25rem 0.5rem; flex-shrink:0; line-height:1; opacity:0.7; }}
+.alert-close:hover {{ opacity:1; }}
+
 /* Chart */
 .chart-wrap {{ display:flex; gap:2.5rem; align-items:flex-start; flex-wrap:wrap; }}
 .chart-canvas-wrap {{ position:relative; width:240px; height:240px; flex-shrink:0; }}
@@ -713,6 +754,8 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
   <div class="stats-div"></div>
   <div class="stats-grp">{pri_stats}</div>
 </div>
+
+{no_status_banner}
 
 <div class="wrap">
 
