@@ -606,6 +606,120 @@ def _completed_section(accounts: dict) -> str:
     </div>""", len(completed)
 
 
+def _weekly_view(accounts: dict) -> str:
+    """
+    Weekly M8/M9 completion tracker by North America week number (Sunday start).
+    Shows past weeks (planned vs done), current week, and 4-week forecast.
+    """
+    from datetime import datetime, date, timedelta
+
+    today = date(2026, 3, 23)
+
+    def _parse(s: str):
+        if not s: return None
+        for fmt in ("%m/%d/%Y", "%m/%d/%y"):
+            try: return datetime.strptime(s.strip(), fmt).date()
+            except: pass
+        return None
+
+    def _week_key(d: date) -> str:
+        # North America week: Sunday-start, strftime %U
+        return d.strftime("%Y-W%U")
+
+    def _week_label(d: date) -> str:
+        # Week start (Sunday) and end (Saturday)
+        start = d - timedelta(days=d.weekday() + 1) if d.weekday() != 6 else d
+        end   = start + timedelta(days=6)
+        wnum  = int(d.strftime("%U"))
+        return f"Week {wnum} · {start.strftime('%d %b')}–{end.strftime('%d %b')}"
+
+    # Build {week_key: {m8: [], m9: [], m9_done: []}}
+    weeks: dict = {}
+
+    for acc in accounts.values():
+        bd = acc.get("blocked_data") or {}
+        if not bd: continue
+        name   = acc.get("customer_name", "—")
+        cse    = acc.get("active_cse") or "—"
+        status = acc.get("status", "—")
+
+        m8d = _parse(bd.get("m8_planned", ""))
+        m9d = _parse(bd.get("m9_planned", ""))
+        m8_done = bd.get("m8_started", False)
+        m9_done = bd.get("m9_complete", False) or status == "Completed"
+
+        if m8d:
+            k = _week_key(m8d)
+            weeks.setdefault(k, {"date": m8d, "m8": [], "m9": [], "m9_done": []})
+            weeks[k]["m8"].append({"name": name, "cse": cse, "done": m8_done, "status": status})
+
+        if m9d:
+            k = _week_key(m9d)
+            weeks.setdefault(k, {"date": m9d, "m8": [], "m9": [], "m9_done": []})
+            if m9_done:
+                weeks[k]["m9_done"].append({"name": name, "cse": cse, "status": status})
+            else:
+                weeks[k]["m9"].append({"name": name, "cse": cse, "status": status})
+
+    if not weeks:
+        return '<div class="empty-sm">No milestone date data available.</div>', 0
+
+    # Show 4 weeks back + current + 6 weeks forward
+    today_week = _week_key(today)
+    sorted_weeks = sorted(weeks.items(), key=lambda x: x[0])
+
+    today_idx = next((i for i, (k, _) in enumerate(sorted_weeks) if k >= today_week), 0)
+    start_idx = max(0, today_idx - 4)
+    display_weeks = sorted_weeks[start_idx:today_idx + 7]
+
+    html = '<div class="weekly-grid">'
+    for week_key, data in display_weeks:
+        is_current = week_key == today_week
+        is_past    = week_key < today_week
+        label      = _week_label(data["date"])
+        m8_list    = data["m8"]
+        m9_list    = data["m9"]
+        m9_done    = data["m9_done"]
+
+        header_cls = "week-header-current" if is_current else ("week-header-past" if is_past else "week-header-future")
+
+        # M9 done rows (green)
+        done_rows = "".join(
+            f'<div class="week-row week-done">✓ {r["name"]}<span class="week-cse">{r["cse"]}</span></div>'
+            for r in sorted(m9_done, key=lambda x: x["name"])
+        )
+        # M9 planned rows
+        m9_rows = "".join(
+            f'<div class="week-row week-m9">M9 {r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
+            for r in sorted(m9_list, key=lambda x: x["name"])
+        )
+        # M8 planned rows
+        m8_rows = "".join(
+            f'<div class="week-row week-m8">M8 {r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
+            for r in sorted(m8_list, key=lambda x: x["name"])
+        )
+
+        total_m9 = len(m9_list) + len(m9_done)
+        badge = f'<span class="week-badge-done">{len(m9_done)} done</span>' if m9_done else ""
+        badge += f'<span class="week-badge-planned">{len(m9_list)} M9 planned</span>' if m9_list else ""
+        badge += f'<span class="week-badge-m8">{len(m8_list)} M8</span>' if m8_list else ""
+
+        html += f"""
+        <div class="week-col {'week-col-current' if is_current else ''}">
+          <div class="{header_cls}">
+            <div class="week-label">{label}</div>
+            <div class="week-badges">{badge}</div>
+          </div>
+          <div class="week-body">
+            {done_rows}{m9_rows}{m8_rows}
+            {"<div class='week-empty'>No milestones</div>" if not (done_rows or m9_rows or m8_rows) else ""}
+          </div>
+        </div>"""
+
+    html += "</div>"
+    return html, len(weeks)
+
+
 def _status_chart(accounts: dict) -> str:
     """Build a donut chart + table showing status distribution across all accounts."""
     from collections import Counter
@@ -762,6 +876,7 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     task_cards        = _task_cards(tasks)
     action_html, n_action = _action_section(accounts)
     completed_html, n_completed = _completed_section(accounts)
+    weekly_html, n_weeks        = _weekly_view(accounts)
     milestone_html, n_milestone = _blocked_milestone_section(accounts)
     stall_html, n_stalls        = _stall_section(accounts)
     ps_html, n_ps               = _ps_section(accounts)
@@ -959,6 +1074,27 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .empty {{ grid-column:1/-1; text-align:center; padding:5rem; font-family:'Fraunces',serif; font-size:1.1rem; font-style:italic; color:var(--muted); }}
 .empty-sm {{ padding:2rem; text-align:center; font-family:'Fraunces',serif; font-style:italic; color:var(--muted); font-size:1rem; }}
 
+/* Weekly view */
+.weekly-grid {{ display:flex; gap:0.75rem; overflow-x:auto; padding-bottom:0.5rem; }}
+.week-col {{ min-width:200px; flex:1; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--card); }}
+.week-col-current {{ border-color:#3B82F6; box-shadow:0 0 0 2px #BFDBFE; }}
+.week-header-current {{ background:#1D4ED8; color:#fff; padding:0.6rem 0.75rem; }}
+.week-header-past {{ background:#F2EFE9; color:var(--muted); padding:0.6rem 0.75rem; }}
+.week-header-future {{ background:var(--ink); color:#F7F5F1; padding:0.6rem 0.75rem; }}
+.week-label {{ font-family:'Fraunces',serif; font-size:0.85rem; font-weight:600; }}
+.week-badges {{ display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; }}
+.week-badge-done {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#DCFCE7; color:#15803D; }}
+.week-badge-planned {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#DBEAFE; color:#1D4ED8; }}
+.week-badge-m8 {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#FEF3C7; color:#92400E; }}
+.week-body {{ padding:0.5rem 0.6rem; display:flex; flex-direction:column; gap:3px; max-height:320px; overflow-y:auto; }}
+.week-row {{ font-size:11px; line-height:1.35; padding:3px 5px; border-radius:4px; display:flex; flex-direction:column; }}
+.week-done {{ background:#F0FDF4; color:#15803D; font-weight:600; }}
+.week-m9 {{ background:#EFF6FF; color:#1D4ED8; }}
+.week-m8 {{ background:#FFFBEB; color:#92400E; }}
+.week-cse {{ font-family:'Geist Mono',monospace; font-size:9px; color:var(--muted); margin-top:1px; }}
+.week-status {{ font-family:'Geist Mono',monospace; font-size:8.5px; color:var(--muted); opacity:.7; }}
+.week-empty {{ font-size:10px; color:#C5BFB5; font-style:italic; padding:4px; }}
+
 /* Alert Banner */
 .alert-banner {{ display:flex; justify-content:space-between; align-items:flex-start; background:#7F1D1D; color:#FEF2F2; padding:1rem 2rem; gap:1rem; border-bottom:3px solid #DC2626; }}
 .alert-left {{ display:flex; align-items:flex-start; gap:1rem; }}
@@ -1058,7 +1194,13 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
     {action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}
   </section>
 
-  <!-- SECTION 3: Milestone Stalls -->
+  <!-- SECTION 3: Weekly Completion View -->
+  <section id="section-weekly">
+    {_section_header("Weekly Tracker", "M8 / M9 milestones by North America week · 4 weeks back · current · 6 weeks ahead", n_weeks)}
+    {weekly_html}
+  </section>
+
+  <!-- SECTION 4: Milestone Stalls -->
   <section id="section-stalls">
     {_section_header("Milestone Stalls", "Scale cohort accounts exceeding M3→M8 (14d) or M8→M9 (28d) limits · effective 09 Mar 2026", n_stalls)}
     {stall_html}
