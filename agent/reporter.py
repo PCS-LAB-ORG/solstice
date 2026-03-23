@@ -538,12 +538,32 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     status_chart      = _status_chart(accounts)
     total_accounts    = len(accounts)
 
+    # Open Graph summary for Slack unfurling
+    og_title       = f"Solstice EMEA Migration Report — {generated_at}"
+    og_description = (
+        f"{total_accounts} accounts tracked | "
+        f"{n_action} need action | "
+        f"{n_completed} completed | "
+        f"{total_tasks} tasks approved this session"
+    )
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solstice EMEA — Report</title>
+
+<!-- Open Graph meta tags for Slack link unfurling -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{og_title}">
+<meta property="og:description" content="{og_description}">
+<meta property="og:site_name"   content="Solstice EMEA Migration Agent">
+<meta name="description"        content="{og_description}">
+<meta name="twitter:card"       content="summary">
+<meta name="twitter:title"      content="{og_title}">
+<meta name="twitter:description" content="{og_description}">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Geist+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
