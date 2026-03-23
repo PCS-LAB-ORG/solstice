@@ -501,6 +501,45 @@ def _stall_section(accounts: dict) -> tuple[str, int]:
     </div>""", len(stalls)
 
 
+def _ps_unmatched_section() -> str:
+    """Show PS-eligible accounts that don't appear in the EMEA tracker — separate sub-table."""
+    try:
+        import csv as csvlib
+        ps_file = Path(__file__).parent.parent / "data" / "ps_tracker.csv"
+        if not ps_file.exists():
+            return ""
+        all_ps = list(csvlib.DictReader(open(ps_file, encoding="utf-8-sig")))
+        # Load matched names from state
+        import json as jsonlib
+        from agent.constants import STATE_FILE
+        state = jsonlib.loads(STATE_FILE.read_text())
+        matched_names = {a.get("ps_data", {}).get("ps_name", "") for a in state["accounts"].values() if a.get("ps_data")}
+        unmatched = [r for r in all_ps if r.get("PS Eligible Account Name", "").strip() not in matched_names
+                     and r.get("PS Eligible Account Name", "").strip()]
+        if not unmatched:
+            return ""
+        rows = "".join(
+            f'<tr><td class="tbl-name">{r["PS Eligible Account Name"]}</td>'
+            f'<td class="tbl-region">{r.get("Country","—")}</td>'
+            f'<td class="tbl-cse">{r.get("Assigned PSC","—") or "—"}</td>'
+            f'<td class="tbl-cse">{r.get("Assigned PM","—") or "—"}</td>'
+            f'<td class="tbl-region">{r.get("Estimated Time for PS Engagement","—") or "—"}</td></tr>'
+            for r in sorted(unmatched, key=lambda x: x.get("PS Eligible Account Name",""))
+        )
+        return f"""
+        <div style="margin-top:1.5rem">
+          <div class="sec-sub" style="margin-bottom:0.6rem;color:#F59E0B">⚠ PS Eligible — Not yet in EMEA Tracker ({len(unmatched)} accounts)</div>
+          <div class="tbl-wrap">
+            <table class="acct-tbl">
+              <thead><tr><th>Customer</th><th>Country</th><th>PSC</th><th>PM</th><th>Timeline</th></tr></thead>
+              <tbody>{rows}</tbody>
+            </table>
+          </div>
+        </div>"""
+    except Exception as e:
+        return f'<div class="empty-sm">Could not load unmatched PS accounts: {e}</div>'
+
+
 def _ps_section(accounts: dict) -> tuple[str, int]:
     """Build PS Engagement section from accounts with ps_data."""
     ps_accounts = [
@@ -1006,10 +1045,21 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .collapsible-section.collapsed .sec-body {{ max-height:0; opacity:0; overflow:hidden; }}
 
 /* Header */
-/* Layout — driven by --nav-w CSS var, updated by ResizeObserver */
-:root {{ --nav-w: 200px; }}
-.sidenav {{ width:var(--nav-w); transition:width 0.2s; }}
+/* Layout — pure CSS, no JS needed */
+:root {{ --nav-w: clamp(48px, 14vw, 220px); }}
+.sidenav {{ width:var(--nav-w); transition:width 0.2s; overflow:hidden; }}
 .hdr, .stats, .alert-banner, #main-wrap, .footer {{ margin-left:var(--nav-w); transition:margin-left 0.2s; }}
+/* Hide labels when nav is narrow */
+@media(max-width:1100px){{
+  .sidenav-label,.sidenav-count,.sidenav-title,.sidenav-toggle-all{{display:none}}
+  .nav-item{{justify-content:center;padding:0.5rem 0}}
+}}
+@media(max-width:700px){{
+  :root{{--nav-w:0px}}
+  .nav-burger{{display:flex}}
+  .sidenav.nav-open{{width:200px}}
+  .hdr,.stats,.alert-banner,#main-wrap,.footer{{margin-left:0}}
+}}
 
 .hdr {{ background: #161B22; color: #E6EDF3; border-bottom: 1px solid #21262D; padding: 2.5rem 3rem 2.2rem; position: relative; overflow: hidden; }}
 .hdr::after {{ content:''; position:absolute; bottom:-80px; right:-80px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.03); pointer-events:none; }}
@@ -1296,7 +1346,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
       {_section_header("PS Engagement", f"Professional Services assignments · {n_ps} accounts matched · PSC = PS Consultant", n_ps)}
       <span class="toggle-icon">▾</span>
     </div>
-    <div class="sec-body">{ps_html}</div>
+    <div class="sec-body">{ps_html}{_ps_unmatched_section()}</div>
   </section>
 
   <section id="section-milestones" class="collapsible-section">
@@ -1353,36 +1403,7 @@ function toggleNav() {{
   document.getElementById('sidenav').classList.toggle('nav-open');
 }}
 
-// ── Responsive nav width via ResizeObserver ──────────────────────
-(function() {{
-  function applyNavWidth() {{
-    var w = window.innerWidth;
-    var navW, showLabels;
-    if (w >= 1600)      {{ navW = '240px'; showLabels = true; }}
-    else if (w >= 1280) {{ navW = '200px'; showLabels = true; }}
-    else if (w >= 1024) {{ navW = '180px'; showLabels = true; }}
-    else if (w >= 800)  {{ navW = '48px';  showLabels = false; }}  // icon-only rail
-    else                {{ navW = '0px';   showLabels = false; }}   // hidden, burger shows
-    document.documentElement.style.setProperty('--nav-w', navW);
-    document.querySelectorAll('.sidenav-label,.sidenav-count,.sidenav-title,.sidenav-toggle-all').forEach(function(el) {{
-      el.style.display = showLabels ? '' : 'none';
-    }});
-    // Icon-only mode: show dots only
-    document.querySelectorAll('.sidenav-dot').forEach(function(el) {{
-      el.style.display = parseInt(navW) >= 48 ? '' : 'none';
-    }});
-    // Adjust padding for icon-only
-    document.querySelectorAll('.nav-item').forEach(function(el) {{
-      el.style.justifyContent = showLabels ? '' : 'center';
-      el.style.padding = showLabels ? '' : '0.5rem 0';
-    }});
-    // Content padding adjusts with nav
-    var mainPad = w >= 1280 ? '2.5rem 3rem' : w >= 800 ? '1.25rem 1.5rem' : '1rem';
-    document.querySelectorAll('.wrap').forEach(function(el) {{ el.style.padding = mainPad; }});
-  }}
-  applyNavWidth();
-  window.addEventListener('resize', applyNavWidth);
-}})();
+// CSS handles all responsive behaviour via clamp(48px, 14vw, 220px)
 
 // ── Active nav item via IntersectionObserver ─────────────────────
 var sections = document.querySelectorAll('.collapsible-section');
