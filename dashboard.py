@@ -126,6 +126,133 @@ print('done')
     except Exception as e:
         return {"status":"error","message":str(e)}
 
+def _load_open_actions() -> list:
+    """Open Actions — accounts needing follow-up grouped by category."""
+    try:
+        import json as _j
+        state = _j.loads(STATE_FILE.read_text())
+        groups = {
+            "Sales Hold":        {"statuses":["Sales Hold"],                        "color":"#EA580C"},
+            "Churning / Churned":{"statuses":["Churning/Churned"],                  "color":"#DC2626"},
+            "Ready To Engage":   {"statuses":["Ready To Engage"],                   "color":"#10B981"},
+            "Account Contacted": {"statuses":["Account team contacted"],            "color":"#F59E0B"},
+            "Blocked":           {"statuses":["Blocked: Tech limitation"],          "color":"#A1887F"},
+            "On Hold":           {"statuses":["On Hold"],                           "color":"#3B82F6"},
+            "Escalation":        {"statuses":["Backoff","Cancelled"],               "color":"#EF4444"},
+        }
+        result = []
+        for gname, cfg in groups.items():
+            accs = []
+            for acc in state.get("accounts",{}).values():
+                if acc.get("status") not in cfg["statuses"]: continue
+                if not acc.get("customer_name","").strip(): continue
+                bd = acc.get("blocked_data") or {}
+                ai = acc.get("ai_enrichment") or {}
+                accs.append({
+                    "name":       acc.get("customer_name","—"),
+                    "cse":        acc.get("active_cse") or "—",
+                    "region":     acc.get("sales_region") or "—",
+                    "status":     acc.get("status","—"),
+                    "signal":     bd.get("signal",""),
+                    "blocker":    ai.get("blocker",""),
+                    "accountable":ai.get("accountable",""),
+                    "live_fire":  acc.get("live_fire",False),
+                    "live_fire_dc":acc.get("live_fire_dc",""),
+                })
+            if accs:
+                result.append({"group":gname,"color":cfg["color"],"accounts":sorted(accs,key=lambda x:x["name"])})
+        return result
+    except Exception as e:
+        return []
+
+
+def _load_milestones() -> list:
+    """Milestone tracker — M3/M8/M9 with details."""
+    try:
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.status, a.live_fire, a.live_fire_dc,
+                       b.team, b.is_cs_team, b.signal, b.subtype, b.milestone_category,
+                       b.m3_complete, b.m3_planned, b.m8_started, b.m8_planned,
+                       b.m9_complete, b.m9_planned, b.upgrade_notes, b.health_notes,
+                       b.exec_delay, b.status_detail
+                FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
+                WHERE a.customer_name != ''
+                ORDER BY b.signal, a.customer_name
+            """).fetchall()
+            return [dict(r) for r in rows]
+    except: return []
+
+
+def _load_ps() -> dict:
+    """PS engagement — matched + unmatched."""
+    try:
+        with get_db() as conn:
+            matched = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.live_fire,
+                       p.psc, p.psc_shadow, p.pm, p.ps_status, p.clarizen_id, p.timeline
+                FROM accounts a JOIN ps_data p ON a.account_id=p.account_id
+                ORDER BY p.ps_status, a.customer_name
+            """).fetchall()
+        import csv as _csv
+        ps_file = DATA_DIR / "ps_tracker.csv"
+        all_ps = list(_csv.DictReader(open(ps_file, encoding="utf-8-sig"))) if ps_file.exists() else []
+        matched_names = {dict(r)["customer_name"] for r in matched}
+        unmatched = [{"name":r["PS Eligible Account Name"],"country":r.get("Country",""),
+                      "psc":r.get("Assigned PSC",""),"pm":r.get("Assigned PM",""),
+                      "timeline":r.get("Estimated Time for PS Engagement","")}
+                     for r in all_ps if r.get("PS Eligible Account Name","").strip()
+                     and r.get("PS Eligible Account Name","").strip() not in matched_names]
+        return {"matched":[dict(r) for r in matched], "unmatched":sorted(unmatched,key=lambda x:x["name"])}
+    except: return {"matched":[],"unmatched":[]}
+
+
+def _load_completed() -> list:
+    try:
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.sales_region, a.status_changed_at, a.live_fire
+                FROM accounts a WHERE a.status='Completed'
+                ORDER BY a.status_changed_at DESC
+            """).fetchall()
+        return [dict(r) for r in rows]
+    except: return []
+
+
+def _load_dq() -> list:
+    """Data quality issues."""
+    try:
+        import json as _j
+        from agent.constants import STATUSES as _ST
+        state = _j.loads(STATE_FILE.read_text())
+        accs = list(state.get("accounts",{}).values())
+        OUTREACH = {"Ready To Engage","Account team contacted"}
+        issues = []
+        no_st  = [a for a in accs if not (a.get("status") or "").strip() and a.get("customer_name","").strip()]
+        no_cse = [a for a in accs if a.get("customer_name","").strip() and not (a.get("active_cse") or "").strip()]
+        no_email=[a for a in accs if a.get("status") in OUTREACH and not (a.get("email_sent") or "").strip()]
+        if no_st:   issues.append({"type":"No Status",   "count":len(no_st),  "accounts":[a.get("customer_name") for a in no_st]})
+        if no_cse:  issues.append({"type":"No Owner/CSE","count":len(no_cse), "accounts":[a.get("customer_name") for a in no_cse]})
+        if no_email:issues.append({"type":"No Email on Record","count":len(no_email),"accounts":[a.get("customer_name") for a in no_email]})
+        return issues
+    except: return []
+
+
+@app.get("/api/open-actions")
+def api_open_actions(): return _load_open_actions()
+
+@app.get("/api/milestones")
+def api_milestones(): return _load_milestones()
+
+@app.get("/api/ps")
+def api_ps(): return _load_ps()
+
+@app.get("/api/completed")
+def api_completed(): return _load_completed()
+
+@app.get("/api/dq")
+def api_dq(): return _load_dq()
+
 @app.get("/api/events")
 async def api_events(request:Request):
     async def gen():
