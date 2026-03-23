@@ -980,7 +980,35 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
 }}
 body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }}
 
+/* ── Side Navigation ── */
+.sidenav {{ position:fixed; left:0; top:0; height:100vh; width:200px; background:var(--ink); z-index:100; display:flex; flex-direction:column; overflow-y:auto; }}
+.sidenav-inner {{ padding:1.5rem 0 2rem; display:flex; flex-direction:column; gap:2px; }}
+.sidenav-title {{ font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:#4A6078; padding:0 1.25rem 0.75rem; }}
+.sidenav-item {{ display:flex; align-items:center; gap:8px; padding:0.45rem 1.25rem; text-decoration:none; color:#8A9BB0; font-size:11.5px; font-family:'DM Sans',sans-serif; border-left:2px solid transparent; transition:color 0.15s, border-color 0.15s, background 0.15s; cursor:pointer; }}
+.sidenav-item:hover {{ color:#F7F5F1; background:rgba(255,255,255,0.05); }}
+.sidenav-active {{ color:#F7F5F1 !important; border-left-color:#7EB8FF !important; background:rgba(126,184,255,0.08) !important; }}
+.sidenav-dot {{ width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; opacity:0.5; }}
+.sidenav-active .sidenav-dot {{ opacity:1; }}
+.sidenav-label {{ flex:1; }}
+.sidenav-count {{ font-family:'Geist Mono',monospace; font-size:9px; color:#4A6078; background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px; }}
+.sidenav-active .sidenav-count {{ color:#7EB8FF; }}
+.sidenav-toggle-all {{ margin-top:1.5rem; padding:0 1.25rem; display:flex; gap:6px; flex-direction:column; }}
+.sidenav-toggle-all button {{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#8A9BB0; font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.06em; text-transform:uppercase; padding:4px 8px; border-radius:4px; cursor:pointer; transition:background 0.15s,color 0.15s; }}
+.sidenav-toggle-all button:hover {{ background:rgba(255,255,255,0.12); color:#F7F5F1; }}
+
+/* ── Collapsible sections ── */
+.collapsible-section {{ overflow:hidden; }}
+.sec-toggle {{ display:flex; align-items:flex-end; justify-content:space-between; cursor:pointer; user-select:none; }}
+.sec-toggle:hover .toggle-icon {{ color:var(--ink); }}
+.toggle-icon {{ font-size:1.1rem; color:var(--muted); margin-bottom:0.8rem; flex-shrink:0; transition:transform 0.2s; }}
+.collapsible-section.collapsed .toggle-icon {{ transform:rotate(-90deg); }}
+.sec-body {{ transition:max-height 0.35s ease, opacity 0.25s ease; max-height:9999px; opacity:1; }}
+.collapsible-section.collapsed .sec-body {{ max-height:0; opacity:0; overflow:hidden; }}
+
 /* Header */
+/* Layout offset for side nav */
+.hdr, .stats, .alert-banner, #main-wrap, .footer {{ margin-left:200px; }}
+
 .hdr {{ background: var(--ink); color: #F7F5F1; padding: 2.5rem 3rem 2.2rem; position: relative; overflow: hidden; }}
 .hdr::after {{ content:''; position:absolute; bottom:-80px; right:-80px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.03); pointer-events:none; }}
 .hdr-eye {{ font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:#6A8099; margin-bottom:0.5rem; }}
@@ -1139,7 +1167,9 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 /* Footer */
 .footer {{ text-align:center; padding:1.8rem; font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; color:#C5BFB5; border-top:1px solid var(--border); margin-top:1rem; }}
 
-@media (max-width:700px) {{
+@media (max-width:900px) {{
+  .sidenav {{ display:none; }}
+  .hdr, .stats, .alert-banner, #main-wrap, .footer {{ margin-left:0; }}
   .hdr,.stats,.wrap {{ padding-left:1.25rem; padding-right:1.25rem; }}
   .hdr-meta {{ display:none; }}
   .grid {{ grid-template-columns:1fr; }}
@@ -1177,54 +1207,105 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 
 {no_status_banner}
 
-<div class="wrap">
+<!-- Side Navigation -->
+<nav class="sidenav" id="sidenav">
+  <div class="sidenav-inner">
+    <div class="sidenav-title">SECTIONS</div>
+    <a class="sidenav-item" href="#section-weekly"   onclick="expandSection('section-weekly')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">Weekly Tracker</span><span class="sidenav-count">{n_weeks}w</span>
+    </a>
+    <a class="sidenav-item" href="#section-overview" onclick="expandSection('section-overview')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">Status Overview</span><span class="sidenav-count">{total_accounts}</span>
+    </a>
+    <a class="sidenav-item" href="#section-tasks"    onclick="expandSection('section-tasks')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">Approved Tasks</span><span class="sidenav-count">{total_tasks}</span>
+    </a>
+    <a class="sidenav-item" href="#section-todo"     onclick="expandSection('section-todo')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">What To Do Next</span><span class="sidenav-count">{n_action}</span>
+    </a>
+    <a class="sidenav-item" href="#section-stalls"   onclick="expandSection('section-stalls')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">Milestone Stalls</span><span class="sidenav-count">{n_stalls}</span>
+    </a>
+    <a class="sidenav-item" href="#section-ps"       onclick="expandSection('section-ps')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">PS Engagement</span><span class="sidenav-count">{n_ps}</span>
+    </a>
+    <a class="sidenav-item" href="#section-milestones" onclick="expandSection('section-milestones')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">Milestone Tracker</span><span class="sidenav-count">{n_milestone}</span>
+    </a>
+    <a class="sidenav-item" href="#section-completed" onclick="expandSection('section-completed')">
+      <span class="sidenav-dot"></span><span class="sidenav-label">Completed</span><span class="sidenav-count">{n_completed}</span>
+    </a>
+    <div class="sidenav-toggle-all">
+      <button onclick="toggleAll(true)">Expand all</button>
+      <button onclick="toggleAll(false)">Collapse all</button>
+    </div>
+  </div>
+</nav>
 
-  <!-- SECTION 0: Weekly Tracker — exec summary top -->
-  <section id="section-weekly">
-    {_section_header("Weekly Tracker", "M8 / M9 milestones by North America week · 4 weeks back · current · 6 weeks ahead", n_weeks)}
-    {weekly_html}
+<div class="wrap" id="main-wrap">
+
+  <section id="section-weekly" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-weekly')">
+      {_section_header("Weekly Tracker", "M8 / M9 milestones by North America week · 4 weeks back · current · 6 weeks ahead", n_weeks)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{weekly_html}</div>
   </section>
 
-  <!-- SECTION 1: Status Overview -->
-  <section>
-    {_section_header("Status Overview", "Distribution of all EMEA accounts by current migration status", total_accounts)}
-    {status_chart}
+  <section id="section-overview" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-overview')">
+      {_section_header("Status Overview", "Distribution of all EMEA accounts by current migration status", total_accounts)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{status_chart}</div>
   </section>
 
-  <!-- SECTION 2: Approved Tasks -->
-  <section>
-    {_section_header("Approved Tasks", "Actions reviewed and approved in this session", total_tasks)}
-    <div class="grid">{task_cards}</div>
+  <section id="section-tasks" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-tasks')">
+      {_section_header("Approved Tasks", "Actions reviewed and approved in this session", total_tasks)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body"><div class="grid">{task_cards}</div></div>
   </section>
 
-  <!-- SECTION 3: What To Do Next -->
-  <section>
-    {_section_header("What To Do Next", "Accounts requiring follow-up based on current status", n_action)}
-    {action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}
+  <section id="section-todo" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-todo')">
+      {_section_header("What To Do Next", "Accounts requiring follow-up based on current status", n_action)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}</div>
   </section>
 
-  <!-- SECTION 4: Milestone Stalls -->
-  <section id="section-stalls">
-    {_section_header("Milestone Stalls", "Scale cohort accounts exceeding M3→M8 (14d) or M8→M9 (28d) limits · effective 09 Mar 2026", n_stalls)}
-    {stall_html}
+  <section id="section-stalls" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-stalls')">
+      {_section_header("Milestone Stalls", "Scale cohort accounts exceeding M3→M8 (14d) or M8→M9 (28d) limits · effective 09 Mar 2026", n_stalls)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{stall_html}</div>
   </section>
 
-  <!-- SECTION 4: PS Engagement -->
-  <section id="section-ps">
-    {_section_header("PS Engagement", f"Professional Services assignments · {n_ps} accounts matched · PSC = PS Consultant", n_ps)}
-    {ps_html}
+  <section id="section-ps" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-ps')">
+      {_section_header("PS Engagement", f"Professional Services assignments · {n_ps} accounts matched · PSC = PS Consultant", n_ps)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{ps_html}</div>
   </section>
 
-  <!-- SECTION 4: Milestone Tracker -->
-  <section id="section-milestones">
-    {_section_header("Milestone Tracker", f"M3 / M8 / M9 progress · {n_milestone} accounts · CS team + Named · Core Rep Blocking flagged first", n_milestone)}
-    {milestone_html}
+  <section id="section-milestones" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-milestones')">
+      {_section_header("Milestone Tracker", f"M3 / M8 / M9 progress · {n_milestone} accounts · CS team + Named · Core Rep Blocking flagged first", n_milestone)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{milestone_html}</div>
   </section>
 
-  <!-- SECTION 4: Completed -->
-  <section id="section-completed">
-    {_section_header("Completed", "Accounts that reached Completed status — migration done", n_completed)}
-    {completed_html}
+  <section id="section-completed" class="collapsible-section">
+    <div class="sec-toggle" onclick="toggleSection('section-completed')">
+      {_section_header("Completed", "Accounts that reached Completed status — migration done", n_completed)}
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="sec-body">{completed_html}</div>
   </section>
 
 </div>
@@ -1232,6 +1313,51 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 <footer class="footer">
   Solstice Agent · EMEA CC Migration · {generated_at}
 </footer>
+
+<script>
+// ── Collapse / Expand ────────────────────────────────────────────
+function toggleSection(id) {{
+  var sec = document.getElementById(id);
+  var body = sec.querySelector('.sec-body');
+  var icon = sec.querySelector('.toggle-icon');
+  var collapsed = sec.classList.toggle('collapsed');
+  icon.textContent = collapsed ? '▸' : '▾';
+}}
+
+function expandSection(id) {{
+  var sec = document.getElementById(id);
+  if (sec && sec.classList.contains('collapsed')) {{
+    sec.classList.remove('collapsed');
+    sec.querySelector('.toggle-icon').textContent = '▾';
+  }}
+}}
+
+function toggleAll(expand) {{
+  document.querySelectorAll('.collapsible-section').forEach(function(sec) {{
+    var body = sec.querySelector('.sec-body');
+    var icon = sec.querySelector('.toggle-icon');
+    if (expand) {{ sec.classList.remove('collapsed'); icon.textContent = '▾'; }}
+    else        {{ sec.classList.add('collapsed');    icon.textContent = '▸'; }}
+  }});
+}}
+
+// ── Active nav item via IntersectionObserver ─────────────────────
+var sections = document.querySelectorAll('.collapsible-section');
+var navItems = document.querySelectorAll('.sidenav-item');
+
+var observer = new IntersectionObserver(function(entries) {{
+  entries.forEach(function(entry) {{
+    if (entry.isIntersecting) {{
+      var id = entry.target.id;
+      navItems.forEach(function(a) {{
+        a.classList.toggle('sidenav-active', a.getAttribute('href') === '#' + id);
+      }});
+    }}
+  }});
+}}, {{ rootMargin: '-20% 0px -70% 0px', threshold: 0 }});
+
+sections.forEach(function(s) {{ observer.observe(s); }});
+</script>
 
 </body>
 </html>"""
