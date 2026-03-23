@@ -13,6 +13,9 @@ from agent.writer import write_approved_tasks, update_state, bootstrap_state, wr
 from agent.watcher import start_watching
 from agent.reporter import generate_report
 from agent.enricher import enrich_accounts
+from agent.blocked_parser import load_and_merge as merge_blocked
+
+BLOCKED_CSV = DATA_DIR / "blocked_accounts.csv"
 
 # Module-level logger — handlers configured in main() after DATA_DIR exists
 logger = logging.getLogger(__name__)
@@ -110,6 +113,11 @@ def run_pipeline(csv_path: Path) -> None:
 
     expiry_flagged = {d["account_id"] for d in diffs if d.get("expiry_risk")}
     update_state(state, valid_accounts, STATE_FILE, expiry_flagged=expiry_flagged)
+
+    # Merge blocked accounts data if file exists
+    if BLOCKED_CSV.exists():
+        b = merge_blocked(BLOCKED_CSV, STATE_FILE)
+        logger.info("Blocked merge: %d matched, %d core-rep-blocking", b["matched"], b["core_rep_blocking"])
 
     # AI enrichment — extract blocker/owner/accountable from comments
     print("Running AI enrichment on comments...")

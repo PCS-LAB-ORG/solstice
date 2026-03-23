@@ -351,6 +351,106 @@ def _action_section(accounts: dict) -> str:
     return html, total_action
 
 
+SIGNAL_STYLE = {
+    "green":    ("#065F46", "#ECFDF5", "✅"),
+    "at_risk":  ("#92400E", "#FFFBEB", "👎"),
+    "blocked":  ("#7F1D1D", "#FEF2F2", "🛑"),
+    "unknown":  ("#6B7280", "#F9FAFB", "·"),
+}
+
+SUBTYPE_LABEL = {
+    "core_rep_blocking": ("CORE REP BLOCKING", "#DC2626"),
+    "tech_blocker":      ("TECH BLOCKER",      "#D97706"),
+    "no_contact":        ("NO CONTACT",         "#7C3AED"),
+    "active_deal":       ("ACTIVE DEAL",        "#1D4ED8"),
+    "no_response":       ("NO RESPONSE",        "#6B7280"),
+}
+
+
+def _milestone(done: bool, date: str) -> str:
+    if done:
+        return f'<span class="ms-done">✓</span>'
+    if date:
+        return f'<span class="ms-date">{date}</span>'
+    return '<span class="ms-blank">—</span>'
+
+
+def _blocked_milestone_section(accounts: dict) -> tuple[str, int]:
+    """Build the Milestone Tracker section from blocked_data in state."""
+    rows_with_data = [
+        (aid, acc, acc["blocked_data"])
+        for aid, acc in accounts.items()
+        if acc.get("blocked_data") and acc.get("customer_name", "").strip()
+    ]
+    if not rows_with_data:
+        return '<div class="empty-sm">No milestone data loaded. Drop blocked_accounts.csv into data/.</div>', 0
+
+    # Sort: core_rep_blocking first, then at_risk, then blocked, then green
+    signal_order = {"blocked": 0, "at_risk": 1, "core_rep_blocking": -1, "green": 3, "unknown": 4}
+
+    def sort_key(item):
+        _, _, bd = item
+        if bd.get("subtype") == "core_rep_blocking":
+            return -1
+        return signal_order.get(bd.get("signal", "unknown"), 4)
+
+    rows_with_data.sort(key=sort_key)
+
+    rows_html = ""
+    for aid, acc, bd in rows_with_data:
+        name    = acc.get("customer_name", "—")
+        cse     = acc.get("active_cse") or ""
+        cse_html = cse if cse else '<span class="no-owner-inline">⚠ NO OWNER</span>'
+        team    = bd.get("team", "")
+        is_cs   = bd.get("is_cs_team", False)
+        team_html = f'<span class="cs-team-badge">CS</span>' if is_cs else f'<span class="named-badge">{team}</span>'
+
+        signal  = bd.get("signal", "unknown")
+        subtype = bd.get("subtype")
+        color, bg, emoji = SIGNAL_STYLE.get(signal, SIGNAL_STYLE["unknown"])
+
+        sd_label = ""
+        if subtype and subtype in SUBTYPE_LABEL:
+            lbl, lbl_color = SUBTYPE_LABEL[subtype]
+            sd_label = f'<span class="subtype-badge" style="color:{lbl_color};border-color:{lbl_color}44;background:{lbl_color}11">{lbl}</span>'
+
+        status_detail = bd.get("status_detail", "")
+        # Strip emoji prefix for display
+        clean_sd = status_detail
+        for emoji_char in ("✅", "👎", "🛑"):
+            clean_sd = clean_sd.replace(emoji_char, "").strip()
+        sd_html = f'{sd_label}<div class="sd-text">{clean_sd[:120]}{"…" if len(clean_sd) > 120 else ""}</div>' if clean_sd else sd_label
+
+        milestone_cat = bd.get("milestone_category", "")
+        cat_html = f'<span class="ms-cat">{milestone_cat}</span>' if milestone_cat else ""
+
+        rows_html += f"""
+        <tr>
+          <td class="tbl-name">
+            {name}
+            <div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap">{team_html}{cat_html}</div>
+          </td>
+          <td class="tbl-cse">{cse_html}</td>
+          <td style="text-align:center">{_milestone(bd.get('m3_complete'), bd.get('m3_planned',''))}</td>
+          <td style="text-align:center">{_milestone(bd.get('m8_started'), bd.get('m8_planned',''))}</td>
+          <td style="text-align:center">{_milestone(bd.get('m9_complete'), bd.get('m9_planned',''))}</td>
+          <td><span class="signal-dot" style="color:{color}">{emoji}</span></td>
+          <td class="tbl-notes">{sd_html}</td>
+        </tr>"""
+
+    return f"""
+    <div class="tbl-wrap">
+      <table class="acct-tbl">
+        <thead><tr>
+          <th>Customer</th><th>CSE</th>
+          <th>M3 Buy-in</th><th>M8 Started</th><th>M9 Complete</th>
+          <th>Signal</th><th>Status Detail</th>
+        </tr></thead>
+        <tbody>{rows_html}</tbody>
+      </table>
+    </div>""", len(rows_with_data)
+
+
 def _completed_section(accounts: dict) -> str:
     """Build the Completed accounts table."""
     completed = [
@@ -547,6 +647,7 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     task_cards        = _task_cards(tasks)
     action_html, n_action = _action_section(accounts)
     completed_html, n_completed = _completed_section(accounts)
+    milestone_html, n_milestone = _blocked_milestone_section(accounts)
     status_chart      = _status_chart(accounts)
 
     # No-status alert banner
@@ -687,6 +788,15 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .notes-text {{ font-size:12px; color:var(--text); line-height:1.45; display:block; }}
 .notes-none {{ font-size:11px; color:#C5BFB5; font-style:italic; font-family:'Geist Mono',monospace; }}
 .no-owner-inline {{ font-family:'Geist Mono',monospace; font-size:10px; color:#DC2626; font-weight:700; letter-spacing:0.05em; }}
+.cs-team-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#DBEAFE; color:#1D4ED8; border:1px solid #93C5FD; font-weight:600; }}
+.named-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#F3F4F6; color:#6B7280; border:1px solid #D1D5DB; }}
+.ms-done {{ color:#16A34A; font-size:13px; font-weight:700; }}
+.ms-date {{ font-family:'Geist Mono',monospace; font-size:10px; color:var(--muted); }}
+.ms-blank {{ color:#D1D5DB; }}
+.ms-cat {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; }}
+.signal-dot {{ font-size:14px; }}
+.subtype-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:2px 6px; border-radius:3px; border:1px solid; font-weight:700; letter-spacing:0.06em; display:inline-block; margin-bottom:3px; }}
+.sd-text {{ font-size:11.5px; color:var(--muted); line-height:1.4; margin-top:2px; }}
 .ai-field {{ font-size:12px; color:var(--text); line-height:1.45; margin-bottom:3px; }}
 .ai-field:last-child {{ margin-bottom:0; }}
 .ai-label {{ font-family:'Geist Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-right:5px; }}
@@ -793,7 +903,13 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
     {action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}
   </section>
 
-  <!-- SECTION 3: Completed -->
+  <!-- SECTION 3: Milestone Tracker -->
+  <section id="section-milestones">
+    {_section_header("Milestone Tracker", f"M3 / M8 / M9 progress · {n_milestone} accounts · CS team + Named · Core Rep Blocking flagged first", n_milestone)}
+    {milestone_html}
+  </section>
+
+  <!-- SECTION 4: Completed -->
   <section id="section-completed">
     {_section_header("Completed", "Accounts that reached Completed status — migration done", n_completed)}
     {completed_html}
