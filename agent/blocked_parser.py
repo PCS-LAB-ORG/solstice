@@ -148,6 +148,86 @@ def merge_into_state(blocked: dict[str, dict], state_file: Path) -> dict:
     return summary
 
 
+def check_milestone_stalls(accounts: dict) -> list[dict]:
+    """
+    Detect accounts stalled between milestones beyond allowed timelines.
+    Rules (Scale cohort only, effective 2026-03-09, prospective):
+      M3 → M8: 14 days max (M3 complete but M8 not started)
+      M8 → M9: 28 days max (M8 started but M9 not complete)
+    M0→M1 and M1→M3 not enforced yet (no date data available).
+
+    Returns list of stall dicts sorted by days_stalled descending.
+    """
+    from datetime import datetime, date, timezone
+    from agent.constants import MILESTONE_MAX_DAYS, MILESTONE_RULES_EFFECTIVE, MILESTONE_RULES_COHORT
+
+    effective_date = date.fromisoformat(MILESTONE_RULES_EFFECTIVE)
+    today = datetime.now(timezone.utc).date()
+    stalls = []
+
+    def _parse(s: str):
+        if not s: return None
+        for fmt in ("%m/%d/%Y", "%m/%d/%y"):
+            try: return datetime.strptime(s.strip(), fmt).date()
+            except: pass
+        return None
+
+    for aid, acc in accounts.items():
+        bd = acc.get("blocked_data", {})
+        if not bd: continue
+        if not bd.get("is_cs_team"): continue                    # Scale cohort only
+        if acc.get("ps_data", {}).get("ps_status"): continue     # PS customers exempt
+        if acc.get("status") in ("Completed", "Cancelled", "Churning/Churned"): continue
+
+        m3_done  = bd.get("m3_complete", False)
+        m8_done  = bd.get("m8_started",  False)
+        m9_done  = bd.get("m9_complete", False)
+        m3_date  = _parse(bd.get("m3_planned", ""))
+        m8_date  = _parse(bd.get("m8_planned", ""))
+        m9_date  = _parse(bd.get("m9_planned", ""))
+        name     = acc.get("customer_name", "—")
+        cse      = acc.get("active_cse", "") or "⚠ NO OWNER"
+
+        # M3 → M8: M3 complete, M8 not started, reference date = m3_planned
+        if m3_done and not m8_done and m3_date:
+            ref = max(m3_date, effective_date)  # no retroactive
+            days_stalled = (today - ref).days
+            if days_stalled >= MILESTONE_MAX_DAYS["M3_M8"]:
+                stalls.append({
+                    "account_id":   aid,
+                    "customer_name": name,
+                    "cse":          cse,
+                    "transition":   "M3 → M8",
+                    "max_days":     MILESTONE_MAX_DAYS["M3_M8"],
+                    "days_stalled": days_stalled,
+                    "over_by":      days_stalled - MILESTONE_MAX_DAYS["M3_M8"],
+                    "ref_date":     ref.isoformat(),
+                    "status":       acc.get("status", "—"),
+                    "signal":       bd.get("signal", ""),
+                })
+
+        # M8 → M9: M8 started, M9 not complete, reference date = m8_planned
+        if m8_done and not m9_done and m8_date:
+            ref = max(m8_date, effective_date)
+            days_stalled = (today - ref).days
+            if days_stalled >= MILESTONE_MAX_DAYS["M8_M9"]:
+                stalls.append({
+                    "account_id":   aid,
+                    "customer_name": name,
+                    "cse":          cse,
+                    "transition":   "M8 → M9",
+                    "max_days":     MILESTONE_MAX_DAYS["M8_M9"],
+                    "days_stalled": days_stalled,
+                    "over_by":      days_stalled - MILESTONE_MAX_DAYS["M8_M9"],
+                    "ref_date":     ref.isoformat(),
+                    "status":       acc.get("status", "—"),
+                    "signal":       bd.get("signal", ""),
+                })
+
+    stalls.sort(key=lambda x: -x["over_by"])
+    return stalls
+
+
 def load_and_merge(csv_path: Path, state_file: Path) -> dict:
     """One-shot: parse CSV and merge into state."""
     blocked = parse_blocked_csv(csv_path)

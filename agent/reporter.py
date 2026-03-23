@@ -451,6 +451,39 @@ def _blocked_milestone_section(accounts: dict) -> tuple[str, int]:
     </div>""", len(rows_with_data)
 
 
+def _stall_section(accounts: dict) -> tuple[str, int]:
+    """Milestone stall report — Scale cohort accounts over timeline limits."""
+    from agent.blocked_parser import check_milestone_stalls
+    stalls = check_milestone_stalls(accounts)
+    if not stalls:
+        return '<div class="empty-sm">No milestone stalls detected.</div>', 0
+
+    rows_html = ""
+    for s in stalls:
+        over   = s["over_by"]
+        color  = "#DC2626" if over > 14 else "#D97706"
+        rows_html += f"""
+        <tr>
+          <td class="tbl-name">{s['customer_name']}</td>
+          <td class="tbl-cse">{s['cse']}</td>
+          <td><span class="status-chip" style="color:#1D4ED8;background:#EFF6FF;border-color:#93C5FD">{s['transition']}</span></td>
+          <td style="font-family:'Geist Mono',monospace;font-size:11px">{s['ref_date']}</td>
+          <td style="font-family:'Geist Mono',monospace;font-size:11px;color:{color};font-weight:700">+{over}d over</td>
+          <td class="tbl-region">{s['status']}</td>
+        </tr>"""
+
+    return f"""
+    <div class="tbl-wrap">
+      <table class="acct-tbl">
+        <thead><tr>
+          <th>Customer</th><th>CSE</th><th>Transition</th>
+          <th>Reference Date</th><th>Over Limit</th><th>Status</th>
+        </tr></thead>
+        <tbody>{rows_html}</tbody>
+      </table>
+    </div>""", len(stalls)
+
+
 def _ps_section(accounts: dict) -> tuple[str, int]:
     """Build PS Engagement section from accounts with ps_data."""
     ps_accounts = [
@@ -713,6 +746,7 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
     action_html, n_action = _action_section(accounts)
     completed_html, n_completed = _completed_section(accounts)
     milestone_html, n_milestone = _blocked_milestone_section(accounts)
+    stall_html, n_stalls        = _stall_section(accounts)
     ps_html, n_ps               = _ps_section(accounts)
     status_chart      = _status_chart(accounts)
 
@@ -970,7 +1004,13 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
     {action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}
   </section>
 
-  <!-- SECTION 3: PS Engagement -->
+  <!-- SECTION 3: Milestone Stalls -->
+  <section id="section-stalls">
+    {_section_header("Milestone Stalls", "Scale cohort accounts exceeding M3→M8 (14d) or M8→M9 (28d) limits · effective 09 Mar 2026", n_stalls)}
+    {stall_html}
+  </section>
+
+  <!-- SECTION 4: PS Engagement -->
   <section id="section-ps">
     {_section_header("PS Engagement", f"Professional Services assignments · {n_ps} accounts matched · PSC = PS Consultant", n_ps)}
     {ps_html}

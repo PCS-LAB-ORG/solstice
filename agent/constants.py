@@ -77,6 +77,18 @@ TASK_CATEGORIES = [
     "UNCLASSIFIED",         # Fallback — classifier failed
 ]
 
+# --- Milestone Timeline Rules (Scale cohort only, effective 2026-03-09, prospective) ---
+# Source: EMEA leadership directive, March 2026
+MILESTONE_RULES_EFFECTIVE = "2026-03-09"   # no retroactive application
+MILESTONE_MAX_DAYS = {
+    "M0_M1": 7,    # Milestone 0 → Milestone 1: 1 week
+    "M1_M3": 14,   # Milestone 1 → Milestone 3: 2 weeks
+    "M3_M8": 14,   # Milestone 3 → Milestone 8: 2 weeks (buy-in → upgrade start)
+    "M8_M9": 28,   # Milestone 8 → Milestone 9: 4 weeks (upgrade start → complete)
+}
+# Only Scale cohort is subject to these rules — PS-engaged customers are exempt
+MILESTONE_RULES_COHORT = "Scale cohort"
+
 ESCALATION_STATUSES = ["Backoff", "Sales Hold", "Churning/Churned", "Cancelled"]
 OUTREACH_STATUSES = ["Ready To Engage", "Account team contacted"]
 
