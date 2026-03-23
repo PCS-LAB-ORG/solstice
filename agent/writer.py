@@ -54,6 +54,8 @@ def update_state(
             "comments": new.get("comments", ""),
             "sales_region": new.get("sales_region", ""),
             "email_sent": new.get("email_sent", ""),
+            "live_fire": new.get("live_fire", False),
+            "live_fire_dc": new.get("live_fire_dc", ""),
             "blockers": new.get("blockers", []),
             "last_seen": now,
         }

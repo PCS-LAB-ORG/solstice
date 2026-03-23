@@ -104,6 +104,15 @@ STATUS_GROUPS = {
     },
 }
 
+def _lf(acc: dict) -> str:
+    """Return live fire badge with DC name if account is live fire."""
+    if not acc.get("live_fire"):
+        return ""
+    dc = acc.get("live_fire_dc", "").strip()
+    dc_label = f'<span class="lf-dc">{dc}</span>' if dc else ""
+    dc_title = dc if dc else "TBD"
+    return f'<span class="lf-icon" title="Live Fire · DC: {dc_title}">🔥 DC{dc_label}</span>'
+
 
 def _load_tasks(csv_path: Path) -> list[dict]:
     if not csv_path.exists():
@@ -228,7 +237,7 @@ def _task_cards(tasks: list[dict]) -> str:
             {_badge(cat)}
             <div class="pri-wrap">{_priority(pri)}</div>
           </div>
-          <div class="card-name">{name}</div>
+          <div class="card-name">{name}{_lf(t)}</div>
           <div class="card-id">{acc_id}</div>
           <div class="card-meta">{region} · {cse}</div>
           <div class="card-action">{action}</div>
@@ -327,7 +336,7 @@ def _action_section(accounts: dict) -> str:
                 combined_notes = f'{blocker_content}{"<div style=\'margin-top:4px\'>" + notes_html + "</div>" if notes_html else ""}'
                 rows_html += f"""
                 <tr>
-                  <td class="tbl-name">{name}{f"<div>{cross_check_html}</div>" if cross_check_html else ""}</td>
+                  <td class="tbl-name">{name}{_lf(acc)}{f"<div>{cross_check_html}</div>" if cross_check_html else ""}</td>
                   <td class="tbl-region">{region}</td>
                   <td class="tbl-cse">{cse_html}</td>
                   <td class="tbl-date">{changed}</td>
@@ -336,7 +345,7 @@ def _action_section(accounts: dict) -> str:
             else:
                 rows_html += f"""
                 <tr>
-                  <td class="tbl-name">{name}{blocker_html}{f"<div>{cross_check_html}</div>" if cross_check_html else ""}</td>
+                  <td class="tbl-name">{name}{_lf(acc)}{blocker_html}{f"<div>{cross_check_html}</div>" if cross_check_html else ""}</td>
                   <td><span class="status-chip" style="color:{cfg['color']};background:{cfg['bg']};border-color:{cfg['dot']}55">{status}</span></td>
                   <td class="tbl-region">{region}</td>
                   <td class="tbl-cse">{cse_html}</td>
@@ -444,7 +453,7 @@ def _blocked_milestone_section(accounts: dict) -> tuple[str, int]:
         rows_html += f"""
         <tr>
           <td class="tbl-name">
-            {name}
+            {name}{_lf(acc)}
             <div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap">{team_html}{cat_html}</div>
           </td>
           <td class="tbl-cse">{cse_html}</td>
@@ -583,7 +592,7 @@ def _ps_section(accounts: dict) -> tuple[str, int]:
         conf_color = "#16A34A" if conf >= 0.95 else "#D97706"
         rows_html += f"""
         <tr>
-          <td class="tbl-name">{name}<div style="margin-top:2px"><span class="cs-team-badge">PS</span></div></td>
+          <td class="tbl-name">{name}{_lf(acc)}<div style="margin-top:2px"><span class="cs-team-badge">PS</span></div></td>
           <td class="tbl-cse">{cse_html}</td>
           <td class="tbl-cse">{psc_html}</td>
           <td class="tbl-cse">{pm}</td>
@@ -628,7 +637,7 @@ def _completed_section(accounts: dict) -> str:
         date    = _fmt_dt(acc.get("status_changed_at", ""), date_only=True)
         rows_html += f"""
         <tr>
-          <td class="tbl-name">{name}</td>
+          <td class="tbl-name">{name}{_lf(acc)}</td>
           <td class="tbl-region">{region}</td>
           <td class="tbl-cse">{cse}</td>
           <td><span class="done-chip">✓ {date}</span></td>
@@ -681,6 +690,7 @@ def _weekly_view(accounts: dict) -> str:
         name   = acc.get("customer_name", "—")
         cse    = acc.get("active_cse") or "—"
         status = acc.get("status", "—")
+        lf_icon = _lf(acc)
 
         m8d = _parse(bd.get("m8_planned", ""))
         m9d = _parse(bd.get("m9_planned", ""))
@@ -690,15 +700,15 @@ def _weekly_view(accounts: dict) -> str:
         if m8d:
             k = _week_key(m8d)
             weeks.setdefault(k, {"date": m8d, "m8": [], "m9": [], "m9_done": []})
-            weeks[k]["m8"].append({"name": name, "cse": cse, "done": m8_done, "status": status})
+            weeks[k]["m8"].append({"name": name, "cse": cse, "done": m8_done, "status": status, "lf": lf_icon})
 
         if m9d:
             k = _week_key(m9d)
             weeks.setdefault(k, {"date": m9d, "m8": [], "m9": [], "m9_done": []})
             if m9_done:
-                weeks[k]["m9_done"].append({"name": name, "cse": cse, "status": status})
+                weeks[k]["m9_done"].append({"name": name, "cse": cse, "status": status, "lf": lf_icon})
             else:
-                weeks[k]["m9"].append({"name": name, "cse": cse, "status": status})
+                weeks[k]["m9"].append({"name": name, "cse": cse, "status": status, "lf": lf_icon})
 
     if not weeks:
         return '<div class="empty-sm">No milestone date data available.</div>', 0
@@ -711,7 +721,8 @@ def _weekly_view(accounts: dict) -> str:
     start_idx = max(0, today_idx - 4)
     display_weeks = sorted_weeks[start_idx:today_idx + 7]
 
-    html = '<div class="weekly-grid">'
+    n_cols = len(display_weeks)
+    html = f'<div class="weekly-grid" style="grid-template-columns:repeat({n_cols},1fr)">'
     for week_key, data in display_weeks:
         is_current = week_key == today_week
         is_past    = week_key < today_week
@@ -1081,7 +1092,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .stat-l {{ font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }}
 
 /* Wrapper */
-.wrap {{ max-width:1300px; margin:0 auto; padding:2.5rem 3rem; display:flex; flex-direction:column; gap:3.5rem; }}
+.wrap {{ max-width:1400px; margin:0 auto; padding:2rem 2rem; display:flex; flex-direction:column; gap:3rem; }}
 
 /* Section headers */
 .sec-hdr {{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:2px solid #30363D; }}
@@ -1136,6 +1147,8 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .tooltip-text {{ display:none; position:absolute; left:0; top:calc(100% + 4px); z-index:999; background:#1A1209; color:#F7F5F1; font-family:'DM Sans',sans-serif; font-size:11px; line-height:1.45; padding:6px 10px; border-radius:6px; width:240px; white-space:normal; box-shadow:0 4px 16px rgba(0,0,0,0.25); pointer-events:none; }}
 .tooltip-wrap:hover .tooltip-text {{ display:block; }}
 .psc-shadow {{ color:var(--muted); font-size:10px; }}
+.lf-icon {{ display:inline-flex; align-items:center; gap:3px; font-size:10px; font-family:'Geist Mono',monospace; font-weight:600; color:#F97316; background:rgba(249,115,22,0.12); border:1px solid rgba(249,115,22,0.3); padding:1px 5px; border-radius:4px; margin-left:5px; vertical-align:middle; white-space:nowrap; }}
+.lf-dc {{ color:#FED7AA; font-weight:400; margin-left:3px; font-size:9px; }}
 .cs-team-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#DBEAFE; color:#1D4ED8; border:1px solid #93C5FD; font-weight:600; }}
 .named-badge {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#F3F4F6; color:#6B7280; border:1px solid #D1D5DB; }}
 .ms-done {{ color:#16A34A; font-size:13px; font-weight:700; }}
@@ -1158,8 +1171,8 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .empty-sm {{ padding:2rem; text-align:center; font-family:'Fraunces',serif; font-style:italic; color:var(--muted); font-size:1rem; }}
 
 /* Weekly view */
-.weekly-grid {{ display:flex; gap:0.75rem; overflow-x:auto; padding-bottom:0.5rem; }}
-.week-col {{ min-width:200px; flex:1; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--card); }}
+.weekly-grid {{ display:grid; gap:0.5rem; width:100%; overflow:hidden; }}
+.week-col {{ min-width:0; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--card); }}
 .week-col-current {{ border-color:#3B82F6; box-shadow:0 0 0 2px #BFDBFE; }}
 .week-header-current {{ background:#1D4ED8; color:#fff; padding:0.6rem 0.75rem; }}
 .week-header-past {{ background:#F2EFE9; color:var(--muted); padding:0.6rem 0.75rem; }}
@@ -1197,12 +1210,12 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .dq-desc {{ font-weight:400; color:#FECACA; font-style:italic; }}
 
 /* Chart */
-.chart-wrap {{ display:flex; gap:2.5rem; align-items:flex-start; flex-wrap:wrap; }}
-.chart-canvas-wrap {{ position:relative; width:240px; height:240px; flex-shrink:0; }}
+.chart-wrap {{ display:flex; gap:2rem; align-items:center; width:100%; }}
+.chart-canvas-wrap {{ position:relative; width:280px; height:280px; flex-shrink:0; }}
 .chart-centre {{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none; }}
-.chart-centre-n {{ font-family:'Fraunces',serif; font-size:2rem; font-weight:700; color:var(--ink); line-height:1; }}
+.chart-centre-n {{ font-family:'Fraunces',serif; font-size:2.2rem; font-weight:700; color:var(--text); line-height:1; }}
 .chart-centre-l {{ font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }}
-.chart-table-wrap {{ flex:1; min-width:260px; overflow-x:auto; }}
+.chart-table-wrap {{ flex:1; overflow-x:auto; }}
 .chart-tbl {{ width:100%; border-collapse:collapse; }}
 .chart-tbl th {{ font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0.4rem 0.75rem; text-align:left; border-bottom:1px solid var(--border); }}
 .chart-tbl td {{ padding:0.35rem 0.75rem; font-size:12.5px; border-bottom:1px solid var(--border); vertical-align:middle; }}

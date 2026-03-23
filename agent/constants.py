@@ -29,7 +29,9 @@ CSV_COL_PS_ENGAGED = 36
 CSV_COL_KICKOFF_DATE = 35   # column index
 CSV_COL_KICKOFF_DATE_HEADER = "Kickoff\nDate"  # actual CSV column header (contains literal newline)
 CSV_COL_EMAIL_SENT = 41
-# Columns 6-9, 11, 14-34, 37-40 exist in the CSV but are not used by the agent
+CSV_COL_LIVE_FIRE = 6    # "Live-fire" — Yes/No
+CSV_COL_LIVE_FIRE_DC = 7 # "Live-Fire DC assigned"
+# Columns 8-9, 11, 14-34, 37-40 exist in the CSV but are not used by the agent
 
 # Indices 16-30, skipping 19 ('CSP') which is not a blocker column
 BLOCKER_COL_INDICES = [16, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]

@@ -9,6 +9,7 @@ from agent.constants import (
     CSV_COL_ACTIVE_CSE, CSV_COL_BACKUP_CSE, CSV_COL_STATUS,
     CSV_COL_SALES_REGION, CSV_COL_COMMENTS, CSV_COL_EXPIRATION_DATE,
     CSV_COL_PS_ENGAGED, CSV_COL_KICKOFF_DATE, CSV_COL_EMAIL_SENT,
+    CSV_COL_LIVE_FIRE, CSV_COL_LIVE_FIRE_DC,
     BLOCKER_COL_INDICES, BLOCKER_COLS,
     ESCALATION_STATUSES, OUTREACH_STATUSES,
     CUSTOMER_OUTREACH_STALE_DAYS, EXPIRY_RISK_DAYS,
@@ -40,6 +41,8 @@ def _parse_row(row: list) -> Optional[dict[str, Any]]:
         "ps_engaged": _get(CSV_COL_PS_ENGAGED),
         "kickoff_date": _get(CSV_COL_KICKOFF_DATE),
         "email_sent": _get(CSV_COL_EMAIL_SENT),
+        "live_fire": _get(CSV_COL_LIVE_FIRE).strip().lower() == "yes",
+        "live_fire_dc": _get(CSV_COL_LIVE_FIRE_DC),
         "blockers": active_blockers,
     }
 
