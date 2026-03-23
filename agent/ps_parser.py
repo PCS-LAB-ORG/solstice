@@ -25,6 +25,11 @@ logger = logging.getLogger(__name__)
 
 FUZZY_THRESHOLD = 0.85   # minimum similarity — below this creates false matches (e.g. Engie→Enaire)
 
+# Manual overrides for known alias mismatches (PS tracker name → state.json customer_name)
+MANUAL_ALIASES: dict[str, str] = {
+    "Idea Bank S.a. (Salt Bank)": "Salt Bank",
+}
+
 
 def _normalise(name: str) -> str:
     """Lowercase, strip legal suffixes and punctuation for fuzzy comparison."""
@@ -102,6 +107,14 @@ def merge_into_state(ps_records: list[dict], state_file: Path) -> dict:
     now = datetime.now(timezone.utc).isoformat()
 
     for rec in ps_records:
+        # Check manual alias first
+        alias_target = MANUAL_ALIASES.get(rec["ps_name"])
+        if alias_target and alias_target in state_names:
+            aid = state_names[alias_target]
+            accounts[aid]["ps_data"] = {**rec, "match_confidence": 1.0, "matched_name": alias_target, "merged_at": now}
+            matched += 1
+            continue
+
         best_name, score = _best_match(rec["ps_name"], name_list)
         if best_name:
             aid = state_names[best_name]
