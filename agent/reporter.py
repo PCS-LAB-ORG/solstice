@@ -1,7 +1,7 @@
 """
 reporter.py — Generate a light HTML report with three sections:
   1. Approved Tasks (from pending_tasks.csv)
-  2. What To Do Next (problematic statuses from state.json)
+  2. Open Actions (problematic statuses from state.json)
   3. Completed (accounts that reached Completed, with date)
 
 Callable from pipeline (generate_report()) or standalone (python3 agent/reporter.py).
@@ -239,7 +239,7 @@ def _task_cards(tasks: list[dict]) -> str:
 
 
 def _action_section(accounts: dict) -> str:
-    """Build the What To Do Next section from state accounts."""
+    """Build the Open Actions section from state accounts."""
     html = ""
     total_action = 0
 
@@ -1006,8 +1006,10 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .collapsible-section.collapsed .sec-body {{ max-height:0; opacity:0; overflow:hidden; }}
 
 /* Header */
-/* Layout offset for side nav */
-.hdr, .stats, .alert-banner, #main-wrap, .footer {{ margin-left:200px; }}
+/* Layout — driven by --nav-w CSS var, updated by ResizeObserver */
+:root {{ --nav-w: 200px; }}
+.sidenav {{ width:var(--nav-w); transition:width 0.2s; }}
+.hdr, .stats, .alert-banner, #main-wrap, .footer {{ margin-left:var(--nav-w); transition:margin-left 0.2s; }}
 
 .hdr {{ background: var(--ink); color: #F7F5F1; padding: 2.5rem 3rem 2.2rem; position: relative; overflow: hidden; }}
 .hdr::after {{ content:''; position:absolute; bottom:-80px; right:-80px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.03); pointer-events:none; }}
@@ -1167,8 +1169,11 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 /* Footer */
 .footer {{ text-align:center; padding:1.8rem; font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; color:#C5BFB5; border-top:1px solid var(--border); margin-top:1rem; }}
 
+.nav-burger {{ display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--ink); border:none; color:#8A9BB0; font-size:1.2rem; width:36px; height:36px; border-radius:6px; cursor:pointer; align-items:center; justify-content:center; }}
 @media (max-width:900px) {{
-  .sidenav {{ display:none; }}
+  .nav-burger {{ display:flex; }}
+  .sidenav {{ width:0; overflow:hidden; }}
+  .sidenav.nav-open {{ width:200px; }}
   .hdr, .stats, .alert-banner, #main-wrap, .footer {{ margin-left:0; }}
   .hdr,.stats,.wrap {{ padding-left:1.25rem; padding-right:1.25rem; }}
   .hdr-meta {{ display:none; }}
@@ -1207,6 +1212,8 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 
 {no_status_banner}
 
+<button class="nav-burger" onclick="toggleNav()" title="Toggle navigation">☰</button>
+
 <!-- Side Navigation -->
 <nav class="sidenav" id="sidenav">
   <div class="sidenav-inner">
@@ -1221,7 +1228,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
       <span class="sidenav-dot"></span><span class="sidenav-label">Approved Tasks</span><span class="sidenav-count">{total_tasks}</span>
     </a>
     <a class="sidenav-item" href="#section-todo"     onclick="expandSection('section-todo')">
-      <span class="sidenav-dot"></span><span class="sidenav-label">What To Do Next</span><span class="sidenav-count">{n_action}</span>
+      <span class="sidenav-dot"></span><span class="sidenav-label">Open Actions</span><span class="sidenav-count">{n_action}</span>
     </a>
     <a class="sidenav-item" href="#section-stalls"   onclick="expandSection('section-stalls')">
       <span class="sidenav-dot"></span><span class="sidenav-label">Milestone Stalls</span><span class="sidenav-count">{n_stalls}</span>
@@ -1270,7 +1277,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 
   <section id="section-todo" class="collapsible-section">
     <div class="sec-toggle" onclick="toggleSection('section-todo')">
-      {_section_header("What To Do Next", "Accounts requiring follow-up based on current status", n_action)}
+      {_section_header("Open Actions", "Accounts requiring follow-up based on current status", n_action)}
       <span class="toggle-icon">▾</span>
     </div>
     <div class="sec-body">{action_html if action_html else '<div class="empty-sm">No action items detected.</div>'}</div>
@@ -1340,6 +1347,26 @@ function toggleAll(expand) {{
     else        {{ sec.classList.add('collapsed');    icon.textContent = '▸'; }}
   }});
 }}
+
+// ── Hamburger toggle (mobile) ────────────────────────────────────
+function toggleNav() {{
+  document.getElementById('sidenav').classList.toggle('nav-open');
+}}
+
+// ── Responsive nav width via ResizeObserver ──────────────────────
+(function() {{
+  function applyNavWidth() {{
+    var w = window.innerWidth;
+    var navW = w >= 1400 ? '240px' : w >= 1100 ? '200px' : w >= 900 ? '160px' : '0px';
+    document.documentElement.style.setProperty('--nav-w', navW);
+    // Show/hide labels at narrow widths
+    document.querySelectorAll('.sidenav-label,.sidenav-count,.sidenav-title,.sidenav-toggle-all').forEach(function(el) {{
+      el.style.display = parseInt(navW) >= 160 ? '' : 'none';
+    }});
+  }}
+  applyNavWidth();
+  window.addEventListener('resize', applyNavWidth);
+}})();
 
 // ── Active nav item via IntersectionObserver ─────────────────────
 var sections = document.querySelectorAll('.collapsible-section');
