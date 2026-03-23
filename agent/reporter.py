@@ -280,29 +280,28 @@ def _action_section(accounts: dict) -> str:
                 )
                 blocker_html = f'<div class="blocker-tags">{tags}</div>'
 
-            if is_outreach:
-                raw_comments = (acc.get("comments") or "").replace("\r\n", " ").replace("\n", " ").strip()
-                if raw_comments:
-                    notes_html = f'<span class="notes-text">{raw_comments[:180]}{"…" if len(raw_comments) > 180 else ""}</span>'
-                else:
-                    notes_html = '<span class="notes-none">No data available</span>'
-                rows_html += f"""
-                <tr>
-                  <td class="tbl-name">{name}{blocker_html}</td>
-                  <td><span class="status-chip" style="color:{cfg['color']};background:{cfg['bg']};border-color:{cfg['dot']}55">{status}</span></td>
-                  <td class="tbl-region">{region}</td>
-                  <td class="tbl-cse">{cse}</td>
-                  <td class="tbl-date">{last_col_html}</td>
-                  <td class="tbl-notes">{notes_html}</td>
-                </tr>"""
-            elif is_blocked:
+            # Comments shown for ALL groups — critical intel like MTN's paused migration
+            raw_comments = (acc.get("comments") or "").replace("\r\n", " ").replace("\n", " ").strip()
+            if raw_comments:
+                notes_html = f'<span class="notes-text">{raw_comments[:200]}{"…" if len(raw_comments) > 200 else ""}</span>'
+            elif is_outreach:
+                notes_html = '<span class="notes-none">No data available</span>'
+            else:
+                notes_html = ""
+
+            # CSE — flag missing owner inline
+            cse_html = cse if cse and cse != "—" else '<span class="no-owner-inline">⚠ NO OWNER</span>'
+
+            if is_blocked:
+                blocker_content = blocker_html if blocker_html else '<span class="notes-none">No blockers recorded</span>'
+                combined_notes = f'{blocker_content}{"<div style=\'margin-top:4px\'>" + notes_html + "</div>" if notes_html else ""}'
                 rows_html += f"""
                 <tr>
                   <td class="tbl-name">{name}</td>
                   <td class="tbl-region">{region}</td>
-                  <td class="tbl-cse">{cse}</td>
+                  <td class="tbl-cse">{cse_html}</td>
                   <td class="tbl-date">{changed}</td>
-                  <td class="tbl-notes">{blocker_html if blocker_html else '<span class="notes-none">No blockers recorded</span>'}</td>
+                  <td class="tbl-notes">{combined_notes}</td>
                 </tr>"""
             else:
                 rows_html += f"""
@@ -310,13 +309,13 @@ def _action_section(accounts: dict) -> str:
                   <td class="tbl-name">{name}{blocker_html}</td>
                   <td><span class="status-chip" style="color:{cfg['color']};background:{cfg['bg']};border-color:{cfg['dot']}55">{status}</span></td>
                   <td class="tbl-region">{region}</td>
-                  <td class="tbl-cse">{cse}</td>
+                  <td class="tbl-cse">{cse_html}</td>
                   <td class="tbl-date">{last_col_html}</td>
+                  <td class="tbl-notes">{notes_html}</td>
                 </tr>"""
 
         last_col_header  = "Last Contact" if is_outreach else "Since"
-        notes_header     = "<th>Notes / Next Steps</th>" if is_outreach else ""
-        blocked_headers  = "<th>Region</th><th>CSE</th><th>Since</th><th>Blockers</th>" if is_blocked else f"<th>Status</th><th>Region</th><th>CSE</th><th>{last_col_header}</th>{notes_header}"
+        blocked_headers  = "<th>Region</th><th>CSE</th><th>Since</th><th>Notes / Blockers</th>" if is_blocked else f"<th>Status</th><th>Region</th><th>CSE</th><th>{last_col_header}</th><th>Notes</th>"
         group_id = "group-" + group_name.lower().replace(" / ", "-").replace(" ", "-").replace("/", "-")
         html += f"""
         <div class="action-group" id="{group_id}">
@@ -674,6 +673,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .tbl-notes {{ max-width:340px; }}
 .notes-text {{ font-size:12px; color:var(--text); line-height:1.45; display:block; }}
 .notes-none {{ font-size:11px; color:#C5BFB5; font-style:italic; font-family:'Geist Mono',monospace; }}
+.no-owner-inline {{ font-family:'Geist Mono',monospace; font-size:10px; color:#DC2626; font-weight:700; letter-spacing:0.05em; }}
 .blocker-tags {{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }}
 .blocker-tag {{ font-family:'Geist Mono',monospace; font-size:9.5px; padding:2px 6px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; white-space:nowrap; }}
 .status-chip {{ font-family:'Geist Mono',monospace; font-size:10px; font-weight:500; padding:2px 7px; border-radius:4px; border:1px solid; white-space:nowrap; }}
