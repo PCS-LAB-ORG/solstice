@@ -607,7 +607,7 @@ def _status_chart(accounts: dict) -> str:
         "Customer Engaged":        "group-active-migration",
         "Kick Off Scheduled":      "group-active-migration",
         "Customer Acceptance":     "group-active-migration",
-        "PS":                      "group-active-migration",
+        "PS":                      "section-ps",
         "Upgrade Email Sent":      "group-active-migration",
         "Dev testing":             "group-active-migration",
         "Blank":                   "group-no-status",
