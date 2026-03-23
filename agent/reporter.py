@@ -562,7 +562,6 @@ def _render(tasks: list[dict], accounts: dict, generated_at: str) -> str:
           <div class="alert-body">{no_status_items}</div>
         </div>
       </div>
-      <button class="alert-close" onclick="document.getElementById('alert-banner').style.display='none'">✕</button>
     </div>""" if no_status_accounts else ""
     total_accounts    = len(accounts)
 
