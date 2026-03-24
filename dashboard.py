@@ -23,42 +23,48 @@ from agent.db import get_db, init_db
 
 app = FastAPI(title="Solstice Control Center")
 
-_DB_POPULATED = False
 
-def _ensure_db():
-    """Self-heal: check if DB has data, re-populate from CSVs if empty."""
-    global _DB_POPULATED
-    if _DB_POPULATED:
-        return
+def _populate_db():
+    """Populate DB from CSVs. Always runs — checks blocked_data count first."""
     try:
         with get_db() as conn:
             n = conn.execute("SELECT COUNT(*) FROM blocked_data").fetchone()[0]
         if n > 0:
-            _DB_POPULATED = True
-            return
-        # DB is empty — re-populate
-        import json as _j, logging as _log
-        _log.warning("DB empty — auto-repopulating from CSVs...")
-        from agent.blocked_parser import load_and_merge as _mb
-        from agent.ps_parser import load_and_merge as _mp
-        from agent.db import migrate_from_state as _mig
-        init_db()
-        if (DATA_DIR/"blocked_accounts.csv").exists():
-            _mb(DATA_DIR/"blocked_accounts.csv", STATE_FILE)
-        if (DATA_DIR/"ps_tracker.csv").exists():
-            _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
-        _mig(STATE_FILE)
-        _state = _j.loads(STATE_FILE.read_text())
-        with get_db() as conn:
-            for aid, acc in _state.get("accounts",{}).items():
-                conn.execute("UPDATE accounts SET live_fire=?, live_fire_dc=? WHERE account_id=?",
-                    (1 if acc.get("live_fire") else 0, acc.get("live_fire_dc","") or "", aid))
-        with get_db() as conn:
-            n2 = conn.execute("SELECT COUNT(*) FROM blocked_data").fetchone()[0]
-        _log.warning("Self-heal complete: %d milestone records populated", n2)
-        _DB_POPULATED = True
-    except Exception as e:
-        import logging; logging.error("Self-heal failed: %s", e)
+            return  # Already populated
+    except: pass
+
+    import json as _j, logging as _log
+    _log.warning("DB empty — populating from CSVs...")
+    from agent.blocked_parser import load_and_merge as _mb
+    from agent.ps_parser import load_and_merge as _mp
+    from agent.db import migrate_from_state as _mig
+    init_db()
+    if (DATA_DIR/"blocked_accounts.csv").exists():
+        _mb(DATA_DIR/"blocked_accounts.csv", STATE_FILE)
+    if (DATA_DIR/"ps_tracker.csv").exists():
+        _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
+    _mig(STATE_FILE)
+    _state = _j.loads(STATE_FILE.read_text())
+    with get_db() as conn:
+        for aid, acc in _state.get("accounts",{}).items():
+            conn.execute("UPDATE accounts SET live_fire=?, live_fire_dc=? WHERE account_id=?",
+                (1 if acc.get("live_fire") else 0, acc.get("live_fire_dc","") or "", aid))
+    with get_db() as conn:
+        n2 = conn.execute("SELECT COUNT(*) FROM blocked_data").fetchone()[0]
+    _log.warning("DB populated: %d milestone records", n2)
+
+
+def _ensure_db():
+    """Call before every API response."""
+    _populate_db()
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Populate DB immediately when FastAPI starts."""
+    import asyncio
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, _populate_db)
 
 
 def _load_stats() -> dict:
