@@ -123,6 +123,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 .dq-title{font-weight:700;font-size:12.5px;color:#FECACA;margin-bottom:.5rem}
 .dq-item{display:inline-block;background:rgba(220,38,38,.15);border:1px solid rgba(248,113,113,.25);border-radius:4px;padding:2px 8px;margin:2px;font-size:11px;color:#FEF2F2}
 
+/* Status bar */
+.status-bar{background:#010409;border-bottom:1px solid #21262D;padding:.35rem 1.25rem;display:flex;align-items:center;flex-wrap:wrap;gap:0;font-family:'Geist Mono',monospace;font-size:10.5px;position:sticky;top:42px;z-index:48;overflow-x:auto;white-space:nowrap}
+.sb-item{display:inline-flex;align-items:center;gap:.4rem;padding:0 .6rem}
+.sb-label{color:#484F58;font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+.sb-val{font-weight:700}.sb-val.teal{color:#14B8A6}.sb-val.green{color:#22C55E}.sb-val.red{color:#EF4444}.sb-val.amber{color:#F59E0B}.sb-val.blue{color:#3B82F6}.sb-val.orange{color:#F97316}
+.sb-sep{color:#21262D;font-size:13px;padding:0 .2rem}
+.sb-dot-live{display:inline-block;width:5px;height:5px;border-radius:50%;background:#22C55E;animation:pulse 2s infinite;margin-right:4px}
+.sb-right{margin-left:auto}
+/* Debug console */
+.debug-console{background:#010409;border-bottom:2px solid var(--teal);font-family:'Geist Mono',monospace;font-size:10.5px;max-height:260px;overflow-y:auto}
+.debug-hdr{padding:.4rem 1.25rem;border-bottom:1px solid #21262D;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#484F58;display:flex;justify-content:space-between}
+.dlog{display:grid;grid-template-columns:70px 140px 75px 1fr;gap:.5rem;padding:.2rem 1.25rem;line-height:1.6}
+.dlog-ts{color:#21262D}.dlog-step{font-weight:700}.dlog-ok{color:#22C55E}.dlog-err{color:#EF4444}.dlog-run{color:#14B8A6}.dlog-info{color:#3B82F6}.dlog-detail{color:#8B949E}
+
 @media(max-width:900px){:root{--nav:0}.sidenav{display:none}.content{padding:.75rem}}
 </style>
 </head>
@@ -161,6 +175,33 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
   <div class="topbar">
     <div class="topbar-title">EMEA <em>Migration</em> Command Center</div>
     <div class="topbar-meta"><div class="live-dot"></div><span id="last-run-top">Loading...</span></div>
+  </div>
+
+  <!-- STATUS BAR — always visible, moneymaker style -->
+  <div class="status-bar" id="status-bar">
+    <span class="sb-item"><span class="sb-label">ACCOUNTS</span><span class="sb-val teal" id="sb-total">—</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item"><span class="sb-label">IN PROGRESS</span><span class="sb-val green" id="sb-inprog">—</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item"><span class="sb-label">COMPLETED</span><span class="sb-val green" id="sb-done">—</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item"><span class="sb-label">CORE REP BLOCKING</span><span class="sb-val red" id="sb-corer">—</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item"><span class="sb-label">STALLS</span><span class="sb-val amber" id="sb-stalls">—</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item"><span class="sb-label">NO STATUS</span><span class="sb-val amber" id="sb-nostatus">—</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item"><span class="sb-label">DB</span><span class="sb-val blue" id="sb-db">—</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item"><span class="sb-label">Ollama</span><span class="sb-dot-live"></span><span class="sb-val teal">qwen2.5:14b</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item sb-right"><span class="sb-label">LIVE FIRE</span><span class="sb-val orange" id="sb-lf">—</span></span>
+  </div>
+
+  <!-- PIPELINE DEBUG LOG — shows on refresh -->
+  <div class="debug-console" id="debug-console" style="display:none">
+    <div class="debug-hdr"><span>PIPELINE LOG</span><button onclick="document.getElementById('debug-console').style.display='none'" style="background:none;border:none;color:#484F58;cursor:pointer;font-size:11px;float:right">✕</button></div>
+    <div id="debug-log"></div>
   </div>
 
   <div class="content">
@@ -315,7 +356,8 @@ var COLORS=['#14B8A6','#EF4444','#F59E0B','#3B82F6','#A855F7','#22C55E','#EC4899
 var SIGNAL_EMOJI={'green':'✅','at_risk':'👎','blocked':'🛑','unknown':'·'};
 var MS_COLORS={'green':'#22C55E','at_risk':'#F59E0B','blocked':'#EF4444','unknown':'#6B7280'};
 
-function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v==null?'—':v;}
+function setSB(id,v){var e=document.getElementById(id);if(e)e.textContent=v==null?'—':v;}
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function lfBadge(lf,dc){return lf?'<span class="lf-badge">🔥 DC'+(dc?' <span style="opacity:.7;font-size:8px">'+escHtml(dc)+'</span>':'')+'</span>':'';}
 function msFmt(complete,planned){return complete?'<span class="chip done">✓</span>':(planned?'<span style="font-family:\'Geist Mono\',monospace;font-size:10px;color:#8B949E">'+escHtml(planned)+'</span>':'<span style="color:#484F58">—</span>');}
@@ -328,6 +370,13 @@ function applyStats(s){
   setText('nb-total',s.total||'—');setText('nb-stalls',s.stalls||'—');
   setText('nb-completed',s.completed||'—');
   setText('last-run-top','Updated: '+(s.last_run||'—'));
+  // Status bar
+  setSB('sb-total',s.total);setSB('sb-done',s.completed);setSB('sb-inprog',s.ps_active);
+  setSB('sb-corer',s.core_rep_blocking);setSB('sb-stalls',s.stalls);
+  setSB('sb-nostatus',s.no_status);
+  fetch('/api/in-progress').then(r=>r.json()).then(function(d){setSB('sb-inprog',d.length);setSB('sb-lf',d.filter(function(r){return r.live_fire;}).length+' 🔥');});
+  // DB row count
+  fetch('/api/stats').then(function(){setSB('sb-db',(s.total||0)+' accts');});
   setText('last-run-nav',s.last_run||'—');
   setText('donut-n',s.total||'—');
 
@@ -484,10 +533,20 @@ function applyDQ(issues){
 function runPipeline(){
   var btn=document.getElementById('run-btn');
   btn.textContent='⟳ Running...';btn.disabled=true;
-  fetch('/api/run-pipeline').then(r=>r.json()).then(function(d){
-    btn.textContent=d.status==='ok'?'✓ Done':'✗ Error';
-    setTimeout(function(){btn.textContent='⟳ Refresh All Data';btn.disabled=false;loadAll();},2000);
-  });
+  var log=document.getElementById('debug-log');
+  var cons=document.getElementById('debug-console');
+  log.innerHTML='';cons.style.display='block';
+  var es=new EventSource('/api/run-full');
+  es.onmessage=function(e){
+    var d=JSON.parse(e.data);
+    if(d.done){es.close();btn.textContent='✓ Done';setTimeout(function(){btn.textContent='⟳ Refresh All Data';btn.disabled=false;loadAll();},1500);return;}
+    var row=document.createElement('div');row.className='dlog';
+    var colMap={'teal':'dlog-run','green':'dlog-ok','red':'dlog-err','blue':'dlog-info','muted':'dlog-ts'};
+    var c=colMap[d.color]||'dlog-run';
+    row.innerHTML='<span class="dlog-ts">'+escHtml(d.ts)+'</span><span class="'+c+' dlog-step">'+escHtml(d.step)+'</span><span class="'+c+' dlog-status">'+escHtml(d.status)+'</span><span class="dlog-detail">'+escHtml(d.detail)+'</span>';
+    log.appendChild(row);log.scrollTop=log.scrollHeight;
+  };
+  es.onerror=function(){es.close();btn.textContent='✗ Error';btn.disabled=false;};
 }
 
 function applyM9(rows){
