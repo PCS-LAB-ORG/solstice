@@ -41,14 +41,12 @@ def _load_stats() -> dict:
                 "SELECT COUNT(*) FROM ps_data WHERE ps_status='In Progress'").fetchone()[0]
             no_cse     = conn.execute(
                 "SELECT COUNT(*) FROM accounts WHERE (active_cse IS NULL OR active_cse='') AND customer_name!=''").fetchone()[0]
-            stale      = conn.execute("""SELECT COUNT(*) FROM accounts a
-                JOIN blocked_data b ON a.account_id=b.account_id
-                WHERE a.status IN ('Ready To Engage','Account team contacted') AND b.signal='green'""").fetchone()[0]
+            dc_driving = conn.execute("SELECT COUNT(*) FROM accounts WHERE live_fire=1").fetchone()[0]
             last_run   = STATE_FILE.stat().st_mtime if STATE_FILE.exists() else 0
             last_str   = datetime.fromtimestamp(last_run,timezone.utc).strftime("%d %b %Y · %H:%M UTC") if last_run else "—"
             return dict(total=total,completed=completed,no_status=no_status,
                         stalls=stalls,core_rep_blocking=core_rep,ps_active=ps_active,
-                        no_cse=no_cse,stale_tracker=stale,by_status=by_status,last_run=last_str)
+                        no_cse=no_cse,dc_driving=dc_driving,by_status=by_status,last_run=last_str)
     except Exception as e:
         return {"error": str(e)}
 
@@ -159,9 +157,11 @@ async def api_run_full(request: Request):
 
         # Step 2: Check CSV files
         data_dir = Path(__file__).parent / "data"
-        csvs = {"EMEA Accounts": data_dir/"EMEA Accounts CC Migrations - Accounts.csv",
-                "Blocked Accounts": data_dir/"blocked_accounts.csv",
-                "PS Tracker": data_dir/"ps_tracker.csv"}
+        # Local filler CSVs — DC CSE Tracker is master, arrives via Google Drive watcher
+        csvs = {"Blocked Accounts (filler)": data_dir/"blocked_accounts.csv",
+                "PS Tracker (filler)":       data_dir/"ps_tracker.csv",
+                "Drive Config":              data_dir/"drive_config.json",
+                "State DB":                  data_dir/"solstice.db"}
         yield event("CSV Files", "CHECK", "Verifying input files")
         for name, path in csvs.items():
             if path.exists():

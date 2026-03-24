@@ -194,15 +194,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
     <span class="sb-item"><span class="sb-label">DB</span><span class="sb-val blue" id="sb-db">—</span></span>
     <span class="sb-sep">|</span>
     <span class="sb-item"><span class="sb-label">Ollama</span><span class="sb-dot-live"></span><span class="sb-val teal">qwen2.5:14b</span></span>
-    <span class="sb-sep">|</span>
-    <span class="sb-item sb-right"><span class="sb-label">LIVE FIRE</span><span class="sb-val orange" id="sb-lf">—</span></span>
   </div>
 
-  <!-- PIPELINE DEBUG LOG — shows on refresh -->
-  <div class="debug-console" id="debug-console" style="display:none">
-    <div class="debug-hdr"><span>PIPELINE LOG</span><button onclick="document.getElementById('debug-console').style.display='none'" style="background:none;border:none;color:#484F58;cursor:pointer;font-size:11px;float:right">✕</button></div>
-    <div id="debug-log"></div>
-  </div>
 
   <div class="content">
 
@@ -374,9 +367,8 @@ function applyStats(s){
   setSB('sb-total',s.total);setSB('sb-done',s.completed);setSB('sb-inprog',s.ps_active);
   setSB('sb-corer',s.core_rep_blocking);setSB('sb-stalls',s.stalls);
   setSB('sb-nostatus',s.no_status);
-  fetch('/api/in-progress').then(r=>r.json()).then(function(d){setSB('sb-inprog',d.length);setSB('sb-lf',d.filter(function(r){return r.live_fire;}).length+' 🔥');});
-  // DB row count
-  fetch('/api/stats').then(function(){setSB('sb-db',(s.total||0)+' accts');});
+  fetch('/api/in-progress').then(r=>r.json()).then(function(d){setSB('sb-inprog',d.length);});
+  setSB('sb-db',(s.total||0)+' accts');
   setText('last-run-nav',s.last_run||'—');
   setText('donut-n',s.total||'—');
 
@@ -533,20 +525,10 @@ function applyDQ(issues){
 function runPipeline(){
   var btn=document.getElementById('run-btn');
   btn.textContent='⟳ Running...';btn.disabled=true;
-  var log=document.getElementById('debug-log');
-  var cons=document.getElementById('debug-console');
-  log.innerHTML='';cons.style.display='block';
-  var es=new EventSource('/api/run-full');
-  es.onmessage=function(e){
-    var d=JSON.parse(e.data);
-    if(d.done){es.close();btn.textContent='✓ Done';setTimeout(function(){btn.textContent='⟳ Refresh All Data';btn.disabled=false;loadAll();},1500);return;}
-    var row=document.createElement('div');row.className='dlog';
-    var colMap={'teal':'dlog-run','green':'dlog-ok','red':'dlog-err','blue':'dlog-info','muted':'dlog-ts'};
-    var c=colMap[d.color]||'dlog-run';
-    row.innerHTML='<span class="dlog-ts">'+escHtml(d.ts)+'</span><span class="'+c+' dlog-step">'+escHtml(d.step)+'</span><span class="'+c+' dlog-status">'+escHtml(d.status)+'</span><span class="dlog-detail">'+escHtml(d.detail)+'</span>';
-    log.appendChild(row);log.scrollTop=log.scrollHeight;
-  };
-  es.onerror=function(){es.close();btn.textContent='✗ Error';btn.disabled=false;};
+  fetch('/api/run-pipeline').then(r=>r.json()).then(function(d){
+    btn.textContent=d.status==='ok'?'✓ Done':'✗ Error';
+    setTimeout(function(){btn.textContent='⟳ Refresh All Data';btn.disabled=false;loadAll();},1500);
+  }).catch(function(){btn.textContent='✗ Error';btn.disabled=false;});
 }
 
 function applyM9(rows){

@@ -46,7 +46,7 @@ DEFAULT_CONFIG = {
             "gsheet":   "EMEA Accounts CC Migrations.gsheet",
             "file_id":  "1tEVih8qBVv2yJhD8uIJVZb0mxDNiEGTTMS3hFYy5yN8",
             "priority": 2,
-            "role":     "primary",
+            "role":     "filler",  # DC CSE Tracker is master — this is supplementary
         },
         {
             "name":     "EMEA Cortex Cloud Upgrade Tracker",
