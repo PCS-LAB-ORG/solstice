@@ -774,15 +774,15 @@ def _weekly_view(accounts: dict) -> str:
         if m8d:
             k = _week_key(m8d)
             weeks.setdefault(k, {"date": m8d, "m8": [], "m9": [], "m9_done": []})
-            weeks[k]["m8"].append({"name": name, "cse": cse, "done": m8_done, "status": status, "lf": lf_icon})
+            weeks[k]["m8"].append({"name": name, "cse": cse, "done": m8_done, "status": status, "lf": lf_icon, "date": m8d.strftime("%d %b")})
 
         if m9d:
             k = _week_key(m9d)
             weeks.setdefault(k, {"date": m9d, "m8": [], "m9": [], "m9_done": []})
             if m9_done:
-                weeks[k]["m9_done"].append({"name": name, "cse": cse, "status": status, "lf": lf_icon})
+                weeks[k]["m9_done"].append({"name": name, "cse": cse, "status": status, "lf": lf_icon, "date": m9d.strftime("%d %b")})
             else:
-                weeks[k]["m9"].append({"name": name, "cse": cse, "status": status, "lf": lf_icon})
+                weeks[k]["m9"].append({"name": name, "cse": cse, "status": status, "lf": lf_icon, "date": m9d.strftime("%d %b")})
 
     if not weeks:
         return '<div class="empty-sm">No milestone date data available.</div>', 0
@@ -809,18 +809,18 @@ def _weekly_view(accounts: dict) -> str:
 
         # M9 done rows (green)
         done_rows = "".join(
-            f'<div class="week-row week-done">✓ {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span></div>'
+            f'<div class="week-row week-done"><span class="week-date">{r.get("date","")}</span>✅ COMPLETE {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span></div>'
             for r in sorted(m9_done, key=lambda x: x["name"])
         )
         # M9 planned rows
         m9_rows = "".join(
-            f'<div class="week-row week-m9">M9 {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
-            for r in sorted(m9_list, key=lambda x: x["name"])
+            f'<div class="week-row week-m9"><span class="week-date">{r.get("date","")}</span>M9 {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span></div>'
+            for r in sorted(m9_list, key=lambda x: x.get("date",""))
         )
         # M8 planned rows
         m8_rows = "".join(
-            f'<div class="week-row week-m8">M8 {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span><span class="week-status">{r["status"]}</span></div>'
-            for r in sorted(m8_list, key=lambda x: x["name"])
+            f'<div class="week-row week-m8"><span class="week-date">{r.get("date","")}</span>M8 {r.get("lf","")}{r["name"]}<span class="week-cse">{r["cse"]}</span></div>'
+            for r in sorted(m8_list, key=lambda x: x.get("date",""))
         )
 
         total_m9 = len(m9_list) + len(m9_done)
@@ -1263,6 +1263,7 @@ body {{ background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-
 .week-badge-m8 {{ font-family:'Geist Mono',monospace; font-size:9px; padding:1px 5px; border-radius:3px; background:#FEF3C7; color:#92400E; }}
 .week-body {{ padding:0.5rem 0.6rem; display:flex; flex-direction:column; gap:3px; max-height:320px; overflow-y:auto; }}
 .week-row {{ font-size:11px; line-height:1.35; padding:3px 5px; border-radius:4px; display:flex; flex-direction:column; }}
+.week-date {{ font-family:'Geist Mono',monospace; font-size:8.5px; font-weight:700; opacity:.85; margin-bottom:1px; }}
 .week-done {{ background:#F0FDF4; color:#15803D; font-weight:600; }}
 .week-m9 {{ background:#EFF6FF; color:#1D4ED8; }}
 .week-m8 {{ background:#FFFBEB; color:#92400E; }}
