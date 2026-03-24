@@ -142,6 +142,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
     <a class="nav-item" href="#milestones"><span class="nav-icon">◎</span><span class="nav-label">Milestones</span></a>
     <a class="nav-item" href="#ps"><span class="nav-icon">◈</span><span class="nav-label">PS Engagement</span></a>
     <a class="nav-item" href="#cse"><span class="nav-icon">◎</span><span class="nav-label">CSE Workload</span></a>
+    <a class="nav-item" href="#in-progress"><span class="nav-icon">▶</span><span class="nav-label">In Progress</span><span class="nav-badge teal" id="nb-inprog">—</span></a>
+    <a class="nav-item" href="#m9-schedule"><span class="nav-icon">◷</span><span class="nav-label">M9 Schedule</span><span class="nav-badge teal" id="nb-m9">—</span></a>
     <a class="nav-item" href="#completed"><span class="nav-icon">✓</span><span class="nav-label">Completed</span><span class="nav-badge teal" id="nb-completed">—</span></a>
   </div>
   <div>
@@ -178,6 +180,36 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
     <div id="dq" class="dq-banner" style="display:none">
       <div class="dq-title">⚠ Data Quality Issues</div>
       <div id="dq-body"></div>
+    </div>
+
+    <!-- Upgrades In Progress — TOP -->
+    <div id="in-progress" class="sec">
+      <div class="sec-hdr" onclick="toggle('in-progress')">
+        <span class="sec-title">▶ Upgrades In Progress</span>
+        <span class="sec-count" id="inprog-count">—</span>
+        <span class="sec-toggle">▾</span>
+      </div>
+      <div class="sec-body">
+        <table class="data-tbl">
+          <thead><tr><th>Customer</th><th>CSE</th><th>M8 Started</th><th>M9 Target</th><th>Signal</th><th>Notes</th></tr></thead>
+          <tbody id="inprog-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- M9 Schedule — TOP -->
+    <div id="m9-schedule" class="sec">
+      <div class="sec-hdr" onclick="toggle('m9-schedule')">
+        <span class="sec-title">◷ M9 Completion Schedule</span>
+        <span class="sec-count" id="m9-count">—</span>
+        <span class="sec-toggle">▾</span>
+      </div>
+      <div class="sec-body">
+        <table class="data-tbl">
+          <thead><tr><th>Date</th><th>Customer</th><th>CSE</th><th>Status</th><th>M8</th></tr></thead>
+          <tbody id="m9-body"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Weekly -->
@@ -458,9 +490,77 @@ function runPipeline(){
   });
 }
 
+function applyM9(rows){
+  var nb=document.getElementById('nb-m9');if(nb)nb.textContent=rows.length;
+  var cnt=document.getElementById('m9-count');if(cnt)cnt.textContent=rows.length;
+  var tb=document.getElementById('m9-body');if(!tb)return;
+  tb.innerHTML='';
+  var lastMonth='';
+  rows.forEach(function(r){
+    var parts=r.m9_date.split(' ');
+    var month=parts.slice(1).join(' ');
+    if(month!==lastMonth){
+      var sep=tb.insertRow();
+      sep.style.cssText='background:rgba(255,255,255,.04)';
+      var c=sep.insertCell();c.colSpan=5;
+      c.style.cssText='font-family:Geist Mono,monospace;font-size:9px;color:#5EEAD4;letter-spacing:.1em;text-transform:uppercase;padding:.35rem 1rem';
+      c.textContent=month;
+      lastMonth=month;
+    }
+    var tr=tb.insertRow();
+    // Date
+    var td0=tr.insertCell();td0.style.cssText='font-family:Geist Mono,monospace;font-size:11px;font-weight:700;color:#E6EDF3;white-space:nowrap';td0.textContent=r.m9_date;
+    // Customer
+    var td1=tr.insertCell();
+    var b=document.createElement('b');
+    if(r.live_fire){var lf=document.createElement('span');lf.className='lf-badge';lf.textContent='🔥 DC '+(r.live_fire_dc||'');b.appendChild(lf);b.appendChild(document.createTextNode(' '));}
+    b.appendChild(document.createTextNode(r.name));
+    td1.appendChild(b);
+    // CSE
+    var td2=tr.insertCell();td2.className='muted';td2.textContent=r.cse;
+    // Status
+    var td3=tr.insertCell();td3.className='muted';td3.style.fontSize='11px';td3.textContent=r.status;
+    // M8
+    var td4=tr.insertCell();
+    if(r.m8_started){var s=document.createElement('span');s.className='chip done';s.style.fontSize='8px';s.textContent='✓ Started';td4.appendChild(s);}
+    else{td4.style.color='#484F58';td4.style.fontSize='10px';td4.textContent='—';}
+  });
+}
+
+function applyInProgress(rows){
+  var nb=document.getElementById('nb-inprog');if(nb)nb.textContent=rows.length;
+  var cnt=document.getElementById('inprog-count');if(cnt)cnt.textContent=rows.length;
+  var tb=document.getElementById('inprog-body');if(!tb)return;
+  tb.innerHTML='';
+  var SIG={'green':'✅','at_risk':'👎','blocked':'🛑','unknown':'·'};
+  var SIGC={'green':'#22C55E','at_risk':'#F59E0B','blocked':'#EF4444','unknown':'#6B7280'};
+  rows.forEach(function(r){
+    var tr=tb.insertRow();
+    var td0=tr.insertCell();
+    var b=document.createElement('b');
+    if(r.live_fire){var lf=document.createElement('span');lf.className='lf-badge';lf.textContent='🔥 DC '+(r.live_fire_dc||'');b.appendChild(lf);b.appendChild(document.createTextNode(' '));}
+    b.appendChild(document.createTextNode(r.customer_name));
+    td0.appendChild(b);
+    var td1=tr.insertCell();td1.className='muted';td1.textContent=r.active_cse||'—';
+    var td2=tr.insertCell();td2.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#5EEAD4';td2.textContent=r.m8_planned||'—';
+    var td3=tr.insertCell();td3.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#93C5FD';td3.textContent=r.m9_planned||'—';
+    var sig=SIG[r.signal]||'·';var sigc=SIGC[r.signal]||'#6B7280';
+    var td4=tr.insertCell();td4.style.cssText='font-size:14px;color:'+sigc;td4.textContent=sig;
+    var td5=tr.insertCell();td5.style.fontSize='11px';
+    var notes=(r.upgrade_notes||'').trim();
+    var health=(r.health_notes||'').trim();
+    td5.style.color='#8B949E';
+    if(notes){var p1=document.createElement('div');p1.style.cssText='font-size:11px;line-height:1.4;margin-bottom:3px';p1.textContent=notes;td5.appendChild(p1);}
+    if(health){var p2=document.createElement('div');p2.style.cssText='font-size:10.5px;color:#484F58;line-height:1.4';p2.textContent=health;td5.appendChild(p2);}
+    if(!notes&&!health){td5.textContent='—';}
+  });
+}
+
 function loadAll(){
   fetch('/api/stats').then(r=>r.json()).then(applyStats).catch(console.error);
   fetch('/api/weekly').then(r=>r.json()).then(applyWeekly).catch(console.error);
+  fetch('/api/in-progress').then(r=>r.json()).then(applyInProgress).catch(console.error);
+  fetch('/api/m9-schedule').then(r=>r.json()).then(applyM9).catch(console.error);
   fetch('/api/cse').then(r=>r.json()).then(applyCse).catch(console.error);
   fetch('/api/open-actions').then(r=>r.json()).then(applyOpenActions).catch(console.error);
   fetch('/api/milestones').then(r=>r.json()).then(applyMilestones).catch(console.error);

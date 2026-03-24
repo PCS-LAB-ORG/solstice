@@ -129,6 +129,169 @@ print('done')
     except Exception as e:
         return {"status":"error","message":str(e)}
 
+
+@app.get("/api/run-full")
+async def api_run_full(request: Request):
+    """Stream the full pipeline cycle with debug output."""
+    async def stream():
+        import os, json as _j
+        from datetime import datetime, timezone
+
+        def event(step, status, detail="", color="teal"):
+            ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+            return f"data: {_j.dumps({'ts':ts,'step':step,'status':status,'detail':detail,'color':color})}\n\n"
+
+        yield event("Pipeline", "STARTING", "Full cycle initiated")
+        await asyncio.sleep(0.1)
+
+        # Step 1: Check Drive files
+        drive_root = Path.home() / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com/My Drive/EMEA CC "
+        gsheet_files = list(drive_root.glob("*.gsheet")) if drive_root.exists() else []
+        yield event("Google Drive", "CHECK", f"{len(gsheet_files)} .gsheet files found", "blue")
+        for gf in gsheet_files:
+            try:
+                mtime = os.stat(gf).st_mtime
+                from datetime import datetime as dt
+                mt = dt.fromtimestamp(mtime).strftime("%d %b %H:%M")
+                yield event("  →", "FILE", f"{gf.name[:40]} · {mt}", "muted")
+            except: pass
+        await asyncio.sleep(0.1)
+
+        # Step 2: Check CSV files
+        data_dir = Path(__file__).parent / "data"
+        csvs = {"EMEA Accounts": data_dir/"EMEA Accounts CC Migrations - Accounts.csv",
+                "Blocked Accounts": data_dir/"blocked_accounts.csv",
+                "PS Tracker": data_dir/"ps_tracker.csv"}
+        yield event("CSV Files", "CHECK", "Verifying input files")
+        for name, path in csvs.items():
+            if path.exists():
+                import csv as _csv
+                rows = sum(1 for _ in open(path, encoding='utf-8-sig')) - 1
+                size = path.stat().st_size // 1024
+                yield event("  →", "OK", f"{name}: {rows} rows · {size}KB", "green")
+            else:
+                yield event("  →", "MISSING", f"{name}: not found", "red")
+        await asyncio.sleep(0.1)
+
+        # Step 3: Merge blocked accounts
+        yield event("Blocked Accounts", "LOADING", "Parsing + merging into state.json")
+        try:
+            from agent.blocked_parser import load_and_merge as mb
+            b = mb(data_dir/"blocked_accounts.csv", data_dir/"state.json")
+            yield event("  →", "OK", f"{b['matched']} matched · {b['cs_team']} CS team · {b['core_rep_blocking']} core-rep-blocking", "green")
+        except Exception as e:
+            yield event("  →", "ERROR", str(e)[:80], "red")
+        await asyncio.sleep(0.1)
+
+        # Step 4: Merge PS tracker
+        yield event("PS Tracker", "LOADING", "Fuzzy name matching (threshold 0.85)")
+        try:
+            from agent.ps_parser import load_and_merge as mp
+            p = mp(data_dir/"ps_tracker.csv", data_dir/"state.json")
+            yield event("  →", "OK", f"{p['matched']}/{p['total']} matched · {p['unmatched']} not in EMEA tracker", "green")
+        except Exception as e:
+            yield event("  →", "ERROR", str(e)[:80], "red")
+        await asyncio.sleep(0.1)
+
+        # Step 5: AI Enricher
+        yield event("Ollama Enricher", "RUNNING", "Extracting blocker/owner/accountable from comments (qwen2.5:14b)")
+        try:
+            from agent.enricher import enrich_accounts
+            e = enrich_accounts(data_dir/"state.json")
+            yield event("  →", "OK", f"{e['enriched']} enriched · {e['skipped']} cached (comments unchanged)", "green")
+        except Exception as e:
+            yield event("  →", "ERROR", str(e)[:80], "red")
+        await asyncio.sleep(0.1)
+
+        # Step 6: DB Sync
+        yield event("SQLite DB", "SYNCING", "Writing all accounts to solstice.db")
+        try:
+            from agent.db import sync_all, get_db
+            s = sync_all(data_dir/"state.json")
+            with get_db() as conn:
+                total_rows = conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
+                history_rows = conn.execute("SELECT COUNT(*) FROM status_history").fetchone()[0]
+            yield event("  →", "OK", f"{s['synced']} accounts synced · {s['status_changes']} status changes · {history_rows} history rows · {s['errors']} errors", "green")
+        except Exception as e:
+            yield event("  →", "ERROR", str(e)[:80], "red")
+        await asyncio.sleep(0.1)
+
+        # Step 7: Validate data quality
+        yield event("Data Quality", "CHECK", "Cross-checking all 3 CSVs")
+        try:
+            import json as _json2
+            state = _json2.loads((data_dir/"state.json").read_text())
+            accs = list(state.get("accounts",{}).values())
+            no_st  = sum(1 for a in accs if not (a.get("status") or "").strip())
+            no_cse = sum(1 for a in accs if not (a.get("active_cse") or "").strip())
+            live_fire = sum(1 for a in accs if a.get("live_fire"))
+            yield event("  →", "OK", f"{len(accs)} accounts total · {no_st} missing status · {no_cse} no CSE · {live_fire} live fire", "green")
+        except Exception as e:
+            yield event("  →", "ERROR", str(e)[:80], "red")
+        await asyncio.sleep(0.1)
+
+        yield event("Pipeline", "COMPLETE", "All steps done — refreshing dashboard", "teal")
+        yield f"data: {_j.dumps({'done': True})}\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream")
+
+def _load_m9_schedule() -> list:
+    """M9 completion schedule — M3 complete, M9 planned, not yet complete, sorted by date."""
+    try:
+        from datetime import datetime, date
+        today = date.today()
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.status, a.live_fire, a.live_fire_dc,
+                       b.m9_planned, b.m8_started, b.m9_complete
+                FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
+                WHERE b.m3_complete=1 AND b.m9_planned!='' AND b.m9_complete=0
+                ORDER BY b.m9_planned, a.customer_name
+            """).fetchall()
+        result = []
+        for r in rows:
+            try:
+                d = None
+                for fmt in ("%m/%d/%Y", "%m/%d/%y"):
+                    try: d = datetime.strptime(r["m9_planned"].strip(), fmt).date(); break
+                    except: pass
+                if d and d >= today:
+                    result.append({
+                        "name": r["customer_name"], "cse": r["active_cse"] or "—",
+                        "status": r["status"] or "—", "m9_planned": r["m9_planned"],
+                        "m9_date_iso": d.isoformat(), "m9_date": d.strftime("%d %b %Y"),
+                        "m8_started": bool(r["m8_started"]),
+                        "live_fire": bool(r["live_fire"]), "live_fire_dc": r["live_fire_dc"] or "",
+                    })
+            except: pass
+        return result
+    except: return []
+
+
+@app.get("/api/m9-schedule")
+def api_m9(): return _load_m9_schedule()
+
+
+def _load_in_progress() -> list:
+    """Upgrades actively in progress — M8 started, M9 not complete."""
+    try:
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.status, a.live_fire, a.live_fire_dc,
+                       b.m8_planned, b.m9_planned, b.upgrade_notes, b.health_notes,
+                       b.signal, b.subtype, b.upgrade_notes, b.health_notes
+                FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
+                WHERE b.m8_started=1 AND b.m9_complete=0
+                ORDER BY b.m9_planned, a.customer_name
+            """).fetchall()
+        return [dict(r) for r in rows]
+    except: return []
+
+
+@app.get("/api/in-progress")
+def api_in_progress(): return _load_in_progress()
+
+
 def _load_open_actions() -> list:
     """Open Actions — accounts needing follow-up grouped by category."""
     try:
