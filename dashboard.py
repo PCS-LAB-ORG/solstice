@@ -63,6 +63,7 @@ def _load_weekly() -> list:
                 b.m8_planned,b.m9_planned,b.m8_started,b.m9_complete
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE b.m3_complete=1
+                AND (COALESCE(b.m1_complete,0)=1 OR b.m1_planned='')
                 AND (b.m8_planned!='' OR b.m9_planned!='')"""):
                 for field,label,done in [
                     (row["m8_planned"],"M8",bool(row["m8_started"])),
