@@ -201,6 +201,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
     <span class="sb-item"><span class="sb-label">DB</span><span class="sb-val blue" id="sb-db">—</span></span>
     <span class="sb-sep">|</span>
     <span class="sb-item"><span class="sb-label">Ollama</span><span class="sb-dot-live"></span><span class="sb-val teal">qwen2.5:14b</span></span>
+    <span class="sb-sep">|</span>
+    <span class="sb-item" title="Paste new blocked accounts tab URL here when tab changes (format: EMEA_MONTH DAY)">
+      <span class="sb-label">BLOCKED TAB</span>
+      <input id="tab-url-input" type="text" placeholder="paste new tab URL..."
+        style="background:#0D1117;border:1px solid #21262D;color:#5EEAD4;font-family:Geist Mono,monospace;font-size:9px;padding:2px 5px;border-radius:3px;width:160px;outline:none"
+        onkeydown="if(event.key==='Enter'){updateBlockedTab(this.value)}">
+      <span id="tab-update-status" style="font-size:9px;margin-left:4px;color:#484F58"></span>
+    </span>
   </div>
 
 
@@ -612,6 +620,21 @@ function applyM9(rows){
     if(r.m8_started){var s=document.createElement('span');s.className='chip done';s.style.fontSize='8px';s.textContent='✓ Started';td4.appendChild(s);}
     else{td4.style.color='#484F58';td4.style.fontSize='10px';td4.textContent='—';}
   });
+}
+
+function updateBlockedTab(url){
+  if(!url.trim()) return;
+  var status=document.getElementById('tab-update-status');
+  status.textContent='updating...';status.style.color='#F59E0B';
+  fetch('/api/update-blocked-tab?url='+encodeURIComponent(url))
+    .then(r=>r.json()).then(function(d){
+      if(d.status==='ok'){
+        status.textContent='✅ '+d.new_gid;status.style.color='#22C55E';
+        document.getElementById('tab-url-input').value='';
+      } else {
+        status.textContent='❌ '+d.message;status.style.color='#EF4444';
+      }
+    });
 }
 
 function applyInProgress(rows){

@@ -481,6 +481,49 @@ def _load_audit_log() -> list:
 def api_audit(): return _load_audit_log()
 
 
+@app.get("/api/update-blocked-tab")
+def api_update_tab(url: str):
+    """
+    Update the blocked accounts tab gid from a Google Sheets URL.
+    Usage: /api/update-blocked-tab?url=https://docs.google.com/...gid=538753662
+    """
+    import re, json as _j
+    m = re.search(r'gid=(\d+)', url)
+    if not m:
+        return {"status": "error", "message": "No gid found in URL"}
+    gid = m.group(1)
+    config_path = DATA_DIR / "drive_config.json"
+    config = _j.loads(config_path.read_text())
+    updated = False
+    for f in config['files']:
+        if 'Blocked' in f['name']:
+            old_gid = f.get('current_gid', '—')
+            f['current_gid'] = gid
+            updated = True
+            break
+    if updated:
+        config_path.write_text(_j.dumps(config, indent=2))
+        return {"status": "ok", "message": f"Blocked accounts tab updated → gid={gid}", "old_gid": old_gid, "new_gid": gid}
+    return {"status": "error", "message": "Blocked accounts file not found in config"}
+
+
+def _get_blocked_export_url() -> str:
+    """
+    Get CSV export URL for blocked accounts — always uses stored gid.
+    Tab format: EMEA_MONTH DAY (e.g. EMEA_MARCH 22, EMEA_APRIL 5).
+    gid must be updated in drive_config.json when tab changes.
+    Use /api/update-blocked-tab?url=<google_sheets_url> to update.
+    """
+    import json as _j
+    config = _j.loads((DATA_DIR / "drive_config.json").read_text())
+    for f in config['files']:
+        if 'Blocked' in f['name']:
+            file_id = f.get('file_id', '')
+            gid = f.get('current_gid', '0')
+            return f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv&gid={gid}"
+    return ""
+
+
 @app.get("/api/open-actions")
 def api_open_actions(): return _load_open_actions()
 
