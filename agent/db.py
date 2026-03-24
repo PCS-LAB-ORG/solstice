@@ -57,6 +57,8 @@ def init_db(path: Path = DB_PATH) -> None:
             sales_region        TEXT,
             email_sent          TEXT,
             last_seen           TEXT,
+            live_fire           INTEGER DEFAULT 0,
+            live_fire_dc        TEXT DEFAULT '',
             created_at          TEXT DEFAULT (datetime('now'))
         );
 

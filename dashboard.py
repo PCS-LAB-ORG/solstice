@@ -59,9 +59,11 @@ def _load_weekly() -> list:
         weeks  = {}
         with get_db() as conn:
             for row in conn.execute("""SELECT a.customer_name,a.active_cse,a.status,
+                a.live_fire, a.live_fire_dc,
                 b.m8_planned,b.m9_planned,b.m8_started,b.m9_complete
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
-                WHERE b.m8_planned!='' OR b.m9_planned!=''"""):
+                WHERE b.m3_complete=1
+                AND (b.m8_planned!='' OR b.m9_planned!='')"""):
                 for field,label,done in [
                     (row["m8_planned"],"M8",bool(row["m8_started"])),
                     (row["m9_planned"],"M9",bool(row["m9_complete"]) or row["status"]=="Completed")]:
@@ -74,7 +76,7 @@ def _load_weekly() -> list:
                         k=d.strftime("%Y-W%U")
                         ws=d-timedelta(days=(d.weekday()+1)%7)
                         weeks.setdefault(k,{"key":k,"label":f"W{d.strftime('%U')} · {ws.strftime('%d %b')}","m8":[],"m9":[],"done":[]})
-                        e={"name":row["customer_name"],"cse":row["active_cse"] or "—"}
+                        e={"name":row["customer_name"],"cse":row["active_cse"] or "—","lf":bool(row["live_fire"]),"lf_dc":row["live_fire_dc"] or ""}
                         if label=="M8" and not done: weeks[k]["m8"].append(e)
                         elif label=="M9" and not done: weeks[k]["m9"].append(e)
                         elif label=="M9" and done: weeks[k]["done"].append(e)
@@ -211,12 +213,14 @@ def _load_completed() -> list:
     try:
         with get_db() as conn:
             rows = conn.execute("""
-                SELECT a.customer_name, a.active_cse, a.sales_region, a.status_changed_at, a.live_fire
+                SELECT a.customer_name, a.active_cse, a.sales_region,
+                       a.status_changed_at, a.live_fire, a.live_fire_dc
                 FROM accounts a WHERE a.status='Completed'
                 ORDER BY a.status_changed_at DESC
             """).fetchall()
         return [dict(r) for r in rows]
-    except: return []
+    except Exception as e:
+        return []
 
 
 def _load_dq() -> list:
