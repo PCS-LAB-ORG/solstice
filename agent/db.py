@@ -29,10 +29,12 @@ DB_PATH = Path(__file__).parent.parent / "data" / "solstice.db"
 
 def get_db(path: Path = DB_PATH) -> sqlite3.Connection:
     """Return a connection with row_factory=sqlite3.Row."""
-    conn = sqlite3.connect(path)
+    conn = sqlite3.connect(path, check_same_thread=False, isolation_level=None)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
     return conn
 
 
