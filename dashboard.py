@@ -223,17 +223,45 @@ def api_run():
         # Step 2: Run pipeline on fresh data
         r=subprocess.run([sys.executable,"-c","""
 import sys; sys.path.insert(0,'.')
-from agent.constants import STATE_FILE,DATA_DIR
+from agent.constants import STATE_FILE, DATA_DIR
 from agent.blocked_parser import load_and_merge as mb
 from agent.ps_parser import load_and_merge as mp
 from agent.enricher import enrich_accounts
-from agent.db import migrate_from_state
+from agent.db import get_db, migrate_from_state
 import json
-mb(DATA_DIR/'blocked_accounts.csv',STATE_FILE)
-mp(DATA_DIR/'ps_tracker.csv',STATE_FILE)
+from datetime import datetime, timezone
+
+# Merge filler CSVs
+mb(DATA_DIR/'blocked_accounts.csv', STATE_FILE)
+mp(DATA_DIR/'ps_tracker.csv', STATE_FILE)
 enrich_accounts(STATE_FILE)
+
+# Diff EMEA Accounts against stored state — detect real status changes
+emea_csv = DATA_DIR/'emea_accounts.csv'
+if emea_csv.exists():
+    from agent.differ import parse_csv
+    from agent.validator import validate_accounts
+    state = json.loads(STATE_FILE.read_text())
+    new_accounts = parse_csv(emea_csv)
+    valid_accounts, _ = validate_accounts(new_accounts, csv_filename=emea_csv.name)
+    old_accounts = state.get('accounts', {})
+    now = datetime.now(timezone.utc).isoformat()
+    changes = 0
+    with get_db() as conn:
+        for aid, new_acc in valid_accounts.items():
+            old_acc = old_accounts.get(aid, {})
+            old_status = old_acc.get('status', '')
+            new_status = new_acc.get('status', '')
+            if old_status and new_status and old_status != new_status:
+                conn.execute(
+                    'INSERT INTO status_history (account_id, old_status, new_status, changed_at, source) VALUES (?,?,?,?,?)',
+                    (aid, old_status, new_status, now, 'pipeline'))
+                changes += 1
+        state['accounts'].update(valid_accounts)
+        STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
+    print(f'status_changes={changes}')
+
 migrate_from_state(STATE_FILE)
-state = json.loads(STATE_FILE.read_text())
 print('done')
 """],cwd=str(Path(__file__).parent),capture_output=True,text=True,timeout=300)
         return {"status":"ok","downloads":dl_results,"output":r.stdout.strip()}
