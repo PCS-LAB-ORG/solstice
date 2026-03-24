@@ -75,9 +75,10 @@ def _load_weekly() -> list:
                         else: continue
                         k=d.strftime("%Y-W%U")
                         ws=d-timedelta(days=(d.weekday()+1)%7)
-                        weeks.setdefault(k,{"key":k,"label":f"W{d.strftime('%U')} · {ws.strftime('%d %b')}","m8":[],"m9":[],"done":[]})
-                        e={"name":row["customer_name"],"cse":row["active_cse"] or "—","lf":bool(row["live_fire"]),"lf_dc":row["live_fire_dc"] or ""}
+                        weeks.setdefault(k,{"key":k,"label":f"W{d.strftime('%U')} · {ws.strftime('%d %b')}","m8":[],"m8_done":[],"m9":[],"done":[]})
+                        e={"name":row["customer_name"],"cse":row["active_cse"] or "—","lf":bool(row["live_fire"]),"lf_dc":row["live_fire_dc"] or "","date":d.strftime("%d %b")}
                         if label=="M8" and not done: weeks[k]["m8"].append(e)
+                        elif label=="M8" and done: weeks[k]["m8_done"].append(e)
                         elif label=="M9" and not done: weeks[k]["m9"].append(e)
                         elif label=="M9" and done: weeks[k]["done"].append(e)
                     except: pass

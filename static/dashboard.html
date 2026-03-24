@@ -89,6 +89,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 .w-row.d{color:#4ADE80;background:rgba(34,197,94,.07)}
 .w-row.n{color:#93C5FD;background:rgba(59,130,246,.07)}
 .w-row.m{color:#FCD34D;background:rgba(245,158,11,.07)}
+.w-date{font-family:'Geist Mono',monospace;font-size:8px;font-weight:700;opacity:.9;display:block;margin-bottom:1px}
 .w-cse{display:block;font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--muted);margin-top:1px}
 .w-empty{font-size:9px;color:#484F58;padding:4px;font-style:italic}
 .lf-badge{display:inline-flex;align-items:center;gap:2px;font-size:8.5px;font-family:'Geist Mono',monospace;color:#F97316;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);padding:1px 4px;border-radius:3px;margin-left:3px;vertical-align:middle}
@@ -339,9 +340,22 @@ function applyWeekly(weeks){
     if(w.m9.length)badges+='<span class="wbadge n">'+w.m9.length+' M9</span>';
     if(w.m8.length)badges+='<span class="wbadge m">'+w.m8.length+' M8</span>';
     var rows='';
-    w.done.forEach(function(r){rows+='<div class="w-row d">✓ '+lfBadge(r.lf,r.lf_dc)+escHtml(r.name)+'<span class="w-cse">'+escHtml(r.cse)+'</span></div>';});
-    w.m9.forEach(function(r){rows+='<div class="w-row n">M9 '+lfBadge(r.lf,r.lf_dc)+escHtml(r.name)+'<span class="w-cse">'+escHtml(r.cse)+'</span></div>';});
-    w.m8.forEach(function(r){rows+='<div class="w-row m">M8 '+lfBadge(r.lf,r.lf_dc)+escHtml(r.name)+'<span class="w-cse">'+escHtml(r.cse)+'</span></div>';});
+    // M9 complete = PROJECT COMPLETE (sorted by date)
+    (w.done||[]).sort(function(a,b){return(a.date||'').localeCompare(b.date||'');}).forEach(function(r){
+      rows+='<div class="w-row d"><span class="w-date">'+escHtml(r.date||'')+'</span>✅ PROJECT COMPLETE '+lfBadge(r.lf,r.lf_dc)+escHtml(r.name)+'<span class="w-cse">'+escHtml(r.cse)+'</span></div>';
+    });
+    // M8 started/completed
+    (w.m8_done||[]).sort(function(a,b){return(a.date||'').localeCompare(b.date||'');}).forEach(function(r){
+      rows+='<div class="w-row" style="background:rgba(20,184,166,.08);color:#5EEAD4"><span class="w-date">'+escHtml(r.date||'')+'</span>✓ M8 STARTED '+lfBadge(r.lf,r.lf_dc)+escHtml(r.name)+'<span class="w-cse">'+escHtml(r.cse)+'</span></div>';
+    });
+    // M9 planned
+    (w.m9||[]).sort(function(a,b){return(a.date||'').localeCompare(b.date||'');}).forEach(function(r){
+      rows+='<div class="w-row n"><span class="w-date">'+escHtml(r.date||'')+'</span>M9 '+lfBadge(r.lf,r.lf_dc)+escHtml(r.name)+'<span class="w-cse">'+escHtml(r.cse)+'</span></div>';
+    });
+    // M8 planned
+    (w.m8||[]).sort(function(a,b){return(a.date||'').localeCompare(b.date||'');}).forEach(function(r){
+      rows+='<div class="w-row m"><span class="w-date">'+escHtml(r.date||'')+'</span>M8 '+lfBadge(r.lf,r.lf_dc)+escHtml(r.name)+'<span class="w-cse">'+escHtml(r.cse)+'</span></div>';
+    });
     if(!rows)rows='<div class="w-empty">No milestones</div>';
     col.innerHTML='<div class="week-hdr '+hdrCls+'">'+escHtml(w.label)+'<div class="week-badges">'+badges+'</div></div><div class="week-body">'+rows+'</div>';
     grid.appendChild(col);
