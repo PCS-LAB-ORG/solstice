@@ -438,6 +438,30 @@ def dashboard():
     return "<h1>Loading...</h1>"
 
 if __name__=="__main__":
+    import json as _j
+    from agent.blocked_parser import load_and_merge as _mb
+    from agent.ps_parser import load_and_merge as _mp
+    from agent.db import migrate_from_state as _mig
+
+    # Always populate DB from all CSVs on startup
     init_db()
+    print("Loading data sources...")
+    if (DATA_DIR/"blocked_accounts.csv").exists():
+        _mb(DATA_DIR/"blocked_accounts.csv", STATE_FILE)
+        print("  ✓ Blocked accounts merged")
+    if (DATA_DIR/"ps_tracker.csv").exists():
+        _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
+        print("  ✓ PS tracker merged")
+    _mig(STATE_FILE)
+    # Sync live_fire into DB
+    _state = _j.loads(STATE_FILE.read_text())
+    with get_db() as _conn:
+        for _aid, _acc in _state.get("accounts",{}).items():
+            _conn.execute("UPDATE accounts SET live_fire=?, live_fire_dc=? WHERE account_id=?",
+                (1 if _acc.get("live_fire") else 0, _acc.get("live_fire_dc","") or "", _aid))
+    with get_db() as _conn:
+        _n = _conn.execute("SELECT COUNT(*) FROM blocked_data").fetchone()[0]
+        _lf = _conn.execute("SELECT COUNT(*) FROM accounts WHERE live_fire=1").fetchone()[0]
+    print(f"  ✓ DB ready: {_n} milestone records | {_lf} live fire accounts")
     print("Solstice Control Center → http://localhost:8200")
     uvicorn.run(app,host="0.0.0.0",port=8200,log_level="warning")
