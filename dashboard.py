@@ -361,7 +361,9 @@ def _load_ps() -> dict:
         import csv as _csv
         ps_file = DATA_DIR / "ps_tracker.csv"
         all_ps = list(_csv.DictReader(open(ps_file, encoding="utf-8-sig"))) if ps_file.exists() else []
-        matched_names = {dict(r)["customer_name"] for r in matched}
+        with get_db() as conn2:
+            matched_ps_names = {r[0] for r in conn2.execute("SELECT ps_name FROM ps_data").fetchall()}
+        matched_names = matched_ps_names
         unmatched = [{"name":r["PS Eligible Account Name"],"country":r.get("Country",""),
                       "psc":r.get("Assigned PSC",""),"pm":r.get("Assigned PM",""),
                       "timeline":r.get("Estimated Time for PS Engagement","")}
