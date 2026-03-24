@@ -406,6 +406,27 @@ def _load_dq() -> list:
     except: return []
 
 
+def _load_audit_log() -> list:
+    """Audit log — what changed per customer between pipeline runs."""
+    try:
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.customer_name, a.active_cse, sh.old_status, sh.new_status,
+                       sh.changed_at, sh.source
+                FROM status_history sh
+                JOIN accounts a ON a.account_id = sh.account_id
+                WHERE sh.source = 'pipeline'
+                ORDER BY sh.changed_at DESC
+                LIMIT 200
+            """).fetchall()
+        return [dict(r) for r in rows]
+    except: return []
+
+
+@app.get("/api/audit-log")
+def api_audit(): return _load_audit_log()
+
+
 @app.get("/api/open-actions")
 def api_open_actions(): return _load_open_actions()
 

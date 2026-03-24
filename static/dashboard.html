@@ -131,10 +131,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 .sb-sep{color:#21262D;font-size:13px;padding:0 .2rem}
 .sb-dot-live{display:inline-block;width:5px;height:5px;border-radius:50%;background:#22C55E;animation:pulse 2s infinite;margin-right:4px}
 .sb-right{margin-left:auto}
-/* Debug console */
-.debug-console{background:#010409;border-bottom:2px solid var(--teal);font-family:'Geist Mono',monospace;font-size:10.5px;max-height:260px;overflow-y:auto}
-.debug-hdr{padding:.4rem 1.25rem;border-bottom:1px solid #21262D;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#484F58;display:flex;justify-content:space-between}
-.dlog{display:grid;grid-template-columns:70px 140px 75px 1fr;gap:.5rem;padding:.2rem 1.25rem;line-height:1.6}
+/* Bottom-left debug panel */
+.debug-panel{position:fixed;bottom:0;left:var(--nav);width:420px;background:#010409;border:1px solid #21262D;border-bottom:none;border-radius:6px 6px 0 0;font-family:'Geist Mono',monospace;font-size:10px;z-index:200;transition:all .2s}
+.debug-panel.collapsed .debug-body{display:none}
+.debug-panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:.35rem .75rem;background:#0D1117;border-bottom:1px solid #21262D;cursor:pointer;border-radius:6px 6px 0 0}
+.debug-panel-title{color:#14B8A6;font-weight:700;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.debug-panel-btns{display:flex;gap:.5rem;align-items:center}
+.debug-panel-btn{background:none;border:none;color:#484F58;cursor:pointer;font-size:10px;padding:0 3px}
+.debug-panel-btn:hover{color:#E6EDF3}
+.debug-body{max-height:200px;overflow-y:auto}
+.dlog{display:grid;grid-template-columns:60px 120px 65px 1fr;gap:.4rem;padding:.15rem .75rem;line-height:1.6;border-bottom:1px solid rgba(255,255,255,.03)}
 .dlog-ts{color:#21262D}.dlog-step{font-weight:700}.dlog-ok{color:#22C55E}.dlog-err{color:#EF4444}.dlog-run{color:#14B8A6}.dlog-info{color:#3B82F6}.dlog-detail{color:#8B949E}
 
 @media(max-width:900px){:root{--nav:0}.sidenav{display:none}.content{padding:.75rem}}
@@ -159,6 +165,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
     <a class="nav-item" href="#in-progress"><span class="nav-icon">▶</span><span class="nav-label">In Progress</span><span class="nav-badge teal" id="nb-inprog">—</span></a>
     <a class="nav-item" href="#m9-schedule"><span class="nav-icon">◷</span><span class="nav-label">M9 Schedule</span><span class="nav-badge teal" id="nb-m9">—</span></a>
     <a class="nav-item" href="#completed"><span class="nav-icon">✓</span><span class="nav-label">Completed</span><span class="nav-badge teal" id="nb-completed">—</span></a>
+    <a class="nav-item" href="#audit"><span class="nav-icon">◈</span><span class="nav-label">Audit Log</span><span class="nav-badge" id="nb-audit">—</span></a>
   </div>
   <div>
     <div class="nav-section-label">Alerts</div>
@@ -321,6 +328,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
         <table class="data-tbl">
           <thead><tr><th>CSE</th><th>Total</th><th>Outreach</th><th>At Risk</th><th>Done</th><th>Load</th></tr></thead>
           <tbody id="cse-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div id="audit" class="sec">
+      <div class="sec-hdr" onclick="toggle('audit')">
+        <span class="sec-title">Audit Log — Changes Per Customer</span>
+        <span class="sec-count" id="audit-count">—</span>
+        <span class="sec-toggle">▾</span>
+      </div>
+      <div class="sec-body">
+        <table class="data-tbl">
+          <thead><tr><th>Date</th><th>Customer</th><th>CSE</th><th>From</th><th>To</th></tr></thead>
+          <tbody id="audit-body"></tbody>
         </table>
       </div>
     </div>
@@ -525,10 +547,34 @@ function applyDQ(issues){
 function runPipeline(){
   var btn=document.getElementById('run-btn');
   btn.textContent='⟳ Running...';btn.disabled=true;
-  fetch('/api/run-pipeline').then(r=>r.json()).then(function(d){
-    btn.textContent=d.status==='ok'?'✓ Done':'✗ Error';
-    setTimeout(function(){btn.textContent='⟳ Refresh All Data';btn.disabled=false;loadAll();},1500);
-  }).catch(function(){btn.textContent='✗ Error';btn.disabled=false;});
+  var log=document.getElementById('debug-log');
+  var panel=document.getElementById('debug-panel');
+  panel.classList.remove('collapsed');
+
+  var es=new EventSource('/api/run-full');
+  es.onmessage=function(e){
+    var d=JSON.parse(e.data);
+    if(d.done){
+      es.close();
+      btn.textContent='✓ Done';
+      setTimeout(function(){
+        btn.textContent='⟳ Refresh All Data';btn.disabled=false;
+        loadAll();
+        fetch('/api/audit-log').then(r=>r.json()).then(applyAudit);
+      },1200);
+      return;
+    }
+    var row=document.createElement('div');row.className='dlog';
+    var colMap={'teal':'dlog-run','green':'dlog-ok','red':'dlog-err','blue':'dlog-info'};
+    var c=colMap[d.color]||'dlog-run';
+    var ts=document.createElement('span');ts.className='dlog-ts';ts.textContent=d.ts;
+    var step=document.createElement('span');step.className=c+' dlog-step';step.textContent=d.step;
+    var stat=document.createElement('span');stat.className=c;stat.textContent=d.status;
+    var det=document.createElement('span');det.className='dlog-detail';det.textContent=d.detail;
+    row.appendChild(ts);row.appendChild(step);row.appendChild(stat);row.appendChild(det);
+    log.appendChild(row);log.scrollTop=log.scrollHeight;
+  };
+  es.onerror=function(){es.close();btn.textContent='✗ Error';btn.disabled=false;};
 }
 
 function applyM9(rows){
@@ -622,8 +668,39 @@ document.querySelectorAll('.nav-item').forEach(function(a){
   });
 });
 
+function applyAudit(rows){
+  var cnt=document.getElementById('audit-count');if(cnt)cnt.textContent=rows.length;
+  var nb=document.getElementById('nb-audit');if(nb)nb.textContent=rows.length;
+  var tb=document.getElementById('audit-body');if(!tb)return;
+  tb.innerHTML='';
+  if(!rows.length){var tr=tb.insertRow();var td=tr.insertCell();td.colSpan=5;td.className='muted';td.style.padding='1rem';td.textContent='No status changes recorded yet — changes appear after the next pipeline refresh detects a diff.';return;}
+  rows.forEach(function(r){
+    var tr=tb.insertRow();
+    var dt=(r.changed_at||'').substring(0,10);
+    var td0=tr.insertCell();td0.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#484F58;white-space:nowrap';td0.textContent=dt;
+    var td1=tr.insertCell();var b=document.createElement('b');b.textContent=r.customer_name;td1.appendChild(b);
+    var td2=tr.insertCell();td2.className='muted';td2.textContent=r.active_cse||'—';
+    var td3=tr.insertCell();td3.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#8B949E';td3.textContent=r.old_status||'—';
+    var td4=tr.insertCell();var arr=document.createTextNode(' → ');td4.appendChild(arr);var s=document.createElement('span');s.style.color='#5EEAD4';s.style.fontFamily='Geist Mono,monospace';s.style.fontSize='10px';s.textContent=r.new_status;td4.appendChild(s);
+  });
+}
+
 loadAll();
+fetch('/api/audit-log').then(r=>r.json()).then(applyAudit).catch(console.error);
 setInterval(loadAll,60000);
 </script>
+
+<!-- Bottom-left debug panel -->
+<div class="debug-panel" id="debug-panel">
+  <div class="debug-panel-hdr" onclick="document.getElementById('debug-panel').classList.toggle('collapsed')">
+    <span class="debug-panel-title">⟳ Pipeline Log</span>
+    <div class="debug-panel-btns">
+      <button class="debug-panel-btn" onclick="event.stopPropagation();document.getElementById('debug-log').innerHTML=''">clear</button>
+      <span class="debug-panel-btn">▾</span>
+    </div>
+  </div>
+  <div class="debug-body" id="debug-log"></div>
+</div>
+
 </body>
 </html>
