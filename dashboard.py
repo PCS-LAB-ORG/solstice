@@ -155,21 +155,88 @@ def api_weekly(): return _load_weekly()
 @app.get("/api/cse")
 def api_cse(): return _load_cse()
 
+def _download_live_from_drive() -> dict:
+    """
+    Download all 4 live CSVs from Google Drive using browser auth.
+    Opens each export URL → browser (corp Okta auth) downloads to ~/Downloads
+    → moves to data/ → pipeline runs on fresh data.
+    """
+    import json as _j, glob as _g, shutil as _sh, time as _t, os as _os
+    from datetime import datetime, timezone
+
+    config = _j.loads((DATA_DIR / "drive_config.json").read_text())
+    downloads = Path.home() / "Downloads"
+    results = {}
+
+    FILE_MAP = {
+        "EMEA Accounts CC Migrations": ("emea_accounts.csv",  None),
+        "EMEA Solistce Blocked Accounts": ("blocked_accounts.csv", "538753662"),
+        "PS Tracker": ("ps_tracker.csv", None),
+    }
+
+    for f in config["files"]:
+        name = f["name"]
+        if name not in FILE_MAP: continue
+        dest_name, gid = FILE_MAP[name]
+        file_id = f.get("file_id","")
+        if not file_id: continue
+
+        # Use stored gid for blocked accounts (tab-aware)
+        if name == "EMEA Solistce Blocked Accounts":
+            gid = f.get("current_gid", gid)
+
+        url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv"
+        if gid: url += f"&gid={gid}"
+
+        # Track existing downloads before opening browser
+        before = set(_g.glob(str(downloads / "*.csv")))
+        subprocess.Popen(["open", url])
+        _t.sleep(0.5)
+
+        # Wait up to 20s for new CSV in Downloads
+        deadline = _t.monotonic() + 20
+        downloaded = None
+        while _t.monotonic() < deadline:
+            _t.sleep(1)
+            after = set(_g.glob(str(downloads / "*.csv")))
+            new_files = after - before
+            if new_files:
+                downloaded = sorted(new_files, key=_os.path.getmtime)[-1]
+                break
+
+        if downloaded:
+            dest = DATA_DIR / dest_name
+            _sh.move(downloaded, dest)
+            results[name] = f"✅ downloaded → {dest_name}"
+        else:
+            results[name] = "⚠️ no download detected (check browser)"
+
+    return results
+
+
 @app.get("/api/run-pipeline")
 def api_run():
     try:
+        # Step 1: Download latest from Google Drive via browser
+        dl_results = _download_live_from_drive()
+
+        # Step 2: Run pipeline on fresh data
         r=subprocess.run([sys.executable,"-c","""
 import sys; sys.path.insert(0,'.')
 from agent.constants import STATE_FILE,DATA_DIR
 from agent.blocked_parser import load_and_merge as mb
 from agent.ps_parser import load_and_merge as mp
 from agent.enricher import enrich_accounts
+from agent.db import migrate_from_state
+import json
 mb(DATA_DIR/'blocked_accounts.csv',STATE_FILE)
 mp(DATA_DIR/'ps_tracker.csv',STATE_FILE)
 enrich_accounts(STATE_FILE)
+migrate_from_state(STATE_FILE)
+state = json.loads(STATE_FILE.read_text())
 print('done')
 """],cwd=str(Path(__file__).parent),capture_output=True,text=True,timeout=300)
-        return {"status":"ok","output":r.stdout.strip()}
+        return {"status":"ok","downloads":dl_results,"output":r.stdout.strip()}
     except Exception as e:
         return {"status":"error","message":str(e)}
 
@@ -206,7 +273,45 @@ async def api_run_full(request: Request):
         data_dir = Path(__file__).parent / "data"
         csvs = {"Blocked Accounts": data_dir/"blocked_accounts.csv",
                 "PS Tracker":       data_dir/"ps_tracker.csv"}
-        yield event("CSV Files", "CHECK", "Verifying input files")
+        yield event("Google Drive", "DOWNLOADING", "Opening export URLs in browser — corp auth handles it")
+        import glob as _g2, os as _os2, shutil as _sh2
+        downloads = Path.home() / "Downloads"
+        _cfg = json.loads((data_dir / "drive_config.json").read_text())
+        FILE_MAP2 = {
+            "EMEA Accounts CC Migrations": ("emea_accounts.csv", None),
+            "EMEA Solistce Blocked Accounts": ("blocked_accounts.csv", None),
+            "PS Tracker": ("ps_tracker.csv", None),
+        }
+        for _f in _cfg["files"]:
+            _name = _f["name"]
+            if _name not in FILE_MAP2: continue
+            _dest_name, _ = FILE_MAP2[_name]
+            _fid = _f.get("file_id","")
+            if not _fid: continue
+            _gid = _f.get("current_gid","") if "Blocked" in _name else ""
+            _url = f"https://docs.google.com/spreadsheets/d/{_fid}/export?format=csv"
+            if _gid: _url += f"&gid={_gid}"
+            _before = set(_g2.glob(str(downloads / "*.csv")))
+            subprocess.Popen(["open", _url])
+            await asyncio.sleep(0.3)
+            _deadline = asyncio.get_event_loop().time() + 15
+            _got = False
+            while asyncio.get_event_loop().time() < _deadline:
+                await asyncio.sleep(1)
+                _after = set(_g2.glob(str(downloads / "*.csv")))
+                _new = _after - _before
+                if _new:
+                    _dl = sorted(_new, key=_os2.path.getmtime)[-1]
+                    _sh2.move(_dl, data_dir / _dest_name)
+                    _rows = sum(1 for _ in open(data_dir / _dest_name, encoding='utf-8-sig')) - 1
+                    yield event("  →", "OK", f"{_name}: {_rows} rows (LIVE)", "green")
+                    _got = True
+                    break
+            if not _got:
+                yield event("  →", "WARN", f"{_name}: browser download pending", "amber")
+        await asyncio.sleep(0.2)
+
+        yield event("CSV Files", "CHECK", "Verifying downloaded files")
         for name, path in csvs.items():
             if path.exists():
                 import csv as _csv
