@@ -145,7 +145,8 @@ async def api_run_full(request: Request):
         # Step 1: Check Drive files
         drive_root = Path.home() / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com/My Drive/EMEA CC "
         gsheet_files = list(drive_root.glob("*.gsheet")) if drive_root.exists() else []
-        yield event("Google Drive", "CHECK", f"{len(gsheet_files)} .gsheet files found", "blue")
+        drive_status = f"{len(gsheet_files)} .gsheet files synced" if gsheet_files else "Not mounted — open Google Drive Desktop"
+        yield event("Google Drive", "OK" if gsheet_files else "WARN", drive_status, "blue" if gsheet_files else "amber")
         for gf in gsheet_files:
             try:
                 mtime = os.stat(gf).st_mtime
@@ -157,11 +158,8 @@ async def api_run_full(request: Request):
 
         # Step 2: Check CSV files
         data_dir = Path(__file__).parent / "data"
-        # Local filler CSVs — DC CSE Tracker is master, arrives via Google Drive watcher
-        csvs = {"Blocked Accounts (filler)": data_dir/"blocked_accounts.csv",
-                "PS Tracker (filler)":       data_dir/"ps_tracker.csv",
-                "Drive Config":              data_dir/"drive_config.json",
-                "State DB":                  data_dir/"solstice.db"}
+        csvs = {"Blocked Accounts": data_dir/"blocked_accounts.csv",
+                "PS Tracker":       data_dir/"ps_tracker.csv"}
         yield event("CSV Files", "CHECK", "Verifying input files")
         for name, path in csvs.items():
             if path.exists():
