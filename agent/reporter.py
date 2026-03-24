@@ -758,9 +758,9 @@ def _weekly_view(accounts: dict) -> str:
     for acc in accounts.values():
         bd = acc.get("blocked_data") or {}
         if not bd: continue
-        # Weekly rule: M3 (EB Buy-in) complete AND M8 started or planned
+        # Weekly rule: M3 (EB Buy-in) complete AND M8 started/planned OR M9 planned
         if not bd.get("m3_complete"): continue
-        if not bd.get("m8_started") and not bd.get("m8_planned"): continue
+        if not bd.get("m8_started") and not bd.get("m8_planned") and not bd.get("m9_planned"): continue
         name   = acc.get("customer_name", "—")
         cse    = acc.get("active_cse") or "—"
         status = acc.get("status", "—")
