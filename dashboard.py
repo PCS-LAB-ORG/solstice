@@ -457,6 +457,11 @@ def dashboard():
     return "<h1>Loading...</h1>"
 
 if __name__=="__main__":
+    import os as _os
+    # Always run from Solstice/ directory regardless of where called from
+    _os.chdir(Path(__file__).parent)
+    sys.path.insert(0, str(Path(__file__).parent))
+
     import json as _j
     from agent.blocked_parser import load_and_merge as _mb
     from agent.ps_parser import load_and_merge as _mp
