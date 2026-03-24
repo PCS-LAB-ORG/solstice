@@ -23,8 +23,46 @@ from agent.db import get_db, init_db
 
 app = FastAPI(title="Solstice Control Center")
 
+_DB_POPULATED = False
+
+def _ensure_db():
+    """Self-heal: check if DB has data, re-populate from CSVs if empty."""
+    global _DB_POPULATED
+    if _DB_POPULATED:
+        return
+    try:
+        with get_db() as conn:
+            n = conn.execute("SELECT COUNT(*) FROM blocked_data").fetchone()[0]
+        if n > 0:
+            _DB_POPULATED = True
+            return
+        # DB is empty — re-populate
+        import json as _j, logging as _log
+        _log.warning("DB empty — auto-repopulating from CSVs...")
+        from agent.blocked_parser import load_and_merge as _mb
+        from agent.ps_parser import load_and_merge as _mp
+        from agent.db import migrate_from_state as _mig
+        init_db()
+        if (DATA_DIR/"blocked_accounts.csv").exists():
+            _mb(DATA_DIR/"blocked_accounts.csv", STATE_FILE)
+        if (DATA_DIR/"ps_tracker.csv").exists():
+            _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
+        _mig(STATE_FILE)
+        _state = _j.loads(STATE_FILE.read_text())
+        with get_db() as conn:
+            for aid, acc in _state.get("accounts",{}).items():
+                conn.execute("UPDATE accounts SET live_fire=?, live_fire_dc=? WHERE account_id=?",
+                    (1 if acc.get("live_fire") else 0, acc.get("live_fire_dc","") or "", aid))
+        with get_db() as conn:
+            n2 = conn.execute("SELECT COUNT(*) FROM blocked_data").fetchone()[0]
+        _log.warning("Self-heal complete: %d milestone records populated", n2)
+        _DB_POPULATED = True
+    except Exception as e:
+        import logging; logging.error("Self-heal failed: %s", e)
+
 
 def _load_stats() -> dict:
+    _ensure_db()
     try:
         with get_db() as conn:
             total      = conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
@@ -52,6 +90,7 @@ def _load_stats() -> dict:
 
 
 def _load_weekly() -> list:
+    _ensure_db()
     try:
         today  = date.today()
         weeks  = {}
@@ -88,6 +127,7 @@ def _load_weekly() -> list:
 
 
 def _load_cse() -> list:
+    _ensure_db()
     try:
         with get_db() as conn:
             rows=conn.execute("""SELECT active_cse,COUNT(*) total,
@@ -234,6 +274,7 @@ async def api_run_full(request: Request):
     return StreamingResponse(stream(), media_type="text/event-stream")
 
 def _load_m9_schedule() -> list:
+    _ensure_db()
     """M9 completion schedule — M3 complete, M9 planned, not yet complete, sorted by date."""
     try:
         from datetime import datetime, date
@@ -271,6 +312,7 @@ def api_m9(): return _load_m9_schedule()
 
 
 def _load_in_progress() -> list:
+    _ensure_db()
     """Upgrades actively in progress — M8 started, M9 not complete."""
     try:
         with get_db() as conn:
@@ -291,6 +333,7 @@ def api_in_progress(): return _load_in_progress()
 
 
 def _load_open_actions() -> list:
+    _ensure_db()
     """Open Actions — accounts needing follow-up grouped by category."""
     try:
         import json as _j
@@ -331,6 +374,7 @@ def _load_open_actions() -> list:
 
 
 def _load_milestones() -> list:
+    _ensure_db()
     """Milestone tracker — M3/M8/M9 with details."""
     try:
         with get_db() as conn:
@@ -349,6 +393,7 @@ def _load_milestones() -> list:
 
 
 def _load_ps() -> dict:
+    _ensure_db()
     """PS engagement — matched + unmatched."""
     try:
         with get_db() as conn:
@@ -374,6 +419,7 @@ def _load_ps() -> dict:
 
 
 def _load_completed() -> list:
+    _ensure_db()
     try:
         with get_db() as conn:
             rows = conn.execute("""
@@ -388,6 +434,7 @@ def _load_completed() -> list:
 
 
 def _load_dq() -> list:
+    _ensure_db()
     """Data quality issues."""
     try:
         import json as _j
@@ -407,6 +454,7 @@ def _load_dq() -> list:
 
 
 def _load_audit_log() -> list:
+    _ensure_db()
     """Audit log — what changed per customer between pipeline runs."""
     try:
         with get_db() as conn:
