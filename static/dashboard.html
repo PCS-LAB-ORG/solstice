@@ -143,6 +143,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 .dlog{display:grid;grid-template-columns:60px 120px 65px 1fr;gap:.4rem;padding:.15rem .75rem;line-height:1.6;border-bottom:1px solid rgba(255,255,255,.03)}
 .dlog-ts{color:#21262D}.dlog-step{font-weight:700}.dlog-ok{color:#22C55E}.dlog-err{color:#EF4444}.dlog-run{color:#14B8A6}.dlog-info{color:#3B82F6}.dlog-detail{color:#8B949E}
 
+/* Sortable/filterable tables */
+.tbl-container{position:relative}
+.tbl-filter{width:100%;background:#010409;border:1px solid var(--border);border-bottom:none;color:#E6EDF3;font-family:'Geist Mono',monospace;font-size:10px;padding:.35rem .75rem;outline:none;border-radius:5px 5px 0 0}
+.tbl-filter::placeholder{color:#484F58}
+.data-tbl th{cursor:pointer;user-select:none;position:relative;padding-right:18px !important}
+.data-tbl th:hover{color:#E6EDF3;background:rgba(255,255,255,.04)}
+.sort-icon{position:absolute;right:5px;top:50%;transform:translateY(-50%);font-size:9px;color:#484F58;transition:color .15s}
+.data-tbl th.sort-asc .sort-icon{color:var(--teal);content:'↑'}
+.data-tbl th.sort-desc .sort-icon{color:var(--teal)}
+.row-hidden{display:none}
+
 @media(max-width:900px){:root{--nav:0}.sidenav{display:none}.content{padding:.75rem}}
 </style>
 </head>
@@ -667,15 +678,16 @@ function applyInProgress(rows){
 }
 
 function loadAll(){
+  var reinit=function(){setTimeout(initAllTables,300);};
   fetch('/api/stats').then(r=>r.json()).then(applyStats).catch(console.error);
   fetch('/api/weekly').then(r=>r.json()).then(applyWeekly).catch(console.error);
-  fetch('/api/in-progress').then(r=>r.json()).then(applyInProgress).catch(console.error);
-  fetch('/api/m9-schedule').then(r=>r.json()).then(applyM9).catch(console.error);
-  fetch('/api/cse').then(r=>r.json()).then(applyCse).catch(console.error);
-  fetch('/api/open-actions').then(r=>r.json()).then(applyOpenActions).catch(console.error);
-  fetch('/api/milestones').then(r=>r.json()).then(applyMilestones).catch(console.error);
-  fetch('/api/ps').then(r=>r.json()).then(applyPS).catch(console.error);
-  fetch('/api/completed').then(r=>r.json()).then(applyCompleted).catch(console.error);
+  fetch('/api/in-progress').then(r=>r.json()).then(function(d){applyInProgress(d);reinit();}).catch(console.error);
+  fetch('/api/m9-schedule').then(r=>r.json()).then(function(d){applyM9(d);reinit();}).catch(console.error);
+  fetch('/api/cse').then(r=>r.json()).then(function(d){applyCse(d);reinit();}).catch(console.error);
+  fetch('/api/open-actions').then(r=>r.json()).then(function(d){applyOpenActions(d);reinit();}).catch(console.error);
+  fetch('/api/milestones').then(r=>r.json()).then(function(d){applyMilestones(d);reinit();}).catch(console.error);
+  fetch('/api/ps').then(r=>r.json()).then(function(d){applyPS(d);reinit();}).catch(console.error);
+  fetch('/api/completed').then(r=>r.json()).then(function(d){applyCompleted(d);reinit();}).catch(console.error);
   fetch('/api/dq').then(r=>r.json()).then(applyDQ).catch(console.error);
 }
 
@@ -708,9 +720,75 @@ function applyAudit(rows){
   });
 }
 
+// ── Universal table sort + filter ────────────────────────────────
+function initTable(tbl){
+  if(tbl.dataset.sortable) return; // already done
+  tbl.dataset.sortable='1';
+
+  // Wrap in container and add filter input
+  var wrap=document.createElement('div');wrap.className='tbl-container';
+  tbl.parentNode.insertBefore(wrap,tbl);
+  var filter=document.createElement('input');
+  filter.className='tbl-filter';filter.placeholder='Filter table...';filter.type='text';
+  wrap.appendChild(filter);wrap.appendChild(tbl);
+
+  // Add sort icons to all headers
+  var headers=tbl.querySelectorAll('th');
+  headers.forEach(function(th,i){
+    var icon=document.createElement('span');icon.className='sort-icon';icon.textContent='⇅';
+    th.appendChild(icon);
+    th.addEventListener('click',function(){sortTable(tbl,i,th);});
+  });
+
+  // Filter rows on input
+  filter.addEventListener('input',function(){
+    var q=this.value.toLowerCase();
+    Array.from(tbl.querySelectorAll('tbody tr')).forEach(function(row){
+      var text=row.textContent.toLowerCase();
+      row.classList.toggle('row-hidden',q!==''&&!text.includes(q));
+    });
+  });
+}
+
+function sortTable(tbl,colIdx,th){
+  var asc=th.dataset.sortDir!=='asc';
+  th.dataset.sortDir=asc?'asc':'desc';
+  // Reset other headers
+  tbl.querySelectorAll('th').forEach(function(h){
+    h.classList.remove('sort-asc','sort-desc');
+    var icon=h.querySelector('.sort-icon');if(icon)icon.textContent='⇅';
+  });
+  th.classList.add(asc?'sort-asc':'sort-desc');
+  var icon=th.querySelector('.sort-icon');if(icon)icon.textContent=asc?'↑':'↓';
+
+  var tbody=tbl.querySelector('tbody');
+  if(!tbody)return;
+  var rows=Array.from(tbody.querySelectorAll('tr')).filter(function(r){return !r.querySelector('td[colspan]');});
+  rows.sort(function(a,b){
+    var at=(a.cells[colIdx]||{}).textContent||'';
+    var bt=(b.cells[colIdx]||{}).textContent||'';
+    // Try numeric sort
+    var an=parseFloat(at.replace(/[^\d.-]/g,''));
+    var bn=parseFloat(bt.replace(/[^\d.-]/g,''));
+    if(!isNaN(an)&&!isNaN(bn)) return asc?(an-bn):(bn-an);
+    // Date sort (dd Mon yyyy)
+    var ad=new Date(at);var bd=new Date(bt);
+    if(!isNaN(ad)&&!isNaN(bd)) return asc?(ad-bd):(bd-ad);
+    // String sort
+    return asc?at.localeCompare(bt):bt.localeCompare(at);
+  });
+  rows.forEach(function(r){tbody.appendChild(r);});
+}
+
+// Apply to all tables after data loads
+function initAllTables(){
+  document.querySelectorAll('.data-tbl').forEach(initTable);
+}
+
 loadAll();
 fetch('/api/audit-log').then(r=>r.json()).then(applyAudit).catch(console.error);
-setInterval(loadAll,60000);
+setInterval(function(){loadAll();setTimeout(initAllTables,500);},60000);
+setTimeout(initAllTables,2000); // init after first load
 </script>
 
 <!-- Bottom-left debug panel -->
