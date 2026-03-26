@@ -217,6 +217,30 @@ main{flex:1;overflow-y:auto;min-width:0}
 var E=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
 function T(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function tog(id){var s=document.getElementById(id);s&&s.classList.toggle('col');}
+// Global date formatter — DD-MM-YY everywhere, unique and consistent
+function fmtDate(s){
+  if(!s||s==='—') return '—';
+  var d=s.substring(0,10); // YYYY-MM-DD
+  if(d.length<10) return s;
+  var parts=d.split('-');
+  if(parts.length!==3) {
+    // Try M/D/YYYY format
+    var p2=s.split('/');
+    if(p2.length===3){
+      var y=p2[2].substring(0,4);
+      return (p2[1].length===1?'0'+p2[1]:p2[1])+'-'+(p2[0].length===1?'0'+p2[0]:p2[0])+'-'+y.substring(2);
+    }
+    return s;
+  }
+  return parts[2]+'-'+parts[1]+'-'+parts[0].substring(2);
+}
+// Format datetime: DD-MM-YY HH:MM
+function fmtDt(s){
+  if(!s) return '—';
+  var d=fmtDate(s.substring(0,10));
+  var t=s.length>10?s.substring(11,16):'';
+  return t?d+' '+t:d;
+}
 
 function srt(tbl,col){
   var th=tbl.querySelectorAll('th')[col];
@@ -385,7 +409,7 @@ function loadMs(){
 }
 function msF(done,d){
   if(done)return '<span style="color:var(--green)">✅</span>';
-  if(d)return '<span style="font-family:var(--mono);font-size:8.5px;color:var(--muted)">'+E(d.substring(0,7))+'</span>';
+  if(d)return '<span style="font-family:var(--mono);font-size:8.5px;color:var(--muted)">'+E(fmtDate(d))+'</span>';
   return '<span style="color:var(--border)">○</span>';
 }
 function renderMs(){
@@ -409,7 +433,7 @@ function renderMs(){
       +'<td>'+msF(r.m1_complete,r.m1_planned)+'</td>'
       +'<td>'+msF(r.m3_complete,r.m3_planned)+'</td>'
       +'<td>'+msF(r.m8_started,r.m8_planned)+'</td>'
-      +'<td style="font-family:var(--mono);font-size:9.5px;color:var(--teal)">'+E(r.m9_planned||'—')+'</td>'
+      +'<td style="font-family:var(--mono);font-size:9.5px;color:var(--teal)">'+E(fmtDate(r.m9_planned||''))+'</td>'
       +'<td><span style="color:'+sig+';font-size:8.5px;font-family:var(--mono)">'+E(r.signal||'—')+'</span></td>'
       +'<td>'+dcp+'</td></tr>';
   });
@@ -430,7 +454,7 @@ function loadSLA(){
       var c0=tr.insertCell();c0.innerHTML='<b>'+(r.live_fire?'🔥 ':'')+E(r.customer_name)+'</b>';
       var c1=tr.insertCell();c1.style.cssText='font-size:9.5px;color:var(--muted)';c1.textContent=r.active_cse||'—';
       var c2=tr.insertCell();c2.style.cssText='font-size:9.5px;color:var(--muted)';c2.textContent=r.sales_region||'—';
-      [r.m3_planned,r.m8_planned,r.m9_planned].forEach(function(d){var c=tr.insertCell();c.style.cssText='font-family:var(--mono);font-size:9px;color:var(--muted)';c.textContent=d||'—';});
+      [r.m3_planned,r.m8_planned,r.m9_planned].forEach(function(d){var c=tr.insertCell();c.style.cssText='font-family:var(--mono);font-size:9px;color:var(--muted)';c.textContent=fmtDate(d||'');});
       var c6=tr.insertCell();
       if(r.sla_m3_m8_days!=null)c6.innerHTML='<span style="font-family:var(--mono);font-weight:700;font-size:9.5px;color:'+(b38?'var(--red)':'var(--green)')+'">'+r.sla_m3_m8_days+'d</span>';
       else c6.innerHTML='<span class="muted">—</span>';
@@ -489,7 +513,7 @@ function loadCompleted(){
     T('comp-count',rows.length);T('nb-done',rows.length);
     var tb=document.getElementById('comp-body');tb.innerHTML='';
     rows.forEach(function(r){
-      var dt=(r.m9_actual||r.m9_planned||'').substring(0,10);
+      var dt=fmtDate(r.m9_actual||r.m9_planned||'');
       var tr=tb.insertRow();
       var c0=tr.insertCell();c0.innerHTML='<b>'+(r.live_fire?'🔥 ':'')+E(r.customer_name)+'</b>';
       var c1=tr.insertCell();c1.style.cssText='font-size:9.5px;color:var(--muted)';c1.textContent=r.active_cse||'—';
@@ -507,7 +531,7 @@ function loadAudit(){
     var fc={'DC CSE Tracker':'var(--blue)','EMEA Accounts CC Migrations':'var(--teal)','Blocked Accounts':'var(--amber)','EMEA Accounts':'var(--teal)'};
     if(!rows.length){var tr=tb.insertRow();var td=tr.insertCell();td.colSpan=7;td.className='muted';td.style.padding='1rem';td.textContent='No changes yet — detected after next refresh.';return;}
     rows.forEach(function(r){
-      var ca=r.changed_at||'';var dt=ca.substring(0,10)+(ca.length>10?' '+ca.substring(11,19):'');
+      var ca=r.changed_at||'';var dt=fmtDt(ca);
       var fcc=fc[r.file_source]||'var(--muted)';
       var tr=tb.insertRow();
       var c0=tr.insertCell();c0.style.cssText='font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap';c0.textContent=dt;c0.dataset.iso=ca;
@@ -556,7 +580,7 @@ function openCard(aid){
     if(d.error){return;}
     var dcc={'Green':'var(--green)','Yellow':'var(--amber)','Red':'var(--red)'};
     var sc={'green':'var(--green)','at_risk':'var(--amber)','blocked':'var(--red)'};
-    function mf(done,dt){if(done)return '<span style="color:var(--green)">✅</span>';if(dt)return '<span style="font-family:var(--mono);font-size:8.5px;color:var(--muted)">'+E(dt)+'</span>';return '<span style="color:var(--border)">○</span>';}
+    function mf(done,dt){if(done)return '<span style="color:var(--green)">✅</span>';if(dt)return '<span style="font-family:var(--mono);font-size:8.5px;color:var(--muted)">'+E(fmtDate(dt))+'</span>';return '<span style="color:var(--border)">○</span>';}
     var html='<div style="padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between">'
       +'<div><div style="font-family:var(--serif);font-size:1.15rem;font-weight:700">'+(d.live_fire?'🔥 ':'')+E(d.customer_name)+'</div>'
       +'<div style="font-size:8.5px;color:var(--muted);margin-top:3px">'+E(d.account_id)+'</div>'
@@ -610,7 +634,7 @@ function openCard(aid){
       html+='<div style="padding:.75rem 1.4rem"><b style="font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Change History</b>';
       d.history.forEach(function(h){
         html+='<div style="display:flex;gap:.6rem;align-items:center;padding:.28rem 0;border-bottom:1px solid rgba(33,38,45,.5);font-family:var(--mono);font-size:9px">'
-          +'<span style="color:var(--muted);white-space:nowrap">'+E((h.changed_at||'').substring(0,16))+'</span>'
+          +'<span style="color:var(--muted);white-space:nowrap">'+E(fmtDt(h.changed_at||''))+'</span>'
           +'<span style="font-size:7.5px;background:rgba(94,234,212,.1);color:var(--teal);padding:1px 4px;border-radius:3px">'+E(h.file_source||'')+'</span>'
           +'<span style="color:var(--muted)">'+E(h.field_name||'')+'</span>'
           +'<span style="color:var(--muted)">'+E(h.old_status||'')+'</span>'
