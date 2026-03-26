@@ -173,6 +173,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
     <a class="nav-item" href="#milestones"><span class="nav-icon">◎</span><span class="nav-label">Milestones</span></a>
     <a class="nav-item" href="#ps"><span class="nav-icon">◈</span><span class="nav-label">PS Engagement</span></a>
     <a class="nav-item" href="#cse"><span class="nav-icon">◎</span><span class="nav-label">CSE Workload</span></a>
+    <a class="nav-item" href="#m1-suggestions"><span class="nav-icon">◎</span><span class="nav-label">M1 Action Plan</span><span class="nav-badge teal" id="nb-m1s">—</span></a>
     <a class="nav-item" href="#in-progress"><span class="nav-icon">▶</span><span class="nav-label">In Progress</span><span class="nav-badge teal" id="nb-inprog">—</span></a>
     <a class="nav-item" href="#m9-schedule"><span class="nav-icon">◷</span><span class="nav-label">M9 Schedule</span><span class="nav-badge teal" id="nb-m9">—</span></a>
     <a class="nav-item" href="#completed"><span class="nav-icon">✓</span><span class="nav-label">Completed</span><span class="nav-badge teal" id="nb-completed">—</span></a>
@@ -193,6 +194,19 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
   <div class="topbar">
     <div class="topbar-title">EMEA <em>Migration</em> Command Center</div>
     <div class="topbar-meta"><div class="live-dot"></div><span id="last-run-top">Loading...</span></div>
+  </div>
+
+  <!-- GLOBAL CUSTOMER SEARCH -->
+  <div id="customer-search-bar" style="position:sticky;top:42px;z-index:60;background:#010409;border-bottom:1px solid #21262D;padding:.35rem 1.25rem;display:flex;align-items:center;gap:.5rem">
+    <span style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58;text-transform:uppercase;letter-spacing:.1em">⌕</span>
+    <input id="cust-search-input" type="text" placeholder="Search customer..." autocomplete="off"
+      style="flex:1;max-width:320px;background:transparent;border:none;outline:none;font-family:Geist Mono,monospace;font-size:11px;color:#E6EDF3"/>
+    <div id="cust-search-results" style="display:none;position:absolute;top:100%;left:1.25rem;width:320px;background:#161B22;border:1px solid #30363D;border-radius:6px;z-index:99;max-height:280px;overflow-y:auto"></div>
+  </div>
+
+  <!-- CUSTOMER CARD MODAL -->
+  <div id="cust-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);overflow-y:auto" onclick="if(event.target===this)closeCard()">
+    <div id="cust-card" style="background:#0D1117;border:1px solid #30363D;border-radius:10px;max-width:780px;margin:3rem auto;padding:0;overflow:hidden"></div>
   </div>
 
   <!-- STATUS BAR — always visible, moneymaker style -->
@@ -227,13 +241,29 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 
     <!-- KPIs -->
     <div id="kpis" class="kpi-grid">
-      <div class="kpi teal"><div class="kpi-label">Total Accounts</div><div class="kpi-value" id="k-total">—</div><div class="kpi-sub">EMEA tracker</div></div>
-      <div class="kpi green"><div class="kpi-label">Completed</div><div class="kpi-value" id="k-done">—</div><div class="kpi-sub">Migration done</div></div>
-      <div class="kpi red"><div class="kpi-label">Milestone Stalls</div><div class="kpi-value" id="k-stalls">—</div><div class="kpi-sub">M3→M8 over 14d</div></div>
-      <div class="kpi red"><div class="kpi-label">Core Rep Blocking</div><div class="kpi-value" id="k-corer">—</div><div class="kpi-sub">Sales blocking</div></div>
-      <div class="kpi blue"><div class="kpi-label">PS In Progress</div><div class="kpi-value" id="k-ps">—</div><div class="kpi-sub">Active engagements</div></div>
-      <div class="kpi amber"><div class="kpi-label">No Status</div><div class="kpi-value" id="k-nostatus">—</div><div class="kpi-sub">Data quality</div></div>
-      <div class="kpi orange"><div class="kpi-label">No Owner</div><div class="kpi-value" id="k-nocse">—</div><div class="kpi-sub">No CSE assigned</div></div>
+      <div class="kpi teal"><div class="kpi-label">Total Accounts</div><div class="kpi-value" id="k-total">—</div><div class="kpi-sub">EMEA scale cohort</div></div>
+      <div class="kpi green"><div class="kpi-label">Completed</div><div class="kpi-value" id="k-done">—</div><div class="kpi-sub">M9 upgrade done</div></div>
+      <div class="kpi red"><div class="kpi-label">SLA Violations</div><div class="kpi-value" id="k-stalls">—</div><div class="kpi-sub">M3→M8 &gt;14d or M8→M9 &gt;28d</div></div>
+      <div class="kpi red"><div class="kpi-label">Core Rep Blocking</div><div class="kpi-value" id="k-corer">—</div><div class="kpi-sub">Sales hold / acct team block</div></div>
+      <div class="kpi blue"><div class="kpi-label">PS Active</div><div class="kpi-value" id="k-ps">—</div><div class="kpi-sub">Live PS engagements</div></div>
+      <div class="kpi amber"><div class="kpi-label">DC 🟡 Yellow</div><div class="kpi-value" id="k-yellow">—</div><div class="kpi-sub">DC health at risk</div></div>
+      <div class="kpi red"  style="border-color:#DC2626"><div class="kpi-label">DC 🔴 Red</div><div class="kpi-value" id="k-red">—</div><div class="kpi-sub">DC health critical</div></div>
+    </div>
+
+    <!-- SLA Violation Table (from email: M3→M8 ≤14d, M8→M9 ≤28d, effective Mar 9) -->
+    <div id="sla-section" class="sec" style="border-left:3px solid #EF4444">
+      <div class="sec-hdr" onclick="toggle('sla-section')">
+        <span class="sec-title" style="color:#EF4444">⚠ SLA Violations</span>
+        <span style="font-family:'Geist Mono',monospace;font-size:9px;color:#8B949E;margin-left:1rem">M3→M8 must be ≤14d · M8→M9 must be ≤28d · Effective Mar 9 · Scale cohort only</span>
+        <span class="sec-count" id="sla-count">—</span>
+        <span class="sec-toggle">▾</span>
+      </div>
+      <div class="sec-body">
+        <table class="data-tbl">
+          <thead><tr><th>Customer</th><th>CSE</th><th>M3 Date</th><th>M8 Date</th><th>M9 Date</th><th>M3→M8</th><th>M8→M9</th><th>Breach</th></tr></thead>
+          <tbody id="sla-body"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Data Quality -->
@@ -330,7 +360,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
       </div>
       <div class="sec-body">
         <table class="data-tbl">
-          <thead><tr><th>Customer</th><th>PSC</th><th>PM</th><th>Status</th><th>Clarizen</th><th>Timeline</th></tr></thead>
+          <thead><tr><th>Customer</th><th>Area Owner</th><th>DSM</th><th>PS Status</th><th>Notes</th><th>Sessions</th></tr></thead>
           <tbody id="ps-body"></tbody>
         </table>
         <div id="ps-unmatched" style="margin-top:1rem"></div>
@@ -345,10 +375,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
       </div>
       <div class="sec-body">
         <table class="data-tbl">
-          <thead><tr><th>CSE</th><th>Total</th><th>Outreach</th><th>At Risk</th><th>Done</th><th>Load</th></tr></thead>
+          <thead><tr><th>CSE</th><th>Total</th><th>Outreach</th><th>At Risk</th><th>Done</th><th>Success %</th><th>Load</th></tr></thead>
           <tbody id="cse-body"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- M1 Assignments -->
+    <div id="m1-suggestions" class="sec">
+      <div class="sec-hdr" onclick="toggle('m1-suggestions')">
+        <span class="sec-title">M1 Action Plan</span>
+        <span class="sec-count" id="m1s-total">—</span>
+        <span class="sec-toggle">▾</span>
+      </div>
+      <div class="sec-body" id="m1s-body"></div>
     </div>
 
     <!-- Audit Log -->
@@ -360,7 +400,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
       </div>
       <div class="sec-body">
         <table class="data-tbl">
-          <thead><tr><th>Date</th><th>Customer</th><th>CSE</th><th>From</th><th>To</th></tr></thead>
+          <thead><tr><th>Date</th><th>Customer</th><th>CSE</th><th>File</th><th>Field</th><th>From</th><th>To</th></tr></thead>
           <tbody id="audit-body"></tbody>
         </table>
       </div>
@@ -397,18 +437,58 @@ function lfBadge(lf,dc){return lf?'<span class="lf-badge">🔥 DC'+(dc?' <span s
 function msFmt(complete,planned){return complete?'<span class="chip done">✓</span>':(planned?'<span style="font-family:\'Geist Mono\',monospace;font-size:10px;color:#8B949E">'+escHtml(planned)+'</span>':'<span style="color:#484F58">—</span>');}
 function toggle(id){var s=document.getElementById(id);s&&s.classList.toggle('collapsed');}
 
+function applySLA(rows){
+  setText('sla-count', rows.length);
+  var tb=document.getElementById('sla-body');if(!tb)return;
+  while(tb.rows.length)tb.deleteRow(0);
+  if(!rows.length){
+    var tr=tb.insertRow();var td=tr.insertCell();td.colSpan=8;td.className='muted';
+    td.style.padding='1rem';td.textContent='No SLA violations — all prospective accounts within limits.';return;
+  }
+  rows.forEach(function(r){
+    var tr=tb.insertRow();
+    var b38=r.sla_m3_m8_breach, b89=r.sla_m8_m9_breach;
+    var rowColor=b38&&b89?'rgba(239,68,68,.08)':b38?'rgba(239,68,68,.05)':'rgba(245,158,11,.05)';
+    tr.style.background=rowColor;
+    var c0=tr.insertCell();c0.innerHTML='<b>'+(r.live_fire?'🔥 ':'')+escHtml(r.customer_name)+'</b>';
+    var c1=tr.insertCell();c1.className='muted';c1.textContent=r.active_cse||'—';
+    var c2=tr.insertCell();c2.className='muted';c2.style.fontFamily='Geist Mono,monospace';c2.style.fontSize='10px';c2.textContent=r.m3_planned||'—';
+    var c3=tr.insertCell();c3.className='muted';c3.style.fontFamily='Geist Mono,monospace';c3.style.fontSize='10px';c3.textContent=r.m8_planned||'—';
+    var c4=tr.insertCell();c4.className='muted';c4.style.fontFamily='Geist Mono,monospace';c4.style.fontSize='10px';c4.textContent=r.m9_planned||'—';
+    // M3→M8 gap
+    var c5=tr.insertCell();
+    if(r.sla_m3_m8_days!=null){
+      var col38=b38?'#EF4444':'#22C55E';
+      c5.innerHTML='<span style="font-family:Geist Mono,monospace;font-weight:700;color:'+col38+'">'+r.sla_m3_m8_days+'d</span>'+(b38?' <span style="color:#EF4444;font-size:9px">⚠ >14d</span>':'');
+    }else{c5.className='muted';c5.textContent='—';}
+    // M8→M9 gap
+    var c6=tr.insertCell();
+    if(r.sla_m8_m9_days!=null){
+      var col89=b89?'#EF4444':'#22C55E';
+      c6.innerHTML='<span style="font-family:Geist Mono,monospace;font-weight:700;color:'+col89+'">'+r.sla_m8_m9_days+'d</span>'+(b89?' <span style="color:#EF4444;font-size:9px">⚠ >28d</span>':'');
+    }else{c6.className='muted';c6.textContent='—';}
+    // Breach type
+    var c7=tr.insertCell();
+    var badges=[];
+    if(b38)badges.push('<span style="background:#7F1D1D;color:#FCA5A5;font-size:9px;padding:1px 5px;border-radius:3px;font-family:Geist Mono,monospace">M3→M8</span>');
+    if(b89)badges.push('<span style="background:#78350F;color:#FCD34D;font-size:9px;padding:1px 5px;border-radius:3px;font-family:Geist Mono,monospace">M8→M9</span>');
+    c7.innerHTML=badges.join(' ');
+  });
+}
+
 function applyStats(s){
-  setText('k-total',s.total||'—');setText('k-done',s.completed||'—');setText('k-stalls',s.stalls||'—');
+  setText('k-total',s.total||'—');setText('k-done',s.completed||'—');
+  setText('k-stalls',s.sla_breaches!=null?s.sla_breaches:'—');
   setText('k-corer',s.core_rep_blocking||'—');setText('k-ps',s.ps_active||'—');
-  setText('k-nostatus',s.no_status||'—');setText('k-nocse',s.no_cse||'—');
-  setText('nb-total',s.total||'—');setText('nb-stalls',s.stalls||'—');
+  setText('k-yellow',s.dc_yellow||'0');setText('k-red',s.dc_red||'0');
+  setText('nb-total',s.total||'—');setText('nb-stalls',s.sla_breaches||'—');
   setText('nb-completed',s.completed||'—');
   setText('last-run-top','Updated: '+(s.last_run||'—'));
-  // Status bar
-  setSB('sb-total',s.total);setSB('sb-done',s.completed);setSB('sb-inprog',s.ps_active);
+  // Status bar — DC-based counts
+  setSB('sb-total',s.total);setSB('sb-done',s.completed);
+  setSB('sb-inprog',s.in_progress||'—');  // DC M8 started, M9 not complete
   setSB('sb-corer',s.core_rep_blocking);setSB('sb-stalls',s.stalls);
   setSB('sb-nostatus',s.no_status);
-  fetch('/api/in-progress').then(r=>r.json()).then(function(d){setSB('sb-inprog',d.length);});
   setSB('sb-db',(s.total||0)+' accts');
   setText('last-run-nav',s.last_run||'—');
   setText('donut-n',s.total||'—');
@@ -515,13 +595,18 @@ function applyMilestones(rows){
 }
 
 function applyPS(data){
-  var tb=document.getElementById('ps-body');tb.innerHTML='';
+  var tb=document.getElementById('ps-body');while(tb.rows.length)tb.deleteRow(0);
   (data.matched||[]).forEach(function(r){
-    var ps_colors={'In Progress':'#22C55E','On Hold':'#8B949E','Starting':'#3B82F6','Pending IKO':'#F59E0B','Completed':'#14B8A6'};
-    var c=ps_colors[r.ps_status]||'#8B949E';
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><b>'+(r.live_fire?'🔥 ':'')+escHtml(r.customer_name)+'</b></td><td class="muted">'+escHtml(r.psc||'—')+'</td><td class="muted">'+escHtml(r.pm||'—')+'</td><td><span style="color:'+c+';font-size:11px;font-family:Geist Mono,monospace">'+escHtml(r.ps_status||'—')+'</span></td><td class="muted">'+escHtml(r.clarizen_id||'—')+'</td><td class="muted">'+escHtml((r.timeline||'').substring(0,40))+'</td>';
-    tb.appendChild(tr);
+    var ps_colors={'Account Team Approved Upgrade Plan':'#3B82F6','Customer Approved Upgrade Plan':'#22C55E','PS Contacted -- Updating Plan':'#F59E0B','PS Contact Pending':'#8B949E'};
+    var st=r.ps_status||'';
+    var c=Object.keys(ps_colors).find(function(k){return st.startsWith(k.split('--')[0].trim());})?ps_colors[Object.keys(ps_colors).find(function(k){return st.startsWith(k.split('--')[0].trim());})]:st.startsWith('BLOCKED')?'#EF4444':'#5EEAD4';
+    var tr=tb.insertRow();
+    var c0=tr.insertCell();c0.innerHTML='<b>'+(r.live_fire?'🔥 ':'')+escHtml(r.customer_name)+'</b>';
+    var c1=tr.insertCell();c1.className='muted';c1.textContent=r.psc||'—';
+    var c2=tr.insertCell();c2.className='muted';c2.textContent=(r.psc_shadow||'').replace(/\/$/,'').trim()||'—';
+    var c3=tr.insertCell();c3.innerHTML='<span style="color:'+c+';font-size:10px;font-family:Geist Mono,monospace">'+escHtml(st||'—')+'</span>';
+    var c4=tr.insertCell();c4.className='muted';c4.style.fontSize='10px';c4.textContent=(r.notes||'').substring(0,60)+(r.notes&&r.notes.length>60?'…':'');
+    var c5=tr.insertCell();c5.className='muted';c5.textContent=r.timeline?r.timeline+'d':'';
   });
   var um=document.getElementById('ps-unmatched');
   if(data.unmatched&&data.unmatched.length){
@@ -530,24 +615,33 @@ function applyPS(data){
 }
 
 function applyCse(rows){
-  var max=Math.max.apply(null,rows.map(r=>r.total));
-  var tb=document.getElementById('cse-body');tb.innerHTML='';
+  var max=Math.max.apply(null,rows.map(function(r){return r.total;}));
+  var tb=document.getElementById('cse-body');while(tb.rows.length)tb.deleteRow(0);
   rows.forEach(function(r){
     var pct=Math.round(r.total/max*100);
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><b>'+escHtml(r.active_cse)+'</b></td><td style="font-family:Geist Mono,monospace;font-weight:600">'+r.total+'</td><td><span class="chip out">'+r.outreach+'</span></td><td><span class="chip risk">'+r.risk+'</span></td><td><span class="chip done">'+r.done+'</span></td><td><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div></td>';
-    tb.appendChild(tr);
+    var tr=tb.insertRow();
+    var c0=tr.insertCell();c0.innerHTML='<b>'+escHtml(r.active_cse)+'</b>';
+    var c1=tr.insertCell();c1.style.cssText='font-family:Geist Mono,monospace;font-weight:600';c1.textContent=r.total;
+    var c2=tr.insertCell();c2.innerHTML='<span class="chip out">'+r.outreach+'</span>';
+    var c3=tr.insertCell();c3.innerHTML='<span class="chip risk">'+r.risk+'</span>';
+    var c4=tr.insertCell();c4.innerHTML='<span class="chip done">'+r.done+'</span>';
+    var sr=r.success_rate||0;var src=sr>=50?'#22C55E':sr>=25?'#F59E0B':'#EF4444';
+    var c5=tr.insertCell();c5.innerHTML='<span style="font-family:Geist Mono,monospace;font-weight:700;color:'+src+'">'+sr+'%</span>';
+    var c6=tr.insertCell();c6.innerHTML='<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>';
   });
 }
 
 function applyCompleted(rows){
   setText('comp-count',rows.length);
-  var tb=document.getElementById('comp-body');tb.innerHTML='';
+  var tb=document.getElementById('comp-body');while(tb.rows.length)tb.deleteRow(0);
   rows.forEach(function(r){
-    var dt=(r.status_changed_at||'').substring(0,10);
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><b>'+(r.live_fire?'🔥 ':'')+escHtml(r.customer_name)+'</b></td><td class="muted">'+escHtml(r.active_cse||'—')+'</td><td class="muted">'+escHtml(r.sales_region||'—')+'</td><td><span style="color:#4ADE80;font-family:Geist Mono,monospace;font-size:10.5px">✓ '+escHtml(dt)+'</span></td>';
-    tb.appendChild(tr);
+    // DC M9 actual date is source of truth; fall back to planned
+    var dt=(r.m9_actual||r.m9_planned||'').substring(0,10);
+    var tr=tb.insertRow();
+    var c0=tr.insertCell();c0.innerHTML='<b>'+(r.live_fire?'🔥 ':'')+escHtml(r.customer_name)+'</b>';
+    var c1=tr.insertCell();c1.className='muted';c1.textContent=r.active_cse||'—';
+    var c2=tr.insertCell();c2.className='muted';c2.textContent=r.sales_region||'—';
+    var c3=tr.insertCell();c3.innerHTML='<span style="color:#4ADE80;font-family:Geist Mono,monospace;font-size:10.5px">M9 ✓ '+escHtml(dt)+'</span>';
   });
 }
 
@@ -689,6 +783,8 @@ function loadAll(){
   fetch('/api/ps').then(r=>r.json()).then(function(d){applyPS(d);reinit();}).catch(console.error);
   fetch('/api/completed').then(r=>r.json()).then(function(d){applyCompleted(d);reinit();}).catch(console.error);
   fetch('/api/dq').then(r=>r.json()).then(applyDQ).catch(console.error);
+  fetch('/api/sla-breaches').then(r=>r.json()).then(function(d){applySLA(d);reinit();}).catch(console.error);
+  fetch('/api/m1-suggestions').then(r=>r.json()).then(function(d){applyM1Suggestions(d);reinit();}).catch(console.error);
 }
 
 // SSE live stats
@@ -703,52 +799,166 @@ document.querySelectorAll('.nav-item').forEach(function(a){
   });
 });
 
+function applyM1Suggestions(data){
+  var grandTotal=data.reduce(function(s,c){return s+c.total;},0);
+  setText('m1s-total',grandTotal);setText('nb-m1s',grandTotal);
+  var body=document.getElementById('m1s-body');if(!body)return;
+  var sigColor={'green':'#22C55E','at_risk':'#F59E0B','blocked':'#EF4444'};
+  var catColors={'actionable':'#22C55E','acct_team':'#F59E0B','unblock':'#3B82F6','skip':'#EF4444'};
+
+  var html='';
+  data.forEach(function(cat){
+    if(!cat.total) return;
+    var cc=catColors[cat.category]||'#5EEAD4';
+    html+='<div style="margin-bottom:2rem">';
+    // Header
+    html+='<div class="m1-cat-hdr" data-cat="'+cat.category+'" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;border-left:3px solid '+cc+';background:rgba(255,255,255,.025);cursor:pointer;user-select:none">'
+      +'<b style="font-size:12px;color:'+cc+'">'+escHtml(cat.label)+'</b>'
+      +'<span style="font-family:Geist Mono,monospace;font-size:10px;color:#8B949E">'+cat.total+' accounts</span>'
+      +'<span style="margin-left:auto;font-size:10px;color:#484F58">▾</span></div>';
+    // Rationale
+    html+='<div class="m1-cat-body" style="border-left:3px solid '+cc+'">'
+      +'<div style="padding:.6rem 1rem .6rem 1.4rem;background:rgba(255,255,255,.01);font-family:Geist Mono,monospace;font-size:10.5px;color:#8B949E;line-height:1.6;margin-bottom:.5rem">'+escHtml(cat.rationale||'')+'</div>';
+    // Table
+    html+='<table class="data-tbl"><thead><tr><th>Account</th><th>CSE</th><th>Region</th><th>Status</th><th>Signal</th><th>★</th></tr></thead><tbody>';
+    cat.accounts.forEach(function(r){
+      var sc=sigColor[r.signal]||'#484F58';
+      var isNew=r.is_new;
+      var sigCell=r.signal?'<span style="color:'+sc+';font-family:Geist Mono,monospace;font-size:10px">'+escHtml(r.signal)+'</span>':'<span class="muted">—</span>';
+      var cseStyle=isNew?'color:#F59E0B':'color:#8B949E';
+      html+='<tr>'
+        +'<td><b>'+escHtml(r.account_name)+'</b></td>'
+        +'<td><span style="'+cseStyle+';font-size:10.5px">'+escHtml(r.assigned_cse||'—')+'</span></td>'
+        +'<td class="muted">'+escHtml(r.region||'—')+'</td>'
+        +'<td class="muted" style="font-size:10px">'+escHtml(r.status||'—')+'</td>'
+        +'<td>'+sigCell+'</td>'
+        +'<td style="text-align:center">'+(isNew?'<span style="color:#F59E0B">★</span>':'')+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div></div>';
+  });
+
+  body.innerHTML=html;
+
+  // Wire collapse toggles
+  body.querySelectorAll('.m1-cat-hdr').forEach(function(hdr){
+    hdr.addEventListener('click',function(){
+      var catBody=hdr.nextElementSibling;
+      var tog=hdr.querySelector('span:last-child');
+      var visible=catBody.style.display!=='none';
+      catBody.style.display=visible?'none':'';
+      tog.textContent=visible?'▸':'▾';
+    });
+  });
+
+  // Init sort/filter on all tables
+  body.querySelectorAll('.data-tbl').forEach(initTable);
+}
+
 function applyAudit(rows){
   var cnt=document.getElementById('audit-count');if(cnt)cnt.textContent=rows.length;
   var nb=document.getElementById('nb-audit');if(nb)nb.textContent=rows.length;
   var tb=document.getElementById('audit-body');if(!tb)return;
   tb.innerHTML='';
-  if(!rows.length){var tr=tb.insertRow();var td=tr.insertCell();td.colSpan=5;td.className='muted';td.style.padding='1rem';td.textContent='No status changes recorded yet — changes appear after the next pipeline refresh detects a diff.';return;}
+  var fileColors={'DC CSE Tracker':'#3B82F6','EMEA Accounts':'#5EEAD4','Blocked Accounts':'#F59E0B','PS Tracker':'#A78BFA'};
+  if(!rows.length){var tr=tb.insertRow();var td=tr.insertCell();td.colSpan=7;td.className='muted';td.style.padding='1rem';td.textContent='No changes recorded yet — changes appear after the next data refresh detects a diff.';return;}
   rows.forEach(function(r){
     var tr=tb.insertRow();
-    var dt=(r.changed_at||'').substring(0,10);
+    var _ca=r.changed_at||'';var dt=_ca.substring(0,10)+(_ca.length>10?' '+_ca.substring(11,19):'');
+    var fc=fileColors[r.file_source]||'#8B949E';
     var td0=tr.insertCell();td0.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#484F58;white-space:nowrap';td0.textContent=dt;
     var td1=tr.insertCell();var b=document.createElement('b');b.textContent=r.customer_name;td1.appendChild(b);
     var td2=tr.insertCell();td2.className='muted';td2.textContent=r.active_cse||'—';
-    var td3=tr.insertCell();td3.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#8B949E';td3.textContent=r.old_status||'—';
-    var td4=tr.insertCell();var arr=document.createTextNode(' → ');td4.appendChild(arr);var s=document.createElement('span');s.style.color='#5EEAD4';s.style.fontFamily='Geist Mono,monospace';s.style.fontSize='10px';s.textContent=r.new_status;td4.appendChild(s);
+    var td3=tr.insertCell();td3.innerHTML='<span style="font-family:Geist Mono,monospace;font-size:9px;color:'+fc+';background:'+fc+'22;padding:1px 5px;border-radius:3px">'+escHtml(r.file_source||'—')+'</span>';
+    var td4=tr.insertCell();td4.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#8B949E';td4.textContent=r.field_name||'status';
+    var td5=tr.insertCell();td5.style.cssText='font-family:Geist Mono,monospace;font-size:10px;color:#8B949E';td5.textContent=r.old_status||'—';
+    var td6=tr.insertCell();var s=document.createElement('span');s.style.color='#5EEAD4';s.style.fontFamily='Geist Mono,monospace';s.style.fontSize='10px';s.textContent=r.new_status;td6.appendChild(s);
   });
 }
 
 // ── Universal table sort + filter ────────────────────────────────
+// Categorical column names that get dropdowns instead of text
+var CATEGORICAL_COLS = ['signal','status','region','cse','area owner','prev cse','original cse',
+  'breach','ps status','dc progress','sales region','cohort','theater','country','file','field'];
+
+function applyFilters(tbl, textVal, dropVals){
+  Array.from(tbl.querySelectorAll('tbody tr')).forEach(function(row){
+    if(row.querySelector('td[colspan]')){row.classList.remove('row-hidden');return;}
+    var text=row.textContent.toLowerCase();
+    var hide=false;
+    if(textVal && !text.includes(textVal)) hide=true;
+    if(!hide){
+      dropVals.forEach(function(dv){
+        if(dv.val==='') return;
+        var cell=row.cells[dv.col];
+        if(cell && cell.textContent.toLowerCase()!==dv.val) hide=true;
+      });
+    }
+    row.classList.toggle('row-hidden',hide);
+  });
+}
+
 function initTable(tbl){
-  if(tbl.dataset.sortable) return; // already done
+  if(tbl.dataset.sortable) return;
   tbl.dataset.sortable='1';
 
-  // Wrap in container and add filter input
   var wrap=document.createElement('div');wrap.className='tbl-container';
   tbl.parentNode.insertBefore(wrap,tbl);
-  var filter=document.createElement('input');
-  filter.className='tbl-filter';filter.placeholder='Filter table...';filter.type='text';
-  wrap.appendChild(filter);wrap.appendChild(tbl);
 
-  // Add sort icons to all headers
-  var headers=tbl.querySelectorAll('th');
+  // Text search
+  var filter=document.createElement('input');
+  filter.className='tbl-filter';filter.placeholder='Search...';filter.type='text';
+  wrap.appendChild(filter);
+
+  // Detect categorical columns and build dropdowns
+  var headers=Array.from(tbl.querySelectorAll('th'));
+  var dropdowns=[];
+  var dropBar=document.createElement('div');
+  dropBar.style.cssText='display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 4px 0;';
+
+  headers.forEach(function(th,i){
+    var label=th.textContent.replace(/[⇅↑↓]/g,'').trim().toLowerCase();
+    if(CATEGORICAL_COLS.indexOf(label)===-1) return;
+
+    // Collect unique values from this column
+    var vals=new Set();
+    Array.from(tbl.querySelectorAll('tbody tr')).forEach(function(row){
+      var cell=row.cells[i];
+      if(cell){var v=cell.textContent.trim();if(v&&v!=='—')vals.add(v);}
+    });
+    if(vals.size<2) return;
+
+    var sel=document.createElement('select');
+    sel.style.cssText='background:#010409;border:1px solid var(--border);color:#8B949E;font-family:Geist Mono,monospace;font-size:9.5px;padding:2px 6px;border-radius:4px;cursor:pointer;max-width:140px';
+    var opt0=document.createElement('option');opt0.value='';opt0.textContent='All '+th.textContent.replace(/[⇅↑↓]/g,'').trim();
+    sel.appendChild(opt0);
+    Array.from(vals).sort().forEach(function(v){
+      var o=document.createElement('option');o.value=v.toLowerCase();o.textContent=v;sel.appendChild(o);
+    });
+    dropdowns.push({sel:sel,col:i});
+    dropBar.appendChild(sel);
+  });
+
+  if(dropdowns.length) wrap.appendChild(dropBar);
+  wrap.appendChild(tbl);
+
+  // Add sort icons
   headers.forEach(function(th,i){
     var icon=document.createElement('span');icon.className='sort-icon';icon.textContent='⇅';
     th.appendChild(icon);
     th.addEventListener('click',function(){sortTable(tbl,i,th);});
   });
 
-  // Filter rows on input
-  filter.addEventListener('input',function(){
-    var q=this.value.toLowerCase();
-    Array.from(tbl.querySelectorAll('tbody tr')).forEach(function(row){
-      var text=row.textContent.toLowerCase();
-      row.classList.toggle('row-hidden',q!==''&&!text.includes(q));
-    });
-  });
+  function runFilters(){
+    var textVal=filter.value.toLowerCase();
+    var dropVals=dropdowns.map(function(d){return{col:d.col,val:d.sel.value};});
+    applyFilters(tbl,textVal,dropVals);
+  }
+
+  filter.addEventListener('input',runFilters);
+  dropdowns.forEach(function(d){d.sel.addEventListener('change',runFilters);});
 }
+
 
 function sortTable(tbl,colIdx,th){
   var asc=th.dataset.sortDir!=='asc';
@@ -789,6 +999,132 @@ loadAll();
 fetch('/api/audit-log').then(r=>r.json()).then(applyAudit).catch(console.error);
 setInterval(function(){loadAll();setTimeout(initAllTables,500);},60000);
 setTimeout(initAllTables,2000); // init after first load
+
+// ── Global Customer Search ─────────────────────────────────────────
+var _csST=null;
+document.getElementById('cust-search-input').addEventListener('input',function(){
+  var q=this.value.trim();
+  var res=document.getElementById('cust-search-results');
+  clearTimeout(_csST);
+  if(q.length<2){res.style.display='none';return;}
+  _csST=setTimeout(function(){
+    fetch('/api/customer-search?q='+encodeURIComponent(q))
+      .then(function(r){return r.json();})
+      .then(function(data){
+        res.innerHTML='';
+        if(!data.length){res.innerHTML='<div style="padding:.75rem 1rem;font-family:Geist Mono,monospace;font-size:11px;color:#484F58">No results</div>';res.style.display='block';return;}
+        var sigC={'green':'#22C55E','at_risk':'#F59E0B','blocked':'#EF4444','unknown':'#484F58'};
+        data.forEach(function(r){
+          var item=document.createElement('div');
+          item.style.cssText='padding:.6rem 1rem;cursor:pointer;border-bottom:1px solid #21262D;display:flex;align-items:center;gap:.5rem';
+          item.innerHTML='<div style="flex:1"><b style="font-size:11px">'+escHtml(r.customer_name)+'</b>'
+            +'<div style="font-family:Geist Mono,monospace;font-size:9px;color:#8B949E;margin-top:1px">'+escHtml(r.active_cse||'—')+' · '+escHtml(r.sales_region||'—')+'</div></div>'
+            +'<span style="font-family:Geist Mono,monospace;font-size:9px;color:'+(sigC[r.signal]||'#484F58')+'">'+escHtml(r.signal||'—')+'</span>';
+          item.addEventListener('click',function(){
+            res.style.display='none';
+            document.getElementById('cust-search-input').value='';
+            openCustomerCard(r.account_id);
+          });
+          item.addEventListener('mouseover',function(){this.style.background='rgba(255,255,255,.04)';});
+          item.addEventListener('mouseout',function(){this.style.background='';});
+          res.appendChild(item);
+        });
+        res.style.display='block';
+      });
+  },250);
+});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#customer-search-bar'))document.getElementById('cust-search-results').style.display='none';
+});
+
+function closeCard(){document.getElementById('cust-modal').style.display='none';}
+
+function openCustomerCard(aid){
+  fetch('/api/customer/'+aid).then(function(r){return r.json();}).then(function(d){
+    if(d.error){alert('Not found');return;}
+    var modal=document.getElementById('cust-modal');
+    var card=document.getElementById('cust-card');
+    var dcP={'Green':'#22C55E','Yellow':'#F59E0B','Red':'#EF4444'};
+    var sigC={'green':'#22C55E','at_risk':'#F59E0B','blocked':'#EF4444'};
+    var dc=d.dc_progress?'<span style="color:'+(dcP[d.dc_progress]||'#484F58')+';font-size:10px;font-family:Geist Mono,monospace">● '+d.dc_progress+'</span>':'';
+    var sig=d.signal?'<span style="color:'+(sigC[d.signal]||'#484F58')+';font-size:10px;font-family:Geist Mono,monospace">'+d.signal+'</span>':'';
+
+    function ms(done,date,actual){
+      var icon=done?'<span style="color:#22C55E">✅</span>':'<span style="color:#484F58">○</span>';
+      var d2=actual||date||'—';
+      return icon+' <span style="font-family:Geist Mono,monospace;font-size:10px;color:#8B949E">'+escHtml(d2)+'</span>';
+    }
+
+    var html='';
+    // Header
+    html+='<div style="padding:1.25rem 1.5rem;border-bottom:1px solid #21262D;background:#0D1117">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between">'
+      +'<div><div style="font-family:Fraunces,serif;font-size:1.3rem;font-weight:700;color:#E6EDF3">'+(d.live_fire?'🔥 ':'')+escHtml(d.customer_name)+'</div>'
+      +'<div style="font-family:Geist Mono,monospace;font-size:10px;color:#8B949E;margin-top:4px">'+escHtml(d.account_id)+'</div></div>'
+      +'<button onclick="closeCard()" style="background:none;border:1px solid #30363D;color:#8B949E;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:12px">✕</button></div>'
+      +'<div style="display:flex;gap:1rem;margin-top:.75rem;flex-wrap:wrap">'
+      +'<span style="font-family:Geist Mono,monospace;font-size:11px;color:#5EEAD4">'+escHtml(d.active_cse||'—')+'</span>'
+      +'<span class="muted" style="font-size:10px">'+escHtml(d.sales_region||'—')+'</span>'
+      +(d.arr?'<span class="muted" style="font-size:10px">'+escHtml(d.arr)+'</span>':'')
+      +(sig?'<span>'+sig+'</span>':'')+(dc?'<span>'+dc+'</span>':'')
+      +'</div></div>';
+
+    // Status row
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#21262D">'
+      +'<div style="background:#0D1117;padding:.75rem 1.5rem"><div style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58;text-transform:uppercase;margin-bottom:4px">EMEA Status</div><div style="font-size:13px;font-weight:600;color:#E6EDF3">'+escHtml(d.status||'—')+'</div></div>'
+      +'<div style="background:#0D1117;padding:.75rem 1.5rem"><div style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58;text-transform:uppercase;margin-bottom:4px">DC Status</div><div style="font-size:12px;font-family:Geist Mono,monospace;color:#8B949E">'+escHtml(d.status_detail||'—')+'</div></div>'
+      +'</div>';
+
+    // Milestones
+    html+='<div style="padding:1rem 1.5rem;border-bottom:1px solid #21262D">'
+      +'<div style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58;text-transform:uppercase;margin-bottom:.6rem">Milestones</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;font-size:11px">'
+      +'<div><b style="font-size:9px;color:#8B949E">M0 Kickoff</b><br>'+ms(d.m0_complete,null,null)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M1 Outreach</b><br>'+ms(d.m1_complete,d.m1_planned,null)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M2 Entitlements</b><br>'+ms(d.m2_complete,d.m2_planned,null)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M3 EB Buy-in</b><br>'+ms(d.m3_complete,d.m3_planned,null)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M4 Discovery</b><br>'+ms(d.m4_complete,d.m4_planned,null)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M5 Tech Val.</b><br>'+ms(d.m5_complete,d.m5_planned,null)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M7 Legal</b><br>'+ms(d.m7_complete,null,null)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M8 Upgrade</b><br>'+ms(d.m8_started,d.m8_planned,d.m8_actual)+'</div>'
+      +'<div><b style="font-size:9px;color:#8B949E">M9 Complete</b><br>'+ms(d.m9_complete,d.m9_planned,d.m9_actual)+'</div>'
+      +'</div></div>';
+
+    // Notes + PS + AI
+    var notes='';
+    if(d.upgrade_notes&&d.upgrade_notes!='TBD')notes+='<div style="margin-bottom:.5rem"><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">UPGRADE NOTES</b><div style="font-size:11px;color:#8B949E;margin-top:2px">'+escHtml(d.upgrade_notes)+'</div></div>';
+    if(d.health_notes&&d.health_notes!='TBD')notes+='<div style="margin-bottom:.5rem"><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">HEALTH NOTES</b><div style="font-size:11px;color:#8B949E;margin-top:2px">'+escHtml(d.health_notes)+'</div></div>';
+    if(d.comments)notes+='<div style="margin-bottom:.5rem"><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">COMMENTS</b><div style="font-size:11px;color:#8B949E;margin-top:2px">'+escHtml(d.comments)+'</div></div>';
+    if(notes)html+='<div style="padding:1rem 1.5rem;border-bottom:1px solid #21262D">'+notes+'</div>';
+
+    // PS + AI enrichment
+    var extra='';
+    if(d.psc)extra+='<div><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">PSC</b><div style="font-size:11px">'+escHtml(d.psc)+'</div></div>';
+    if(d.pm)extra+='<div><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">PM</b><div style="font-size:11px">'+escHtml(d.pm)+'</div></div>';
+    if(d.clarizen_id)extra+='<div><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">CLARIZEN</b><div style="font-size:11px;font-family:Geist Mono,monospace;color:#5EEAD4">'+escHtml(d.clarizen_id)+'</div></div>';
+    if(d.blocker)extra+='<div><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">BLOCKER</b><div style="font-size:11px;color:#EF4444">'+escHtml(d.blocker)+'</div></div>';
+    if(d.owner)extra+='<div><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">OWNER</b><div style="font-size:11px">'+escHtml(d.owner)+'</div></div>';
+    if(d.email_sent)extra+='<div><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58">EMAIL SENT</b><div style="font-size:11px;font-family:Geist Mono,monospace;color:#8B949E">'+escHtml(d.email_sent)+'</div></div>';
+    if(extra)html+='<div style="padding:1rem 1.5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;border-bottom:1px solid #21262D">'+extra+'</div>';
+
+    // History
+    if(d.history&&d.history.length){
+      html+='<div style="padding:1rem 1.5rem"><b style="font-family:Geist Mono,monospace;font-size:9px;color:#484F58;text-transform:uppercase">Change History</b>';
+      d.history.forEach(function(h){
+        html+='<div style="display:flex;gap:.75rem;align-items:center;padding:.35rem 0;border-bottom:1px solid #0D1117;font-family:Geist Mono,monospace;font-size:10px">'
+          +'<span style="color:#484F58;white-space:nowrap">'+escHtml((h.changed_at||'').substring(0,16))+'</span>'
+          +'<span style="color:#5EEAD4;font-size:9px;background:#0F2A1D;padding:1px 5px;border-radius:3px">'+escHtml(h.file_source||'')+'</span>'
+          +'<span style="color:#8B949E">'+escHtml(h.field_name||'')+'</span>'
+          +'<span style="color:#484F58">'+escHtml(h.old_status||'')+'</span>'
+          +'<span style="color:#E6EDF3">→ '+escHtml(h.new_status||'')+'</span></div>';
+      });
+      html+='</div>';
+    }
+
+    card.innerHTML=html;
+    modal.style.display='block';
+  });
+}
 </script>
 
 <!-- Bottom-left debug panel -->

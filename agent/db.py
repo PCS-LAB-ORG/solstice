@@ -69,7 +69,7 @@ def init_db(path: Path = DB_PATH) -> None:
             PRIMARY KEY (account_id, blocker_name)
         );
 
-        -- Milestone + signal data (from blocked accounts CSV)
+        -- Milestone + signal data (DC CSE Tracker is master source of truth)
         CREATE TABLE IF NOT EXISTS blocked_data (
             account_id          TEXT PRIMARY KEY REFERENCES accounts(account_id) ON DELETE CASCADE,
             area                TEXT,
@@ -78,12 +78,34 @@ def init_db(path: Path = DB_PATH) -> None:
             cohort              TEXT,
             team                TEXT,
             is_cs_team          INTEGER DEFAULT 0,
+            -- Milestones M0-M9 (all from DC CSE Tracker)
+            m0_complete         INTEGER DEFAULT 0,
+            m1_complete         INTEGER DEFAULT 0,
+            m1_planned          TEXT,
+            m2_complete         INTEGER DEFAULT 0,
+            m2_planned          TEXT,
             m3_complete         INTEGER DEFAULT 0,
             m3_planned          TEXT,
+            m4_complete         INTEGER DEFAULT 0,
+            m4_planned          TEXT,
+            m5_complete         INTEGER DEFAULT 0,
+            m5_planned          TEXT,
+            m7_complete         INTEGER DEFAULT 0,
+            m7_planned          TEXT,
             m8_started          INTEGER DEFAULT 0,
             m8_planned          TEXT,
+            m8_actual           TEXT,
             m9_complete         INTEGER DEFAULT 0,
             m9_planned          TEXT,
+            m9_actual           TEXT,
+            -- DC metadata
+            dc_progress         TEXT,
+            owner_e2e           TEXT,
+            dc_assignment       TEXT,
+            cc_rep              TEXT,
+            cc_dsm              TEXT,
+            churn_risk          TEXT,
+            -- Notes and signals
             upgrade_notes       TEXT,
             health_notes        TEXT,
             exec_delay          TEXT,
@@ -129,7 +151,24 @@ def init_db(path: Path = DB_PATH) -> None:
             old_status  TEXT,
             new_status  TEXT,
             changed_at  TEXT,
-            source      TEXT DEFAULT 'pipeline'  -- 'pipeline' | 'migration'
+            source      TEXT DEFAULT 'pipeline',
+            file_source TEXT,
+            field_name  TEXT
+        );
+
+        -- M1 outreach action plan (rebuilt on every DC sync)
+        CREATE TABLE IF NOT EXISTS m1_suggestions (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id    TEXT,
+            account_name  TEXT NOT NULL,
+            assigned_cse  TEXT NOT NULL,
+            original_cse  TEXT,
+            region        TEXT,
+            status        TEXT,
+            signal        TEXT,
+            m1_planned    TEXT,
+            category      TEXT,
+            created_at    TEXT DEFAULT (datetime('now'))
         );
 
         -- Approved tasks (from terminal approval flow)
@@ -186,7 +225,7 @@ def migrate_from_state(state_file: Path, path: Path = DB_PATH) -> dict:
         for account_id, acc in accounts.items():
             # accounts
             conn.execute("""
-                INSERT OR REPLACE INTO accounts
+                INSERT OR IGNORE INTO accounts
                 (account_id, customer_name, arr, active_cse, backup_cse, status,
                  status_changed_at, expiration_date, expiry_alerted_date, ps_engaged,
                  kickoff_date, comments, sales_region, email_sent, last_seen)
@@ -274,20 +313,36 @@ def migrate_from_state(state_file: Path, path: Path = DB_PATH) -> dict:
                 ))
                 counts["ai_enrichment"] += 1
 
-            # status_history — seed from status_changed_at
+            # status_history — two sources:
+            # 1. migration: initial status from state.json (old_status=None)
+            # 2. pipeline: real changes stored in state.json["pipeline_changes"]
             changed_at = acc.get("status_changed_at", "")
             status = acc.get("status", "")
             if status and changed_at:
-                existing = conn.execute(
+                migration_exists = conn.execute(
                     "SELECT 1 FROM status_history WHERE account_id=? AND new_status=? AND source='migration'",
                     (account_id, status)
                 ).fetchone()
-                if not existing:
+                if not migration_exists:
                     conn.execute("""
                         INSERT INTO status_history (account_id, old_status, new_status, changed_at, source)
                         VALUES (?,?,?,?,?)
                     """, (account_id, None, status, changed_at, "migration"))
                     counts["status_history"] += 1
+
+        # Restore pipeline changes from state.json (survive DB rebuilds)
+        for change in state.get("pipeline_changes", []):
+            existing = conn.execute(
+                "SELECT 1 FROM status_history WHERE account_id=? AND old_status=? AND new_status=? AND source='pipeline'",
+                (change["account_id"], change["old_status"], change["new_status"])
+            ).fetchone()
+            if not existing:
+                conn.execute("""
+                    INSERT INTO status_history (account_id, old_status, new_status, changed_at, source)
+                    VALUES (?,?,?,?,?)
+                """, (change["account_id"], change["old_status"], change["new_status"],
+                      change["changed_at"], "pipeline"))
+                counts["status_history"] += 1
 
     logger.info("Migration complete: %s", counts)
     return counts
@@ -309,7 +364,7 @@ def upsert_account(conn: sqlite3.Connection, account_id: str, acc: dict) -> bool
         status_changed = old_status != new_status and old_status is not None
 
         conn.execute("""
-            INSERT OR REPLACE INTO accounts
+            INSERT OR IGNORE INTO accounts
             (account_id, customer_name, arr, active_cse, backup_cse, status,
              status_changed_at, expiration_date, expiry_alerted_date, ps_engaged,
              kickoff_date, comments, sales_region, email_sent, last_seen)
