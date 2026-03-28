@@ -37,12 +37,9 @@ def _populate_db():
 
     import json as _j, logging as _log
     _log.warning("DB empty — populating from CSVs...")
-    from agent.blocked_parser import load_and_merge as _mb
     from agent.ps_parser import load_and_merge as _mp
     from agent.db import migrate_from_state as _mig
     init_db()
-    if (DATA_DIR/"blocked_accounts.csv").exists():
-        _mb(DATA_DIR/"blocked_accounts.csv", STATE_FILE)
     if (DATA_DIR/"ps_tracker.csv").exists():
         _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
     _mig(STATE_FILE)
@@ -283,15 +280,41 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
     _now = _dt.now(_tz.utc).isoformat()
     _audit = 0
 
+    # Load ALL theatres via dc_parser — same full field set for every account, no exceptions
+    from agent.dc_parser import parse_dc_csv as _parse_dc
+    _all_dc = {rec["account_id"]: rec for rec in _parse_dc(data_dir / "dc_cse_tracker.csv")}
+
     with get_db() as _conn:
-        for _aid, _acc in _dc_state.get("accounts", {}).items():
-            _dd = _acc.get("dc_data", {})
-            if not _dd:
-                continue
-            # Update accounts table (CSE + email)
-            if _dd.get("active_cse"):
-                _conn.execute("UPDATE accounts SET active_cse=? WHERE account_id=?",
-                              (_dd["active_cse"], _aid))
+        _new_accounts = 0
+        for _aid, _dd in _all_dc.items():
+            # Ensure account exists — create if new (JAPAC/AMER/LATAM)
+            _exists = _conn.execute("SELECT 1 FROM accounts WHERE account_id=?", (_aid,)).fetchone()
+            if not _exists:
+                _conn.execute("""INSERT OR IGNORE INTO accounts
+                    (account_id, customer_name, active_cse, sales_region, account_theatre, created_at)
+                    VALUES (?,?,?,?,?,datetime('now'))""",
+                    (_aid, _dd.get("account_name",""),
+                     _dd.get("active_cse",""),
+                     _dd.get("area","") or _dd.get("account_region",""),
+                     _dd.get("account_theatre","EMEA")))
+                _new_accounts += 1
+            # Update accounts table — same fields for ALL theatres, no exceptions
+            _region = _dd.get("area","") or _dd.get("account_region","")
+            _conn.execute("""UPDATE accounts SET
+                active_cse=CASE WHEN ? !='' THEN ? ELSE active_cse END,
+                sales_region=CASE WHEN ? !='' THEN ? ELSE sales_region END,
+                account_theatre=?,
+                customer_name=CASE WHEN ? !='' THEN ? ELSE customer_name END,
+                status=CASE WHEN ? !='' THEN ? ELSE status END,
+                live_fire=CASE WHEN ? =1 THEN 1 ELSE live_fire END
+                WHERE account_id=?""",
+                (_dd.get("active_cse",""), _dd.get("active_cse",""),
+                 _region, _region,
+                 _dd.get("account_theatre","EMEA"),
+                 _dd.get("account_name",""), _dd.get("account_name",""),
+                 _dd.get("status",""), _dd.get("status",""),
+                 int(_dd.get("live_fire", False)),
+                 _aid))
             if _dd.get("email_sent"):
                 _conn.execute("UPDATE accounts SET email_sent=? WHERE account_id=? AND (email_sent IS NULL OR email_sent='')",
                               (_dd["email_sent"], _aid))
@@ -304,8 +327,15 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                    m7_complete, m8_started, m8_planned, m8_actual,
                    m9_complete, m9_planned, m9_actual,
                    upgrade_notes, dc_progress, owner_e2e, dc_assignment, merged_at,
-                   cc_rep, cc_dsm, churn_risk, health_notes)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                   cc_rep, cc_dsm, churn_risk, health_notes,
+                   last_edited_by, last_edited_date, roadmap_url, ps_plan_url,
+                   account_region, current_project_status, next_renewal_date,
+                   past_due_planned, upgrade_duration_weeks, has_partner, upgrade_partner,
+                   m1_details, m3_details, m5_details, milestone_aging,
+                   days_since_milestone, momentum_x, entitlement_provision,
+                   activation_status, posture_workloads, account_theatre,
+                   signal, subtype, status_detail, cohort, area, district, team)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 ON CONFLICT(account_id) DO UPDATE SET
                   m0_complete=excluded.m0_complete, m1_complete=excluded.m1_complete,
                   m1_planned=excluded.m1_planned, m2_complete=excluded.m2_complete,
@@ -321,7 +351,30 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                   dc_assignment=excluded.dc_assignment, merged_at=excluded.merged_at,
                   cc_rep=excluded.cc_rep, cc_dsm=excluded.cc_dsm,
                   churn_risk=excluded.churn_risk,
-                  health_notes=CASE WHEN excluded.health_notes!='' THEN excluded.health_notes ELSE health_notes END
+                  health_notes=CASE WHEN excluded.health_notes!='' THEN excluded.health_notes ELSE health_notes END,
+                  last_edited_by=excluded.last_edited_by, last_edited_date=excluded.last_edited_date,
+                  roadmap_url=excluded.roadmap_url, ps_plan_url=excluded.ps_plan_url,
+                  account_region=excluded.account_region,
+                  current_project_status=excluded.current_project_status,
+                  next_renewal_date=excluded.next_renewal_date,
+                  past_due_planned=excluded.past_due_planned,
+                  upgrade_duration_weeks=excluded.upgrade_duration_weeks,
+                  has_partner=excluded.has_partner, upgrade_partner=excluded.upgrade_partner,
+                  m1_details=excluded.m1_details, m3_details=excluded.m3_details,
+                  m5_details=excluded.m5_details, milestone_aging=excluded.milestone_aging,
+                  days_since_milestone=excluded.days_since_milestone,
+                  momentum_x=excluded.momentum_x,
+                  entitlement_provision=excluded.entitlement_provision,
+                  activation_status=excluded.activation_status,
+                  posture_workloads=excluded.posture_workloads,
+                  account_theatre=excluded.account_theatre,
+                  signal=excluded.signal,
+                  subtype=excluded.subtype,
+                  status_detail=CASE WHEN excluded.status_detail!='' THEN excluded.status_detail ELSE status_detail END,
+                  cohort=excluded.cohort,
+                  area=excluded.area,
+                  district=excluded.district,
+                  team=excluded.team
             """, (
                 _aid,
                 int(_dd.get("m0_complete", False)),
@@ -337,6 +390,21 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                 _dd.get("owner_e2e", ""), _dd.get("dc_assignment", ""), _dd.get("merged_at", ""),
                 _dd.get("cc_rep", ""), _dd.get("cc_dsm", ""),
                 _dd.get("churn_risk", ""), _dd.get("health_notes", ""),
+                _dd.get("last_edited_by", ""), _dd.get("last_edited_date", ""),
+                _dd.get("roadmap_url", ""), _dd.get("ps_plan_url", ""),
+                _dd.get("account_region", ""), _dd.get("current_project_status", ""),
+                _dd.get("next_renewal_date", ""), _dd.get("past_due_planned", ""),
+                _dd.get("upgrade_duration_weeks", ""), _dd.get("has_partner", ""),
+                _dd.get("upgrade_partner", ""), _dd.get("m1_details", ""),
+                _dd.get("m3_details", ""), _dd.get("m5_details", ""),
+                _dd.get("milestone_aging", ""), _dd.get("days_since_milestone", ""),
+                _dd.get("momentum_x", ""), _dd.get("entitlement_provision", ""),
+                _dd.get("activation_status", ""), _dd.get("posture_workloads", ""),
+                _dd.get("account_theatre", "EMEA"),
+                _dd.get("signal", ""), _dd.get("subtype", ""),
+                _dd.get("status_detail", ""),
+                _dd.get("cohort", ""), _dd.get("area", ""),
+                _dd.get("district", ""), _dd.get("pm_status", ""),
             ))
             # Diff audit — only accounts with prior dc_data (skip first-load)
             _old = _snap.get(_aid.lower(), {})
@@ -369,6 +437,7 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                     _audit += 1
 
     result["audit_logged"] = _audit
+    result["new_accounts"] = _new_accounts
 
     # Auto-rebuild m1_suggestions from fresh DB state — no stale data ever served
     _SKIP = {'Churning/Churned','Cancelled','Backoff','Completed'}
@@ -393,9 +462,13 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
         _load = {r[0]:r[1] for r in _mdb.execute(
             "SELECT active_cse,COUNT(*) FROM accounts WHERE active_cse IS NOT NULL AND active_cse!='' AND active_cse!='Irene Garcia' GROUP BY active_cse").fetchall()}
         _load['Visnavi'] = 0
+        _SKIP_KW = ['wiz choice','made a wiz','went to wiz','no action required',
+                    'will not migrate','never activated','not migrate them','decided not to migrate',
+                    'chose wiz','going with wiz','no cortex cloud migration','nfr use','likely nfr',
+                    'partner account','strictly nfr']
         _m1_rows = _mdb.execute('''
             SELECT a.account_id,a.customer_name,a.active_cse,a.sales_region,a.status,a.live_fire,
-                   b.signal,b.status_detail,b.upgrade_notes,b.subtype
+                   b.signal,b.status_detail,b.upgrade_notes,b.subtype,b.churn_risk,b.health_notes
             FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
             WHERE a.customer_name!='' AND b.m1_complete=0
             ORDER BY a.sales_region,a.customer_name''').fetchall()
@@ -406,16 +479,73 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
             _cse = min(_REGION_CSE.get(_reg,['Chinmoy Roy']),key=lambda c:_load.get(c,0)) if _orig=='Irene Garcia' else _orig
             if _orig=='Irene Garcia': _load[_cse]=_load.get(_cse,0)+1
             _st=_mr['status'] or ''; _sig=_mr['signal'] or ''
-            _det=(_mr['status_detail'] or '').lower(); _nt=(_mr['upgrade_notes'] or '').lower()
+            _det=(_mr['status_detail'] or '').lower()
+            _nt=(_mr['upgrade_notes'] or '').lower()
+            _hn=(_mr['health_notes'] or '').lower()
+            _churn=(_mr['churn_risk'] or '').strip()
             _nm=_mr['customer_name'].lower()
+            _all=_nt+' '+_hn+' '+_det
             if 'mtn ' in _nm or _nm=='mtn benin': _cat='unblock'
             elif _st in _SKIP or 'Blocked: Tech' in _st: _cat='skip'
+            elif any(k in _all for k in _SKIP_KW): _cat='skip'
+            elif _churn=='Red': _cat='acct_team'
+            elif '\U0001f6d1' in (_mr['status_detail'] or '') or 'blocked from' in _det: _cat='acct_team'
             elif _st in ('Sales Hold','On Hold') or any(k in _nt+_det for k in _HOLD_KW) or _sig=='blocked': _cat='acct_team'
             else: _cat='actionable'
             _mdb.execute(
                 'INSERT INTO m1_suggestions (account_name,assigned_cse,original_cse,region,status,signal,category) VALUES (?,?,?,?,?,?,?)',
                 (_mr['customer_name'],_cse,_orig,_reg,_mr['status'],_mr['signal'],_cat))
     result["m1_rebuilt"] = len(_m1_rows)
+
+    # Backfill audit history for any account that has a milestone completion but no audit entry
+    # This runs on every DC sync so new theatres (JAPAC/AMER/LATAM) get history automatically
+    import csv as _csv2
+    _PLACEHOLDER = '01/15/2026'
+    _MS_DATES = [
+        ('m1_complete','Date - M1:Internal Kickoff Complete','M1 Outreach'),
+        ('m2_complete','Date - M2:Entitlements and Plan aligned with customer','M2 Entitlements'),
+        ('m3_complete','Date - M3:EB Buy-in Meeting Complete','M3 Buy-in'),
+        ('m4_complete','Date - M4:Discovery complete','M4 Discovery'),
+        ('m5_complete','Date - M5:Tech validation complete','M5 Tech Validation'),
+        ('m8_started','Date - M8:Upgrade started','M8 Upgrade Started'),
+        ('m9_complete','Date - M9:Upgrade complete','M9 Upgrade Complete'),
+    ]
+    _raw_rows = {}
+    with open(data_dir / "dc_cse_tracker.csv", encoding="utf-8-sig", errors="ignore") as _f2:
+        for _row2 in _csv2.DictReader(_f2):
+            _t2 = _row2.get("account_theatre","").strip().upper()
+            if _t2 not in ("EMEA","JAPAC","AMER","LATAM"): continue
+            _rid2 = _row2.get("pc_end_customer_account_id","").strip().lower()
+            if _rid2: _raw_rows[_rid2] = _row2
+
+    def _parse_actual(s):
+        if not s or s.strip() == _PLACEHOLDER: return None
+        for _fmt in ('%m/%d/%Y %H:%M:%S','%m/%d/%Y','%m/%d/%y'):
+            try:
+                from datetime import datetime as _dtt
+                return _dtt.strptime(s.strip(), _fmt).isoformat()+'+00:00'
+            except: pass
+        return None
+
+    _bf = 0
+    with get_db() as _bc:
+        _id_map2 = {r[0].lower(): r[0] for r in _bc.execute('SELECT account_id FROM accounts').fetchall()}
+        for _rec in _all_dc.values():
+            _aid2_lower = _rec["account_id"]
+            _aid2 = _id_map2.get(_aid2_lower)
+            if not _aid2: continue
+            _raw2 = _raw_rows.get(_aid2_lower, {})
+            for _fk, _dc_col, _label in _MS_DATES:
+                if not _rec.get(_fk): continue
+                _ts2 = _parse_actual(_raw2.get(_dc_col,''))
+                if not _ts2: continue
+                _dup2 = _bc.execute("SELECT 1 FROM status_history WHERE account_id=? AND field_name=? AND new_status='Y' AND file_source='DC CSE Tracker'",
+                    (_aid2, _label)).fetchone()
+                if _dup2: continue
+                _bc.execute("INSERT INTO status_history (account_id,old_status,new_status,changed_at,source,file_source,field_name) VALUES (?,?,?,?,?,?,?)",
+                    (_aid2,'N','Y',_ts2,'backfill','DC CSE Tracker',_label))
+                _bf += 1
+    result["history_backfilled"] = _bf
     return result
 
 
@@ -429,161 +559,19 @@ def api_run():
         try:
             import json as _j2
             from datetime import datetime as _dt, timezone as _tz
-            from agent.blocked_parser import load_and_merge as _mb
             from agent.ps_parser import load_and_merge as _mp
             from agent.dc_parser import load_and_merge as _mdc
             from agent.enricher import enrich_accounts as _enrich
             from agent.db import migrate_from_state as _mig
-            from agent.differ import parse_csv as _parse
-            from agent.validator import validate_accounts as _validate
 
-            _mb(DATA_DIR/"blocked_accounts.csv", STATE_FILE)
             _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
             # DC CSE Tracker is master — shared function handles snapshot, upsert, diff audit
             if (DATA_DIR/"dc_cse_tracker.csv").exists():
                 _run_dc_pipeline(DATA_DIR, STATE_FILE)
 
             _enrich(STATE_FILE)
-
-            # Diff EMEA accounts — detect status AND CSE changes
-            _emea = DATA_DIR/"emea_accounts.csv"
-            _changes = 0
-            # Fields to audit from EMEA accounts CSV
-            _EMEA_WATCH = [
-                ("status",     "status"),
-                ("active_cse", "cse"),
-            ]
-            if _emea.exists():
-                _state = _j2.loads(STATE_FILE.read_text())
-                _new = _parse(_emea)
-                _valid, _ = _validate(_new, csv_filename=_emea.name)
-                _old = _state.get("accounts", {})
-                _now = _dt.now(_tz.utc).isoformat()
-                _pipeline_changes = _state.get("pipeline_changes", [])
-                with get_db() as _conn:
-                    for _aid, _nacc in _valid.items():
-                        for _field, _label in _EMEA_WATCH:
-                            _ov = (_old.get(_aid, {}).get(_field) or "").strip()
-                            _nv = (_nacc.get(_field) or "").strip()
-                            if not _ov or _ov == _nv: continue
-                            _dup = _conn.execute(
-                                "SELECT 1 FROM status_history WHERE account_id=? AND field_name=? AND old_status=? AND new_status=? AND source='pipeline' AND file_source='EMEA Accounts CC Migrations'",
-                                (_aid, _label, _ov, _nv)).fetchone()
-                            if not _dup:
-                                _conn.execute(
-                                    "INSERT INTO status_history (account_id,old_status,new_status,changed_at,source,file_source,field_name) VALUES (?,?,?,?,?,?,?)",
-                                    (_aid, _ov, _nv, _now, "pipeline", "EMEA Accounts CC Migrations", _label))
-                                if _field == "status":
-                                    _pipeline_changes.append({
-                                        "account_id": _aid, "old_status": _ov, "new_status": _nv,
-                                        "changed_at": _now, "customer_name": _nacc.get("customer_name","")
-                                    })
-                            _changes += 1
-                _state["pipeline_changes"] = _pipeline_changes
-                # MERGE — preserve enrichment fields, only update CSV-sourced fields
-                MERGE_FIELDS = ['customer_name','arr','active_cse','backup_cse','status',
-                                'status_changed_at','expiration_date','expiry_alerted_date',
-                                'ps_engaged','kickoff_date','comments','sales_region',
-                                'email_sent','live_fire','live_fire_dc','blockers','last_seen']
-                for _mid, _macc in _valid.items():
-                    if _mid in _state["accounts"]:
-                        for _f in MERGE_FIELDS:
-                            if _f in _macc:
-                                _state["accounts"][_mid][_f] = _macc[_f]
-                    else:
-                        _state["accounts"][_mid] = _macc
-                STATE_FILE.write_text(_j2.dumps(_state, indent=2, ensure_ascii=False))
-
-            # Multi-file audit — track ALL column changes across ALL CSV source files
-            _now2 = _dt.now(_tz.utc).isoformat()
-            _snap = _j2.loads(STATE_FILE.read_text()).get("file_snapshots", {})
-            import csv as _csv_mod
-
-            def _log_change(conn, aid, field, old_v, new_v, file_src):
-                """Log a field change to status_history. No-op if duplicate or no real change."""
-                ov, nv = str(old_v).strip(), str(new_v).strip()
-                if not ov or ov == nv: return 0
-                dup = conn.execute(
-                    "SELECT 1 FROM status_history WHERE account_id=? AND field_name=? AND old_status=? AND new_status=? AND file_source=?",
-                    (aid, field, ov, nv, file_src)).fetchone()
-                if dup: return 0
-                conn.execute(
-                    "INSERT INTO status_history (account_id,old_status,new_status,changed_at,source,file_source,field_name) VALUES (?,?,?,?,?,?,?)",
-                    (aid, ov, nv, _now2, "pipeline", file_src, field))
-                return 1
-
-            # Build account_id lookup (lowercase → real ID)
-            with get_db() as _lm_conn:
-                _lower_map = {r[0].lower(): r[0] for r in _lm_conn.execute('SELECT account_id FROM accounts').fetchall()}
-
-            _audit_total = 0
-
-            # File audit config:
-            # EMEA Accounts = CSE working file → track ALL columns
-            # DC CSE Tracker = data feed → track only key milestone/status fields
-            _CSV_WATCH = {
-                "emea_accounts": {
-                    "path": DATA_DIR/"emea_accounts.csv",
-                    "label": "EMEA Accounts CC Migrations",
-                    "id_col": "\xa0\xa0",  # non-breaking spaces — actual column header
-                    "filter": {},
-                    "cols": {"Status"},    # only track status — CSE handled by simple diff, rest is noise
-                },
-                "dc_cse_tracker": {
-                    "path": DATA_DIR/"dc_cse_tracker.csv",
-                    "label": "DC CSE Tracker",
-                    "id_col": "pc_end_customer_account_id",
-                    "filter": {"account_theatre": "EMEA"},
-                    "cols": {              # only these fields matter
-                        "M0:Internal Kickoff Complete", "M1:Customer Outreach Complete",
-                        "M2:Entitlements and Plan aligned with customer",
-                        "M3:EB Buy-in Meeting Complete", "M4:Discovery complete",
-                        "M5:Tech validation complete", "M7:Legal and operational upgrade readiness",
-                        "M8:Upgrade started", "M9:Upgrade complete",
-                        "PC_CC_Migration_status", "DC Upgrade Progress Status",
-                        "CSE Assigned", "DC Indicated account churn risk",
-                    },
-                },
-            }
-
-            for _snap_key, _cfg in _CSV_WATCH.items():
-                if not _cfg["path"].exists(): continue
-                _old_snap = _snap.get(_snap_key, {})
-                _new_snap = {}
-                try:
-                    with open(_cfg["path"], encoding='utf-8-sig', errors='ignore') as _cf:
-                        for _row in _csv_mod.DictReader(_cf):
-                            # Row filter
-                            if _cfg["filter"] and any(
-                                    _row.get(k,'').strip().upper() != v.upper()
-                                    for k,v in _cfg["filter"].items()): continue
-                            # Resolve account_id
-                            _raw_id = (_row.get(_cfg["id_col"],'') or '').strip().lower()
-                            _aid = _lower_map.get(_raw_id)
-                            if not _aid: continue
-                            # Build row snapshot — all cols or specific set
-                            if _cfg["cols"] is None:
-                                _row_snap = {k: v.strip() for k,v in _row.items()
-                                             if k and k != _cfg["id_col"] and v and v.strip()
-                                             and not v.strip().startswith('#')}  # skip #REF! etc
-                            else:
-                                _row_snap = {k: _row.get(k,'').strip() for k in _cfg["cols"]}
-                            _new_snap[_aid] = _row_snap
-                            _prev = _old_snap.get(_aid, {})
-                            if not _prev: continue  # first run = seed, no diff
-                            with get_db() as _dc:
-                                for _fld in set(_prev) | set(_row_snap):
-                                    _ov = _prev.get(_fld,'')
-                                    _nv = _row_snap.get(_fld,'')
-                                    _audit_total += _log_change(_dc, _aid, _fld, _ov, _nv, _cfg["label"])
-                except Exception:
-                    pass
-                _st_snap = _j2.loads(STATE_FILE.read_text())
-                _st_snap.setdefault("file_snapshots", {})[_snap_key] = _new_snap
-                STATE_FILE.write_text(_j2.dumps(_st_snap, indent=2, ensure_ascii=False))
-
             _mig(STATE_FILE)
-            r_output = f"status_changes={_changes} audit_changes={_audit_total}\ndone"
+            r_output = "DC CSE Tracker is sole source. All milestones synced.\ndone"
             r_ok = True
         except Exception as _e:
             r_output = str(_e)
@@ -623,16 +611,13 @@ async def api_run_full(request: Request):
 
         # Step 2: Check CSV files
         data_dir = Path(__file__).parent / "data"
-        csvs = {"Blocked Accounts": data_dir/"blocked_accounts.csv",
-                "PS Tracker":       data_dir/"ps_tracker.csv"}
+        csvs = {"PS Tracker": data_dir/"ps_tracker.csv"}
         yield event("Google Drive", "DOWNLOADING", "Opening export URLs in browser — corp auth handles it")
         import glob as _g2, os as _os2, shutil as _sh2
         downloads = Path.home() / "Downloads"
         _cfg = json.loads((data_dir / "drive_config.json").read_text())
         FILE_MAP2 = {
             "DC CSE Tracker":              ("dc_cse_tracker.csv", None),
-            "EMEA Accounts CC Migrations": ("emea_accounts.csv",  None),
-            "EMEA Solistce Blocked Accounts": ("blocked_accounts.csv", None),
             # PS Tracker excluded — Drive default tab exports wrong format
         }
         for _f in _cfg["files"]:
@@ -675,17 +660,8 @@ async def api_run_full(request: Request):
                 yield event("  →", "MISSING", f"{name}: not found", "red")
         await asyncio.sleep(0.1)
 
-        # Step 3: Merge blocked accounts
-        yield event("Blocked Accounts", "LOADING", "Parsing + merging into state.json")
-        try:
-            from agent.blocked_parser import load_and_merge as mb
-            b = mb(data_dir/"blocked_accounts.csv", data_dir/"state.json")
-            yield event("  →", "OK", f"{b['matched']} matched · {b['cs_team']} CS team · {b['core_rep_blocking']} core-rep-blocking", "green")
-        except Exception as e:
-            yield event("  →", "ERROR", str(e)[:80], "red")
-        await asyncio.sleep(0.1)
-
-        # Step 4: Merge PS tracker
+        # Step 3: PS tracker (supplementary — Clarizen IDs, PSC names)
+        yield event("PS Tracker", "LOADING", "Supplementary PS engagement data")
         yield event("PS Tracker", "LOADING", "Fuzzy name matching (threshold 0.85)")
         try:
             from agent.ps_parser import load_and_merge as mp
@@ -847,9 +823,9 @@ def _load_open_actions() -> list:
         return []
 
 
-def _load_milestones() -> list:
+def _load_milestones(theatre: str = "") -> list:
     _ensure_db()
-    """Milestone tracker — full M0-M9 with SLA breach flags."""
+    """Milestone tracker — full M0-M9 with SLA breach flags. Optional theatre filter."""
     from datetime import datetime
     MARCH9 = datetime(2026, 3, 9)
     def _pd(s):
@@ -872,11 +848,13 @@ def _load_milestones() -> list:
                        b.m8_started, b.m8_planned, b.m8_actual,
                        b.m9_complete, b.m9_planned, b.m9_actual,
                        b.upgrade_notes, b.health_notes, b.exec_delay, b.status_detail,
-                       b.dc_progress, b.owner_e2e
+                       b.dc_progress, b.owner_e2e,
+                       COALESCE(a.account_theatre, b.account_theatre, 'EMEA') as account_theatre
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != ''
+                  AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA')) = UPPER(?))
                 ORDER BY b.signal, a.customer_name
-            """).fetchall()
+            """, (theatre, theatre)).fetchall()
             result = []
             for r in rows:
                 d = dict(r)
@@ -974,7 +952,7 @@ def _load_dq() -> list:
     except: return []
 
 
-def _load_audit_log() -> list:
+def _load_audit_log(theatre: str = "") -> list:
     _ensure_db()
     """Audit log — changes detected across all source files between pipeline runs."""
     try:
@@ -994,15 +972,22 @@ def _load_audit_log() -> list:
                 LEFT JOIN accounts a ON a.account_id = sh.account_id
                 WHERE sh.source IN ('pipeline','backfill')
                   AND sh.file_source = 'DC CSE Tracker'
+                  AND (? = ''
+                       OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?)
+                       OR (sh.account_id='unmatched_dc' AND (
+                           ? = '' OR UPPER(COALESCE(
+                             (SELECT a2.account_theatre FROM accounts a2
+                              WHERE a2.customer_name=sh.new_status LIMIT 1),
+                             'EMEA'))=UPPER(?))))
                 ORDER BY sh.changed_at ASC
                 LIMIT 2000
-            """).fetchall()
+            """, (theatre, theatre, theatre, theatre)).fetchall()
         return [dict(r) for r in rows]
     except: return []
 
 
 @app.get("/api/audit-log")
-def api_audit(): return _load_audit_log()
+def api_audit(theatre: str = ""): return _load_audit_log(theatre=theatre)
 
 
 @app.get("/api/update-blocked-tab")
@@ -1070,7 +1055,21 @@ def _get_blocked_export_url() -> str:
 def api_open_actions(): return _load_open_actions()
 
 @app.get("/api/milestones")
-def api_milestones(): return _load_milestones()
+def api_milestones(theatre: str = ""): return _load_milestones(theatre=theatre)
+
+@app.get("/api/theatres")
+def api_theatres():
+    """List distinct theatres with account counts."""
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT COALESCE(account_theatre,'EMEA') theatre, COUNT(*) n
+                FROM accounts WHERE customer_name!=''
+                GROUP BY account_theatre ORDER BY n DESC
+            """).fetchall()
+        return [dict(r) for r in rows]
+    except: return []
 
 @app.get("/api/ps")
 def api_ps(): return _load_ps()
@@ -1110,12 +1109,20 @@ def api_customer_detail(account_id: str):
                 SELECT a.*, b.m0_complete, b.m1_complete, b.m1_planned,
                        b.m2_complete, b.m2_planned, b.m3_complete, b.m3_planned,
                        b.m4_complete, b.m4_planned, b.m5_complete, b.m5_planned,
-                       b.m7_complete, b.m8_started, b.m8_planned, b.m8_actual,
+                       b.m7_complete, b.m7_planned, b.m8_started, b.m8_planned, b.m8_actual,
                        b.m9_complete, b.m9_planned, b.m9_actual,
                        b.signal, b.subtype, b.dc_progress, b.status_detail,
                        b.upgrade_notes, b.health_notes, b.owner_e2e, b.dc_assignment,
-                       b.cohort, b.region as district_region, b.milestone_category,
+                       b.cohort, b.area, b.region as district_region, b.district,
+                       b.milestone_category, b.is_cs_team, b.team, b.exec_delay,
                        b.cc_rep, b.cc_dsm, b.churn_risk,
+                       b.last_edited_by, b.last_edited_date, b.roadmap_url, b.ps_plan_url,
+                       b.account_region, b.current_project_status, b.next_renewal_date,
+                       b.past_due_planned, b.upgrade_duration_weeks,
+                       b.has_partner, b.upgrade_partner,
+                       b.m1_details, b.m3_details, b.m5_details,
+                       b.milestone_aging, b.days_since_milestone, b.momentum_x,
+                       b.entitlement_provision, b.activation_status, b.posture_workloads,
                        p.psc, p.pm, p.psc_shadow, p.ps_status, p.clarizen_id, p.timeline as ps_timeline,
                        ae.blocker, ae.owner, ae.accountable
                 FROM accounts a
@@ -1127,7 +1134,7 @@ def api_customer_detail(account_id: str):
             # Status history
             hist = conn.execute("""
                 SELECT old_status, new_status, changed_at, file_source, field_name
-                FROM status_history WHERE account_id=? ORDER BY changed_at DESC LIMIT 10
+                FROM status_history WHERE account_id=? ORDER BY changed_at ASC LIMIT 20
             """, (account_id,)).fetchall()
         if not r: return {"error": "not found"}
         d = dict(r)
@@ -1165,19 +1172,41 @@ def api_m1_suggestions():
     try:
         with get_db() as conn:
             rows = conn.execute("""
-                SELECT assigned_cse, account_name, original_cse, region, status, signal, category
-                FROM m1_suggestions
-                ORDER BY category, assigned_cse, region, account_name
+                SELECT s.assigned_cse, s.account_name, s.original_cse, s.region,
+                       s.status, s.signal, s.category,
+                       b.status_detail, b.upgrade_notes, b.health_notes,
+                       b.cc_rep, b.cc_dsm, b.churn_risk, b.dc_progress,
+                       a.live_fire, b.m3_planned, b.m8_planned, b.m9_planned
+                FROM m1_suggestions s
+                LEFT JOIN accounts a ON a.customer_name=s.account_name
+                LEFT JOIN blocked_data b ON b.account_id=a.account_id
+                ORDER BY s.category, s.assigned_cse, s.region, s.account_name
             """).fetchall()
         from collections import defaultdict
         cats: dict = {'actionable': [], 'acct_team': [], 'unblock': [], 'skip': []}
         for r in rows:
             cat = r[6] or 'actionable'
             if cat in cats:
+                # Pick best note: upgrade_notes first, then health_notes, then status_detail
+                detail = (r[7] or '').strip()  # status_detail
+                notes  = (r[8] or '').strip()  # upgrade_notes
+                health = (r[9] or '').strip()  # health_notes
+                best_note = notes if notes and notes not in ('TBD','-','') else (
+                            health if health and health not in ('TBD','-','') else detail)
                 cats[cat].append({
                     "account_name": r[1], "assigned_cse": r[0], "original_cse": r[2],
                     "region": r[3], "status": r[4], "signal": r[5],
-                    "is_new": r[2] == 'Irene Garcia'
+                    "is_new": r[2] == 'Irene Garcia',
+                    "status_detail": detail,
+                    "notes": best_note[:200] if best_note else '',
+                    "cc_rep": r[10] or '',
+                    "cc_dsm": r[11] or '',
+                    "churn_risk": r[12] or '',
+                    "dc_progress": r[13] or '',
+                    "live_fire": bool(r[14]),
+                    "m3_planned": r[15] or '',
+                    "m8_planned": r[16] or '',
+                    "m9_planned": r[17] or '',
                 })
         result = []
         for cat, label, color in [
@@ -1217,6 +1246,131 @@ def dashboard_v2():
         return html_path.read_text()
     return "<h1>v2 not found</h1>"
 
+@app.get("/daily",response_class=HTMLResponse)
+def dashboard_daily():
+    html_path = Path(__file__).parent / "static" / "daily.html"
+    if html_path.exists():
+        return html_path.read_text()
+    return "<h1>daily not found</h1>"
+
+@app.get("/api/daily-brief")
+def api_daily_brief(date: str = "", theatre: str = ""):
+    """Leadership daily briefing — movements for a given date + 7-day trend."""
+    _ensure_db()
+    from datetime import datetime, timedelta
+    if not date:
+        date = datetime.utcnow().strftime("%Y-%m-%d")
+    try:
+        target = datetime.strptime(date, "%Y-%m-%d")
+    except:
+        return {"error": "Invalid date"}
+    try:
+        with get_db() as conn:
+            # All movements for this day
+            day_rows = conn.execute("""
+                SELECT sh.account_id, sh.field_name, sh.old_status, sh.new_status,
+                       sh.changed_at, sh.file_source,
+                       CASE WHEN sh.account_id='unmatched_dc' THEN sh.new_status
+                            ELSE a.customer_name END as customer_name,
+                       CASE WHEN sh.account_id='unmatched_dc' THEN sh.old_status
+                            ELSE COALESCE(a.active_cse,'—') END as active_cse,
+                       COALESCE(b.area,'—') as area,
+                       COALESCE(a.sales_region,'—') as region,
+                       COALESCE(b.churn_risk,'') as churn_risk
+                FROM status_history sh
+                LEFT JOIN accounts a ON a.account_id=sh.account_id
+                LEFT JOIN blocked_data b ON b.account_id=sh.account_id
+                WHERE sh.changed_at >= ? AND sh.changed_at < ?
+                  AND sh.source IN ('pipeline','backfill')
+                  AND (? = ''
+                       OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?)
+                       OR (sh.account_id='unmatched_dc' AND (
+                           ? = '' OR UPPER(COALESCE(
+                             (SELECT a2.account_theatre FROM accounts a2
+                              WHERE a2.customer_name=sh.new_status LIMIT 1),
+                             'EMEA'))=UPPER(?))))
+                ORDER BY sh.changed_at
+            """, (date+"T00:00:00", date+"T23:59:59", theatre, theatre, theatre, theatre)).fetchall()
+
+            # 7-day trend
+            trend = []
+            for i in range(6, -1, -1):
+                d = (target - timedelta(days=i)).strftime("%Y-%m-%d")
+                r = conn.execute("""
+                    SELECT
+                      SUM(CASE WHEN sh.field_name='M8 Upgrade Started' THEN 1 ELSE 0 END) m8,
+                      SUM(CASE WHEN sh.field_name='M9 Upgrade Complete' THEN 1 ELSE 0 END) m9,
+                      0 m3, 0 m1,
+                      SUM(CASE WHEN sh.field_name IN ('M8 Upgrade Started','M9 Upgrade Complete') THEN 1 ELSE 0 END) total
+                    FROM status_history sh
+                    LEFT JOIN accounts a ON a.account_id=sh.account_id
+                    WHERE sh.changed_at >= ? AND sh.changed_at < ?
+                      AND sh.source IN ('pipeline','backfill')
+                      AND sh.field_name IN ('M8 Upgrade Started','M9 Upgrade Complete')
+                      AND sh.new_status='Y'
+                      AND (? = ''
+                           OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?)
+                           OR (sh.account_id='unmatched_dc' AND (
+                               ? = '' OR UPPER(COALESCE(
+                                 (SELECT a2.account_theatre FROM accounts a2
+                                  WHERE a2.customer_name=sh.new_status LIMIT 1),
+                                 'EMEA'))=UPPER(?))))
+                """, (d+"T00:00:00", d+"T23:59:59", theatre, theatre, theatre, theatre)).fetchone()
+                trend.append({"date": d, "m8": r[0] or 0, "m9": r[1] or 0,
+                              "m3": r[2] or 0, "m1": r[3] or 0, "total": r[4] or 0})
+
+            # Per-theatre cumulative breakdown
+            theatre_totals = {}
+            for t in ["EMEA", "JAPAC", "AMER", "LATAM"]:
+                tr = conn.execute("""
+                    SELECT SUM(b.m8_started) m8, SUM(b.m9_complete) m9,
+                           SUM(b.m3_complete) m3, COUNT(*) accounts
+                    FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
+                    WHERE UPPER(COALESCE(a.account_theatre,'EMEA'))=?
+                """, (t,)).fetchone()
+                theatre_totals[t] = {"m8": tr[0] or 0, "m9": tr[1] or 0,
+                                     "m3": tr[2] or 0, "accounts": tr[3] or 0}
+
+            # Cumulative totals (filtered or global)
+            totals = conn.execute("""
+                SELECT
+                  SUM(b.m8_started) m8, SUM(b.m9_complete) m9,
+                  SUM(b.m3_complete) m3, SUM(b.m5_complete) m5,
+                  COUNT(*) accounts
+                FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
+                WHERE (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
+            """, (theatre, theatre)).fetchone()
+
+        movements = [dict(r) for r in day_rows]
+        # Headline counts
+        headline = {
+            "m8_started":     sum(1 for m in movements if m["field_name"] == "M8 Upgrade Started"),
+            "m9_complete":    sum(1 for m in movements if m["field_name"] == "M9 Upgrade Complete"),
+            "m3_complete":    sum(1 for m in movements if m["field_name"] == "M3 Buy-in"),
+            "m1_outreach":    sum(1 for m in movements if m["field_name"] == "M1 Outreach"),
+            "cse_changes":    sum(1 for m in movements if m["field_name"] == "cse"),
+            "status_changes": sum(1 for m in movements if m["field_name"] == "status"),
+            "regressions":    sum(1 for m in movements if m.get("new_status") in ("N","") and m.get("old_status") == "Y"),
+            "total":          len(movements),
+        }
+        return {
+            "date": date,
+            "theatre": theatre or "All",
+            "headline": headline,
+            "movements": movements,
+            "trend": trend,
+            "theatre_totals": theatre_totals,
+            "cumulative": {
+                "m8_total": totals["m8"] or 0,
+                "m9_total": totals["m9"] or 0,
+                "m3_total": totals["m3"] or 0,
+                "m5_total": totals["m5"] or 0,
+                "accounts": totals["accounts"] or 0,
+            }
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 if __name__=="__main__":
     import os as _os
     # Always run from Solstice/ directory regardless of where called from
@@ -1224,7 +1378,6 @@ if __name__=="__main__":
     sys.path.insert(0, str(Path(__file__).parent))
 
     import json as _j
-    from agent.blocked_parser import load_and_merge as _mb
     from agent.ps_parser import load_and_merge as _mp
     from agent.dc_parser import load_and_merge as _mdc
     from agent.db import migrate_from_state as _mig
@@ -1232,9 +1385,7 @@ if __name__=="__main__":
     # Always populate DB from all CSVs on startup
     init_db()
     print("Loading data sources...")
-    if (DATA_DIR/"blocked_accounts.csv").exists():
-        _mb(DATA_DIR/"blocked_accounts.csv", STATE_FILE)
-        print("  ✓ Blocked accounts merged")
+
     if (DATA_DIR/"ps_tracker.csv").exists():
         _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
         print("  ✓ PS tracker merged")

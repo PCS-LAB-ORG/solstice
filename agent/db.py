@@ -59,6 +59,7 @@ def init_db(path: Path = DB_PATH) -> None:
             last_seen           TEXT,
             live_fire           INTEGER DEFAULT 0,
             live_fire_dc        TEXT DEFAULT '',
+            account_theatre     TEXT DEFAULT 'EMEA',
             created_at          TEXT DEFAULT (datetime('now'))
         );
 
@@ -99,6 +100,7 @@ def init_db(path: Path = DB_PATH) -> None:
             m9_planned          TEXT,
             m9_actual           TEXT,
             -- DC metadata
+            account_theatre     TEXT DEFAULT 'EMEA',
             dc_progress         TEXT,
             owner_e2e           TEXT,
             dc_assignment       TEXT,

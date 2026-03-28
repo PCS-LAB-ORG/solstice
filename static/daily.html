@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CC Migration — Daily Briefing</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0D1117;--card:#161B22;--border:#21262D;--text:#E6EDF3;--muted:#8B949E;--teal:#14B8A6;--green:#22C55E;--amber:#F59E0B;--red:#EF4444;--blue:#3B82F6;--purple:#8B5CF6;--mono:'Geist Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+.hdr{background:var(--card);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.hdr-logo{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.15em}
+.hdr-title{font-size:15px;font-weight:700;flex:1}
+.date-nav{display:flex;align-items:center;gap:.5rem}
+.date-nav button{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);padding:.3rem .7rem;border-radius:4px;cursor:pointer;font-size:12px}
+.date-nav button:hover{background:rgba(255,255,255,.1)}
+.date-display{font-family:var(--mono);font-size:13px;font-weight:700;padding:.3rem .8rem;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);border-radius:4px;color:var(--teal);min-width:110px;text-align:center}
+.nav-links a{font-size:10px;color:var(--muted);text-decoration:none;padding:.25rem .5rem;border:1px solid var(--border);border-radius:3px;margin-left:.3rem}
+.nav-links a:hover{color:var(--text)}
+.wrap{max-width:1160px;margin:0 auto;padding:1.5rem 2rem}
+
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.6rem;margin-bottom:1.25rem}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem 1rem;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
+.kpi.m9::before{background:var(--green)}.kpi.m8::before{background:var(--teal)}
+.kpi.m3::before{background:var(--amber)}.kpi.cse::before{background:#ec4899}
+.kpi.reg::before{background:var(--red)}.kpi.total::before{background:var(--muted)}
+.kpi.m1::before{background:var(--purple)}.kpi.m5::before{background:var(--blue)}
+.kpi-n{font-size:28px;font-weight:700;line-height:1;margin-bottom:.2rem}
+.kpi-n.m9{color:var(--green)}.kpi-n.m8{color:var(--teal)}.kpi-n.m3{color:var(--amber)}
+.kpi-n.cse{color:#ec4899}.kpi-n.reg{color:var(--red)}.kpi-n.total{color:var(--muted)}
+.kpi-n.m1{color:var(--purple)}.kpi-n.m5{color:var(--blue)}
+.kpi-label{font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* Cumulative at top */
+.cum-banner{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1.2rem;margin-bottom:1.25rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.5rem}
+.cum-item{text-align:center}
+.cum-n{font-size:20px;font-weight:700;line-height:1}
+.cum-label{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* Collapsible sections */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.sec-hdr{padding:.65rem 1rem;display:flex;align-items:center;gap:.6rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+.sec-hdr:hover{background:rgba(255,255,255,.02)}
+.sec-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sec-count{background:rgba(20,184,166,.12);color:var(--teal);padding:1px 7px;border-radius:3px;font-size:9px;font-family:var(--mono)}
+.sec-arrow{margin-left:auto;font-size:10px;color:var(--border);transition:transform .2s}
+.sec.collapsed .sec-arrow{transform:rotate(-90deg)}
+.sec.collapsed .sec-body{display:none}
+.sec-body{padding:.5rem}
+
+/* Movement cards */
+.move{display:grid;grid-template-columns:auto 1fr auto;gap:.5rem .65rem;padding:.5rem .5rem;border-radius:5px;align-items:center;border-bottom:1px solid rgba(33,38,45,.4)}
+.move:last-child{border-bottom:none}
+.move:hover{background:rgba(255,255,255,.025)}
+.move-badge{font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.move-name{font-size:10.5px;font-weight:700}
+.move-sub{font-size:8.5px;color:var(--muted)}
+.move-change{font-family:var(--mono);font-size:8.5px;text-align:right}
+.empty{padding:1.5rem;text-align:center;color:var(--muted);font-size:11px}
+
+/* Two-col */
+.cols{display:grid;grid-template-columns:1fr 320px;gap:1rem;align-items:start}
+@media(max-width:800px){.cols{grid-template-columns:1fr}}
+
+/* Trend */
+.trend-bars{padding:.65rem .75rem}
+.trend-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem}
+.trend-day{font-family:var(--mono);font-size:7.5px;color:var(--muted);width:52px;flex-shrink:0}
+.trend-stack{flex:1;display:flex;height:14px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.04)}
+.trend-seg{height:100%;transition:width .4s}
+.trend-n{font-family:var(--mono);font-size:8px;color:var(--muted);width:20px;text-align:right}
+.trend-today .trend-day{color:var(--teal);font-weight:700}
+.trend-today .trend-stack{outline:1px solid rgba(20,184,166,.4)}
+.trend-legend{display:flex;flex-wrap:wrap;gap:.4rem .75rem;padding:.25rem .75rem .6rem;font-size:8px;color:var(--muted)}
+.leg-dot{display:inline-block;width:8px;height:8px;border-radius:1px;margin-right:2px;vertical-align:middle}
+@media print{.date-nav button,.nav-links{display:none}.sec.collapsed .sec-body{display:block}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div><div class="hdr-logo">SOLSTICE</div><div class="hdr-title">CC Migration — Daily Briefing</div></div>
+  <div class="date-nav">
+    <button onclick="shiftDay(-1)">◀</button>
+    <div class="date-display" id="disp-date">—</div>
+    <button onclick="shiftDay(+1)">▶</button>
+    <button onclick="loadDate(todayStr())" style="font-size:10px">Today</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <div id="theatre-btns" style="display:flex;gap:.3rem"></div>
+    <span id="last-sync" style="font-size:9px;color:var(--muted);font-family:var(--mono)">—</span>
+    <button onclick="runRefresh()" id="refresh-btn" style="background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);color:var(--teal);padding:.3rem .8rem;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">⟳ Refresh Data</button>
+  </div>
+  <div class="nav-links">
+    <a href="/v2">← Dashboard</a>
+    <a href="javascript:window.print()">⎙ Print</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="theatre-breakdown" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem"></div>
+  <!-- Cumulative milestones always at top -->
+  <div class="cum-banner">
+    <div class="cum-item"><div class="cum-n" style="color:var(--green)" id="c-m9">—</div><div class="cum-label">M9 Complete (All Time)</div></div>
+    <div class="cum-item"><div class="cum-n" style="color:var(--teal)" id="c-m8">—</div><div class="cum-label">M8 Started (All Time)</div></div>
+    <div class="cum-item"><div class="cum-n" style="color:var(--purple)" id="c-m5">—</div><div class="cum-label">M5 Tech Valid.</div></div>
+    <div class="cum-item"><div class="cum-n" style="color:var(--amber)" id="c-m3">—</div><div class="cum-label">M3 Buy-in</div></div>
+    <div class="cum-item"><div class="cum-n" style="color:var(--blue)" id="c-acc">—</div><div class="cum-label">Total Accounts</div></div>
+  </div>
+
+  <!-- Today KPIs -->
+  <div class="kpi-row">
+    <div class="kpi m1"><div class="kpi-n m1" id="k-m1">—</div><div class="kpi-label">M1 Outreach</div></div>
+    <div class="kpi m3"><div class="kpi-n m3" id="k-m3">—</div><div class="kpi-label">M3 Buy-in</div></div>
+    <div class="kpi m8"><div class="kpi-n m8" id="k-m8">—</div><div class="kpi-label">M8 Started</div></div>
+    <div class="kpi m9"><div class="kpi-n m9" id="k-m9">—</div><div class="kpi-label">M9 Complete</div></div>
+    <div class="kpi cse"><div class="kpi-n cse" id="k-cse">—</div><div class="kpi-label">CSE Changes</div></div>
+    <div class="kpi reg"><div class="kpi-n reg" id="k-reg">—</div><div class="kpi-label">Regressions</div></div>
+    <div class="kpi total"><div class="kpi-n total" id="k-total">—</div><div class="kpi-label">Total Movements</div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <!-- Collapsible: Upgrades -->
+      <div class="sec" id="sec-upgrades">
+        <div class="sec-hdr" onclick="toggleSec('sec-upgrades')">
+          <span class="sec-title">Upgrades (M8 + M9)</span>
+          <span class="sec-count" id="cnt-upgrades">0</span>
+          <span class="sec-arrow">▾</span>
+        </div>
+        <div class="sec-body" id="body-upgrades"><div class="empty">None today</div></div>
+      </div>
+      <!-- Collapsible: Milestones -->
+      <div class="sec" id="sec-milestones">
+        <div class="sec-hdr" onclick="toggleSec('sec-milestones')">
+          <span class="sec-title">Other Milestones (M1–M7)</span>
+          <span class="sec-count" id="cnt-milestones">0</span>
+          <span class="sec-arrow">▾</span>
+        </div>
+        <div class="sec-body" id="body-milestones"><div class="empty">None today</div></div>
+      </div>
+      <!-- Collapsible: CSE/Status -->
+      <div class="sec collapsed" id="sec-changes">
+        <div class="sec-hdr" onclick="toggleSec('sec-changes')">
+          <span class="sec-title">CSE & Status Changes</span>
+          <span class="sec-count" id="cnt-changes">0</span>
+          <span class="sec-arrow">▾</span>
+        </div>
+        <div class="sec-body" id="body-changes"><div class="empty">None today</div></div>
+      </div>
+      <!-- Collapsible: Regressions -->
+      <div class="sec collapsed" id="sec-reg">
+        <div class="sec-hdr" onclick="toggleSec('sec-reg')">
+          <span class="sec-title">Regressions (Y→N)</span>
+          <span class="sec-count" id="cnt-reg" style="background:rgba(239,68,68,.12);color:var(--red)">0</span>
+          <span class="sec-arrow">▾</span>
+        </div>
+        <div class="sec-body" id="body-reg"><div class="empty">No regressions today</div></div>
+      </div>
+    </div>
+
+    <!-- Right: trend -->
+    <div>
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('sec-trend')">
+          <span class="sec-title">7-Day Trend</span>
+          <span class="sec-arrow">▾</span>
+        </div>
+        <div class="sec-body" id="sec-trend-body">
+          <div class="trend-bars" id="trend-body"></div>
+          <div class="trend-legend">
+            <span><span class="leg-dot" style="background:#22c55e"></span>M9 Complete</span>
+            <span><span class="leg-dot" style="background:#14b8a6"></span>M8 Started</span>
+            <span><span class="leg-dot" style="background:#f59e0b"></span>M3 Buy-in</span>
+            <span><span class="leg-dot" style="background:#a78bfa"></span>M1 Outreach</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var E=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+var _curDate='';
+var MC={'M9 Upgrade Complete':'#22c55e','M8 Upgrade Started':'#14b8a6','M7 Legal':'#8b5cf6',
+  'M5 Tech Validation':'#3b82f6','M4 Discovery':'#06b6d4','M3 Buy-in':'#f59e0b',
+  'M2 Entitlements':'#f97316','M1 Outreach':'#a78bfa','cse':'#ec4899','status':'#8B949E'};
+var MI={'M9 Upgrade Complete':'M9','M8 Upgrade Started':'M8','M7 Legal':'M7',
+  'M5 Tech Validation':'M5','M4 Discovery':'M4','M3 Buy-in':'M3',
+  'M2 Entitlements':'M2','M1 Outreach':'M1','cse':'CSE','status':'STS'};
+var LABELS={'M9 Upgrade Complete':'Upgrade Complete','M8 Upgrade Started':'Upgrade Started',
+  'M7 Legal':'Legal Ready','M5 Tech Validation':'Tech Validated',
+  'M4 Discovery':'Discovery Done','M3 Buy-in':'EB Buy-in',
+  'M2 Entitlements':'Entitlements Aligned','M1 Outreach':'Customer Outreach',
+  'cse':'CSE Reassigned','status':'Status Changed'};
+
+function toggleSec(id){
+  document.getElementById(id).classList.toggle('collapsed');
+}
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+(d.getMonth()<9?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();
+}
+function fmtDisp(iso){
+  if(!iso)return '—';
+  var p=iso.split('-');
+  return p.length===3?p[2]+'-'+p[1]+'-'+p[0].substring(2):iso;
+}
+function shiftDay(n){
+  var d=new Date(_curDate+'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate()+n);
+  loadDate(d.toISOString().substring(0,10));
+}
+
+function moveCard(m){
+  var mc=MC[m.field_name]||'#8B949E';
+  var mi=MI[m.field_name]||'?';
+  var label=LABELS[m.field_name]||m.field_name||'Movement';
+  var isCse=m.field_name==='cse';
+  var isStatus=m.field_name==='status';
+  var isReg=m.new_status==='N'&&m.old_status==='Y';
+  var time=(m.changed_at||'').substring(11,16);
+  var chg='';
+  if(isCse||isStatus){
+    chg='<span style="color:var(--muted)">'+E(m.old_status||'—')+'</span> → <span style="color:'+mc+';font-weight:700">'+E(m.new_status||'—')+'</span>';
+  } else if(isReg){
+    chg='<span style="color:var(--red)">↓ Regression</span>';
+  } else {
+    chg='<span style="color:'+mc+'">✅ '+E(label)+'</span>';
+  }
+  return '<div class="move">'
+    +'<span class="move-badge" style="background:'+mc+'22;color:'+mc+'">'+E(mi)+'</span>'
+    +'<div><div class="move-name">'+E(m.customer_name||'—')+'</div>'
+    +'<div class="move-sub">'+E(m.active_cse||'—')+' · '+E(m.region||'—')+'</div></div>'
+    +'<div class="move-change"><div>'+chg+'</div>'+(time?'<div style="color:var(--border);font-size:8px">'+E(time)+'</div>':'')+'</div>'
+    +'</div>';
+}
+
+function fillSec(bodyId,countId,rows,emptyMsg){
+  var el=document.getElementById(bodyId);
+  var cnt=document.getElementById(countId);
+  if(cnt)cnt.textContent=rows.length;
+  el.innerHTML=rows.length?rows.map(moveCard).join(''):('<div class="empty">'+emptyMsg+'</div>');
+}
+
+function loadDate(date){
+  _curDate=date;
+  document.getElementById('disp-date').textContent=fmtDisp(date);
+  document.title='EMEA Daily — '+fmtDisp(date);
+  fetch('/api/daily-brief?date='+date+'&theatre='+encodeURIComponent(_dtheatre))
+    .then(function(r){return r.json();})
+    .then(render)
+    .catch(function(){document.getElementById('body-upgrades').innerHTML='<div class="empty">Error loading</div>';});
+}
+
+function render(d){
+  // KPIs
+  document.getElementById('k-m9').textContent=d.headline.m9_complete;
+  document.getElementById('k-m8').textContent=d.headline.m8_started;
+  document.getElementById('k-m3').textContent=d.headline.m3_complete;
+  document.getElementById('k-m1').textContent=d.headline.m1_outreach||0;
+  // Update section totals accurately
+  var allMs=(d.movements||[]).filter(function(m){
+    return m.field_name&&m.field_name!=='cse'&&m.field_name!=='status'&&!(m.new_status==='N'&&m.old_status==='Y');
+  });
+  document.getElementById('k-total').textContent=(d.headline.cse_changes||0)+(d.headline.regressions||0)+allMs.length;
+  document.getElementById('k-cse').textContent=d.headline.cse_changes;
+  document.getElementById('k-reg').textContent=d.headline.regressions;
+  document.getElementById('k-total').textContent=d.headline.total;
+  // Cumulative
+  document.getElementById('c-m9').textContent=d.cumulative.m9_total;
+  document.getElementById('c-m8').textContent=d.cumulative.m8_total;
+  document.getElementById('c-m3').textContent=d.cumulative.m3_total;
+  document.getElementById('c-m5').textContent=d.cumulative.m5_total;
+  document.getElementById('c-acc').textContent=d.cumulative.accounts;
+
+  // Categorise movements
+  var upgrades=d.movements.filter(function(m){return m.field_name==='M8 Upgrade Started'||m.field_name==='M9 Upgrade Complete';});
+  var milestones=d.movements.filter(function(m){
+    var f=m.field_name;
+    return f&&f!=='M8 Upgrade Started'&&f!=='M9 Upgrade Complete'&&f!=='cse'&&f!=='status'&&!(m.new_status==='N'&&m.old_status==='Y');
+  });
+  var changes=d.movements.filter(function(m){return m.field_name==='cse'||m.field_name==='status';});
+  var regs=d.movements.filter(function(m){return m.new_status==='N'&&m.old_status==='Y';});
+
+  fillSec('body-upgrades','cnt-upgrades',upgrades,'No upgrades today');
+  fillSec('body-milestones','cnt-milestones',milestones,'No other milestones today');
+  fillSec('body-changes','cnt-changes',changes,'No changes today');
+  fillSec('body-reg','cnt-reg',regs,'No regressions today');
+
+  // Auto-expand if has content
+  ['sec-upgrades','sec-milestones'].forEach(function(id){
+    var sec=document.getElementById(id);
+    var cnt=parseInt(sec.querySelector('.sec-count').textContent)||0;
+    if(cnt>0)sec.classList.remove('collapsed');
+    else sec.classList.add('collapsed');
+  });
+  if(regs.length>0)document.getElementById('sec-reg').classList.remove('collapsed');
+
+  // Trend chart
+  var fields=['M9 Upgrade Complete','M8 Upgrade Started','M3 Buy-in','M1 Outreach'];
+  var segColors={'M9 Upgrade Complete':'#22c55e','M8 Upgrade Started':'#14b8a6','M3 Buy-in':'#f59e0b','M1 Outreach':'#a78bfa'};
+  var maxVal=Math.max(1,Math.max.apply(null,d.trend.map(function(t){return t.m8+t.m9+t.total;})));
+  var thtml='';
+  d.trend.forEach(function(t){
+    var isToday=t.date===_curDate;
+    var segs=[
+      {k:'M9 Upgrade Complete',v:t.m9},
+      {k:'M8 Upgrade Started',v:t.m8},
+      {k:'M3 Buy-in',v:t.m3||0},
+      {k:'M1 Outreach',v:t.m1||0},
+    ];
+    var total=segs.reduce(function(s,x){return s+x.v;},0); // sum of displayed bars only
+    thtml+='<div class="trend-row'+(isToday?' trend-today':'')+'">'
+      +'<div class="trend-day">'+fmtDisp(t.date)+'</div>'
+      +'<div class="trend-stack">';
+    segs.forEach(function(s){
+      if(!s.v)return;
+      var pct=Math.round(s.v/maxVal*100);
+      thtml+='<div class="trend-seg" style="width:'+pct+'%;background:'+segColors[s.k]+'" title="'+s.k+': '+s.v+'"></div>';
+    });
+    thtml+='</div><div class="trend-n">'+(total||'·')+'</div></div>';
+  });
+  document.getElementById('trend-body').innerHTML=thtml;
+}
+
+var _dtheatre='';
+function setDTheatre(t){
+  _dtheatre=t;
+  document.querySelectorAll('.dt-btn').forEach(function(b){
+    var act=b.dataset.t===t;
+    b.style.background=act?'rgba(20,184,166,.2)':'rgba(255,255,255,.04)';
+    b.style.color=act?'var(--teal)':'var(--muted)';
+    b.style.borderColor=act?'rgba(20,184,166,.3)':'var(--border)';
+  });
+  loadDate(_curDate);
+}
+function initDTheatre(){
+  fetch('/api/theatres').then(r=>r.json()).then(function(rows){
+    var el=document.getElementById('theatre-btns');if(!el)return;
+    var all=[{theatre:'',n:'All'}].concat(rows);
+    el.innerHTML=all.map(function(r){
+      var act=r.theatre===_dtheatre;
+      var lbl=r.theatre||'All';
+      return '<button class="dt-btn" data-t="'+lbl+'" onclick="setDTheatre(this.dataset.t)"'
+        +' style="font-size:9px;font-family:var(--mono);padding:.25rem .5rem;border-radius:4px;cursor:pointer;'
+        +'background:'+(act?'rgba(20,184,166,.2)':'rgba(255,255,255,.04)')+';'
+        +'border:1px solid '+(act?'rgba(20,184,166,.3)':'var(--border)')+';'
+        +'color:'+(act?'var(--teal)':'var(--muted)')+'">'+lbl+'</button>';
+    }).join('');
+  }).catch(function(){});
+}
+initDTheatre();
+fetch('/api/stats').then(r=>r.json()).then(function(s){
+  var ts=s.last_refresh||'';
+  if(ts){var d=new Date(ts);document.getElementById('last-sync').textContent='Last sync: '+d.toLocaleTimeString();}
+}).catch(function(){});
+
+function runRefresh(){
+  var btn=document.getElementById('refresh-btn');
+  btn.textContent='Running...';btn.disabled=true;
+  var es=new EventSource('/api/run-full');
+  es.onmessage=function(e){
+    try{var d=JSON.parse(e.data);if(d.done||d.status==='DONE'||e.data.includes('done')){throw new Error('done');}}catch(ex){
+      if(ex.message==='done'){es.close();btn.textContent='✅ Done';
+        setTimeout(function(){btn.textContent='⟳ Refresh Data';btn.disabled=false;loadDate(_curDate);
+          document.getElementById('last-sync').textContent='Last sync: '+new Date().toLocaleTimeString();},1500);}
+    }
+  };
+  es.onerror=function(){es.close();btn.textContent='⟳ Refresh Data';btn.disabled=false;};
+}
+
+setInterval(function(){if(_curDate===todayStr())loadDate(_curDate);},5*60*1000);
+
+loadDate(todayStr());
+</script>
+</body>
+</html>

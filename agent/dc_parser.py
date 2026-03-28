@@ -30,6 +30,41 @@ def _yn(val: str) -> bool:
     return val.strip().lower() in BOOL_YES
 
 
+def _signal_from_detail(status_detail: str) -> str:
+    """Derive signal from DC Status Detail emoji prefix."""
+    d = status_detail.strip()
+    if d.startswith('\U00002705') or d.startswith('✅'): return 'green'
+    if d.startswith('\U0001f6d1') or d.startswith('🛑'): return 'blocked'
+    if d.startswith('\U0001f44e') or d.startswith('👎'): return 'at_risk'
+    return 'at_risk'
+
+
+def _subtype_from_detail(status_detail: str) -> str:
+    """Derive blocker subtype from DC Status Detail text."""
+    d = status_detail.lower()
+    if 'not able to contact or connect with ngs' in d or 'internal kick-off' in d: return 'no_contact'
+    if 'core rep is blocking' in d or 'account team is blocking' in d: return 'core_rep_blocking'
+    if 'technical reason' in d or 'technical blocker' in d or 'tech limitation' in d: return 'tech_blocker'
+    if 'active deal' in d: return 'active_deal'
+    if 'self-hosted' in d or 'self hosted' in d: return 'self_hosted'
+    return ''
+
+
+def _status_from_dc(status_detail: str, pc_status: str) -> str:
+    """Derive EMEA-style engagement status from DC fields."""
+    d = status_detail.lower()
+    if 'upgrade complete' in d or pc_status == 'CC NNL': return 'Completed'
+    if 'upgrade started' in d or 'upgrade in progress' in d: return 'In Progress'
+    if 'tech validation' in d and 'won' in d: return 'Customer Engaged'
+    if 'customer meeting completed' in d: return 'Customer Engaged'
+    if 'customer outreach complete' in d: return 'Account team contacted'
+    if 'outreach made' in d: return 'Account team contacted'
+    if pc_status == 'Churn': return 'Churning/Churned'
+    if 'blocked from internal kick-off' in d: return 'Account team contacted'
+    if 'blocked from customer outreach' in d: return 'Account team contacted'
+    return 'Account team contacted'
+
+
 def _clean_cse(val: str) -> str:
     """Return CSE name or empty string. Rejects date-like and junk values."""
     v = val.strip()
@@ -43,12 +78,16 @@ def _clean_cse(val: str) -> str:
     return v
 
 
+SUPPORTED_THEATRES = {"EMEA", "JAPAC", "AMER", "LATAM"}
+
+
 def parse_dc_csv(filepath: Path) -> list[dict]:
-    """Parse DC CSE Tracker CSV. Returns EMEA-only records."""
+    """Parse DC CSE Tracker CSV. Returns all supported theatre records."""
     records = []
     with open(filepath, newline="", encoding="utf-8-sig", errors="ignore") as f:
         for row in csv.DictReader(f):
-            if row.get("account_theatre", "").strip().upper() != "EMEA":
+            theatre = row.get("account_theatre", "").strip().upper()
+            if theatre not in SUPPORTED_THEATRES:
                 continue
             aid = row.get("pc_end_customer_account_id", "").strip().lower()
             if not aid:
@@ -56,6 +95,7 @@ def parse_dc_csv(filepath: Path) -> list[dict]:
             records.append({
                 "account_id":       aid,
                 "account_name":     row.get("pc_account_name", "").strip(),
+                "account_theatre":  theatre,
                 "active_cse":       _clean_cse(row.get("CSE Assigned", "")),
                 "dc_assignment":    row.get("DC assignment", "").strip(),
                 "owner_e2e":        row.get("Owner: End to end upgrade", "").strip(),
@@ -84,14 +124,39 @@ def parse_dc_csv(filepath: Path) -> list[dict]:
                 "m9_complete":      _yn(row.get("M9:Upgrade complete", "")),
                 "m9_planned":       row.get("M9 Planned date", "").strip(),
                 "m9_actual":        row.get("Date - M9:Upgrade complete", "").strip(),
-                "upgrade_notes":    row.get("Upgrade Notes", "").strip(),
-                "health_notes":     row.get("Account Health Notes", "").strip(),
-                "pm_status":        row.get("PM Status", "").strip(),
-                "dc_progress":      row.get("DC Upgrade Progress Status", "").strip(),
-                "cc_rep":           row.get("cc_Rep (SPO)", "").strip(),
-                "cc_dsm":           row.get("cc_DSM (SPO)", "").strip(),
-                "churn_risk":       row.get("DC Indicated account churn risk", "").strip(),
-                "merged_at":        datetime.now(timezone.utc).isoformat(),
+                "upgrade_notes":      row.get("Upgrade Notes", "").strip(),
+                "health_notes":       row.get("Account Health Notes", "").strip(),
+                "pm_status":          row.get("PM Status", "").strip(),
+                "dc_progress":        row.get("DC Upgrade Progress Status", "").strip(),
+                "cc_rep":             row.get("cc_Rep (SPO)", "").strip(),
+                "cc_dsm":             row.get("cc_DSM (SPO)", "").strip(),
+                "churn_risk":         row.get("DC Indicated account churn risk", "").strip(),
+                # Derived fields — signal, subtype, status from DC Status Detail
+                "signal":   _signal_from_detail(row.get("Status Detail", "")),
+                "subtype":  _subtype_from_detail(row.get("Status Detail", "")),
+                "status":   _status_from_dc(row.get("Status Detail", ""), row.get("PC_CC_Migration_status", "")),
+                # Extended fields
+                "last_edited_by":     row.get("Last edited by", "").strip(),
+                "last_edited_date":   row.get("Last edited date", "").strip(),
+                "roadmap_url":        row.get("roadmap", "").strip(),
+                "ps_plan_url":        row.get("ps plan", "").strip(),
+                "account_region":     row.get("account_region", "").strip(),
+                "current_project_status": row.get("current_project_status", "").strip(),
+                "next_renewal_date":  row.get("next_cloud_renewal_date", "").strip(),
+                "past_due_planned":   row.get("Past due planned dates", "").strip(),
+                "upgrade_duration_weeks": row.get("Planned upgrade duration (weeks)", "").strip(),
+                "has_partner":        row.get("Is there partner", "").strip(),
+                "upgrade_partner":    row.get("Upgrade partner name", "").strip(),
+                "m1_details":         row.get("M1 Details", "").strip(),
+                "m3_details":         row.get("M3 Details", "").strip(),
+                "m5_details":         row.get("M5 Details", "").strip(),
+                "milestone_aging":    row.get("Milestone aging calculation", "").strip(),
+                "days_since_milestone": row.get("Days since milestones advanced", "").strip(),
+                "momentum_x":         row.get("MomentumX", "").strip(),
+                "entitlement_provision": row.get("entitlement_provision", "").strip(),
+                "activation_status":  row.get("activation_tenant_status", "").strip(),
+                "posture_workloads":  row.get("Posture workloads", "").strip(),
+                "merged_at":          datetime.now(timezone.utc).isoformat(),
             })
     logger.info("DC CSE Tracker: parsed %d EMEA records", len(records))
     return records
