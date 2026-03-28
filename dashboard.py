@@ -1294,7 +1294,7 @@ def api_daily_brief(date: str = "", theatre: str = ""):
 
             # 7-day trend
             trend = []
-            for i in range(6, -1, -1):
+            for i in range(29, -1, -1):
                 d = (target - timedelta(days=i)).strftime("%Y-%m-%d")
                 r = conn.execute("""
                     SELECT
