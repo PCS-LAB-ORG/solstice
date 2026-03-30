@@ -31,12 +31,12 @@ def _yn(val: str) -> bool:
 
 
 def _signal_from_detail(status_detail: str) -> str:
-    """Derive signal from DC Status Detail emoji prefix."""
+    """Derive signal from DC Status Detail emoji prefix. Returns '' when no emoji recognised."""
     d = status_detail.strip()
     if d.startswith('\U00002705') or d.startswith('✅'): return 'green'
     if d.startswith('\U0001f6d1') or d.startswith('🛑'): return 'blocked'
     if d.startswith('\U0001f44e') or d.startswith('👎'): return 'at_risk'
-    return 'at_risk'
+    return ''  # empty status_detail or unrecognised prefix — not 'at_risk' by default
 
 
 def _subtype_from_detail(status_detail: str) -> str:
@@ -82,7 +82,7 @@ SUPPORTED_THEATRES = {"EMEA", "JAPAC", "AMER", "LATAM"}
 
 
 def parse_dc_csv(filepath: Path) -> list[dict]:
-    """Parse DC CSE Tracker CSV. Returns all supported theatre records."""
+    """Parse DC CSE Tracker CSV. Returns records for all supported theatres (EMEA/JAPAC/AMER/LATAM)."""
     records = []
     with open(filepath, newline="", encoding="utf-8-sig", errors="ignore") as f:
         for row in csv.DictReader(f):
@@ -158,7 +158,7 @@ def parse_dc_csv(filepath: Path) -> list[dict]:
                 "posture_workloads":  row.get("Posture workloads", "").strip(),
                 "merged_at":          datetime.now(timezone.utc).isoformat(),
             })
-    logger.info("DC CSE Tracker: parsed %d EMEA records", len(records))
+    logger.info("DC CSE Tracker: parsed %d records across all theatres", len(records))
     return records
 
 

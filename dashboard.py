@@ -195,11 +195,11 @@ def _download_live_from_drive() -> dict:
     downloads = Path.home() / "Downloads"
     results = {}
 
+    # Only DC CSE Tracker is used by the pipeline — emea_accounts and blocked_accounts
+    # are no longer pipeline sources (DC is sole source of truth for all data).
     FILE_MAP = {
-        "DC CSE Tracker":               ("dc_cse_tracker.csv", None),
-        "EMEA Accounts CC Migrations":  ("emea_accounts.csv",  None),
-        "EMEA Solistce Blocked Accounts": ("blocked_accounts.csv", "538753662"),
-        # PS Tracker excluded — Drive default tab is wrong format; file maintained separately
+        "DC CSE Tracker": ("dc_cse_tracker.csv", None),
+        # emea_accounts.csv and blocked_accounts.csv removed — DC CSE Tracker is sole source
     }
 
     for f in config["files"]:
@@ -675,7 +675,7 @@ async def api_run_full(request: Request):
         yield event("DC CSE Tracker", "LOADING", "Master source — CSE assignments, all milestones (M0-M9), audit diff")
         try:
             dc = _run_dc_pipeline(data_dir, data_dir/"state.json")
-            yield event("  →", "OK", f"{dc['matched']}/{dc['total']} EMEA matched · {dc['audit_logged']} milestone changes logged · M1 action plan rebuilt ({dc.get('m1_rebuilt',0)} accounts)", "green")
+            yield event("  →", "OK", f"{dc['matched']}/{dc['total']} accounts matched · {dc['audit_logged']} milestone changes · M1 rebuilt ({dc.get('m1_rebuilt',0)}) · history backfilled ({dc.get('history_backfilled',0)})", "green")
             yield event("  →", "MILESTONES", "✅ M0–M9 100% synced from DC CSV across all accounts — zero stale data", "green")
         except Exception as e:
             yield event("  →", "ERROR", str(e)[:80], "red")
@@ -1379,7 +1379,6 @@ if __name__=="__main__":
 
     import json as _j
     from agent.ps_parser import load_and_merge as _mp
-    from agent.dc_parser import load_and_merge as _mdc
     from agent.db import migrate_from_state as _mig
 
     # Always populate DB from all CSVs on startup
@@ -1390,8 +1389,8 @@ if __name__=="__main__":
         _mp(DATA_DIR/"ps_tracker.csv", STATE_FILE)
         print("  ✓ PS tracker merged")
     if (DATA_DIR/"dc_cse_tracker.csv").exists():
-        _mdc(DATA_DIR/"dc_cse_tracker.csv", STATE_FILE)
-        print("  ✓ DC CSE Tracker merged (master)")
+        _run_dc_pipeline(DATA_DIR, STATE_FILE)
+        print("  ✓ DC CSE Tracker synced via _run_dc_pipeline (all theatres, milestones, audit)")
     _mig(STATE_FILE)
     # Sync live_fire into DB
     _state = _j.loads(STATE_FILE.read_text())
