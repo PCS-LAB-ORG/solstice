@@ -81,6 +81,14 @@ main{flex:1;overflow-y:auto;min-width:0}
 </style>
 </head>
 <body>
+<div style="background:#161B22;border-bottom:1px solid #21262D;padding:.5rem 1.5rem;display:flex;align-items:center;gap:.25rem">
+  <span style="font-weight:800;font-size:12px;color:#14B8A6;letter-spacing:.05em;margin-right:1rem">SOLSTICE</span>
+  <a href="/ops" style="font-size:10.5px;color:#E6EDF3;text-decoration:none;padding:3px 10px;border-radius:5px;background:rgba(255,255,255,.08);border:1px solid #21262D">Ops</a>
+  <a href="/blockers" style="font-size:10.5px;color:#EF4444;text-decoration:none;padding:3px 10px;border-radius:5px">Blockers</a>
+  <a href="/forecast" style="font-size:10.5px;color:#22C55E;text-decoration:none;padding:3px 10px;border-radius:5px">Forecast</a>
+  <a href="/daily" style="font-size:10.5px;color:#8B949E;text-decoration:none;padding:3px 10px;border-radius:5px">Daily</a>
+  <a href="/audit" style="font-size:10.5px;color:#A78BFA;text-decoration:none;padding:3px 10px;border-radius:5px">Audit</a>
+</div>
 <nav>
   <div class="nlogo">Solstice<span>EMEA CC · v2</span></div>
   <div class="nlg">Overview</div>
@@ -126,7 +134,21 @@ main{flex:1;overflow-y:auto;min-width:0}
   <!-- WEEKLY -->
   <div class="sec" id="weekly">
     <div class="sh" onclick="tog('weekly')"><span class="st">Weekly Tracker</span><span class="sg">▾</span></div>
-    <div class="sb" style="padding:1rem 1.5rem" id="weekly-body"></div>
+    <div class="sb">
+      <div style="padding:.5rem 1rem .25rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+        <select id="weekly-region" onchange="renderWeekly()" style="background:#010409;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:9px;padding:.3rem .5rem;font-family:var(--mono)">
+          <option value="">All Theatres</option>
+          <option value="EMEA">EMEA</option>
+          <option value="AMER">AMER / NAM</option>
+          <option value="JAPAC">JAPAC</option>
+          <option value="LATAM">LATAM</option>
+        </select>
+        <select id="weekly-cse" onchange="renderWeekly()" style="background:#010409;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:9px;padding:.3rem .5rem;font-family:var(--mono)">
+          <option value="">All CSEs</option>
+        </select>
+      </div>
+      <div style="padding:.25rem 1rem 1rem" id="weekly-body"></div>
+    </div>
   </div>
 
   <!-- M1 ACTION PLAN -->
@@ -193,6 +215,13 @@ main{flex:1;overflow-y:auto;min-width:0}
     <div class="sh" onclick="tog('audit')"><span class="st">Audit Log</span><span class="sc" id="audit-count">—</span><span class="sg">▾</span></div>
     <div class="sb">
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;padding:.25rem 0 .6rem">
+        <select onchange="setTheatre(this.value);document.querySelectorAll('[data-th]').forEach(function(e){e.value=this.value;}.bind(this))" style="background:#010409;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:9px;padding:.3rem .5rem;font-family:var(--mono)">
+          <option value="">All Theatres</option>
+          <option value="EMEA">EMEA</option>
+          <option value="AMER">AMER/NAM</option>
+          <option value="JAPAC">JAPAC</option>
+          <option value="LATAM">LATAM</option>
+        </select>
         <input id="audit-s" type="text" placeholder="Search accounts..." style="flex:1;min-width:160px;background:#010409;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:10px;padding:.3rem .6rem;outline:none">
         <select id="audit-f-field" onchange="renderAudit()" style="background:#010409;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:9px;padding:.3rem .5rem;font-family:var(--mono)">
           <option value="">All Fields</option>
@@ -327,43 +356,77 @@ function isoWeekKey(){
   var y=d.getFullYear(),w=Math.round((d-new Date(y,0,4))/604800000)+1;
   return y+'-W'+(w<10?'0'+w:w);
 }
+var _weeklyData=[];
+function renderWeekly(){
+  var filterRegion=(document.getElementById('weekly-region')||{}).value||'';
+  var filterCse=(document.getElementById('weekly-cse')||{}).value||'';
+  var body=document.getElementById('weekly-body');
+  if(!_weeklyData.length){body.innerHTML='<span style="color:var(--muted);font-size:10px">No data</span>';return;}
+  var curKey=isoWeekKey();
+  var html='';
+  _weeklyData.forEach(function(w){
+    var buckets=[
+      {key:'done',   label:'M9 Done',   col:'var(--green)'},
+      {key:'m9',     label:'M9 Started',col:'var(--teal)'},
+      {key:'m8_done',label:'M8 Active', col:'var(--blue)'},
+      {key:'m8',     label:'M8 Started',col:'var(--amber)'},
+    ];
+    // Filter items
+    var filtered={};
+    buckets.forEach(function(b){
+      filtered[b.key]=(w[b.key]||[]).filter(function(a){
+        var theatre=(a.theatre||a.account_theatre||'').toUpperCase();
+        var cse=a.cse||a.active_cse||'';
+        if(filterRegion&&theatre!==filterRegion.toUpperCase())return false;
+        if(filterCse&&cse!==filterCse)return false;
+        return true;
+      });
+    });
+    var hasAny=buckets.some(function(b){return filtered[b.key].length;});
+    if(!hasAny)return;
+    var isCur=w.key===curKey;
+    var rowStyle=isCur?'style="background:rgba(0,210,200,.06);border-left:2px solid var(--teal);padding-left:6px;border-radius:4px"':'';
+    html+='<div class="week-row" '+rowStyle+'>'
+      +'<div class="wl">'+E(w.label||w.key)+(isCur?' <span style="font-size:7px;color:var(--teal);font-weight:700;letter-spacing:.5px">NOW</span>':'')+'</div>'
+      +'<div class="wi">';
+    buckets.forEach(function(b){
+      filtered[b.key].forEach(function(a){
+        html+='<span class="witem" style="border-color:'+b.col+'22;color:'+b.col+'">'
+          +(a.lf||a.live_fire?'🔥 ':'')+E(a.name||a.customer_name)
+          +'<span style="font-size:7.5px;opacity:.6;margin-left:3px">'+b.label+'</span></span>';
+      });
+    });
+    html+='</div></div>';
+  });
+  body.innerHTML=html||'<span style="color:var(--muted);font-size:10px">No movement this period</span>';
+}
 function loadWeekly(){
-  fetch('/api/weekly').then(r=>r.json()).then(function(weeks){
-    var body=document.getElementById('weekly-body');
-    if(!weeks||!weeks.length){body.textContent='No data';return;}
-    var curKey=isoWeekKey();
-    var html='';
+  fetch('/api/weekly').then(r=>r.json()).then(function(weeks){    _weeklyData=weeks;
+    // Populate region + CSE filters from data
+    var regions={},cses={};
     weeks.forEach(function(w){
-      // API returns m8, m8_done, m9, done arrays per week
-      var buckets=[
-        {key:'done',  label:'M9 Done',    col:'var(--green)'},
-        {key:'m9',    label:'M9 Started', col:'var(--teal)'},
-        {key:'m8_done',label:'M8 Active', col:'var(--blue)'},
-        {key:'m8',    label:'M8 Started', col:'var(--amber)'},
-      ];
-      var hasAny=buckets.some(function(b){return w[b.key]&&w[b.key].length;});
-      if(!hasAny)return;
-      var isCur=w.key===curKey;
-      var rowStyle=isCur?'style="background:rgba(0,210,200,.06);border-left:2px solid var(--teal);padding-left:6px;border-radius:4px"':'';
-      html+='<div class="week-row" '+rowStyle+'>'
-        +'<div class="wl">'+E(w.label||w.key)+(isCur?' <span style="font-size:7px;color:var(--teal);font-weight:700;letter-spacing:.5px">NOW</span>':'')+'</div>'
-        +'<div class="wi">';
-      buckets.forEach(function(b){
-        (w[b.key]||[]).forEach(function(a){
-          html+='<span class="witem" style="border-color:'+b.col+'22;color:'+b.col+'">'
-            +(a.lf||a.live_fire?'🔥 ':'')+E(a.name||a.customer_name)
-            +'<span style="font-size:7.5px;opacity:.6;margin-left:3px">'+b.label+'</span></span>';
+      ['done','m9','m8_done','m8'].forEach(function(k){
+        (w[k]||[]).forEach(function(a){
+          if(a.region||a.sales_region)regions[a.region||a.sales_region]=1;
+          if(a.cse||a.active_cse)cses[a.cse||a.active_cse]=1;
         });
       });
-      html+='</div></div>';
     });
-    body.innerHTML=html||'<span style="color:var(--muted);font-size:10px">No movement this period</span>';
+    var rEl=document.getElementById('weekly-region');
+    var cEl=document.getElementById('weekly-cse');
+    // Region select has fixed theatre options — no dynamic population
+    if(cEl&&Object.keys(cses).length){
+      var curC=cEl.value;
+      cEl.innerHTML='<option value="">All CSEs</option>';
+      Object.keys(cses).sort().forEach(function(r){var o=document.createElement('option');o.value=r;o.textContent=r;if(r===curC)o.selected=true;cEl.appendChild(o);});
+    }
+    renderWeekly();
   }).catch(console.error);
 }
 
 // ── M1 ────────────────────────────────────────────────────────────
 function loadM1(){
-  fetch('/api/m1-suggestions').then(r=>r.json()).then(function(data){
+  fetch('/api/m1-suggestions?theatre='+encodeURIComponent(_theatre)).then(r=>r.json()).then(function(data){
     var tot=data.reduce(function(s,c){return s+c.total;},0);
     T('m1-count',tot);T('nb-m1',tot);
     var body=document.getElementById('m1-body');
@@ -399,7 +462,7 @@ function loadM1(){
           +'<td><b>'+lf+E(r.account_name)+'</b></td>'
           +'<td style="color:'+(isN?'var(--amber)':'var(--muted)')+';font-size:9.5px">'+E(r.assigned_cse||'—')+'</td>'
           +'<td style="font-size:9px;color:var(--muted)">'+E(r.cc_rep||'—')+'</td>'
-          +'<td style="font-size:9px;font-weight:600;color:'+((r.cc_rep&&r.cc_rep!=='-'&&r.cc_rep!=='—')?'var(--border)':'var(--amber)')+'">'+E(r.cc_dsm||'—')+'</td>'
+          +'<td style="font-size:9px;font-weight:600;color:var(--amber)">'+E(r.cc_dsm||'—')+'</td>'
           +'<td class="muted" style="font-size:9.5px">'+E(r.region||'—')+'</td>'
           +'<td style="font-size:9px;color:var(--muted)">'+E(r.status||'—')+'</td>'
           +'<td>'+rid+'</td>'
@@ -539,7 +602,7 @@ function loadCSE(){
 
 // ── Completed ─────────────────────────────────────────────────────
 function loadCompleted(){
-  fetch('/api/completed').then(r=>r.json()).then(function(rows){
+  fetch('/api/completed?theatre='+encodeURIComponent(_theatre)).then(r=>r.json()).then(function(rows){
     T('comp-count',rows.length);T('nb-done',rows.length);
     var tb=document.getElementById('comp-body');tb.innerHTML='';
     rows.forEach(function(r){
@@ -701,121 +764,178 @@ function closeCard(){document.getElementById('cm').style.display='none';}
 function openCard(aid){
   fetch('/api/customer/'+aid).then(r=>r.json()).then(function(d){
     if(d.error){return;}
-    var dcc={'Green':'var(--green)','Yellow':'var(--amber)','Red':'var(--red)'};
-    var sc={'green':'var(--green)','at_risk':'var(--amber)','blocked':'var(--red)'};
+    var DC_C={'Green':'#22c55e','Yellow':'#f59e0b','Red':'#ef4444'};
+    var SIG_C={'green':'#22c55e','at_risk':'#f59e0b','blocked':'#ef4444','unknown':'#8B949E'};
     var PLACEHOLDER='01/15/2026';
-    function mf(done,dt){if(done)return '<span style="color:var(--green)">✅</span>';if(dt&&dt!==PLACEHOLDER&&dt!=='01/15/2026 0:00:00')return '<span style="font-family:var(--mono);font-size:8.5px;color:var(--muted)">'+E(fmtDate(dt))+'</span>';return '<span style="color:var(--border)">○</span>';}
-    var html='<div style="padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between">'
-      +'<div><div style="font-family:var(--serif);font-size:1.15rem;font-weight:700">'+(d.live_fire?'🔥 ':'')+E(d.customer_name)+'</div>'
-      +'<div style="font-size:8.5px;color:var(--muted);margin-top:3px">'+E(d.account_id)+'</div>'
-      +'<div style="display:flex;gap:.6rem;margin-top:.4rem;flex-wrap:wrap;font-size:9.5px">'
-      +'<span style="color:var(--teal)">'+E(d.active_cse||'—')+'</span>'
-      +'<span class="muted">'+E(d.sales_region||'—')+'</span>'
-      +(d.arr?'<span class="muted">'+E(d.arr)+'</span>':'')
-      +(d.signal?'<span style="color:'+(sc[d.signal]||'var(--muted)')+'">'+E(d.signal)+'</span>':'')
-      +(d.dc_progress?'<span style="color:'+(dcc[d.dc_progress]||'var(--muted)')+'">DC: '+E(d.dc_progress)+'</span>':'')
-      +'</div></div>'
-      +'<button onclick="closeCard()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:3px 9px;cursor:pointer;font-size:11px">✕</button></div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)">'
-      +'<div style="background:var(--bg);padding:.65rem 1.4rem"><div style="font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">EMEA Status</div><div style="font-weight:600;font-size:13px">'+E(d.status||'—')+'</div></div>'
-      +'<div style="background:var(--bg);padding:.65rem 1.4rem"><div style="font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Detail</div><div style="font-size:9.5px;color:var(--muted)">'+E(d.status_detail||'—')+'</div></div>'
+    var dc_col=DC_C[d.dc_progress]||'#8B949E';
+    var risk_col=DC_C[d.churn_risk]||'#8B949E';
+
+    // ── ZONE 1: Header band coloured by DC Progress ──────────────────
+    var html='<div style="background:'+dc_col+'18;border-bottom:3px solid '+dc_col+';padding:1rem 1.4rem">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-family:var(--serif);font-size:1.1rem;font-weight:700;line-height:1.2">'+(d.live_fire?'🔥 ':'')+E(d.customer_name)+'</div>'
+        +'<div style="font-size:8px;color:var(--muted);font-family:var(--mono);margin-top:2px">'+E(d.account_id)+'</div>'
+        +'<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;align-items:center">'
+          +(d.account_theatre?'<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:3px;background:'+dc_col+'33;color:'+dc_col+'">'+E(d.account_theatre)+'</span>':'')
+          +(d.cohort?'<span style="font-size:8px;color:var(--muted)">'+E(d.cohort)+'</span>':'')
+          +(d.sales_region?'<span style="font-size:8px;color:var(--muted)">'+E(d.sales_region)+'</span>':'')
+        +'</div>'
       +'</div>'
-      +'<div style="padding:.85rem 1.4rem;border-bottom:1px solid var(--border)">'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">'
+        +'<button onclick="closeCard()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:3px 9px;cursor:pointer;font-size:11px">✕</button>'
+        +'<div style="display:flex;gap:.4rem">'
+          +(d.dc_progress?'<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:'+dc_col+'22;color:'+dc_col+'">DC: '+E(d.dc_progress)+'</span>':'')
+          +(d.churn_risk?'<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:'+risk_col+'22;color:'+risk_col+'">Churn: '+E(d.churn_risk)+'</span>':'')
+          +(d.signal?'<span style="font-size:9px;padding:2px 8px;border-radius:4px;background:'+(SIG_C[d.signal]||'#8B949E')+'22;color:'+(SIG_C[d.signal]||'#8B949E')+'">'+E(d.signal)+'</span>':'')
+        +'</div>'
+      +'</div>'
+      +'</div>'
+      // Team row: CSE | Rep | DSM | Last edited
+      +'<div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.65rem;padding-top:.5rem;border-top:1px solid '+dc_col+'33;font-size:9px">'
+        +'<span><span style="color:var(--muted)">CSE: </span><span style="color:var(--teal);font-weight:600">'+E(d.active_cse||'—')+'</span></span>'
+        +(d.cc_rep&&d.cc_rep!=='-'?'<span><span style="color:var(--muted)">Rep: </span><b>'+E(d.cc_rep)+'</b></span>':'')
+        +(d.cc_dsm&&d.cc_dsm!=='-'?'<span><span style="color:var(--muted)">DSM: </span><b>'+E(d.cc_dsm)+'</b></span>':'')
+        +(d.last_edited_by?'<span style="color:var(--muted)">Edited by: '+E(d.last_edited_by)+(d.last_edited_date?' ('+E(d.last_edited_date.substring(0,10))+')':'')+'</span>':'')
+      +'</div>'
+    +'</div>';
+
+    // ── ZONE 2: Status + Detail side by side ──────────────────────────
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)">'
+      +'<div style="background:var(--bg);padding:.65rem 1.4rem">'
+        +'<div style="font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px">Status</div>'
+        +'<div style="font-weight:600;font-size:13px">'+E(d.status||'—')+'</div>'
+      +'</div>'
+      +'<div style="background:var(--bg);padding:.65rem 1.4rem">'
+        +'<div style="font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px">DC Status Detail</div>'
+        +'<div style="font-size:9.5px;color:var(--muted);line-height:1.4">'+E(d.status_detail||'—')+'</div>'
+      +'</div>'
+    +'</div>';
+
+    // ── DC Alert ────────────────────────────────────────────────────────
+    if(d.milestone_category)
+      html+='<div style="padding:.4rem 1.4rem;background:rgba(245,158,11,.08);border-bottom:1px solid var(--border)">'
+        +'<span style="font-size:8px;color:var(--amber);font-family:var(--mono);font-weight:700">⚠ DC ALERT </span>'
+        +'<span style="font-size:9px;color:var(--amber)">'+E(d.milestone_category)+'</span>'
+        +(d.days_since_milestone?'<span style="float:right;font-size:8px;color:var(--muted);font-family:var(--mono)">'+E(d.days_since_milestone)+'d no move</span>':'')
+      +'</div>';
+
+    // ── ZONE 3: Visual milestone progress bar ──────────────────────────
+    var MS=[
+      {k:'m0_complete',p:null,l:'M0 Kickoff'},
+      {k:'m1_complete',p:'m1_planned',l:'M1 Outreach'},
+      {k:'m2_complete',p:'m2_planned',l:'M2 Entitle'},
+      {k:'m3_complete',p:'m3_planned',l:'M3 Buy-in'},
+      {k:'m4_complete',p:'m4_planned',l:'M4 Disc'},
+      {k:'m5_complete',p:'m5_planned',l:'M5 Tech'},
+      {k:'m7_complete',p:null,l:'M7 Legal'},
+      {k:'m8_started',p:'m8_planned',l:'M8 Start'},
+      {k:'m9_complete',p:'m9_planned',l:'M9 Done'},
+    ];
+    var lastDone=0;
+    MS.forEach(function(m,i){if(d[m.k])lastDone=i;});
+    html+='<div style="padding:.75rem 1.4rem;border-bottom:1px solid var(--border)">'
       +'<div style="font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.5rem">Milestone Chain</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem">';
-    var mkeys=[['m0_complete',null,'M0'],['m1_complete','m1_planned','M1'],['m2_complete','m2_planned','M2'],
-      ['m3_complete','m3_planned','M3 Buy-in'],['m4_complete','m4_planned','M4'],
-      ['m5_complete','m5_planned','M5'],['m7_complete',null,'M7'],['m8_started','m8_planned','M8'],['m9_complete','m9_planned','M9 Done']];
-    mkeys.forEach(function(k){
-      html+='<div><b style="font-size:7.5px;color:var(--muted)">'+k[2]+'</b><br>'+mf(d[k[0]],k[1]?d[k[1]]:null)+'</div>';
+      // Progress bar
+      +'<div style="display:flex;height:4px;border-radius:2px;overflow:hidden;background:rgba(255,255,255,.06);margin-bottom:.6rem">';
+    MS.forEach(function(m,i){
+      var done=!!d[m.k];
+      var pct=Math.round(100/MS.length);
+      html+='<div style="flex:1;background:'+(done?'var(--green)':'rgba(255,255,255,.06)')+';margin-right:1px;border-radius:1px"></div>';
+    });
+    html+='</div>'
+    // Milestone grid
+    +'<div style="display:grid;grid-template-columns:repeat(9,1fr);gap:.2rem">';
+    MS.forEach(function(m){
+      var done=!!d[m.k];
+      var dt=m.p&&d[m.p]&&d[m.p]!==PLACEHOLDER?fmtDate(d[m.p]):'';
+      var col=done?'#22c55e':'var(--border)';
+      html+='<div style="text-align:center">'
+        +'<div style="font-size:6.5px;color:var(--muted);margin-bottom:2px">'+m.l+'</div>'
+        +'<div style="font-size:11px;color:'+col+'">'+( done?'✅':'○')+'</div>'
+        +(dt?'<div style="font-size:6px;color:var(--muted);font-family:var(--mono);margin-top:1px">'+dt+'</div>':'')
+      +'</div>';
     });
     html+='</div></div>';
-    // ── All DC blocked_data fields ──
-    var riskC={'Red':'var(--red)','Yellow':'var(--amber)','Green':'var(--green)'};
-    var rc=riskC[d.churn_risk]||'var(--muted)';
-    function fld(label,val,color){
-      if(!val||val==='-'||val==='TBD'||val==='')return '';
-      var disp=typeof val==='boolean'||(val===0||val===1)?(val?'Yes':'No'):E(String(val));
-      return '<div><div style="font-size:7.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px">'+label+'</div>'
-        +'<div style="font-size:10px;'+(color?'color:'+color+';font-weight:700':'')+'">'+(color&&val?'● ':'')+disp+'</div></div>';
+
+    // ── ZONE 4: Notes split panel (most important data) ───────────────
+    var hasNotes=((d.health_notes&&d.health_notes!=='TBD'&&d.health_notes!=='-')||(d.upgrade_notes&&d.upgrade_notes!=='TBD')||d.comments||d.exec_delay||d.m1_details||d.m3_details||d.m5_details);
+    if(hasNotes){
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border)">';
+      var left='',right='';
+      if(d.health_notes&&d.health_notes!=='TBD'&&d.health_notes!=='-')
+        left+='<div style="margin-bottom:.5rem"><div style="font-size:7px;color:'+risk_col+';text-transform:uppercase;font-weight:700;margin-bottom:2px">Account Health</div><div style="font-size:9px;color:var(--muted);line-height:1.4">'+E(d.health_notes)+'</div></div>';
+      if(d.upgrade_notes&&d.upgrade_notes!=='TBD')
+        right+='<div style="margin-bottom:.5rem"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:2px">Upgrade Notes</div><div style="font-size:9px;color:var(--muted);line-height:1.4">'+E(d.upgrade_notes)+'</div></div>';
+      if(d.comments)
+        right+='<div style="margin-bottom:.5rem"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:2px">EMEA Comments</div><div style="font-size:9px;color:var(--muted);line-height:1.4">'+E(d.comments)+'</div></div>';
+      if(d.m1_details)left+='<div style="margin-bottom:.35rem"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-bottom:1px">M1 Details</div><div style="font-size:8.5px;color:var(--muted)">'+E(d.m1_details)+'</div></div>';
+      if(d.m3_details)left+='<div style="margin-bottom:.35rem"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-bottom:1px">M3 Details</div><div style="font-size:8.5px;color:var(--muted)">'+E(d.m3_details)+'</div></div>';
+      if(d.m5_details)left+='<div style="margin-bottom:.35rem"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-bottom:1px">M5 Details</div><div style="font-size:8.5px;color:var(--muted)">'+E(d.m5_details)+'</div></div>';
+      if(d.exec_delay)right+='<div><div style="font-size:7px;color:var(--red);text-transform:uppercase;font-weight:700;margin-bottom:1px">Exec Delay</div><div style="font-size:9px;color:var(--red)">'+E(d.exec_delay)+'</div></div>';
+      html+='<div style="background:var(--bg);padding:.65rem 1.4rem">'+(left||'<span style="font-size:9px;color:var(--border)">—</span>')+'</div>'
+           +'<div style="background:var(--bg);padding:.65rem 1.4rem">'+(right||'<span style="font-size:9px;color:var(--border)">—</span>')+'</div>'
+      +'</div>';
     }
-    // Account team + DC metadata
-    var teamRow='';
-    teamRow+=fld('Account Rep',d.cc_rep&&d.cc_rep!=='-'?d.cc_rep:'');
-    teamRow+=fld('DSM',d.cc_dsm&&d.cc_dsm!=='-'?d.cc_dsm:'');
-    teamRow+=fld('Last Edited By',d.last_edited_by);
-    teamRow+=fld('Last Edit Date',d.last_edited_date);
-    teamRow+=fld('DC Assignment',d.dc_assignment);
-    teamRow+=fld('Churn Risk',d.churn_risk,rc);
-    teamRow+=fld('DC Progress',d.dc_progress,riskC[d.dc_progress]||'var(--muted)');
-    teamRow+=fld('DC Project Status',d.current_project_status);
-    teamRow+=fld('Team',d.team);
-    teamRow+=fld('Cohort',d.cohort);
-    teamRow+=fld('Area',d.area);
-    teamRow+=fld('Region',d.account_region||d.district_region);
-    teamRow+=fld('District',d.district);
-    teamRow+=fld('Email Sent',d.email_sent);
-    teamRow+=fld('Next Renewal',d.next_renewal_date);
-    teamRow+=fld('Upgrade Duration',d.upgrade_duration_weeks?d.upgrade_duration_weeks+'w':'');
-    teamRow+=fld('Has Partner',d.has_partner==='TRUE'?'Yes':d.has_partner==='FALSE'?'No':'');
-    teamRow+=fld('Partner',d.upgrade_partner&&d.upgrade_partner!=="I don't know"?d.upgrade_partner:'');
-    teamRow+=fld('Past Due',d.past_due_planned);
-    teamRow+=fld('Milestone Aging',d.milestone_aging);
-    teamRow+=fld('Days No Move',d.days_since_milestone);
-    teamRow+=fld('MomentumX',d.momentum_x);
-    teamRow+=fld('Entitlement',d.entitlement_provision);
-    teamRow+=fld('Activation',d.activation_status);
-    teamRow+=fld('Posture WL',d.posture_workloads);
-    teamRow+=fld('Last Edited By',d.last_edited_by);
-    teamRow+=fld('Last Edited',d.last_edited_date);
-    if(teamRow)html+='<div style="padding:.65rem 1.4rem;display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem .75rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,.015)">'+teamRow+'</div>';
-    // Roadmap + PS Plan links
+
+    // ── ZONE 5: DC metadata grid (all fields) ──────────────────────────
+    function fld(label,val,col){
+      if(!val||val==='-'||val==='TBD'||val==='')return '';
+      return '<div><div style="font-size:6.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">'+label+'</div>'
+        +'<div style="font-size:9px;'+(col?'color:'+col+';font-weight:600':'')+'">'+(col&&val?'● ':'')+E(String(val))+'</div></div>';
+    }
+    var meta='';
+    meta+=fld('Account Rep',d.cc_rep&&d.cc_rep!=='-'?d.cc_rep:'');
+    meta+=fld('DSM',d.cc_dsm&&d.cc_dsm!=='-'?d.cc_dsm:'');
+    meta+=fld('DC Assignment',d.dc_assignment);
+    meta+=fld('Area',d.area);
+    meta+=fld('District',d.district);
+    meta+=fld('Region',d.account_region||d.district_region);
+    meta+=fld('Next Renewal',d.next_renewal_date);
+    meta+=fld('Project Status',d.current_project_status);
+    meta+=fld('Milestone Aging',d.milestone_aging);
+    meta+=fld('Days No Move',d.days_since_milestone);
+    meta+=fld('Past Due',d.past_due_planned);
+    meta+=fld('Has Partner',d.has_partner==='TRUE'?'Yes':d.has_partner==='FALSE'?'No':'');
+    meta+=fld('Partner',d.upgrade_partner&&d.upgrade_partner!=="I don't know"?d.upgrade_partner:'');
+    meta+=fld('Upgrade Duration',d.upgrade_duration_weeks?d.upgrade_duration_weeks+'w':'');
+    meta+=fld('Entitlement',d.entitlement_provision);
+    meta+=fld('Activation',d.activation_status);
+    meta+=fld('Posture WL',d.posture_workloads);
+    meta+=fld('MomentumX',d.momentum_x);
+    meta+=fld('Email Sent',d.email_sent);
+    meta+=fld('AI Blocker',d.blocker);
+    meta+=fld('AI Owner',d.owner);
+    meta+=fld('AI Accountable',d.accountable);
+    meta+=fld('PSC',d.psc);
+    meta+=fld('PM',d.pm);
+    meta+=fld('Clarizen',d.clarizen_id);
+    meta+=fld('PS Status',d.ps_status);
+    meta+=fld('Blocker Type',d.subtype?d.subtype.replace(/_/g,' '):'');
+    if(meta)html+='<div style="padding:.6rem 1.4rem;display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem .6rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,.01)">'+meta+'</div>';
+
+    // ── ZONE 6: Doc links + Change history ────────────────────────────
     var links='';
-    if(d.roadmap_url)links+='<a href="'+E(d.roadmap_url)+'" target="_blank" style="font-size:9px;color:var(--teal);margin-right:1rem">📄 PC to CC Roadmap</a>';
-    if(d.ps_plan_url)links+='<a href="'+E(d.ps_plan_url)+'" target="_blank" style="font-size:9px;color:var(--teal)">📄 PS Plan</a>';
-    if(links)html+='<div style="padding:.5rem 1.4rem;border-bottom:1px solid var(--border)">'+links+'</div>';
-    // DC alert
-    if(d.milestone_category)
-      html+='<div style="padding:.5rem 1.4rem;border-bottom:1px solid var(--border);background:rgba(245,158,11,.06)">'
-        +'<span style="font-size:8px;color:var(--amber);font-family:var(--mono);font-weight:700">⚠ DC ALERT: </span>'
-        +'<span style="font-size:9px;color:var(--amber)">'+E(d.milestone_category)+'</span></div>';
-    // Notes
-    var notesHtml='';
-    if(d.m1_details)notesHtml+='<div style="margin-bottom:.5rem"><div style="font-size:7.5px;color:var(--muted);margin-bottom:2px;text-transform:uppercase">M1 Details</div><div style="font-size:9px;color:var(--muted)">'+E(d.m1_details)+'</div></div>';
-    if(d.m3_details)notesHtml+='<div style="margin-bottom:.5rem"><div style="font-size:7.5px;color:var(--muted);margin-bottom:2px;text-transform:uppercase">M3 Details</div><div style="font-size:9px;color:var(--muted)">'+E(d.m3_details)+'</div></div>';
-    if(d.m5_details)notesHtml+='<div style="margin-bottom:.5rem"><div style="font-size:7.5px;color:var(--muted);margin-bottom:2px;text-transform:uppercase">M5 Details</div><div style="font-size:9px;color:var(--muted)">'+E(d.m5_details)+'</div></div>';
-    if(d.health_notes&&d.health_notes!=='TBD'&&d.health_notes!=='-')
-      notesHtml+='<div style="margin-bottom:.5rem"><div style="font-size:7.5px;color:var(--muted);margin-bottom:2px;text-transform:uppercase">Account Health (DC)</div><div style="font-size:9.5px;color:'+rc+'">'+E(d.health_notes)+'</div></div>';
-    if(d.upgrade_notes&&d.upgrade_notes!=='TBD')
-      notesHtml+='<div style="margin-bottom:.5rem"><div style="font-size:7.5px;color:var(--muted);margin-bottom:2px;text-transform:uppercase">Upgrade Notes</div><div style="font-size:9.5px;color:var(--muted)">'+E(d.upgrade_notes)+'</div></div>';
-    if(d.comments)
-      notesHtml+='<div style="margin-bottom:.5rem"><div style="font-size:7.5px;color:var(--muted);margin-bottom:2px;text-transform:uppercase">EMEA Comments</div><div style="font-size:9.5px;color:var(--muted)">'+E(d.comments)+'</div></div>';
-    if(d.exec_delay)
-      notesHtml+='<div><div style="font-size:7.5px;color:var(--red);margin-bottom:2px;text-transform:uppercase">Exec Delay</div><div style="font-size:9.5px;color:var(--red)">'+E(d.exec_delay)+'</div></div>';
-    if(notesHtml)html+='<div style="padding:.75rem 1.4rem;border-bottom:1px solid var(--border)">'+notesHtml+'</div>';
-    // PS + AI + extras
-    var ex='';
-    if(d.blocker)ex+=fld('AI Blocker',d.blocker);
-    if(d.owner)ex+=fld('AI Owner',d.owner);
-    if(d.accountable)ex+=fld('AI Accountable',d.accountable);
-    if(d.psc)ex+=fld('PSC',d.psc);
-    if(d.pm)ex+=fld('PM',d.pm);
-    if(d.clarizen_id)ex+=fld('Clarizen',d.clarizen_id);
-    if(d.ps_status)ex+=fld('PS Status',d.ps_status);
-    if(d.subtype)ex+=fld('Blocker Type',d.subtype.replace(/_/g,' '));
-    if(ex)html+='<div style="padding:.75rem 1.4rem;display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem .75rem;border-bottom:1px solid var(--border)">'+ex+'</div>';
-        if(d.history&&d.history.length){
-      html+='<div style="padding:.75rem 1.4rem"><b style="font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Change History</b>';
+    if(d.roadmap_url)links+='<a href="'+E(d.roadmap_url)+'" target="_blank" style="font-size:9px;color:var(--teal);padding:3px 8px;border:1px solid rgba(20,184,166,.3);border-radius:4px;text-decoration:none">📄 Roadmap</a>';
+    if(d.ps_plan_url)links+='<a href="'+E(d.ps_plan_url)+'" target="_blank" style="font-size:9px;color:var(--teal);padding:3px 8px;border:1px solid rgba(20,184,166,.3);border-radius:4px;text-decoration:none">📄 PS Plan</a>';
+    if(links)html+='<div style="padding:.5rem 1.4rem;border-bottom:1px solid var(--border);display:flex;gap:.5rem">'+links+'</div>';
+
+    if(d.history&&d.history.length){
+      html+='<div style="padding:.6rem 1.4rem">'
+        +'<div style="font-size:7px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.35rem">Change History (last '+d.history.length+')</div>';
       d.history.forEach(function(h){
-        html+='<div style="display:flex;gap:.6rem;align-items:center;padding:.28rem 0;border-bottom:1px solid rgba(33,38,45,.5);font-family:var(--mono);font-size:9px">'
-          +'<span style="color:var(--muted);white-space:nowrap">'+E(fmtDt(h.changed_at||''))+'</span>'
-          +'<span style="font-size:7.5px;background:rgba(94,234,212,.1);color:var(--teal);padding:1px 4px;border-radius:3px">'+E(h.file_source||'')+'</span>'
-          +'<span style="color:var(--muted)">'+E(h.field_name||'')+'</span>'
-          +'<span style="color:var(--muted)">'+E(h.old_status||'')+'</span>'
-          +'<span style="color:var(--text)">→ '+E(h.new_status||'')+'</span></div>';
+        var isReg=(h.old_status==='Y'&&h.new_status==='N');
+        html+='<div style="display:flex;gap:.5rem;align-items:center;padding:.22rem 0;border-bottom:1px solid rgba(33,38,45,.4);font-family:var(--mono);font-size:8.5px">'
+          +'<span style="color:var(--muted);white-space:nowrap;width:100px;flex-shrink:0">'+E(fmtDt(h.changed_at||''))+'</span>'
+          +'<span style="font-size:7px;background:rgba(94,234,212,.08);color:var(--teal);padding:1px 4px;border-radius:2px;flex-shrink:0">'+E((h.file_source||'').replace('DC CSE Tracker','DC').replace('EMEA Accounts CC Migrations','EMEA'))+'</span>'
+          +'<span style="color:var(--muted);flex-shrink:0">'+E(h.field_name||'')+'</span>'
+          +'<span style="color:var(--muted)">'+E(h.old_status||'—')+'</span>'
+          +'<span style="color:'+(isReg?'var(--red)':'var(--text)')+'">→ '+E(h.new_status||'')+'</span>'
+        +'</div>';
       });
       html+='</div>';
     }
+
     document.getElementById('cc').innerHTML=html;
     document.getElementById('cm').style.display='block';
   });
@@ -846,7 +966,7 @@ function setTheatre(t){
     p.style.color=act?'var(--teal)':'var(--muted)';
     p.style.borderColor=act?'rgba(20,184,166,.4)':'var(--border)';
   });
-  loadMs();loadCSE();loadAudit();
+  loadMs();loadCSE();loadAudit();loadCompleted();loadM1();
 }
 function initTheatre(){
   fetch('/api/theatres').then(r=>r.json()).then(function(rows){
@@ -867,7 +987,7 @@ function initTheatre(){
     }).join('');
   }).catch(function(){});
 }
-function loadAll(){loadStats();loadFunnel();loadWeekly();loadM1();loadMs();loadSLA();loadCSE();loadCompleted();loadAudit();initTheatre();}
+function loadAll(){loadStats();loadFunnel();loadWeekly();loadM1();loadMs();loadSLA();loadCSE();loadCompleted();initTheatre();}
 loadAll();
 setInterval(loadAll,60000);
 </script>

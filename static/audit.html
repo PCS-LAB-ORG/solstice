@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solstice — Audit Log</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0D1117;--card:#161B22;--border:#21262D;--text:#E6EDF3;--muted:#8B949E;--teal:#14B8A6;--green:#22C55E;--amber:#F59E0B;--red:#EF4444;--purple:#A78BFA;--mono:'Geist Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.nav-link{font-size:10.5px;color:var(--muted);text-decoration:none;padding:4px 12px;border-radius:5px;border:1px solid transparent}
+.nav-link:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-link.active{color:var(--text);background:rgba(255,255,255,.08);border-color:var(--border)}
+.page{max-width:1100px;margin:0 auto;padding:1.25rem 1.5rem}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-bottom:1.1rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;text-align:center}
+.stat .n{font-size:22px;font-weight:700}
+.stat .l{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-top:2px}
+.fbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1.1rem}
+.fbar input{background:var(--card);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:9px;padding:5px 10px;flex:1;min-width:200px;outline:none}
+select.fsel{background:var(--card);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:9px;padding:5px 8px;font-family:var(--mono)}
+.day-grp{margin-bottom:1.25rem}
+.day-hdr{font-size:8px;font-family:var(--mono);letter-spacing:.1em;color:#484F58;padding:.3rem 0 .35rem;border-bottom:1px solid rgba(33,38,45,.6);margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+.day-cnt{color:#30363D}
+.entry{display:grid;grid-template-columns:3px 1fr;gap:0 .65rem;margin-bottom:.28rem}
+.bar{border-radius:2px;align-self:stretch;margin:.15rem 0}
+.body{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:.45rem .75rem}
+.body.glow-m9{box-shadow:0 0 12px rgba(34,197,94,.12);border-color:rgba(34,197,94,.2)}
+.body.glow-m8{border-color:rgba(20,184,166,.14)}
+.body.glow-reg{border-color:rgba(239,68,68,.18)}
+.etop{display:flex;align-items:center;gap:.4rem;margin-bottom:.2rem}
+.ebadge{font-family:var(--mono);font-size:7.5px;font-weight:700;padding:1px 6px;border-radius:3px}
+.eacct{font-size:10px;font-weight:700}
+.etime{margin-left:auto;font-family:var(--mono);font-size:8px;color:#484F58}
+.echg{font-family:var(--mono);font-size:9px;margin-bottom:.18rem}
+.emeta{font-size:8px;color:#6E7681;display:flex;gap:.5rem;align-items:center}
+.empty{padding:2rem;text-align:center;color:var(--muted);font-size:11px}
+</style>
+</head>
+<body>
+<nav style="background:#161B22;border-bottom:1px solid #21262D;padding:.6rem 1.5rem;display:flex;align-items:center;gap:.25rem;position:sticky;top:0;z-index:100">
+  <span style="font-weight:800;font-size:12px;color:#14B8A6;letter-spacing:.05em;margin-right:1rem">SOLSTICE</span>
+  <a href="/ops" class="nav-link">Ops</a>
+  <a href="/blockers" class="nav-link">Blockers</a>
+  <a href="/forecast" class="nav-link">Forecast</a>
+  <a href="/daily" class="nav-link">Daily</a>
+  <a href="/audit" class="nav-link">Audit</a>
+</nav>
+<div class="page">
+  <div class="stats" id="stats"></div>
+  <div class="fbar">
+    <input id="f-search" placeholder="Search accounts..." oninput="render()">
+    <select class="fsel" id="f-theatre" onchange="load()">
+      <option value="">All Theatres</option>
+      <option value="EMEA">EMEA</option>
+      <option value="AMER">AMER/NAM</option>
+      <option value="JAPAC">JAPAC</option>
+      <option value="LATAM">LATAM</option>
+    </select>
+    <select class="fsel" id="f-field" onchange="render()">
+      <option value="">All Fields</option>
+      <option value="M9 Upgrade Complete">M9 Complete</option>
+      <option value="M8 Upgrade Started">M8 Started</option>
+      <option value="M3 Buy-in">M3 Buy-in</option>
+      <option value="M1 Outreach">M1 Outreach</option>
+      <option value="cse">CSE Change</option>
+    </select>
+    <select class="fsel" id="f-sort" onchange="render()">
+      <option value="asc">Oldest First</option>
+      <option value="desc">Newest First</option>
+    </select>
+  </div>
+  <div id="timeline"></div>
+</div>
+<script>
+var E=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+var _rows=[];
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var MC={'M9 Upgrade Complete':'#22C55E','M8 Upgrade Started':'#14B8A6','M7 Legal':'#8B5CF6',
+  'M5 Tech Validation':'#3B82F6','M4 Discovery':'#06b6d4','M3 Buy-in':'#F59E0B',
+  'M2 Entitlements':'#F97316','M1 Outreach':'#A78BFA','cse':'#EC4899','status':'#8B949E'};
+var MI={'M9 Upgrade Complete':'M9','M8 Upgrade Started':'M8','M7 Legal':'M7',
+  'M5 Tech Validation':'M5','M4 Discovery':'M4','M3 Buy-in':'M3',
+  'M2 Entitlements':'M2','M1 Outreach':'M1','cse':'CSE','status':'STS'};
+var TH_C={'EMEA':'#14B8A6','AMER':'#3B82F6','JAPAC':'#8B5CF6','LATAM':'#F59E0B'};
+
+function load(){
+  var theatre=document.getElementById('f-theatre').value;
+  fetch('/api/audit-log?theatre='+encodeURIComponent(theatre)).then(function(r){return r.json();}).then(function(rows){
+    _rows=rows;
+    var m9=rows.filter(function(r){return r.field_name==='M9 Upgrade Complete';}).length;
+    var m8=rows.filter(function(r){return r.field_name==='M8 Upgrade Started';}).length;
+    var m3=rows.filter(function(r){return r.field_name==='M3 Buy-in';}).length;
+    var cse=rows.filter(function(r){return r.field_name==='cse';}).length;
+    var reg=rows.filter(function(r){return r.old_status==='Y'&&r.new_status==='N';}).length;
+    document.getElementById('stats').innerHTML=
+      '<div class="stat"><div class="n" style="color:#22C55E">'+m9+'</div><div class="l">M9 Complete</div></div>'
+      +'<div class="stat"><div class="n" style="color:#14B8A6">'+m8+'</div><div class="l">M8 Started</div></div>'
+      +'<div class="stat"><div class="n" style="color:#F59E0B">'+m3+'</div><div class="l">M3 Buy-in</div></div>'
+      +'<div class="stat"><div class="n" style="color:#EC4899">'+cse+'</div><div class="l">CSE Changes</div></div>'
+      +'<div class="stat"><div class="n" style="color:#EF4444">'+reg+'</div><div class="l">Regressions</div></div>'
+      +'<div class="stat"><div class="n" style="color:var(--muted)">'+rows.length+'</div><div class="l">Total</div></div>';
+    render();
+  }).catch(function(){document.getElementById('timeline').innerHTML='<div class="empty">Error loading audit log</div>';});
+}
+
+function render(){
+  var q=(document.getElementById('f-search').value||'').toLowerCase();
+  var ff=document.getElementById('f-field').value;
+  var sort=document.getElementById('f-sort').value;
+  var rows=_rows.filter(function(r){
+    if(ff&&r.field_name!==ff)return false;
+    if(q&&!((r.customer_name||r.new_status||'')+(r.active_cse||'')).toLowerCase().indexOf(q)>=0)return false;
+    return true;
+  });
+  if(sort==='desc')rows=rows.slice().reverse();
+  if(!rows.length){document.getElementById('timeline').innerHTML='<div class="empty">No entries match filters</div>';return;}
+  var byDay={},dayOrder=[];
+  rows.forEach(function(r){
+    var day=(r.changed_at||'').substring(0,10);
+    var p=day.split('-');
+    var label=p.length===3?p[2]+' '+(MONTHS[parseInt(p[1])-1]||p[1])+' '+p[0].substring(2):day;
+    if(!byDay[day]){byDay[day]={label:label,entries:[]};dayOrder.push(day);}
+    byDay[day].entries.push(r);
+  });
+  var html='';
+  dayOrder.forEach(function(day){
+    var grp=byDay[day];
+    html+='<div class="day-grp">'
+      +'<div class="day-hdr">'+E(grp.label)+' <span class="day-cnt">('+grp.entries.length+')</span></div>';
+    grp.entries.forEach(function(r){
+      var mc=MC[r.field_name]||'#8B949E';
+      var mi=MI[r.field_name]||r.field_name||'?';
+      var isM9=r.field_name==='M9 Upgrade Complete';
+      var isM8=r.field_name==='M8 Upgrade Started';
+      var isReg=r.old_status==='Y'&&r.new_status==='N';
+      var isCse=r.field_name==='cse';
+      if(isReg)mc='#EF4444';
+      var glow=isM9?'glow-m9':isM8?'glow-m8':isReg?'glow-reg':'';
+      var time=(r.changed_at||'').substring(11,16);
+      var name=r.customer_name||r.new_status||'?';
+      var th=r.account_theatre||'';
+      var thcol=TH_C[th]||'';
+      var chgHtml='';
+      if(isCse){
+        chgHtml='<span style="color:var(--muted)">'+E(r.old_status||'—')+'</span>'
+          +' &#8594; <span style="color:'+mc+';font-weight:700">'+E(r.new_status||'—')+'</span>';
+      } else if(isReg){
+        chgHtml='<span style="color:#EF4444;font-weight:700">&#8595; REGRESSION: '+E(r.field_name)+'</span>';
+      } else {
+        chgHtml='<span style="color:'+mc+';font-weight:700">&#10003; '+E(r.field_name)+'</span>';
+      }
+      html+='<div class="entry">'
+        +'<div class="bar" style="background:'+mc+'"></div>'
+        +'<div class="body '+glow+'">'
+          +'<div class="etop">'
+            +'<span class="ebadge" style="background:'+mc+'22;color:'+mc+'">'+E(mi)+'</span>'
+            +'<span class="eacct" style="color:'+(isM9?'#4ade80':isM8?'#5eead4':'var(--text)')+'">'+E(name)+'</span>'
+            +(time?'<span class="etime">'+E(time)+'</span>':'')
+          +'</div>'
+          +'<div class="echg">'+chgHtml+'</div>'
+          +'<div class="emeta">'
+            +(r.active_cse?'<span>'+E(r.active_cse)+'</span>':'')
+            +(th?'<span style="font-size:7px;font-weight:700;padding:1px 4px;border-radius:2px;background:'+thcol+'18;color:'+thcol+'">'+E(th)+'</span>':'')
+          +'</div>'
+        +'</div>'
+      +'</div>';
+    });
+    html+='</div>';
+  });
+  document.getElementById('timeline').innerHTML=html;
+}
+
+document.querySelectorAll('.nav-link').forEach(function(a){if(window.location.pathname===a.getAttribute('href'))a.classList.add('active');});
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solstice — Blocker Review</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0D1117;--card:#161B22;--border:#21262D;--text:#E6EDF3;--muted:#8B949E;--teal:#14B8A6;--red:#EF4444;--amber:#F59E0B;--green:#22C55E;--mono:'Geist Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+.nav-link{font-size:10.5px;color:var(--muted);text-decoration:none;padding:4px 12px;border-radius:5px;border:1px solid transparent;transition:all .15s}
+.nav-link:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-link.active{color:var(--text);background:rgba(255,255,255,.08);border-color:var(--border)}
+.page{max-width:1160px;margin:0 auto;padding:1.25rem 1.5rem}
+.fbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.fpill{font-size:8.5px;font-weight:700;letter-spacing:.07em;padding:4px 11px;border-radius:20px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;transition:all .15s}
+.fpill:hover{border-color:#30363D;color:var(--text)}
+.fpill.act-emea{border-color:var(--teal);color:var(--teal);background:rgba(20,184,166,.08)}
+.fpill.act-amer{border-color:#3B82F6;color:#3B82F6;background:rgba(59,130,246,.08)}
+.fpill.act-japac{border-color:#8B5CF6;color:#8B5CF6;background:rgba(139,92,246,.08)}
+.fpill.act-latam{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.08)}
+select.fsel{background:var(--card);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:9px;padding:5px 8px;font-family:var(--mono)}
+input.fsearch{background:var(--card);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:9px;padding:5px 10px;outline:none;min-width:180px}
+.sumbar{display:flex;gap:.6rem;margin-bottom:1.1rem;flex-wrap:wrap}
+.schip{font-size:9px;font-weight:600;padding:3px 10px;border-radius:4px;cursor:pointer}
+.bsec{margin-bottom:1.25rem}
+.shdr{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;background:var(--card);border:1px solid var(--border);border-radius:8px 8px 0 0;cursor:pointer;user-select:none}
+.shdr:hover{background:#1C2128}
+.shdr .ico{font-size:13px;width:18px;text-align:center}
+.shdr h3{font-size:11px;font-weight:700}
+.shdr .cnt{font-size:9px;color:var(--muted)}
+.shdr .chev{margin-left:auto;color:var(--muted);font-size:10px;transition:transform .2s}
+.sbody{border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden}
+.sbody.col{display:none}
+.shdr.open .chev{transform:rotate(180deg)}
+.rghdr{padding:.3rem .8rem;background:var(--bg);border-bottom:1px solid rgba(33,38,45,.5);display:flex;align-items:center;gap:.5rem}
+.rghdr span{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:#484F58;font-weight:700}
+.rghdr .rc{font-size:8px;color:#30363D}
+.thdr{display:grid;grid-template-columns:2fr 1.3fr 1fr 2.5fr;background:var(--bg);border-bottom:1px solid var(--border)}
+.thdr span{padding:.28rem .7rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:#484F58;font-weight:700;border-right:1px solid rgba(33,38,45,.4)}
+.thdr span:last-child{border-right:none}
+.arow{display:grid;grid-template-columns:2fr 1.3fr 1fr 2.5fr;border-bottom:1px solid rgba(33,38,45,.4);align-items:stretch}
+.arow:last-child{border-bottom:none}
+.arow:hover{background:rgba(255,255,255,.015)}
+.ac{padding:.5rem .7rem;font-size:9.5px;border-right:1px solid rgba(33,38,45,.3)}
+.ac:last-child{border-right:none}
+.aname{font-weight:700;font-size:10px;margin-bottom:2px}
+.asub{font-size:8.5px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font-size:8px;color:var(--muted);margin-bottom:2px}
+.chip .role{font-size:7px;color:#484F58;font-weight:700}
+.notes{font-size:8.5px;color:#6E7681;line-height:1.45}
+.dcdot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:2px}
+.empty{padding:1.5rem;text-align:center;color:var(--muted);font-size:10px}
+</style>
+</head>
+<body>
+<nav style="background:#161B22;border-bottom:1px solid #21262D;padding:.6rem 1.5rem;display:flex;align-items:center;gap:.25rem;position:sticky;top:0;z-index:100">
+  <span style="font-weight:800;font-size:12px;color:#14B8A6;letter-spacing:.05em;margin-right:1rem">SOLSTICE</span>
+  <a href="/ops" class="nav-link">Ops</a>
+  <a href="/blockers" class="nav-link">Blockers</a>
+  <a href="/forecast" class="nav-link">Forecast</a>
+  <a href="/daily" class="nav-link">Daily</a>
+  <a href="/audit" class="nav-link">Audit</a>
+</nav>
+<div class="page">
+  <div class="fbar">
+    <span class="fpill" data-t="" onclick="setT(this,'')">All</span>
+    <span class="fpill" data-t="EMEA" onclick="setT(this,'EMEA')">EMEA</span>
+    <span class="fpill" data-t="AMER" onclick="setT(this,'AMER')">AMER/NAM</span>
+    <span class="fpill" data-t="JAPAC" onclick="setT(this,'JAPAC')">JAPAC</span>
+    <span class="fpill" data-t="LATAM" onclick="setT(this,'LATAM')">LATAM</span>
+    <span style="color:var(--border);margin:0 .1rem">|</span>
+    <select class="fsel" id="f-region" onchange="load()"><option value="">All Regions</option></select>
+    <select class="fsel" id="f-cse" onchange="load()"><option value="">All CSEs</option></select>
+    <input class="fsearch" id="f-search" placeholder="Search account..." oninput="render()">
+  </div>
+  <div class="sumbar" id="sumbar"></div>
+  <div id="sections"></div>
+</div>
+<script>
+var E=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+var _t='',_data={};
+var TYPES=[
+  {key:'no_contact',     icon:'X',label:'No Internal Kickoff',     desc:'Not able to contact NGS Sales Specialist'},
+  {key:'core_rep_blocking',icon:'!',label:'Blocked by Account Team',desc:'Rep asked CSE to hold'},
+  {key:'tech_blocker',   icon:'T',label:'Technical Blocker',       desc:'CoE / product gap'},
+  {key:'active_deal',    icon:'D',label:'Active Deal',             desc:'XSIAM or other deal in flight'},
+  {key:'other',          icon:'o',label:'Other',                   desc:'Other blockers'},
+];
+var DC_C={'Green':'#22C55E','Yellow':'#F59E0B','Red':'#EF4444'};
+
+function setT(el,t){
+  _t=t;
+  document.querySelectorAll('.fpill').forEach(function(p){
+    p.className='fpill';
+    if(p.dataset.t===t){
+      var cls={'EMEA':'act-emea','AMER':'act-amer','JAPAC':'act-japac','LATAM':'act-latam','':''}[t];
+      p.className='fpill '+(cls||'act-emea');
+    }
+  });
+  load();
+}
+
+function load(){
+  var region=document.getElementById('f-region').value;
+  var cse=document.getElementById('f-cse').value;
+  var url='/api/blockers?theatre='+encodeURIComponent(_t)+'&region='+encodeURIComponent(region)+'&cse='+encodeURIComponent(cse);
+  fetch(url).then(function(r){return r.json();}).then(function(d){
+    _data=d;
+    var cses={};
+    TYPES.forEach(function(t){(d[t.key]||[]).forEach(function(a){if(a.active_cse)cses[a.active_cse]=1;});});
+    var cEl=document.getElementById('f-cse');
+    var cur=cEl.value;
+    cEl.innerHTML='<option value="">All CSEs</option>';
+    Object.keys(cses).sort().forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;if(c===cur)o.selected=true;cEl.appendChild(o);});
+    render();
+  }).catch(function(){document.getElementById('sections').innerHTML='<div class="empty">Error loading data</div>';});
+}
+
+function render(){
+  var q=(document.getElementById('f-search').value||'').toLowerCase();
+  var total=0;
+  var sumHtml='';
+  var secHtml='';
+  TYPES.forEach(function(type){
+    var items=(_data[type.key]||[]).filter(function(a){
+      return !q||(a.customer_name||'').toLowerCase().indexOf(q)>=0||(a.active_cse||'').toLowerCase().indexOf(q)>=0;
+    });
+    if(!items.length)return;
+    total+=items.length;
+    sumHtml+='<span class="schip" style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted)">'+type.icon+' '+type.label+': <b style="color:var(--text)">'+items.length+'</b></span>';
+    var byReg={};var regOrder=[];
+    items.forEach(function(a){var r=a.sales_region||'Other';if(!byReg[r]){byReg[r]=[];regOrder.push(r);}byReg[r].push(a);});
+    var rows='<div class="thdr"><span>Account</span><span>Rep / DSM</span><span>CSE · DC</span><span>Notes</span></div>';
+    regOrder.forEach(function(reg){
+      rows+='<div class="rghdr"><span>'+E(reg)+'</span><span class="rc">'+byReg[reg].length+'</span></div>';
+      byReg[reg].forEach(function(a){
+        var dc=a.dc_progress||'—';
+        var dcc=DC_C[dc]||'var(--muted)';
+        var repHtml=a.cc_rep&&a.cc_rep!=='-'?'<div class="chip"><span class="role">REP</span>'+E(a.cc_rep)+'</div>':'';
+        var dsmHtml=a.cc_dsm&&a.cc_dsm!=='-'?'<div class="chip"><span class="role">DSM</span>'+E(a.cc_dsm)+'</div>':'<div style="font-size:8px;color:#484F58">No DSM</div>';
+        var txt=(a.upgrade_notes||a.health_notes||a.status_detail||'—').substring(0,160);
+        rows+='<div class="arow">'
+          +'<div class="ac"><div class="aname">'+E(a.customer_name)+'</div><div class="asub">'+E(a.active_cse||'—')+'</div></div>'
+          +'<div class="ac">'+repHtml+dsmHtml+'</div>'
+          +'<div class="ac"><div class="asub" style="margin-bottom:3px">'+E(a.active_cse||'—')+'</div>'
+            +'<div><span class="dcdot" style="background:'+dcc+'"></span><span style="font-size:8.5px;color:'+dcc+'">'+E(dc)+'</span></div></div>'
+          +'<div class="ac"><div class="notes">'+E(txt)+'</div></div>'
+          +'</div>';
+      });
+    });
+    secHtml+='<div class="bsec">'
+      +'<div class="shdr open" onclick="toggleSec(this)">'
+        +'<span class="ico">'+type.icon+'</span>'
+        +'<h3>'+E(type.label)+'</h3>'
+        +'<span class="cnt">'+items.length+' accounts — '+E(type.desc)+'</span>'
+        +'<span class="chev">&#9660;</span>'
+      +'</div>'
+      +'<div class="sbody">'+rows+'</div>'
+      +'</div>';
+  });
+  document.getElementById('sumbar').innerHTML=sumHtml+(total?'<span class="schip" style="color:var(--muted);font-size:9px">Total: '+total+'</span>':'');
+  document.getElementById('sections').innerHTML=secHtml||'<div class="empty">No blocked accounts match current filters</div>';
+}
+
+function toggleSec(hdr){
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('col');
+}
+
+document.querySelectorAll('.nav-link').forEach(function(a){if(window.location.pathname===a.getAttribute('href'))a.classList.add('active');});
+load();
+</script>
+</body>
+</html>

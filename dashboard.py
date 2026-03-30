@@ -121,7 +121,7 @@ def _load_weekly() -> list:
         weeks  = {}
         with get_db() as conn:
             for row in conn.execute("""SELECT a.customer_name,a.active_cse,a.status,
-                a.live_fire, a.live_fire_dc,
+                a.live_fire, a.live_fire_dc, a.sales_region, a.account_theatre,
                 b.m8_planned,b.m9_planned,b.m8_started,b.m9_complete
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE b.m3_complete=1
@@ -138,7 +138,7 @@ def _load_weekly() -> list:
                         k=d.strftime("%Y-W%U")
                         ws=d-timedelta(days=(d.weekday()+1)%7)
                         weeks.setdefault(k,{"key":k,"label":f"W{d.strftime('%U')} · {ws.strftime('%d %b')}","m8":[],"m8_done":[],"m9":[],"done":[]})
-                        e={"name":row["customer_name"],"cse":row["active_cse"] or "—","lf":bool(row["live_fire"]),"lf_dc":row["live_fire_dc"] or "","date":d.strftime("%d %b")}
+                        e={"name":row["customer_name"],"cse":row["active_cse"] or "—","lf":bool(row["live_fire"]),"lf_dc":row["live_fire_dc"] or "","date":d.strftime("%d %b"),"region":row["sales_region"] or "","theatre":row["account_theatre"] or "EMEA"}
                         if label=="M8" and not done: weeks[k]["m8"].append(e)
                         elif label=="M8" and done: weeks[k]["m8_done"].append(e)
                         elif label=="M9" and not done: weeks[k]["m9"].append(e)
@@ -903,7 +903,7 @@ def _load_ps() -> dict:
     except: return {"matched":[],"unmatched":[]}
 
 
-def _load_completed() -> list:
+def _load_completed(theatre: str = '') -> list:
     _ensure_db()
     """Completed accounts — DC M9 complete is source of truth."""
     try:
@@ -915,6 +915,7 @@ def _load_completed() -> list:
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE b.m9_complete=1
+                  AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY b.m9_actual DESC, b.m9_planned DESC
             """).fetchall()
         return [dict(r) for r in rows]
@@ -1076,7 +1077,114 @@ def api_theatres():
 def api_ps(): return _load_ps()
 
 @app.get("/api/completed")
-def api_completed(): return _load_completed()
+def api_completed(theatre: str = ""): return _load_completed(theatre=theatre)
+
+@app.get("/api/blockers")
+def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
+    """Blocked accounts grouped by blocker type for call prep."""
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.sales_region,
+                       COALESCE(a.account_theatre,'EMEA') as account_theatre,
+                       b.signal, b.subtype, b.status_detail, b.upgrade_notes,
+                       b.health_notes, b.dc_progress, b.churn_risk,
+                       b.cc_rep, b.cc_dsm, b.cohort, b.area, b.district,
+                       b.m8_started, b.m9_complete, b.m3_complete
+                FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
+                WHERE a.customer_name != ''
+                  AND b.signal IN ('blocked','at_risk')
+                  AND b.m9_complete = 0
+                  AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
+                  AND (? = '' OR LOWER(a.sales_region) LIKE LOWER(?))
+                  AND (? = '' OR a.active_cse = ?)
+                ORDER BY b.subtype, a.sales_region, a.customer_name
+            """, (theatre, theatre,
+                  region, f"%{region}%",
+                  cse, cse)).fetchall()
+        result = {"no_contact": [], "core_rep_blocking": [], "tech_blocker": [], "active_deal": [], "other": []}
+        for r in rows:
+            d = dict(r)
+            st = d.get("subtype") or "other"
+            bucket = st if st in result else "other"
+            result[bucket].append(d)
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/forecast")
+def api_forecast(theatre: str = ""):
+    """Next 7 days M8/M9 targets + 4-week velocity."""
+    _ensure_db()
+    from datetime import datetime, timedelta
+    today = datetime.utcnow().date()
+    next_week_end = today + timedelta(days=7)
+
+    try:
+        with get_db() as conn:
+            targets = conn.execute("""
+                SELECT a.customer_name, a.active_cse, a.sales_region,
+                       COALESCE(a.account_theatre,'EMEA') as account_theatre,
+                       b.m9_planned, b.m8_planned, b.m8_started, b.m9_complete,
+                       b.dc_progress, b.churn_risk, b.m8_actual
+                FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
+                WHERE a.customer_name != '' AND b.m9_complete=0
+                  AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
+                ORDER BY b.m9_planned
+            """, (theatre, theatre)).fetchall()
+
+            velocity = []
+            for w in range(3, -1, -1):
+                week_start = (today - timedelta(days=today.weekday()) - timedelta(weeks=w))
+                week_end = week_start + timedelta(days=6)
+                n = conn.execute("""
+                    SELECT COUNT(*) FROM status_history sh
+                    LEFT JOIN accounts a ON a.account_id=sh.account_id
+                    WHERE sh.field_name='M9 Upgrade Complete'
+                      AND sh.new_status='Y'
+                      AND sh.source IN ('pipeline','backfill')
+                      AND date(sh.changed_at) BETWEEN ? AND ?
+                      AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
+                """, (str(week_start), str(week_end), theatre, theatre)).fetchone()[0]
+                velocity.append({"week_start": str(week_start), "week_end": str(week_end), "m9_count": n,
+                                 "label": week_start.strftime("%d %b")})
+
+        def parse_date(s):
+            if not s: return None
+            for f in ('%m/%d/%Y', '%Y-%m-%d', '%m/%d/%Y %H:%M:%S'):
+                try:
+                    from datetime import datetime as dt
+                    return dt.strptime(s.strip().split(' ')[0], f).date()
+                except: pass
+            return None
+
+        next_targets = []
+        overdue = []
+        for r in targets:
+            d = dict(r)
+            m9d = parse_date(d.get('m9_planned'))
+            if not m9d: continue
+            confidence = "HIGH" if d['m8_started'] and d['dc_progress'] == 'Green' else \
+                         "MED" if d['m8_started'] else "LOW"
+            d['confidence'] = confidence
+            d['m9_date'] = str(m9d)
+            if m9d < today:
+                d['status'] = 'overdue'
+                overdue.append(d)
+            elif m9d <= next_week_end:
+                d['status'] = 'upcoming'
+                next_targets.append(d)
+
+        counts = [v['m9_count'] for v in velocity]
+        trend = "up" if counts[-1] > counts[0] else "down" if counts[-1] < counts[0] else "flat"
+
+        return {"next_targets": next_targets, "overdue": overdue,
+                "velocity": velocity, "trend": trend}
+    except Exception as e:
+        return {"error": str(e)}
+
 
 @app.get("/api/dq")
 def api_dq(): return _load_dq()
@@ -1168,7 +1276,7 @@ def _generate_m1_rationale(cat: str, accounts: list, total: int) -> str:
 
 
 @app.get("/api/m1-suggestions")
-def api_m1_suggestions():
+def api_m1_suggestions(theatre: str = ""):
     """M1 action plan — 4 flat tables with LLM rationale per category."""
     try:
         with get_db() as conn:
@@ -1181,8 +1289,9 @@ def api_m1_suggestions():
                 FROM m1_suggestions s
                 LEFT JOIN accounts a ON a.customer_name=s.account_name
                 LEFT JOIN blocked_data b ON b.account_id=a.account_id
+                AND (? = '' OR UPPER(COALESCE(b.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY s.category, s.assigned_cse, s.region, s.account_name
-            """).fetchall()
+            """, (theatre, theatre)).fetchall()
         from collections import defaultdict
         cats: dict = {'actionable': [], 'acct_team': [], 'unblock': [], 'skip': []}
         for r in rows:
@@ -1235,10 +1344,12 @@ async def api_events(request:Request):
 
 @app.get("/",response_class=HTMLResponse)
 def dashboard():
-    html_path = Path(__file__).parent / "static" / "dashboard.html"
-    if html_path.exists():
-        return html_path.read_text()
-    return "<h1>Loading...</h1>"
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/ops")
+
+@app.get("/ops",response_class=HTMLResponse)
+def dashboard_ops():
+    return dashboard_v2()
 
 @app.get("/v2",response_class=HTMLResponse)
 def dashboard_v2():
@@ -1253,6 +1364,24 @@ def dashboard_daily():
     if html_path.exists():
         return html_path.read_text()
     return "<h1>daily not found</h1>"
+
+@app.get("/blockers",response_class=HTMLResponse)
+def page_blockers():
+    html_path = Path(__file__).parent / "static" / "blockers.html"
+    if html_path.exists(): return html_path.read_text()
+    return "<h1>blockers page not found</h1>"
+
+@app.get("/forecast",response_class=HTMLResponse)
+def page_forecast():
+    html_path = Path(__file__).parent / "static" / "forecast.html"
+    if html_path.exists(): return html_path.read_text()
+    return "<h1>forecast page not found</h1>"
+
+@app.get("/audit",response_class=HTMLResponse)
+def page_audit():
+    html_path = Path(__file__).parent / "static" / "audit.html"
+    if html_path.exists(): return html_path.read_text()
+    return "<h1>audit page not found</h1>"
 
 @app.get("/api/daily-brief")
 def api_daily_brief(date: str = "", theatre: str = ""):
