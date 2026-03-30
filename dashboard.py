@@ -518,11 +518,12 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
             _rid2 = _row2.get("pc_end_customer_account_id","").strip().lower()
             if _rid2: _raw_rows[_rid2] = _row2
 
+    from datetime import datetime as _dtt  # hoisted — avoids re-importing inside loop
+
     def _parse_actual(s):
         if not s or s.strip() == _PLACEHOLDER: return None
         for _fmt in ('%m/%d/%Y %H:%M:%S','%m/%d/%Y','%m/%d/%y'):
             try:
-                from datetime import datetime as _dtt
                 return _dtt.strptime(s.strip(), _fmt).isoformat()+'+00:00'
             except: pass
         return None

@@ -222,10 +222,13 @@ def init_db(path: Path = DB_PATH) -> None:
 
         -- Indexes for common queries
         CREATE INDEX IF NOT EXISTS idx_accounts_status      ON accounts(status);
+        CREATE INDEX IF NOT EXISTS idx_accounts_theatre     ON accounts(account_theatre);
         CREATE INDEX IF NOT EXISTS idx_accounts_cse         ON accounts(active_cse);
         CREATE INDEX IF NOT EXISTS idx_accounts_region      ON accounts(sales_region);
         CREATE INDEX IF NOT EXISTS idx_status_history_acct  ON status_history(account_id);
         CREATE INDEX IF NOT EXISTS idx_status_history_date  ON status_history(changed_at);
+        CREATE INDEX IF NOT EXISTS idx_status_history_src   ON status_history(file_source);
+        CREATE INDEX IF NOT EXISTS idx_status_history_field ON status_history(field_name);
         CREATE INDEX IF NOT EXISTS idx_blocked_signal       ON blocked_data(signal);
         CREATE INDEX IF NOT EXISTS idx_approved_tasks_date  ON approved_tasks(detected_at);
         """)
@@ -480,10 +483,10 @@ def load_accounts(path: Path = DB_PATH) -> dict:
             bd = conn.execute("SELECT * FROM blocked_data WHERE account_id=?", (aid,)).fetchone()
             if bd:
                 bd_dict = dict(bd)
-                bd_dict["is_cs_team"] = bool(bd_dict.get("is_cs_team"))
-                bd_dict["m3_complete"] = bool(bd_dict.get("m3_complete"))
-                bd_dict["m8_started"]  = bool(bd_dict.get("m8_started"))
-                bd_dict["m9_complete"] = bool(bd_dict.get("m9_complete"))
+                for _bool_col in ("is_cs_team","m0_complete","m1_complete","m2_complete",
+                                   "m3_complete","m4_complete","m5_complete","m7_complete",
+                                   "m8_started","m9_complete"):
+                    bd_dict[_bool_col] = bool(bd_dict.get(_bool_col))
                 acc["blocked_data"] = bd_dict
 
             # ps_data
