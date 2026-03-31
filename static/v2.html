@@ -9,8 +9,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0D1117;--panel:#161B22;--border:#21262D;--teal:#5EEAD4;--green:#22C55E;--red:#EF4444;--amber:#F59E0B;--blue:#3B82F6;--text:#E6EDF3;--muted:#8B949E;--mono:'Geist Mono',monospace;--serif:'Fraunces',serif;}
 html{font-size:14px;background:var(--bg);color:var(--text);font-family:var(--mono)}
-body{display:flex;min-height:100vh}
-nav{width:196px;min-height:100vh;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
+body{display:flex;flex-direction:column;min-height:100vh}
+.app-row{display:flex;flex:1;min-height:0}
+nav{width:196px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
 .nlogo{padding:.9rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--teal)}
 .nlogo span{display:block;font-family:var(--mono);font-size:7.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-top:2px}
 .nlg{font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:.65rem 1rem .25rem}
@@ -90,6 +91,7 @@ main{flex:1;overflow-y:auto;min-width:0}
   <a href="/daily" style="font-size:10.5px;color:#8B949E;text-decoration:none;padding:3px 10px;border-radius:5px">Daily</a>
   <a href="/audit" style="font-size:10.5px;color:#A78BFA;text-decoration:none;padding:3px 10px;border-radius:5px">Audit</a>
 </div>
+<div class="app-row">
 <nav>
   <div class="nlogo">Solstice<span>EMEA CC · v2</span></div>
   <div class="nlg">Overview</div>
@@ -256,6 +258,7 @@ main{flex:1;overflow-y:auto;min-width:0}
     </div>
   </div>
 </main>
+</div>
 
 <!-- MODAL -->
 <div id="cm" onclick="if(event.target===this)closeCard()"><div id="cc"></div></div>
@@ -944,18 +947,17 @@ function openCard(aid){
 
 // ── Pipeline ──────────────────────────────────────────────────────
 function runPipeline(){
-  var btn=document.getElementById('rbtn');btn.textContent='Running...';btn.disabled=true;
-  var log=document.getElementById('dlog');
-  document.getElementById('dpanel').classList.remove('col');
+  var btn=document.getElementById('rbtn');btn.innerHTML='&#8635; Running...';btn.disabled=true;
+  openPC();
   var es=new EventSource('/api/run-full');
   es.onmessage=function(e){
-    var d=JSON.parse(e.data);
-    if(d.done){es.close();btn.textContent='✓ Done';setTimeout(function(){btn.textContent='⟳ Refresh Data';btn.disabled=false;loadAll();},1500);return;}
-    var row=document.createElement('div');row.className='dg';
-    row.textContent='['+d.ts+'] '+d.step+' '+d.status+(d.detail?' — '+d.detail:'');
-    log.appendChild(row);log.scrollTop=log.scrollHeight;
+    try{
+      var d=JSON.parse(e.data);
+      if(d.done){es.close();pcDone();btn.innerHTML='&#10003; Done';setTimeout(function(){btn.innerHTML='&#8635; Refresh Data';btn.disabled=false;loadAll();},2000);return;}
+      pcLog(d.step,d.status,d.detail,d.color);
+    }catch(ex){}
   };
-  es.onerror=function(){es.close();btn.textContent='⟳ Refresh Data';btn.disabled=false;};
+  es.onerror=function(){es.close();btn.innerHTML='&#8635; Refresh Data';btn.disabled=false;document.getElementById('pc-status').textContent='ERROR';};
 }
 
 var _theatre='';
@@ -991,6 +993,150 @@ function initTheatre(){
 function loadAll(){loadStats();loadFunnel();loadWeekly();loadM1();loadMs();loadSLA();loadCSE();loadCompleted();initTheatre();}
 loadAll();
 setInterval(loadAll,60000);
+</script>
+<!-- Pipeline console -->
+<div id="pipeline-console" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:800;background:#010409;border-top:2px solid #14B8A6;flex-direction:column" id="pipeline-console">
+  <div style="display:flex;align-items:center;gap:.75rem;padding:.3rem 1rem;border-bottom:1px solid #21262D;background:#0D1117;flex-shrink:0">
+    <span style="font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;color:#14B8A6;letter-spacing:.08em">PIPELINE</span>
+    <span id="pc-status" style="font-family:'Geist Mono',monospace;font-size:8.5px;color:#8B949E">IDLE</span>
+    <span id="pc-elapsed" style="font-family:'Geist Mono',monospace;font-size:8px;color:#484F58;margin-left:auto"></span>
+    <button onclick="document.getElementById('pipeline-console').style.display='none'" style="background:rgba(255,255,255,.06);border:1px solid #21262D;color:#8B949E;border-radius:3px;padding:1px 8px;cursor:pointer;font-size:10px">&#10005;</button>
+  </div>
+  <div id="pc-log" style="height:240px;overflow-y:auto;padding:.4rem 1rem;font-family:'Geist Mono',monospace;font-size:8.5px;line-height:1.65"></div>
+</div>
+<script>
+var _pcStart=0,_pcEl;
+function openPC(){
+  var c=document.getElementById('pipeline-console');
+  c.style.display='flex';c.style.flexDirection='column';
+  document.getElementById('pc-log').innerHTML='';
+  document.getElementById('pc-status').textContent='RUNNING';
+  document.getElementById('pc-elapsed').textContent='';
+  _pcStart=Date.now();
+  _pcEl=setInterval(function(){document.getElementById('pc-elapsed').textContent=((Date.now()-_pcStart)/1000).toFixed(1)+'s';},500);
+}
+function pcDone(){
+  clearInterval(_pcEl);
+  document.getElementById('pc-status').textContent='DONE';
+  document.getElementById('pc-status').style.color='#22C55E';
+}
+function pcLog(step,status,detail,color){
+  var log=document.getElementById('pc-log');
+  var C={'green':'#22C55E','red':'#EF4444','amber':'#F59E0B','teal':'#14B8A6','blue':'#3B82F6','muted':'#484F58'};
+  var c=C[color]||'#8B949E';
+  var indent=step.trim().startsWith('&#8594;')||step.trim().startsWith('  ');
+  var ts=new Date().toTimeString().substring(0,8);
+  var row=document.createElement('div');
+  row.style.cssText='padding:'+(indent?'0 0 0 14px':'1px 0')+';border-bottom:1px solid rgba(33,38,45,'+(indent?'.2':'.35')+')';
+  row.innerHTML='<span style="color:#30363D">'+ts+'</span> '
+    +(indent?'<span style="color:#30363D">&#8250; </span>':'<span style="color:'+c+';font-weight:700">'+step+' </span>')
+    +'<span style="color:'+c+'">'+status+'</span>'
+    +(detail?' <span style="color:#6E7681">&mdash; '+detail+'</span>':'');
+  log.appendChild(row);log.scrollTop=log.scrollHeight;
+}
+</script>
+<!-- Global search + card -->
+<div id="g-card" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:600;overflow-y:auto;padding:2rem 1rem" onclick="if(event.target===this)closeGCard()">
+  <div id="g-card-inner" style="max-width:640px;margin:0 auto;background:#161B22;border:1px solid #21262D;border-radius:10px;overflow:hidden"></div>
+</div>
+<script>
+var _gsT,_GE=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+function gSearch(q){
+  clearTimeout(_gsT);
+  var r=document.getElementById('g-results');
+  if(!q||q.length<2){r.style.display='none';return;}
+  _gsT=setTimeout(function(){
+    fetch('/api/customer-search?q='+encodeURIComponent(q)).then(function(res){return res.json();}).then(function(d){
+      if(!d||!d.length){r.style.display='none';return;}
+      r.style.display='block';
+      var SC={'green':'#22C55E','blocked':'#EF4444','at_risk':'#F59E0B'};
+      r.innerHTML=d.map(function(a){
+        var sc=SC[a.signal]||'#8B949E';
+        return '<div onclick="openGCard(''+a.account_id+'')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid rgba(33,38,45,.5);display:flex;align-items:center;gap:.5rem">'
+          +'<span style="width:6px;height:6px;border-radius:50%;background:'+sc+';flex-shrink:0;display:inline-block"></span>'
+          +'<div><div style="font-size:10px;font-weight:700;color:#E6EDF3">'+_GE(a.customer_name)+'</div>'
+          +'<div style="font-size:8px;color:#8B949E">'+_GE(a.active_cse||'—')+' &middot; '+_GE(a.sales_region||'—')+(a.account_theatre?' &middot; '+_GE(a.account_theatre):'')+'</div></div></div>';
+      }).join('');
+    }).catch(function(){});
+  },220);
+}
+function openGCard(id){
+  document.getElementById('g-results').style.display='none';
+  document.getElementById('g-search').value='';
+  localStorage.setItem('g-last-card',id);
+  document.getElementById('g-card').style.display='block';
+  document.getElementById('g-card-inner').innerHTML='<div style="padding:2rem;text-align:center;color:#484F58;font-size:10px">Loading...</div>';
+  fetch('/api/customer/'+id).then(function(r){return r.json();}).then(renderGCard).catch(function(){closeGCard();});
+}
+function closeGCard(){
+  document.getElementById('g-card').style.display='none';
+  localStorage.removeItem('g-last-card');
+}
+var _MSK=[['m0_complete',null,'M0'],['m1_complete','m1_planned','M1'],['m2_complete','m2_planned','M2'],
+  ['m3_complete','m3_planned','M3'],['m4_complete','m4_planned','M4'],['m5_complete','m5_planned','M5'],
+  ['m7_complete',null,'M7'],['m8_started','m8_planned','M8'],['m9_complete','m9_planned','M9']];
+var _DCC={'Green':'#22C55E','Yellow':'#F59E0B','Red':'#EF4444'};
+var _SGC={'green':'#22C55E','blocked':'#EF4444','at_risk':'#F59E0B'};
+function fmtGD(s){
+  if(!s||s==='—')return '—';
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var m=/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/.exec(s);
+  if(m){return m[2]+' '+M[parseInt(m[1])-1];}
+  var iso=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if(iso)return iso[3]+' '+M[parseInt(iso[2])-1];
+  return s.substring(0,10);
+}
+function renderGCard(d){
+  var dcc=_DCC[d.dc_progress]||'#8B949E';
+  var sig=_SGC[d.signal]||'#8B949E';
+  var chc={'Red':'#EF4444','Yellow':'#F59E0B','Green':'#22C55E'}[d.churn_risk]||'#8B949E';
+  var msBar=_MSK.map(function(mk,i){
+    var done=d[mk[0]];var plan=mk[1]?d[mk[1]]:null;
+    var c=done?dcc:'rgba(255,255,255,.08)';var tc=done?dcc:'#484F58';
+    return '<div style="flex:1;text-align:center">'
+      +'<div style="height:4px;border-radius:2px;background:'+c+';margin-bottom:2px"></div>'
+      +'<div style="font-size:6.5px;color:'+tc+'">'+mk[2]+'</div>'
+      +(plan&&!done?'<div style="font-size:6px;color:#484F58">'+fmtGD(plan)+'</div>':'')
+      +'</div>'+(i<8?'<div style="color:#21262D;font-size:8px;padding-bottom:6px">&#8250;</div>':'');
+  }).join('');
+  var hist=(d.history||[]).slice(-6).reverse().map(function(h){
+    var isReg=h.old_status==='Y'&&h.new_status==='N';
+    var hc=isReg?'#EF4444':'#22C55E';
+    return '<div style="display:flex;align-items:center;gap:.4rem;padding:.2rem 0;border-bottom:1px solid rgba(33,38,45,.4);font-size:8.5px">'
+      +'<span style="font-family:monospace;color:#484F58;font-size:7.5px;flex-shrink:0;min-width:60px">'+_GE((h.changed_at||'').substring(0,10))+'</span>'
+      +'<span style="color:'+hc+';font-weight:700;flex:1">'+_GE(h.field_name||'change')+'</span>'
+      +(isReg?'<span style="color:#EF4444;font-size:7.5px;font-weight:700">REGRESSION</span>':'<span style="color:#22C55E;font-size:9px">&#10003;</span>')
+      +'</div>';
+  }).join('');
+  var meta=[['Rep',d.cc_rep],['DSM',d.cc_dsm],['Cohort',(d.cohort||'').split(' ')[0]],['Renewal',fmtGD(d.next_renewal_date)],['Weeks',d.upgrade_duration_weeks],['Workloads',d.posture_workloads]];
+  document.getElementById('g-card-inner').innerHTML=
+    '<div style="background:'+dcc+'18;border-bottom:3px solid '+dcc+';padding:.75rem 1rem;display:flex;align-items:flex-start;justify-content:space-between">'
+      +'<div><div style="font-size:15px;font-weight:700;color:#E6EDF3">'+(d.live_fire?'&#128293; ':'')+_GE(d.customer_name)+'</div>'
+      +'<div style="font-size:9px;color:#8B949E;margin-top:3px">'+_GE(d.active_cse||'—')+' &middot; '+_GE(d.sales_region||'—')+' &middot; '+_GE(d.account_theatre||'—')+'</div></div>'
+      +'<button onclick="closeGCard()" style="background:rgba(255,255,255,.08);border:1px solid #21262D;color:#8B949E;border-radius:4px;padding:.25rem .6rem;cursor:pointer;font-size:12px;flex-shrink:0;margin-left:.5rem">&#10005;</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:.4rem;padding:.5rem 1rem;border-bottom:1px solid #21262D;flex-wrap:wrap">'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;font-weight:700;background:'+sig+'18;color:'+sig+'">'+_GE(d.signal||'—')+'</span>'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;font-weight:700;background:'+dcc+'18;color:'+dcc+'">DC: '+_GE(d.dc_progress||'—')+'</span>'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;background:'+chc+'18;color:'+chc+'">Churn: '+_GE(d.churn_risk||'—')+'</span>'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,.04);color:#8B949E;margin-left:auto">'+_GE(d.status||'—')+'</span>'
+    +'</div>'
+    +'<div style="padding:.6rem 1rem;border-bottom:1px solid #21262D">'
+      +'<div style="font-size:7px;color:#484F58;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Migration Progress</div>'
+      +'<div style="display:flex;align-items:flex-end;gap:0">'+msBar+'</div>'
+    +'</div>'
+    +(d.status_detail||d.upgrade_notes?'<div style="padding:.6rem 1rem;border-bottom:1px solid #21262D;font-size:8.5px;color:#6E7681;line-height:1.5">'+_GE((d.status_detail||'').substring(0,200))+(d.upgrade_notes?'<div style="color:#484F58;margin-top:.25rem">'+_GE(d.upgrade_notes.substring(0,180))+'</div>':'')+'</div>':'')
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#21262D;border-bottom:1px solid #21262D">'
+      +meta.map(function(x){return '<div style="background:#161B22;padding:.4rem .65rem"><div style="font-size:7px;color:#484F58;text-transform:uppercase">'+x[0]+'</div><div style="font-size:9px;color:#E6EDF3">'+_GE(String(x[1]||'—').substring(0,16))+'</div></div>';}).join('')
+    +'</div>'
+    +'<div style="padding:.6rem 1rem">'
+      +'<div style="font-size:7px;color:#484F58;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Recent Changes</div>'
+      +(hist||'<div style="font-size:8px;color:#484F58">No history</div>')
+    +'</div>';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeGCard();});
+document.addEventListener('click',function(e){if(!e.target.closest('#g-search')&&!e.target.closest('#g-results'))document.getElementById('g-results').style.display='none';});
+(function(){var last=localStorage.getItem('g-last-card');if(last){document.getElementById('g-card').style.display='block';document.getElementById('g-card-inner').innerHTML='<div style="padding:2rem;text-align:center;color:#484F58;font-size:10px">Loading...</div>';fetch('/api/customer/'+last).then(function(r){return r.json();}).then(renderGCard).catch(function(){closeGCard();});}})();
 </script>
 </body>
 </html>

@@ -45,6 +45,12 @@ select.fsel{background:var(--card);border:1px solid var(--border);border-radius:
   <a href="/forecast" class="nav-link">Forecast</a>
   <a href="/daily" class="nav-link">Daily</a>
   <a href="/audit" class="nav-link">Audit</a>
+  <div style="margin-left:auto;position:relative;display:flex;align-items:center">
+    <input type="text" id="g-search" placeholder="&#128269; Account..." autocomplete="off"
+      style="background:rgba(255,255,255,.05);border:1px solid #21262D;border-radius:4px;color:#E6EDF3;font-size:10px;padding:.28rem .65rem;width:150px;outline:none;font-family:'Geist Mono',monospace;transition:width .2s"
+      oninput="gSearch(this.value)" onfocus="this.style.width='210px'" onblur="setTimeout(function(){document.getElementById('g-search').style.width='150px';},200)">
+    <div id="g-results" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:300px;background:#161B22;border:1px solid #21262D;border-radius:6px;max-height:300px;overflow-y:auto;z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.7)"></div>
+  </div>
 </nav>
 <div class="page">
   <div class="stats" id="stats"></div>
@@ -173,6 +179,109 @@ function render(){
 
 document.querySelectorAll('.nav-link').forEach(function(a){if(window.location.pathname===a.getAttribute('href'))a.classList.add('active');});
 load();
+</script>
+<!-- Global search + card -->
+<div id="g-card" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:600;overflow-y:auto;padding:2rem 1rem" onclick="if(event.target===this)closeGCard()">
+  <div id="g-card-inner" style="max-width:640px;margin:0 auto;background:#161B22;border:1px solid #21262D;border-radius:10px;overflow:hidden"></div>
+</div>
+<script>
+var _gsT,_GE=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+function gSearch(q){
+  clearTimeout(_gsT);
+  var r=document.getElementById('g-results');
+  if(!q||q.length<2){r.style.display='none';return;}
+  _gsT=setTimeout(function(){
+    fetch('/api/customer-search?q='+encodeURIComponent(q)).then(function(res){return res.json();}).then(function(d){
+      if(!d||!d.length){r.style.display='none';return;}
+      r.style.display='block';
+      var SC={'green':'#22C55E','blocked':'#EF4444','at_risk':'#F59E0B'};
+      r.innerHTML=d.map(function(a){
+        var sc=SC[a.signal]||'#8B949E';
+        return '<div onclick="openGCard(''+a.account_id+'')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid rgba(33,38,45,.5);display:flex;align-items:center;gap:.5rem">'
+          +'<span style="width:6px;height:6px;border-radius:50%;background:'+sc+';flex-shrink:0;display:inline-block"></span>'
+          +'<div><div style="font-size:10px;font-weight:700;color:#E6EDF3">'+_GE(a.customer_name)+'</div>'
+          +'<div style="font-size:8px;color:#8B949E">'+_GE(a.active_cse||'—')+' &middot; '+_GE(a.sales_region||'—')+(a.account_theatre?' &middot; '+_GE(a.account_theatre):'')+'</div></div></div>';
+      }).join('');
+    }).catch(function(){});
+  },220);
+}
+function openGCard(id){
+  document.getElementById('g-results').style.display='none';
+  document.getElementById('g-search').value='';
+  localStorage.setItem('g-last-card',id);
+  document.getElementById('g-card').style.display='block';
+  document.getElementById('g-card-inner').innerHTML='<div style="padding:2rem;text-align:center;color:#484F58;font-size:10px">Loading...</div>';
+  fetch('/api/customer/'+id).then(function(r){return r.json();}).then(renderGCard).catch(function(){closeGCard();});
+}
+function closeGCard(){
+  document.getElementById('g-card').style.display='none';
+  localStorage.removeItem('g-last-card');
+}
+var _MSK=[['m0_complete',null,'M0'],['m1_complete','m1_planned','M1'],['m2_complete','m2_planned','M2'],
+  ['m3_complete','m3_planned','M3'],['m4_complete','m4_planned','M4'],['m5_complete','m5_planned','M5'],
+  ['m7_complete',null,'M7'],['m8_started','m8_planned','M8'],['m9_complete','m9_planned','M9']];
+var _DCC={'Green':'#22C55E','Yellow':'#F59E0B','Red':'#EF4444'};
+var _SGC={'green':'#22C55E','blocked':'#EF4444','at_risk':'#F59E0B'};
+function fmtGD(s){
+  if(!s||s==='—')return '—';
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var m=/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/.exec(s);
+  if(m){return m[2]+' '+M[parseInt(m[1])-1];}
+  var iso=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if(iso)return iso[3]+' '+M[parseInt(iso[2])-1];
+  return s.substring(0,10);
+}
+function renderGCard(d){
+  var dcc=_DCC[d.dc_progress]||'#8B949E';
+  var sig=_SGC[d.signal]||'#8B949E';
+  var chc={'Red':'#EF4444','Yellow':'#F59E0B','Green':'#22C55E'}[d.churn_risk]||'#8B949E';
+  var msBar=_MSK.map(function(mk,i){
+    var done=d[mk[0]];var plan=mk[1]?d[mk[1]]:null;
+    var c=done?dcc:'rgba(255,255,255,.08)';var tc=done?dcc:'#484F58';
+    return '<div style="flex:1;text-align:center">'
+      +'<div style="height:4px;border-radius:2px;background:'+c+';margin-bottom:2px"></div>'
+      +'<div style="font-size:6.5px;color:'+tc+'">'+mk[2]+'</div>'
+      +(plan&&!done?'<div style="font-size:6px;color:#484F58">'+fmtGD(plan)+'</div>':'')
+      +'</div>'+(i<8?'<div style="color:#21262D;font-size:8px;padding-bottom:6px">&#8250;</div>':'');
+  }).join('');
+  var hist=(d.history||[]).slice(-6).reverse().map(function(h){
+    var isReg=h.old_status==='Y'&&h.new_status==='N';
+    var hc=isReg?'#EF4444':'#22C55E';
+    return '<div style="display:flex;align-items:center;gap:.4rem;padding:.2rem 0;border-bottom:1px solid rgba(33,38,45,.4);font-size:8.5px">'
+      +'<span style="font-family:monospace;color:#484F58;font-size:7.5px;flex-shrink:0;min-width:60px">'+_GE((h.changed_at||'').substring(0,10))+'</span>'
+      +'<span style="color:'+hc+';font-weight:700;flex:1">'+_GE(h.field_name||'change')+'</span>'
+      +(isReg?'<span style="color:#EF4444;font-size:7.5px;font-weight:700">REGRESSION</span>':'<span style="color:#22C55E;font-size:9px">&#10003;</span>')
+      +'</div>';
+  }).join('');
+  var meta=[['Rep',d.cc_rep],['DSM',d.cc_dsm],['Cohort',(d.cohort||'').split(' ')[0]],['Renewal',fmtGD(d.next_renewal_date)],['Weeks',d.upgrade_duration_weeks],['Workloads',d.posture_workloads]];
+  document.getElementById('g-card-inner').innerHTML=
+    '<div style="background:'+dcc+'18;border-bottom:3px solid '+dcc+';padding:.75rem 1rem;display:flex;align-items:flex-start;justify-content:space-between">'
+      +'<div><div style="font-size:15px;font-weight:700;color:#E6EDF3">'+(d.live_fire?'&#128293; ':'')+_GE(d.customer_name)+'</div>'
+      +'<div style="font-size:9px;color:#8B949E;margin-top:3px">'+_GE(d.active_cse||'—')+' &middot; '+_GE(d.sales_region||'—')+' &middot; '+_GE(d.account_theatre||'—')+'</div></div>'
+      +'<button onclick="closeGCard()" style="background:rgba(255,255,255,.08);border:1px solid #21262D;color:#8B949E;border-radius:4px;padding:.25rem .6rem;cursor:pointer;font-size:12px;flex-shrink:0;margin-left:.5rem">&#10005;</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:.4rem;padding:.5rem 1rem;border-bottom:1px solid #21262D;flex-wrap:wrap">'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;font-weight:700;background:'+sig+'18;color:'+sig+'">'+_GE(d.signal||'—')+'</span>'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;font-weight:700;background:'+dcc+'18;color:'+dcc+'">DC: '+_GE(d.dc_progress||'—')+'</span>'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;background:'+chc+'18;color:'+chc+'">Churn: '+_GE(d.churn_risk||'—')+'</span>'
+      +'<span style="font-size:8px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,.04);color:#8B949E;margin-left:auto">'+_GE(d.status||'—')+'</span>'
+    +'</div>'
+    +'<div style="padding:.6rem 1rem;border-bottom:1px solid #21262D">'
+      +'<div style="font-size:7px;color:#484F58;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Migration Progress</div>'
+      +'<div style="display:flex;align-items:flex-end;gap:0">'+msBar+'</div>'
+    +'</div>'
+    +(d.status_detail||d.upgrade_notes?'<div style="padding:.6rem 1rem;border-bottom:1px solid #21262D;font-size:8.5px;color:#6E7681;line-height:1.5">'+_GE((d.status_detail||'').substring(0,200))+(d.upgrade_notes?'<div style="color:#484F58;margin-top:.25rem">'+_GE(d.upgrade_notes.substring(0,180))+'</div>':'')+'</div>':'')
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#21262D;border-bottom:1px solid #21262D">'
+      +meta.map(function(x){return '<div style="background:#161B22;padding:.4rem .65rem"><div style="font-size:7px;color:#484F58;text-transform:uppercase">'+x[0]+'</div><div style="font-size:9px;color:#E6EDF3">'+_GE(String(x[1]||'—').substring(0,16))+'</div></div>';}).join('')
+    +'</div>'
+    +'<div style="padding:.6rem 1rem">'
+      +'<div style="font-size:7px;color:#484F58;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Recent Changes</div>'
+      +(hist||'<div style="font-size:8px;color:#484F58">No history</div>')
+    +'</div>';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeGCard();});
+document.addEventListener('click',function(e){if(!e.target.closest('#g-search')&&!e.target.closest('#g-results'))document.getElementById('g-results').style.display='none';});
+(function(){var last=localStorage.getItem('g-last-card');if(last){document.getElementById('g-card').style.display='block';document.getElementById('g-card-inner').innerHTML='<div style="padding:2rem;text-align:center;color:#484F58;font-size:10px">Loading...</div>';fetch('/api/customer/'+last).then(function(r){return r.json();}).then(renderGCard).catch(function(){closeGCard();});}})();
 </script>
 </body>
 </html>
