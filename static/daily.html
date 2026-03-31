@@ -421,7 +421,7 @@ function gSearch(q){
       var SC={'green':'#22C55E','blocked':'#EF4444','at_risk':'#F59E0B'};
       r.innerHTML=d.map(function(a){
         var sc=SC[a.signal]||'#8B949E';
-        return '<div onclick="openGCard(''+a.account_id+'')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid rgba(33,38,45,.5);display:flex;align-items:center;gap:.5rem">'
+        return '<div onclick="openGCard(\''+a.account_id+'\')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid rgba(33,38,45,.5);display:flex;align-items:center;gap:.5rem">'
           +'<span style="width:6px;height:6px;border-radius:50%;background:'+sc+';flex-shrink:0;display:inline-block"></span>'
           +'<div><div style="font-size:10px;font-weight:700;color:#E6EDF3">'+_GE(a.customer_name)+'</div>'
           +'<div style="font-size:8px;color:#8B949E">'+_GE(a.active_cse||'—')+' &middot; '+_GE(a.sales_region||'—')+(a.account_theatre?' &middot; '+_GE(a.account_theatre):'')+'</div></div></div>';

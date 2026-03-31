@@ -90,6 +90,12 @@ main{flex:1;overflow-y:auto;min-width:0}
   <a href="/forecast" style="font-size:10.5px;color:#22C55E;text-decoration:none;padding:3px 10px;border-radius:5px">Forecast</a>
   <a href="/daily" style="font-size:10.5px;color:#8B949E;text-decoration:none;padding:3px 10px;border-radius:5px">Daily</a>
   <a href="/audit" style="font-size:10.5px;color:#A78BFA;text-decoration:none;padding:3px 10px;border-radius:5px">Audit</a>
+  <div style="margin-left:auto;position:relative;display:flex;align-items:center">
+    <input type="text" id="g-search" placeholder="&#128269; Account..." autocomplete="off"
+      style="background:rgba(255,255,255,.05);border:1px solid #21262D;border-radius:4px;color:#E6EDF3;font-size:10px;padding:.28rem .65rem;width:150px;outline:none;font-family:'Geist Mono',monospace;transition:width .2s"
+      oninput="gSearch(this.value)" onfocus="this.style.width='210px'" onblur="setTimeout(function(){document.getElementById('g-search').style.width='150px';},200)">
+    <div id="g-results" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:300px;background:#161B22;border:1px solid #21262D;border-radius:6px;max-height:300px;overflow-y:auto;z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.7)"></div>
+  </div>
 </div>
 <div class="app-row">
 <nav>
@@ -1052,7 +1058,7 @@ function gSearch(q){
       var SC={'green':'#22C55E','blocked':'#EF4444','at_risk':'#F59E0B'};
       r.innerHTML=d.map(function(a){
         var sc=SC[a.signal]||'#8B949E';
-        return '<div onclick="openGCard(''+a.account_id+'')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid rgba(33,38,45,.5);display:flex;align-items:center;gap:.5rem">'
+        return '<div onclick="openGCard(\''+a.account_id+'\')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid rgba(33,38,45,.5);display:flex;align-items:center;gap:.5rem">'
           +'<span style="width:6px;height:6px;border-radius:50%;background:'+sc+';flex-shrink:0;display:inline-block"></span>'
           +'<div><div style="font-size:10px;font-weight:700;color:#E6EDF3">'+_GE(a.customer_name)+'</div>'
           +'<div style="font-size:8px;color:#8B949E">'+_GE(a.active_cse||'—')+' &middot; '+_GE(a.sales_region||'—')+(a.account_theatre?' &middot; '+_GE(a.account_theatre):'')+'</div></div></div>';
