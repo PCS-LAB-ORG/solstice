@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀</text></svg>">
 <title>CC Migration — Daily Briefing</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -201,10 +202,13 @@ function todayStr(){
   var d=new Date();
   return d.getFullYear()+'-'+(d.getMonth()<9?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();
 }
+var _MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDisp(iso){
   if(!iso)return '—';
   var p=iso.split('-');
-  return p.length===3?p[2]+'-'+p[1]+'-'+p[0].substring(2):iso;
+  if(p.length!==3)return iso;
+  var dd=p[2], mm=parseInt(p[1],10)-1;
+  return dd+' '+(_MONTHS[mm]||p[1]);
 }
 function shiftDay(n){
   var d=new Date(_curDate+'T12:00:00Z');

@@ -917,7 +917,7 @@ def _load_completed(theatre: str = '') -> list:
                 WHERE b.m9_complete=1
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY b.m9_actual DESC, b.m9_planned DESC
-            """).fetchall()
+            """, (theatre, theatre)).fetchall()
         return [dict(r) for r in rows]
     except Exception as e:
         return []

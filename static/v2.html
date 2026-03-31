@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀</text></svg>">
 <title>Solstice v2 · EMEA CC</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -68,7 +69,7 @@ main{flex:1;overflow-y:auto;min-width:0}
 .week-row{display:grid;grid-template-columns:85px 1fr;gap:.5rem;padding:.35rem 0;border-bottom:1px solid rgba(33,38,45,.4);align-items:start}
 .week-row:last-child{border-bottom:none}
 .wl{font-family:var(--mono);font-size:8.5px;color:var(--muted);padding-top:2px}
-.wi{display:flex;flex-wrap:wrap;gap:.3rem}
+.wi{display:flex;flex-wrap:wrap;gap:.3rem;align-content:flex-start;justify-content:flex-start}
 .witem{font-size:9.5px;background:rgba(94,234,212,.07);border:1px solid rgba(94,234,212,.18);border-radius:4px;padding:2px 6px;color:var(--teal)}
 .ms-tab{flex:1;padding:.5rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--mono);font-size:9.5px;cursor:pointer;transition:all .15s}
 .tab-bar{display:flex;border-bottom:1px solid var(--border)}
@@ -327,27 +328,26 @@ function loadStats(){
 }
 
 // ── Funnel ────────────────────────────────────────────────────────
-function loadFunnel(){
-  fetch('/api/milestones?theatre='+encodeURIComponent(_theatre)).then(r=>r.json()).then(function(rows){
-    var c={m0:0,m1:0,m2:0,m3:0,m4:0,m5:0,m7:0,m8:0,m9:0};
-    rows.forEach(function(r){
-      if(r.m0_complete)c.m0++;if(r.m1_complete)c.m1++;if(r.m2_complete)c.m2++;if(r.m3_complete)c.m3++;
-      if(r.m4_complete)c.m4++;if(r.m5_complete)c.m5++;if(r.m7_complete)c.m7++;if(r.m8_started)c.m8++;if(r.m9_complete)c.m9++;
-    });
-    var tot=rows.length||1;
-    var steps=[['m0','M0 Kickoff'],['m1','M1 Outreach'],['m2','M2 Entitle'],['m3','M3 Buy-in'],['m4','M4 Disc'],['m5','M5 Tech'],['m7','M7 Legal'],['m8','M8 Start'],['m9','M9 Done']];
-    var maxH=72;
-    var html='';
-    steps.forEach(function(step,i){
-      var n=c[step[0]]||0;var h=Math.max(3,Math.round(n/tot*maxH));
-      var pct=Math.round(n/tot*100);
-      var col=n===0?'rgba(94,234,212,.15)':i>=7?'var(--green)':'var(--teal)';
-      html+='<div class="fs"><div class="fb" style="height:'+h+'px;background:'+col+'" title="'+step[1]+': '+n+' ('+pct+'%)"></div><div class="fn" style="color:'+col+'">'+n+'</div><div class="fl">'+step[1]+'</div></div>';
-      if(i<steps.length-1)html+='<div class="fa">›</div>';
-    });
-    document.getElementById('funnel').innerHTML=html;
+function renderFunnel(rows){
+  var c={m0:0,m1:0,m2:0,m3:0,m4:0,m5:0,m7:0,m8:0,m9:0};
+  rows.forEach(function(r){
+    if(r.m0_complete)c.m0++;if(r.m1_complete)c.m1++;if(r.m2_complete)c.m2++;if(r.m3_complete)c.m3++;
+    if(r.m4_complete)c.m4++;if(r.m5_complete)c.m5++;if(r.m7_complete)c.m7++;if(r.m8_started)c.m8++;if(r.m9_complete)c.m9++;
   });
+  var tot=rows.length||1;
+  var steps=[['m0','M0 Kickoff'],['m1','M1 Outreach'],['m2','M2 Entitle'],['m3','M3 Buy-in'],['m4','M4 Disc'],['m5','M5 Tech'],['m7','M7 Legal'],['m8','M8 Start'],['m9','M9 Done']];
+  var maxH=72;
+  var html='';
+  steps.forEach(function(step,i){
+    var n=c[step[0]]||0;var h=Math.max(3,Math.round(n/tot*maxH));
+    var pct=Math.round(n/tot*100);
+    var col=n===0?'rgba(94,234,212,.15)':i>=7?'var(--green)':'var(--teal)';
+    html+='<div class="fs"><div class="fb" style="height:'+h+'px;background:'+col+'" title="'+step[1]+': '+n+' ('+pct+'%)"></div><div class="fn" style="color:'+col+'">'+n+'</div><div class="fl">'+step[1]+'</div></div>';
+    if(i<steps.length-1)html+='<div class="fa">›</div>';
+  });
+  document.getElementById('funnel').innerHTML=html;
 }
+function loadFunnel(){} // no-op — milestones loaded once by loadMs()
 
 // ── Weekly ────────────────────────────────────────────────────────
 function isoWeekKey(){
@@ -493,6 +493,7 @@ function showTab(t){
 function loadMs(){
   fetch('/api/milestones?theatre='+encodeURIComponent(_theatre)).then(r=>r.json()).then(function(rows){
     _ms=rows;
+    renderFunnel(rows);
     var act=rows.filter(function(r){return r.m8_started&&!r.m9_complete;});
     var m9=rows.filter(function(r){return !r.m9_complete&&r.m9_planned;});
     T('tn-active',act.length);T('tn-m9',m9.length);T('tn-all',rows.length);
