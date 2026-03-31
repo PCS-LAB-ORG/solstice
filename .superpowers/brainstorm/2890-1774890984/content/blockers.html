@@ -1,0 +1,176 @@
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0D1117;color:#E6EDF3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:0}
+  .topbar{background:#161B22;border-bottom:1px solid #21262D;padding:.65rem 1.5rem;display:flex;align-items:center;gap:.25rem}
+  .logo{font-weight:800;font-size:12px;color:#14B8A6;letter-spacing:.05em;margin-right:1rem}
+  .topbar a{font-size:10.5px;color:#8B949E;text-decoration:none;padding:4px 12px;border-radius:5px;border:1px solid transparent}
+  .topbar a.active{color:#EF4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)}
+  .topbar a:hover{background:rgba(255,255,255,.04)}
+  .topbar .sep{color:#21262D;margin:0 .25rem}
+
+  .page{max-width:1100px;margin:0 auto;padding:1.5rem}
+
+  /* Filters */
+  .filters{display:flex;gap:.6rem;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap}
+  .filter-pill{font-size:9px;font-weight:700;letter-spacing:.08em;padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid #21262D;color:#8B949E;background:transparent;transition:all .15s}
+  .filter-pill:hover{border-color:#30363D;color:#E6EDF3}
+  .filter-pill.active{border-color:#EF4444;color:#EF4444;background:rgba(239,68,68,.08)}
+  .filter-pill.emea.active{border-color:#14B8A6;color:#14B8A6;background:rgba(20,184,166,.08)}
+  .filter-pill.amer.active{border-color:#3B82F6;color:#3B82F6;background:rgba(59,130,246,.08)}
+  .filter-pill.japac.active{border-color:#8B5CF6;color:#8B5CF6;background:rgba(139,92,246,.08)}
+  .filter-pill.latam.active{border-color:#F59E0B;color:#F59E0B;background:rgba(245,158,11,.08)}
+  .filters .sep{color:#21262D;font-size:12px}
+  select.fsel{background:#161B22;border:1px solid #21262D;border-radius:5px;color:#8B949E;font-size:9px;padding:4px 8px;font-family:monospace}
+  .summary-bar{display:flex;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap}
+  .sum-chip{font-size:9px;padding:3px 10px;border-radius:4px;font-weight:600}
+
+  /* Section */
+  .blocker-section{margin-bottom:1.5rem}
+  .section-hdr{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;background:#161B22;border:1px solid #21262D;border-radius:8px 8px 0 0;cursor:pointer}
+  .section-hdr .icon{font-size:14px;width:20px;text-align:center}
+  .section-hdr h3{font-size:11px;font-weight:700;color:#E6EDF3}
+  .section-hdr .cnt{font-size:9px;color:#8B949E;margin-left:.25rem}
+  .section-hdr .chevron{margin-left:auto;color:#484F58;font-size:10px}
+  .section-body{border:1px solid #21262D;border-top:none;border-radius:0 0 8px 8px;overflow:hidden}
+
+  /* Region sub-group */
+  .region-grp{}
+  .region-hdr{padding:.35rem .75rem;background:#0D1117;border-bottom:1px solid rgba(33,38,45,.6);display:flex;align-items:center;gap:.5rem}
+  .region-hdr span{font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:#484F58;font-weight:700}
+  .region-hdr .rcnt{font-size:8px;color:#30363D}
+
+  /* Account row */
+  .acct-row{display:grid;grid-template-columns:2fr 1.2fr 1.2fr 2.2fr;gap:0;border-bottom:1px solid rgba(33,38,45,.5);align-items:stretch}
+  .acct-row:last-child{border-bottom:none}
+  .acct-row:hover{background:rgba(255,255,255,.015)}
+  .col{padding:.55rem .75rem;font-size:9.5px;border-right:1px solid rgba(33,38,45,.4)}
+  .col:last-child{border-right:none}
+  .col .name{font-weight:700;font-size:10px;color:#E6EDF3;margin-bottom:2px}
+  .col .sub{font-size:8.5px;color:#8B949E}
+  .contact-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid #21262D;border-radius:4px;padding:2px 7px;font-size:8.5px;color:#8B949E;margin-bottom:3px}
+  .contact-chip .role{color:#484F58;font-size:7.5px}
+  .notes{font-size:8.5px;color:#6E7681;line-height:1.45}
+  .dc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;vertical-align:middle}
+  .tbl-header{display:grid;grid-template-columns:2fr 1.2fr 1.2fr 2.2fr;background:#0D1117;border-bottom:1px solid #21262D}
+  .tbl-header span{padding:.3rem .75rem;font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:#484F58;font-weight:700;border-right:1px solid rgba(33,38,45,.4)}
+  .tbl-header span:last-child{border-right:none}
+</style>
+
+<!-- NAV -->
+<div class="topbar">
+  <span class="logo">SOLSTICE</span>
+  <a href="#">Ops</a>
+  <a href="#" class="active">Blockers</a>
+  <a href="#">Forecast</a>
+  <a href="#">Daily</a>
+  <a href="#">Audit</a>
+</div>
+
+<div class="page">
+
+  <!-- Filters -->
+  <div class="filters">
+    <span class="filter-pill active emea">EMEA</span>
+    <span class="filter-pill amer">AMER/NAM</span>
+    <span class="filter-pill japac">JAPAC</span>
+    <span class="filter-pill latam">LATAM</span>
+    <span class="sep">|</span>
+    <select class="fsel"><option>All Regions</option><option>SEUR</option><option>UKI</option><option>CEE</option><option>France</option><option>Germany</option><option>Nordics</option></select>
+    <select class="fsel"><option>All CSEs</option><option>Alvaro Fortes</option><option>Chinmoy Roy</option><option>Jonathan Brox</option><option>Mathieu Dalbes</option><option>Mikhail Bakhmetiev</option></select>
+    <span class="sep">|</span>
+    <input style="background:#161B22;border:1px solid #21262D;border-radius:5px;color:#8B949E;font-size:9px;padding:4px 8px;width:160px;outline:none" placeholder="Search account…">
+  </div>
+
+  <!-- Summary chips -->
+  <div class="summary-bar">
+    <span class="sum-chip" style="background:rgba(239,68,68,.12);color:#EF4444">🛑 No Internal Kickoff: 61</span>
+    <span class="sum-chip" style="background:rgba(245,158,11,.12);color:#F59E0B">👎 Rep Blocking: 22</span>
+    <span class="sum-chip" style="background:rgba(59,130,246,.12);color:#3B82F6">⚡ MTN Single Unblock: 11</span>
+    <span class="sum-chip" style="background:rgba(239,68,68,.08);color:#6E7681">Total: 94 accounts</span>
+  </div>
+
+  <!-- SECTION: No Internal Kickoff -->
+  <div class="blocker-section">
+    <div class="section-hdr">
+      <span class="icon">🛑</span>
+      <h3>Blocked from Internal Kickoff</h3>
+      <span class="cnt">61 accounts — Not able to contact NGS Sales Specialist</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="tbl-header">
+        <span>Account</span><span>Contact (Rep / DSM)</span><span>CSE · DC</span><span>Notes</span>
+      </div>
+
+      <!-- UKI group -->
+      <div class="region-grp">
+        <div class="region-hdr"><span>UKI</span><span class="rcnt">20 accounts</span></div>
+        <div class="acct-row">
+          <div class="col"><div class="name">British Airways</div><div class="sub">Tunde Adenugba</div></div>
+          <div class="col">
+            <div class="contact-chip"><span class="role">REP</span> William J. Mardling</div><br>
+            <div class="contact-chip"><span class="role">DSM</span> Richard C. Bennett</div>
+          </div>
+          <div class="col"><div class="sub">Tunde Adenugba</div><div class="sub"><span class="dc-dot" style="background:#F59E0B"></span>Yellow</div></div>
+          <div class="col"><div class="notes">CS: TBD. No response from account team yet. Awaiting sync-up.</div></div>
+        </div>
+        <div class="acct-row">
+          <div class="col"><div class="name">IAG Cargo</div><div class="sub">Tunde Adenugba</div></div>
+          <div class="col">
+            <div class="contact-chip"><span class="role">REP</span> William J. Mardling</div><br>
+            <div class="contact-chip"><span class="role">DSM</span> Richard C. Bennett</div>
+          </div>
+          <div class="col"><div class="sub">Tunde Adenugba</div><div class="sub"><span class="dc-dot" style="background:#22C55E"></span>Green</div></div>
+          <div class="col"><div class="notes">CS: TBD. Grouped with British Airways — same rep.</div></div>
+        </div>
+        <div class="acct-row" style="opacity:.5">
+          <div class="col"><div class="name" style="color:#484F58">+ 18 more in UKI…</div></div>
+          <div class="col"></div><div class="col"></div><div class="col"></div>
+        </div>
+      </div>
+
+      <!-- SEUR group -->
+      <div class="region-grp">
+        <div class="region-hdr"><span>SEUR</span><span class="rcnt">16 accounts</span></div>
+        <div class="acct-row">
+          <div class="col"><div class="name">Poltrona Frau Spa</div><div class="sub">Mikhail Bakhmetiev</div></div>
+          <div class="col">
+            <div class="contact-chip"><span class="role">REP</span> Carlo Daniele</div><br>
+            <div class="contact-chip"><span class="role">DSM</span> Eleonora Baviera</div>
+          </div>
+          <div class="col"><div class="sub">Mikhail Bakhmetiev</div><div class="sub"><span class="dc-dot" style="background:#F59E0B"></span>Yellow</div></div>
+          <div class="col"><div class="notes">Waiting for XDR→XSIAM order confirmation before proceeding with Prisma migration.</div></div>
+        </div>
+        <div class="acct-row" style="opacity:.5">
+          <div class="col"><div class="name" style="color:#484F58">+ 15 more in SEUR…</div></div>
+          <div class="col"></div><div class="col"></div><div class="col"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Rep Blocking -->
+  <div class="blocker-section">
+    <div class="section-hdr" style="background:#161B22">
+      <span class="icon">👎</span>
+      <h3>Blocked by Account Team (Rep)</h3>
+      <span class="cnt">22 accounts — Core rep asking CSE to hold</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="tbl-header">
+        <span>Account</span><span>Contact (Rep / DSM)</span><span>CSE · DC</span><span>Reason</span>
+      </div>
+      <div class="region-grp">
+        <div class="region-hdr"><span>Turkey/SA</span><span class="rcnt">6 accounts (MTN group)</span></div>
+        <div class="acct-row">
+          <div class="col"><div class="name">MTN South Africa</div><div class="sub">Pushkar Kakkar</div></div>
+          <div class="col"><div class="contact-chip"><span class="role">REP</span> Kiran Premnath</div><br><div class="contact-chip"><span class="role">DSM</span> Gur Biron</div></div>
+          <div class="col"><div class="sub">Pushkar Kakkar</div><div class="sub"><span class="dc-dot" style="background:#EF4444"></span>Red</div></div>
+          <div class="col"><div class="notes" style="color:#EF4444">⚡ Single unblock: all 6 MTN accounts release together when Strata escalation resolves.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

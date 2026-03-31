@@ -1,0 +1,108 @@
+<h2>Landing Page — 3 Concepts</h2>
+<p class="subtitle">What should someone see when they first hit the app?</p>
+
+<div class="cards">
+
+  <!-- OPTION A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0D1117;padding:1rem;border-radius:6px;font-family:monospace">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
+        <span style="color:#14B8A6;font-weight:800;font-size:11px">SOLSTICE</span>
+        <span style="color:#484F58;font-size:9px">CC Migration Monitor</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:.75rem">
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:4px;padding:6px;text-align:center">
+          <div style="color:#22C55E;font-size:16px;font-weight:700">42</div>
+          <div style="color:#484F58;font-size:7px">M9 EMEA</div>
+        </div>
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:4px;padding:6px;text-align:center">
+          <div style="color:#3B82F6;font-size:16px;font-weight:700">18</div>
+          <div style="color:#484F58;font-size:7px">M9 AMER</div>
+        </div>
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:4px;padding:6px;text-align:center">
+          <div style="color:#8B5CF6;font-size:16px;font-weight:700">9</div>
+          <div style="color:#484F58;font-size:7px">M9 JAPAC</div>
+        </div>
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:4px;padding:6px;text-align:center">
+          <div style="color:#F59E0B;font-size:16px;font-weight:700">3</div>
+          <div style="color:#484F58;font-size:7px">M9 LATAM</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px">
+        <div style="background:#14B8A611;border:1px solid #14B8A630;border-radius:3px;padding:4px;text-align:center;font-size:7px;color:#14B8A6">Ops</div>
+        <div style="background:#EF444411;border:1px solid #EF444430;border-radius:3px;padding:4px;text-align:center;font-size:7px;color:#EF4444">Blockers</div>
+        <div style="background:#22C55E11;border:1px solid #22C55E30;border-radius:3px;padding:4px;text-align:center;font-size:7px;color:#22C55E">Forecast</div>
+        <div style="background:#8B949E11;border:1px solid #8B949E30;border-radius:3px;padding:4px;text-align:center;font-size:7px;color:#8B949E">Daily</div>
+        <div style="background:#A78BFA11;border:1px solid #A78BFA30;border-radius:3px;padding:4px;text-align:center;font-size:7px;color:#A78BFA">Audit</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Mission Control</h3>
+      <p>Live M9 counts by theatre at the top, then 5 nav cards. Everyone sees the global number first. One click to any page.</p>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0D1117;padding:1rem;border-radius:6px">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
+        <span style="color:#14B8A6;font-weight:800;font-size:11px">SOLSTICE</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <div style="background:#161B22;border:1px solid #14B8A630;border-radius:4px;padding:8px">
+          <div style="font-size:9px;font-weight:700;color:#14B8A6;margin-bottom:3px">Ops</div>
+          <div style="font-size:7px;color:#6E7681;margin-bottom:4px">Funnel · Weekly · M1 · SLA</div>
+          <div style="font-size:7px;color:#22C55E">42 M9 complete</div>
+        </div>
+        <div style="background:#161B22;border:1px solid #EF444430;border-radius:4px;padding:8px">
+          <div style="font-size:9px;font-weight:700;color:#EF4444;margin-bottom:3px">Blockers</div>
+          <div style="font-size:7px;color:#6E7681;margin-bottom:4px">323 blocked / at-risk</div>
+          <div style="font-size:7px;color:#EF4444">75 no contact</div>
+        </div>
+        <div style="background:#161B22;border:1px solid #22C55E30;border-radius:4px;padding:8px">
+          <div style="font-size:9px;font-weight:700;color:#22C55E;margin-bottom:3px">Forecast</div>
+          <div style="font-size:7px;color:#6E7681;margin-bottom:4px">70 targets this week</div>
+          <div style="font-size:7px;color:#EF4444">121 overdue</div>
+        </div>
+        <div style="background:#161B22;border:1px solid #8B949E30;border-radius:4px;padding:8px">
+          <div style="font-size:9px;font-weight:700;color:#8B949E;margin-bottom:3px">Daily</div>
+          <div style="font-size:7px;color:#6E7681;margin-bottom:4px">Today's movements</div>
+          <div style="font-size:7px;color:#14B8A6">3 M9 today</div>
+        </div>
+      </div>
+      <div style="background:#161B22;border:1px solid #A78BFA30;border-radius:4px;padding:6px;margin-top:4px;text-align:center">
+        <span style="font-size:9px;font-weight:700;color:#A78BFA">Audit</span>
+        <span style="font-size:7px;color:#6E7681"> — full change history</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Live Page Cards</h3>
+      <p>Each page gets a card with its live stat pulled from the APIs. Blockers shows count, Forecast shows overdue, Daily shows today's M9. Instantly see where the action is.</p>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0D1117;padding:1rem;border-radius:6px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.75rem;flex-direction:column;padding:1rem 0">
+        <span style="color:#14B8A6;font-weight:800;font-size:18px;letter-spacing:.15em">SOLSTICE</span>
+        <span style="color:#484F58;font-size:9px;letter-spacing:.1em">CC MIGRATION OPERATIONS</span>
+      </div>
+      <div style="display:flex;gap:4px;justify-content:center">
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:20px;padding:4px 10px;font-size:8px;color:#14B8A6">Ops</div>
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:20px;padding:4px 10px;font-size:8px;color:#EF4444">Blockers</div>
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:20px;padding:4px 10px;font-size:8px;color:#22C55E">Forecast</div>
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:20px;padding:4px 10px;font-size:8px;color:#8B949E">Daily</div>
+        <div style="background:#161B22;border:1px solid #21262D;border-radius:20px;padding:4px 10px;font-size:8px;color:#A78BFA">Audit</div>
+      </div>
+      <div style="text-align:center;margin-top:.75rem">
+        <div style="font-size:8px;color:#484F58">Auto-redirect to Ops in 3s...</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Splash + Auto-redirect</h3>
+      <p>Branded splash screen with page pills. Auto-redirects to /ops after 3 seconds. Good for bookmarks — feels intentional, not accidental.</p>
+    </div>
+  </div>
+
+</div>

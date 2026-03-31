@@ -1,0 +1,232 @@
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0D1117;color:#E6EDF3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  .topbar{background:#161B22;border-bottom:1px solid #21262D;padding:.65rem 1.5rem;display:flex;align-items:center;gap:.25rem}
+  .logo{font-weight:800;font-size:12px;color:#14B8A6;letter-spacing:.05em;margin-right:1rem}
+  .topbar a{font-size:10.5px;color:#8B949E;text-decoration:none;padding:4px 12px;border-radius:5px;border:1px solid transparent}
+  .topbar a.active{color:#22C55E;background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)}
+  .topbar a:hover{background:rgba(255,255,255,.04)}
+  .page{max-width:1100px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:1fr 340px;gap:1.25rem;align-items:start}
+  .left{display:flex;flex-direction:column;gap:1.25rem}
+  .right{display:flex;flex-direction:column;gap:1.25rem}
+  .card{background:#161B22;border:1px solid #21262D;border-radius:10px;overflow:hidden}
+  .card-hdr{padding:.6rem 1rem;border-bottom:1px solid #21262D;display:flex;align-items:center;justify-content:space-between}
+  .card-hdr h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#8B949E}
+  .card-hdr .sub{font-size:9px;color:#484F58}
+
+  /* Velocity widget */
+  .vel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  .vel-week{padding:.75rem;text-align:center;border-right:1px solid #21262D;position:relative}
+  .vel-week:last-child{border-right:none}
+  .vel-week .wlabel{font-size:8px;font-family:monospace;color:#484F58;margin-bottom:.35rem}
+  .vel-week .wnum{font-size:28px;font-weight:700;line-height:1;margin-bottom:2px}
+  .vel-week .wsub{font-size:8px;color:#8B949E}
+  .vel-week.current{background:rgba(34,197,94,.04)}
+  .vel-week.current .wnum{color:#22C55E}
+  .vel-arrow{font-size:14px;position:absolute;top:8px;right:8px}
+  .trend-line{padding:.5rem 1rem;font-size:10px;font-weight:600;border-top:1px solid #21262D;text-align:center}
+
+  /* Forecast table */
+  .ft-filters{padding:.5rem 1rem;display:flex;gap:.4rem;border-bottom:1px solid #21262D}
+  .fpill{font-size:8.5px;padding:3px 9px;border-radius:12px;cursor:pointer;border:1px solid #21262D;color:#8B949E}
+  .fpill.active{border-color:#22C55E;color:#22C55E;background:rgba(34,197,94,.08)}
+  .ft-row{display:grid;grid-template-columns:22px 1.8fr .9fr .7fr .7fr .7fr;gap:0;border-bottom:1px solid rgba(33,38,45,.5);align-items:center}
+  .ft-row:hover{background:rgba(255,255,255,.015)}
+  .ft-hdr{background:#0D1117;border-bottom:1px solid #21262D}
+  .ft-hdr .fc{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:#484F58;font-weight:700;padding:.3rem .5rem}
+  .fc{padding:.5rem .5rem;font-size:9.5px}
+  .conf{display:inline-flex;align-items:center;gap:2px;font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:3px}
+  .conf.high{background:rgba(34,197,94,.12);color:#22C55E}
+  .conf.med{background:rgba(245,158,11,.12);color:#F59E0B}
+  .conf.low{background:rgba(239,68,68,.12);color:#EF4444}
+  .dc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:2px}
+  .date-chip{font-family:monospace;font-size:8.5px;color:#8B949E}
+  .theatre-tag{font-size:7.5px;font-weight:700;padding:1px 5px;border-radius:3px}
+  .tag-emea{background:rgba(20,184,166,.1);color:#14B8A6}
+  .tag-amer{background:rgba(59,130,246,.1);color:#3B82F6}
+  .tag-latam{background:rgba(245,158,11,.1);color:#F59E0B}
+  .overdue-banner{padding:.45rem 1rem;background:rgba(239,68,68,.06);border-top:1px solid rgba(239,68,68,.15);font-size:9px;color:#EF4444}
+
+  /* Theatre breakdown */
+  .th-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#21262D}
+  .th-cell{background:#161B22;padding:.75rem 1rem}
+  .th-cell .th-name{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#484F58;margin-bottom:.5rem}
+  .th-cell .th-nums{display:flex;gap.5rem;align-items:baseline;gap:.75rem}
+  .th-cell .big{font-size:22px;font-weight:700}
+  .th-cell .th-sub{font-size:9px;color:#8B949E}
+  .m9c{color:#22C55E}
+  .m8c{color:#14B8A6}
+</style>
+
+<div class="topbar">
+  <span class="logo">SOLSTICE</span>
+  <a href="#">Ops</a><a href="#">Blockers</a>
+  <a href="#" class="active">Forecast</a>
+  <a href="#">Daily</a><a href="#">Audit</a>
+</div>
+
+<div class="page">
+  <!-- LEFT COLUMN -->
+  <div class="left">
+
+    <!-- NEXT WEEK FORECAST TABLE -->
+    <div class="card">
+      <div class="card-hdr">
+        <h3>Next Week M8 + M9 Targets</h3>
+        <span class="sub">31 Mar – 5 Apr 2026</span>
+      </div>
+      <div class="ft-filters">
+        <span class="fpill active">All Theatres</span>
+        <span class="fpill">EMEA</span>
+        <span class="fpill">AMER</span>
+        <span class="fpill">JAPAC</span>
+        <span class="fpill">LATAM</span>
+        <span class="fpill" style="margin-left:auto">M8 only</span>
+        <span class="fpill">M9 only</span>
+      </div>
+      <div class="ft-row ft-hdr">
+        <div class="fc"></div>
+        <div class="fc">Account</div>
+        <div class="fc">Date</div>
+        <div class="fc">Theatre</div>
+        <div class="fc">DC</div>
+        <div class="fc">Confidence</div>
+      </div>
+      <!-- M9 completions -->
+      <div class="ft-row">
+        <div class="fc" style="color:#22C55E;font-size:11px;text-align:center">M9</div>
+        <div class="fc"><b>Supermercados Heb</b><div style="font-size:8px;color:#8B949E">Andre Inforzato</div></div>
+        <div class="fc"><span class="date-chip">31 Mar</span></div>
+        <div class="fc"><span class="theatre-tag tag-latam">LATAM</span></div>
+        <div class="fc"><span class="dc-dot" style="background:#22C55E"></span><span style="font-size:8.5px">Green</span></div>
+        <div class="fc"><span class="conf high">HIGH ✓</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="fc" style="color:#22C55E;font-size:11px;text-align:center">M9</div>
+        <div class="fc"><b>Bsecure Medellin</b><div style="font-size:8px;color:#8B949E">CSE</div></div>
+        <div class="fc"><span class="date-chip">31 Mar</span></div>
+        <div class="fc"><span class="theatre-tag tag-latam">LATAM</span></div>
+        <div class="fc"><span class="dc-dot" style="background:#22C55E"></span><span style="font-size:8.5px">Green</span></div>
+        <div class="fc"><span class="conf high">HIGH ✓</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="fc" style="color:#22C55E;font-size:11px;text-align:center">M9</div>
+        <div class="fc"><b>JC Decaux</b><div style="font-size:8px;color:#8B949E">Alvaro Fortes</div></div>
+        <div class="fc"><span class="date-chip">31 Mar</span></div>
+        <div class="fc"><span class="theatre-tag tag-emea">EMEA</span></div>
+        <div class="fc"><span class="dc-dot" style="background:#EF4444"></span><span style="font-size:8.5px;color:#EF4444">Red</span></div>
+        <div class="fc"><span class="conf med">MED ⚠</span></div>
+      </div>
+      <!-- M8 starts -->
+      <div class="ft-row">
+        <div class="fc" style="color:#14B8A6;font-size:11px;text-align:center">M8</div>
+        <div class="fc"><b>Itau Unibanco Holding</b><div style="font-size:8px;color:#8B949E">Andre Inforzato</div></div>
+        <div class="fc"><span class="date-chip">03 Apr</span></div>
+        <div class="fc"><span class="theatre-tag tag-latam">LATAM</span></div>
+        <div class="fc"><span class="dc-dot" style="background:#22C55E"></span><span style="font-size:8.5px">Green</span></div>
+        <div class="fc"><span class="conf high">HIGH ✓</span></div>
+      </div>
+      <div class="ft-row">
+        <div class="fc" style="color:#14B8A6;font-size:11px;text-align:center">M8</div>
+        <div class="fc"><b>Sherwin Williams de CA</b><div style="font-size:8px;color:#8B949E">CSE</div></div>
+        <div class="fc"><span class="date-chip">03 Apr</span></div>
+        <div class="fc"><span class="theatre-tag tag-latam">LATAM</span></div>
+        <div class="fc"><span class="dc-dot" style="background:#EF4444"></span><span style="font-size:8.5px;color:#EF4444">Red</span></div>
+        <div class="fc"><span class="conf low">LOW ✗</span></div>
+      </div>
+      <div class="overdue-banner">⚠ 3 accounts missed their target this week — PETROBRAS, El Puerto (27 Mar), AEGEA (26 Mar, M8 not started)</div>
+    </div>
+
+    <!-- VELOCITY TREND -->
+    <div class="card">
+      <div class="card-hdr">
+        <h3>4-Week Velocity — M9 Completions</h3>
+        <span class="sub">All theatres</span>
+      </div>
+      <div class="vel-grid">
+        <div class="vel-week">
+          <div class="wlabel">W-3 · 09 Mar</div>
+          <div class="wnum" style="color:#8B949E">7</div>
+          <div class="wsub">M9 done</div>
+          <span class="vel-arrow" style="color:#22C55E">↑</span>
+        </div>
+        <div class="vel-week">
+          <div class="wlabel">W-2 · 16 Mar</div>
+          <div class="wnum" style="color:#8B949E">5</div>
+          <div class="wsub">M9 done</div>
+          <span class="vel-arrow" style="color:#EF4444">↓</span>
+        </div>
+        <div class="vel-week">
+          <div class="wlabel">W-1 · 23 Mar</div>
+          <div class="wnum" style="color:#8B949E">9</div>
+          <div class="wsub">M9 done</div>
+          <span class="vel-arrow" style="color:#22C55E">↑</span>
+        </div>
+        <div class="vel-week current">
+          <div class="wlabel">THIS · 30 Mar</div>
+          <div class="wnum">4</div>
+          <div class="wsub">so far (3 days left)</div>
+        </div>
+      </div>
+      <div class="trend-line" style="color:#22C55E">▲ Trending UP — 7 → 5 → 9 · pace this week on track</div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right">
+    <!-- Theatre breakdown -->
+    <div class="card">
+      <div class="card-hdr"><h3>Next Week by Theatre</h3><span class="sub">M8 + M9 combined</span></div>
+      <div class="th-grid">
+        <div class="th-cell">
+          <div class="th-name">EMEA</div>
+          <div class="th-nums">
+            <div><div class="big m9c">1</div><div class="th-sub">M9 target</div></div>
+            <div><div class="big m8c" style="font-size:16px">0</div><div class="th-sub">M8 target</div></div>
+          </div>
+        </div>
+        <div class="th-cell">
+          <div class="th-name">LATAM</div>
+          <div class="th-nums">
+            <div><div class="big m9c">2</div><div class="th-sub">M9 target</div></div>
+            <div><div class="big m8c" style="font-size:16px">2</div><div class="th-sub">M8 target</div></div>
+          </div>
+        </div>
+        <div class="th-cell">
+          <div class="th-name">AMER</div>
+          <div class="th-nums">
+            <div><div class="big m9c">3</div><div class="th-sub">M9 target</div></div>
+            <div><div class="big m8c" style="font-size:16px">5</div><div class="th-sub">M8 target</div></div>
+          </div>
+        </div>
+        <div class="th-cell">
+          <div class="th-name">JAPAC</div>
+          <div class="th-nums">
+            <div><div class="big m9c">2</div><div class="th-sub">M9 target</div></div>
+            <div><div class="big m8c" style="font-size:16px">4</div><div class="th-sub">M8 target</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confidence legend -->
+    <div class="card">
+      <div class="card-hdr"><h3>Confidence Score Logic</h3></div>
+      <div style="padding:.75rem 1rem;font-size:9px;color:#8B949E;line-height:1.7">
+        <div style="margin-bottom:.4rem"><span class="conf high" style="display:inline-flex;margin-right:.4rem">HIGH</span> M8 active + DC Green → likely to complete</div>
+        <div style="margin-bottom:.4rem"><span class="conf med" style="display:inline-flex;margin-right:.4rem">MED</span> M8 active + DC Yellow/Red → at risk</div>
+        <div><span class="conf low" style="display:inline-flex;margin-right:.4rem">LOW</span> M8 not started OR DC Red → unlikely this week</div>
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="card">
+      <div class="card-hdr"><h3>All-Time M9 Totals</h3></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#21262D">
+        <div style="background:#161B22;padding:.75rem;text-align:center"><div style="font-size:24px;font-weight:700;color:#22C55E">42</div><div style="font-size:8.5px;color:#8B949E">Total M9 Complete</div></div>
+        <div style="background:#161B22;padding:.75rem;text-align:center"><div style="font-size:24px;font-weight:700;color:#14B8A6">220</div><div style="font-size:8.5px;color:#8B949E">M8 Started</div></div>
+      </div>
+    </div>
+  </div>
+</div>

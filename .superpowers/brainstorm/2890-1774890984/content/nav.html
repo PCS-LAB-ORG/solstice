@@ -1,0 +1,159 @@
+<style>
+  body{background:#0D1117;color:#E6EDF3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:2rem}
+  h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#8B949E;margin:0 0 1.25rem}
+  .nav-bar{background:#161B22;border:1px solid #21262D;border-radius:8px;padding:.75rem 1.5rem;display:flex;align-items:center;gap:.25rem;margin-bottom:2rem;max-width:900px}
+  .nav-bar .logo{font-weight:800;font-size:13px;color:#14B8A6;letter-spacing:.05em;margin-right:1rem}
+  .nav-bar a{font-size:11px;color:#8B949E;text-decoration:none;padding:5px 14px;border-radius:5px;transition:all .15s;cursor:pointer;border:1px solid transparent}
+  .nav-bar a:hover{color:#E6EDF3;background:rgba(255,255,255,.05)}
+  .nav-bar a.active{color:#E6EDF3;background:rgba(255,255,255,.08);border-color:#21262D}
+  .nav-bar a.new-page{color:#14B8A6}
+  .nav-bar a.new-page:hover{background:rgba(20,184,166,.08)}
+
+  /* Page previews */
+  .pages{display:flex;gap:1.25rem;max-width:900px;align-items:flex-start}
+  .page{flex:1;background:#161B22;border:1px solid #21262D;border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s}
+  .page:hover{border-color:#30363D;transform:translateY(-2px)}
+  .page.selected{border-color:#14B8A6;box-shadow:0 0 0 1px #14B8A6}
+  .page-hdr{padding:.75rem 1rem;border-bottom:1px solid #21262D;display:flex;align-items:center;gap:.5rem}
+  .dot{width:6px;height:6px;border-radius:50%}
+  .page-hdr .url{font-family:monospace;font-size:9px;color:#8B949E}
+  .page-hdr .badge{font-size:7.5px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:auto}
+  .badge.new{background:rgba(20,184,166,.15);color:#14B8A6}
+  .badge.exists{background:rgba(59,130,246,.12);color:#3B82F6}
+  .badge.split{background:rgba(245,158,11,.12);color:#F59E0B}
+  .page-body{padding:.85rem 1rem;font-size:10px;color:#8B949E;line-height:1.6}
+  .page-body h3{font-size:12px;font-weight:700;color:#E6EDF3;margin:0 0 .35rem}
+  .page-body p{margin:0 0 .6rem}
+  .section-list{font-size:9px;color:#484F58;padding-left:.85rem;margin:0}
+  .section-list li{margin-bottom:2px;color:#6E7681}
+  .page-body .label{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:#484F58;margin-bottom:.3rem;display:block}
+  .sel-hint{text-align:center;margin-top:1.5rem;font-size:10px;color:#484F58;max-width:900px}
+</style>
+
+<h2>Site structure — left to right order</h2>
+
+<div class="nav-bar">
+  <span class="logo">SOLSTICE</span>
+  <a class="active" onclick="sel(this,'ops')">Ops</a>
+  <a class="new-page" onclick="sel(this,'blockers')">Blockers</a>
+  <a class="new-page" onclick="sel(this,'forecast')">Forecast</a>
+  <a onclick="sel(this,'daily')">Daily</a>
+  <a class="new-page" onclick="sel(this,'audit')">Audit</a>
+</div>
+
+<div class="pages">
+  <div class="page" id="p-ops" onclick="selPage('ops')">
+    <div class="page-hdr">
+      <div class="dot" style="background:#3B82F6"></div>
+      <span class="url">/ops</span>
+      <span class="badge split">CLEANED UP</span>
+    </div>
+    <div class="page-body">
+      <h3>Operations</h3>
+      <p>"Right now" view — what's moving, who owns what.</p>
+      <span class="label">Sections</span>
+      <ul class="section-list">
+        <li>KPI bar (M9/M8/M3)</li>
+        <li>M1 Action Plan</li>
+        <li>Milestones table</li>
+        <li>CSE Workload</li>
+        <li>Completed</li>
+        <li>Customer search</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page" id="p-blockers" onclick="selPage('blockers')">
+    <div class="page-hdr">
+      <div class="dot" style="background:#EF4444"></div>
+      <span class="url">/blockers</span>
+      <span class="badge new">NEW</span>
+    </div>
+    <div class="page-body">
+      <h3>Blocker Review</h3>
+      <p>Built for your weekly call. Account by account, who to call.</p>
+      <span class="label">Sections</span>
+      <ul class="section-list">
+        <li>Theatre + region filter</li>
+        <li>Grouped by blocker type</li>
+        <li>🛑 No internal kickoff</li>
+        <li>👎 Rep blocking</li>
+        <li>DSM / Rep contact info</li>
+        <li>Upgrade notes inline</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page" id="p-forecast" onclick="selPage('forecast')">
+    <div class="page-hdr">
+      <div class="dot" style="background:#22C55E"></div>
+      <span class="url">/forecast</span>
+      <span class="badge new">NEW</span>
+    </div>
+    <div class="page-body">
+      <h3>Velocity & Forecast</h3>
+      <p>Next week completions + are we trending up or down.</p>
+      <span class="label">Sections</span>
+      <ul class="section-list">
+        <li>Next 7 days M8/M9 targets</li>
+        <li>Confidence score per account</li>
+        <li>4-week velocity trend ↑↓</li>
+        <li>Overdue alerts</li>
+        <li>By theatre breakdown</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page" id="p-daily" onclick="selPage('daily')">
+    <div class="page-hdr">
+      <div class="dot" style="background:#8B949E"></div>
+      <span class="url">/daily</span>
+      <span class="badge exists">EXISTS</span>
+    </div>
+    <div class="page-body">
+      <h3>Daily Briefing</h3>
+      <p>Leadership view. Already built, no changes.</p>
+      <span class="label">Sections</span>
+      <ul class="section-list">
+        <li>30-day M8/M9 trend</li>
+        <li>Theatre breakdown tiles</li>
+        <li>Day's movements</li>
+        <li>Refresh Data button</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page" id="p-audit" onclick="selPage('audit')">
+    <div class="page-hdr">
+      <div class="dot" style="background:#A78BFA"></div>
+      <span class="url">/audit</span>
+      <span class="badge split">EXTRACTED</span>
+    </div>
+    <div class="page-body">
+      <h3>Audit Log</h3>
+      <p>Full change history, pulled out of /ops.</p>
+      <span class="label">Sections</span>
+      <ul class="section-list">
+        <li>Timeline cards</li>
+        <li>M8/M9/CSE/regression</li>
+        <li>Theatre + field filters</li>
+        <li>Search by account</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="sel-hint">Click any page card to select it — or click the nav links above to see how they'll feel</div>
+
+<script>
+function sel(el,v){
+  document.querySelectorAll('.nav-bar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  selPage(v);
+}
+function selPage(v){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('selected'));
+  var p=document.getElementById('p-'+v);
+  if(p){p.classList.add('selected');if(window.__companion_emit)window.__companion_emit(v);}
+}
+</script>

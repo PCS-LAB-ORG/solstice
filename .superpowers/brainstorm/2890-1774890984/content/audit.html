@@ -1,0 +1,158 @@
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0D1117;color:#E6EDF3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  .topbar{background:#161B22;border-bottom:1px solid #21262D;padding:.65rem 1.5rem;display:flex;align-items:center;gap:.25rem}
+  .logo{font-weight:800;font-size:12px;color:#14B8A6;letter-spacing:.05em;margin-right:1rem}
+  .topbar a{font-size:10.5px;color:#8B949E;text-decoration:none;padding:4px 12px;border-radius:5px;border:1px solid transparent}
+  .topbar a.active{color:#A78BFA;background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.2)}
+  .topbar a:hover{background:rgba(255,255,255,.04)}
+  .page{max-width:1100px;margin:0 auto;padding:1.5rem}
+
+  /* Filter bar */
+  .fbar{display:flex;gap:.5rem;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap}
+  .fbar input{background:#161B22;border:1px solid #21262D;border-radius:5px;color:#8B949E;font-size:9px;padding:5px 10px;flex:1;min-width:200px;outline:none}
+  select.fsel{background:#161B22;border:1px solid #21262D;border-radius:5px;color:#8B949E;font-size:9px;padding:5px 8px;font-family:monospace}
+  .fpill{font-size:8.5px;padding:4px 10px;border-radius:12px;cursor:pointer;border:1px solid #21262D;color:#8B949E}
+  .fpill.active{border-color:#A78BFA;color:#A78BFA;background:rgba(167,139,250,.08)}
+
+  /* Stats row */
+  .stats{display:flex;gap:.75rem;margin-bottom:1.25rem}
+  .stat{background:#161B22;border:1px solid #21262D;border-radius:8px;padding:.6rem 1rem;flex:1;text-align:center}
+  .stat .n{font-size:22px;font-weight:700}
+  .stat .l{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:#8B949E;margin-top:2px}
+
+  /* Timeline */
+  .day-group{margin-bottom:1.5rem}
+  .day-hdr{font-size:8px;font-family:monospace;letter-spacing:.1em;color:#484F58;padding:.3rem 0 .4rem;border-bottom:1px solid rgba(33,38,45,.6);margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+  .day-hdr .dcnt{color:#30363D}
+
+  /* Card */
+  .entry{display:grid;grid-template-columns:3px 1fr;gap:0 .7rem;margin-bottom:.3rem}
+  .bar{border-radius:2px;align-self:stretch;margin:.15rem 0}
+  .body{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:.5rem .8rem}
+  .body.glow-m9{box-shadow:0 0 12px rgba(34,197,94,.12);border-color:rgba(34,197,94,.2)}
+  .body.glow-m8{border-color:rgba(20,184,166,.15)}
+  .body.glow-reg{border-color:rgba(239,68,68,.2)}
+  .top{display:flex;align-items:center;gap:.45rem;margin-bottom:.22rem}
+  .badge{font-family:monospace;font-size:7.5px;font-weight:700;padding:1px 6px;border-radius:3px}
+  .acct{font-size:10.5px;font-weight:700}
+  .time{margin-left:auto;font-family:monospace;font-size:8px;color:#484F58}
+  .chg{font-family:monospace;font-size:9px;margin-bottom:.2rem}
+  .meta{font-size:8px;color:#6E7681;display:flex;gap:.5rem}
+  .theatre-tag{font-size:7px;font-weight:700;padding:1px 4px;border-radius:2px}
+  .tag-emea{background:rgba(20,184,166,.1);color:#14B8A6}
+  .tag-amer{background:rgba(59,130,246,.1);color:#3B82F6}
+  .tag-japac{background:rgba(139,92,246,.1);color:#8B5CF6}
+  .tag-latam{background:rgba(245,158,11,.1);color:#F59E0B}
+</style>
+
+<div class="topbar">
+  <span class="logo">SOLSTICE</span>
+  <a href="#">Ops</a><a href="#">Blockers</a><a href="#">Forecast</a><a href="#">Daily</a>
+  <a href="#" class="active">Audit</a>
+</div>
+
+<div class="page">
+  <div class="fbar">
+    <input placeholder="Search accounts…">
+    <select class="fsel">
+      <option>All Theatres</option><option>EMEA</option><option>AMER/NAM</option><option>JAPAC</option><option>LATAM</option>
+    </select>
+    <select class="fsel">
+      <option>All Fields</option><option>M9 Upgrade Complete</option><option>M8 Upgrade Started</option><option>M3 Buy-in</option><option>M1 Outreach</option><option>CSE Change</option>
+    </select>
+    <select class="fsel"><option>All CSEs</option><option>Alvaro Fortes</option><option>Mathieu Dalbes</option></select>
+    <select class="fsel"><option>Newest First</option><option>Oldest First</option></select>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="n" style="color:#22C55E">42</div><div class="l">M9 Complete</div></div>
+    <div class="stat"><div class="n" style="color:#14B8A6">220</div><div class="l">M8 Started</div></div>
+    <div class="stat"><div class="n" style="color:#F59E0B">730</div><div class="l">M3 Buy-in</div></div>
+    <div class="stat"><div class="n" style="color:#EC4899">38</div><div class="l">CSE Changes</div></div>
+    <div class="stat"><div class="n" style="color:#EF4444">12</div><div class="l">Regressions</div></div>
+    <div class="stat"><div class="n" style="color:#8B949E">1,044</div><div class="l">Total Entries</div></div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="day-group">
+    <div class="day-hdr">30 Mar 2026 <span class="dcnt">(3)</span></div>
+
+    <div class="entry">
+      <div class="bar" style="background:#22C55E"></div>
+      <div class="body glow-m9">
+        <div class="top">
+          <span class="badge" style="background:#22c55e22;color:#22C55E">M9</span>
+          <span class="acct" style="color:#4ade80">Empreendimentos Pague Menos</span>
+          <span class="time">09:56</span>
+        </div>
+        <div class="chg" style="color:#22C55E">✅ Upgrade Complete</div>
+        <div class="meta"><span class="theatre-tag tag-latam">LATAM</span><span>Andre Inforzato</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="bar" style="background:#14B8A6"></div>
+      <div class="body glow-m8">
+        <div class="top">
+          <span class="badge" style="background:#14b8a622;color:#14B8A6">M8</span>
+          <span class="acct">Better Payment Germany GmbH</span>
+          <span class="time">20:46</span>
+        </div>
+        <div class="chg" style="color:#14B8A6">✅ Upgrade Started</div>
+        <div class="meta"><span class="theatre-tag tag-emea">EMEA</span><span>Jonathan Brox</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="bar" style="background:#EF4444"></div>
+      <div class="body glow-reg">
+        <div class="top">
+          <span class="badge" style="background:#ef444422;color:#EF4444">M7</span>
+          <span class="acct">Automobili Lamborghini Spa</span>
+          <span class="time">13:58</span>
+        </div>
+        <div class="chg" style="color:#EF4444">↓ REGRESSION: M7 Legal Y → N</div>
+        <div class="meta"><span class="theatre-tag tag-emea">EMEA</span><span>Alvaro Fortes</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-group">
+    <div class="day-hdr">27 Mar 2026 <span class="dcnt">(5)</span></div>
+
+    <div class="entry">
+      <div class="bar" style="background:#22C55E"></div>
+      <div class="body glow-m9">
+        <div class="top">
+          <span class="badge" style="background:#22c55e22;color:#22C55E">M9</span>
+          <span class="acct" style="color:#4ade80">Home Office ESN</span>
+          <span class="time">10:55</span>
+        </div>
+        <div class="chg" style="color:#22C55E">✅ Upgrade Complete</div>
+        <div class="meta"><span class="theatre-tag tag-emea">EMEA</span><span>—</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="bar" style="background:#EC4899"></div>
+      <div class="body">
+        <div class="top">
+          <span class="badge" style="background:#ec489922;color:#EC4899">CSE</span>
+          <span class="acct">Madrileña Red De Gas Sau</span>
+          <span class="time">14:43</span>
+        </div>
+        <div class="chg"><span style="color:#8B949E">Vaishnavi Mishra</span> → <span style="color:#EC4899;font-weight:700">Alvaro Fortes</span></div>
+        <div class="meta"><span class="theatre-tag tag-emea">EMEA</span><span>DC CSE Tracker</span></div>
+      </div>
+    </div>
+
+    <div class="entry" style="opacity:.5">
+      <div class="bar" style="background:#8B949E"></div>
+      <div class="body">
+        <div class="top"><span class="acct" style="color:#484F58">+ 3 more entries on 27 Mar…</span></div>
+      </div>
+    </div>
+  </div>
+</div>

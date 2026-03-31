@@ -92,10 +92,8 @@ class TestApiCustomerSearch:
 
 class TestApiCustomerDetail:
     def test_missing_account_returns_error(self, client):
-        # Route returns 200 + {"error": "not found"} for missing accounts
         r = client.get("/api/customer/nonexistent_id")
-        assert r.status_code == 200
-        assert "error" in r.json()
+        assert r.status_code == 404
 
     def test_existing_account_returns_200(self, client_with_data):
         r = client_with_data.get("/api/customer/acc001")
