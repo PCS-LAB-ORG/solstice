@@ -1122,6 +1122,44 @@ def api_cse_workload(theatre: str = ""):
         return []
 
 
+@app.get("/api/compare")
+def api_compare():
+    """4-theatre side-by-side comparison for QBR."""
+    from datetime import date as _date, timedelta
+    _ensure_db()
+    theatres = ["EMEA", "JAPAC", "AMER", "LATAM"]
+    result = []
+    today = _date.today()
+    monday = (today - timedelta(days=today.weekday())).isoformat()
+    try:
+        with get_db() as conn:
+            for theatre in theatres:
+                rows = conn.execute("""
+                    SELECT b.signal, b.m9_complete, b.m9_actual
+                    FROM blocked_data b
+                    JOIN accounts a ON a.account_id=b.account_id
+                    WHERE UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=?
+                      AND a.customer_name!=''
+                """, (theatre,)).fetchall()
+                m9_total     = sum(1 for r in rows if r[1])
+                m9_this_week = sum(1 for r in rows if r[1] and r[2] and r[2] >= monday)
+                blocked      = sum(1 for r in rows if r[0]=="blocked" and not r[1])
+                at_risk      = sum(1 for r in rows if r[0]=="at_risk" and not r[1])
+                result.append({
+                    "theatre":      theatre,
+                    "m9_total":     m9_total,
+                    "m9_this_week": m9_this_week,
+                    "blocked":      blocked,
+                    "at_risk":      at_risk,
+                    "sla_overdue":  0,  # computed from milestone dates in future enhancement
+                })
+    except Exception as e:
+        logger.error("compare failed: %s", e)
+        for t in theatres:
+            result.append({"theatre":t,"m9_total":0,"m9_this_week":0,"blocked":0,"at_risk":0,"sla_overdue":0})
+    return {"theatres": result}
+
+
 @app.get("/api/theatres")
 def api_theatres():
     """List distinct theatres with account counts."""
