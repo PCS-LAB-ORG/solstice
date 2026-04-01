@@ -1219,7 +1219,7 @@ def _load_milestones(theatre: str = "") -> list:
         with get_db() as conn:
             rows = conn.execute(
                 """
-                SELECT a.customer_name, a.active_cse, a.status, a.live_fire, a.live_fire_dc,
+                SELECT a.account_id, a.customer_name, a.active_cse, a.status, a.live_fire, a.live_fire_dc,
                        a.sales_region,
                        b.team, b.is_cs_team, b.signal, b.subtype, b.milestone_category,
                        b.m0_complete, b.m1_complete, b.m1_planned,
@@ -1474,6 +1474,7 @@ def api_sla_breaches(theatre: str = ""):
             for k, v in r.items()
             if k
             in (
+                "account_id",
                 "customer_name",
                 "active_cse",
                 "status",

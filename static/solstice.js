@@ -136,10 +136,11 @@ S.closeSearch = function() {
 // ── Account modal ─────────────────────────────────────────────────────────────
 
 S.openAccountCard = function(account_id) {
+  if (!account_id) return;
   localStorage.setItem('lastGCard', account_id);
   fetch('/api/customer/'+encodeURIComponent(account_id))
     .then(function(r){return r.json();})
-    .then(function(d){ if (!d.error) _renderCard(d); })
+    .then(function(d){ if (!d.error && !d.detail) _renderCard(d); })
     .catch(function(){});
 };
 
