@@ -1528,7 +1528,7 @@ def api_m1_suggestions(theatre: str = ""):
                 FROM m1_suggestions s
                 LEFT JOIN accounts a ON a.customer_name=s.account_name
                 LEFT JOIN blocked_data b ON b.account_id=a.account_id
-                AND (? = '' OR UPPER(COALESCE(b.account_theatre,'EMEA'))=UPPER(?))
+                WHERE (? = '' OR UPPER(COALESCE(b.account_theatre,a.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY s.category, s.assigned_cse, s.region, s.account_name
             """, (theatre, theatre)).fetchall()
         from collections import defaultdict

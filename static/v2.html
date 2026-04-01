@@ -13,8 +13,11 @@
 
 <div id="main" style="max-width:1200px;margin:0 auto;padding:1.5rem">
 
-  <!-- Theatre filter pills -->
-  <div id="theatre-pills" style="display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap"></div>
+  <!-- Theatre filter pills + Refresh -->
+  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+    <div id="theatre-pills" style="display:flex;gap:.5rem;flex-wrap:wrap;flex:1"></div>
+    <button onclick="refreshData()" style="background:#0f1729;border:1px solid #22d3ee;color:#22d3ee;padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;flex-shrink:0">&#10227; Refresh Data</button>
+  </div>
 
   <!-- KPI row -->
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
@@ -72,10 +75,6 @@
     <div id="cse-bars" style="padding:1rem;display:flex;flex-direction:column;gap:.5rem"></div>
   </div>
 
-  <!-- Refresh button -->
-  <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
-    <button onclick="refreshData()" style="background:#0f1729;border:1px solid #22d3ee;color:#22d3ee;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace">&#10227; Refresh Data</button>
-  </div>
 
 </div>
 
