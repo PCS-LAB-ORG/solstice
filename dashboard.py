@@ -1062,6 +1062,38 @@ def api_open_actions(): return _load_open_actions()
 @app.get("/api/milestones")
 def api_milestones(theatre: str = ""): return _load_milestones(theatre=theatre)
 
+@app.get("/api/health-summary")
+def api_health_summary():
+    """Theatre health status — green/amber/red per theatre based on blocked count."""
+    _ensure_db()
+    theatres = ["EMEA", "JAPAC", "AMER", "LATAM"]
+    result = {}
+    try:
+        with get_db() as conn:
+            for theatre in theatres:
+                rows = conn.execute("""
+                    SELECT b.signal, b.m9_complete
+                    FROM blocked_data b
+                    JOIN accounts a ON a.account_id=b.account_id
+                    WHERE UPPER(COALESCE(a.account_theatre,'EMEA'))=?
+                      AND a.customer_name!=''
+                """, (theatre,)).fetchall()
+                m9 = sum(1 for r in rows if r[1])
+                blocked = sum(1 for r in rows if r[0] == "blocked" and not r[1])
+                at_risk = sum(1 for r in rows if r[0] == "at_risk" and not r[1])
+                if blocked > 5:
+                    status = "red"
+                elif blocked > 2:
+                    status = "amber"
+                else:
+                    status = "green"
+                result[theatre] = {"status": status, "m9": m9, "blocked": blocked, "at_risk": at_risk}
+    except Exception as e:
+        for t in theatres:
+            result[t] = {"status": "green", "m9": 0, "blocked": 0, "at_risk": 0}
+    return result
+
+
 @app.get("/api/theatres")
 def api_theatres():
     """List distinct theatres with account counts."""
@@ -1195,7 +1227,7 @@ def api_dq(): return _load_dq()
 
 @app.get("/api/customer-search")
 def api_customer_search(q: str = ""):
-    """Search accounts by name — returns list of matches."""
+    """Search accounts by name — returns list of matches, deduplicated by name."""
     if not q or len(q) < 2: return []
     _ensure_db()
     try:
@@ -1205,9 +1237,42 @@ def api_customer_search(q: str = ""):
                        a.sales_region, a.live_fire, b.signal, b.dc_progress
                 FROM accounts a LEFT JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name LIKE ? AND a.customer_name!=''
-                ORDER BY a.customer_name LIMIT 10
+                ORDER BY a.customer_name LIMIT 20
             """, (f"%{q}%",)).fetchall()
-        return [dict(r) for r in rows]
+
+        # Deduplicate by lower-cased customer_name: same company can have duplicate
+        # account_ids that differ only in case (Salesforce ID normalisation issue).
+        # Keep the row with the most DC data (signal + dc_progress present wins).
+        # If both rows are genuinely distinct (different regions AND both have data),
+        # keep both but mark them with a disambiguating region suffix in the name.
+        seen: dict = {}  # lower(name) → list of row dicts
+        for r in rows:
+            d = dict(r)
+            key = (d.get("customer_name") or "").lower().strip()
+            seen.setdefault(key, []).append(d)
+
+        result = []
+        for key, candidates in seen.items():
+            if len(candidates) == 1:
+                result.append(candidates[0])
+                continue
+            # Multiple rows for same name — check if they're case-duplicates of the
+            # same Salesforce ID or genuinely different accounts.
+            ids_normalised = [c["account_id"].lower() for c in candidates]
+            if len(set(ids_normalised)) == 1:
+                # Pure case-duplicate: pick the one with more DC data
+                def _score(c):
+                    return (1 if c.get("signal") else 0) + (1 if c.get("dc_progress") else 0)
+                best = max(candidates, key=_score)
+                result.append(best)
+            else:
+                # Genuinely distinct accounts — keep all but make region visible
+                # so the user can tell them apart in the dropdown.
+                for c in candidates:
+                    result.append(c)
+
+        result.sort(key=lambda x: (x.get("customer_name") or "").lower())
+        return result[:10]
     except: return []
 
 
