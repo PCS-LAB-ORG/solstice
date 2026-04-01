@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from agent.constants import STATE_FILE, DATA_DIR
@@ -32,6 +33,7 @@ async def lifespan(app):
 
 
 app = FastAPI(title="Solstice Control Center", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
 
 
 def _populate_db():
