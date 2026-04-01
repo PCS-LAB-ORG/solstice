@@ -1122,6 +1122,91 @@ def api_cse_workload(theatre: str = ""):
         return []
 
 
+@app.get("/api/weekly-movements")
+def api_weekly_movements(theatre: str = "", date: str = ""):
+    """What changed this week — new M9, M8 started, newly blocked, resolved."""
+    from datetime import date as _date, timedelta
+    _ensure_db()
+    try:
+        if date:
+            ref = _date.fromisoformat(date)
+        else:
+            ref = _date.today()
+        monday = ref - timedelta(days=ref.weekday())
+        sunday = monday + timedelta(days=6)
+        mon_s = monday.isoformat()
+        sun_s = sunday.isoformat()
+
+        t_filter = "AND UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=UPPER(?)" if theatre else ""
+        t_params = (theatre,) if theatre else ()
+
+        def _q(sql, params):
+            with get_db() as conn:
+                return [dict(r) for r in conn.execute(sql, params).fetchall()]
+
+        base = f"""
+            FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
+            WHERE a.customer_name!='' {t_filter}
+        """
+
+        new_m9 = _q(f"""
+            SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
+                   b.m9_actual, b.dc_progress,
+                   COALESCE(b.account_theatre, a.account_theatre,'EMEA') as account_theatre
+            {base} AND b.m9_complete=1 AND b.m9_actual>=? AND b.m9_actual<=?
+            ORDER BY b.m9_actual DESC
+        """, t_params + (mon_s, sun_s))
+
+        m8_started = _q(f"""
+            SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
+                   b.m8_actual,
+                   COALESCE(b.account_theatre, a.account_theatre,'EMEA') as account_theatre
+            {base} AND b.m8_started=1 AND b.m8_actual>=? AND b.m8_actual<=?
+            ORDER BY b.m8_actual DESC
+        """, t_params + (mon_s, sun_s))
+
+        newly_blocked = _q(f"""
+            SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
+                   b.signal, b.subtype,
+                   COALESCE(b.account_theatre, a.account_theatre,'EMEA') as account_theatre
+            {base} AND b.signal IN ('blocked','at_risk') AND b.m9_complete=0
+              AND EXISTS (
+                SELECT 1 FROM status_history sh
+                WHERE sh.account_id=a.account_id
+                  AND sh.field_name='signal'
+                  AND sh.new_status IN ('blocked','at_risk')
+                  AND sh.changed_at>=? AND sh.changed_at<=?
+              )
+            ORDER BY a.customer_name
+        """, t_params + (mon_s, sun_s + "T23:59:59"))
+
+        resolved = _q(f"""
+            SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
+                   COALESCE(b.account_theatre, a.account_theatre,'EMEA') as account_theatre
+            {base} AND b.m9_complete=0 AND b.signal='green'
+              AND EXISTS (
+                SELECT 1 FROM status_history sh
+                WHERE sh.account_id=a.account_id
+                  AND sh.field_name='signal'
+                  AND sh.old_status IN ('blocked','at_risk')
+                  AND sh.new_status='green'
+                  AND sh.changed_at>=? AND sh.changed_at<=?
+              )
+            ORDER BY a.customer_name
+        """, t_params + (mon_s, sun_s + "T23:59:59"))
+
+        return {
+            "week_of": mon_s,
+            "new_m9": new_m9,
+            "m8_started": m8_started,
+            "newly_blocked": newly_blocked,
+            "resolved": resolved,
+        }
+    except Exception as e:
+        logger.error("weekly-movements failed: %s", e)
+        return {"week_of": "", "new_m9": [], "m8_started": [], "newly_blocked": [], "resolved": []}
+
+
 @app.get("/api/compare")
 def api_compare():
     """4-theatre side-by-side comparison for QBR."""

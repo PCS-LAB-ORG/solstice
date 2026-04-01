@@ -25,7 +25,8 @@ def _make_client(test_db):
     """Return TestClient with get_db patched to always use test_db."""
     from dashboard import app
     with patch("dashboard.get_db", side_effect=lambda *a, **k: get_db(test_db)), \
-         patch("dashboard.init_db", side_effect=lambda *a, **k: None):
+         patch("dashboard.init_db", side_effect=lambda *a, **k: None), \
+         patch("dashboard._ensure_db", side_effect=lambda *a, **k: None):
         yield TestClient(app, raise_server_exceptions=False)
 
 
