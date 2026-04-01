@@ -1,0 +1,26 @@
+# Data files — never commit live data
+data/solstice.db
+data/solstice.db-shm
+data/solstice.db-wal
+data/state.json
+data/*.csv
+
+# Brainstorm sessions
+.superpowers/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Env
+.env
+*.env.local
+
+# OS
+.DS_Store
+Thumbs.db
