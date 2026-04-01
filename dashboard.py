@@ -1075,7 +1075,7 @@ def api_health_summary():
                     SELECT b.signal, b.m9_complete
                     FROM blocked_data b
                     JOIN accounts a ON a.account_id=b.account_id
-                    WHERE UPPER(COALESCE(a.account_theatre,'EMEA'))=?
+                    WHERE UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=?
                       AND a.customer_name!=''
                 """, (theatre,)).fetchall()
                 m9 = sum(1 for r in rows if r[1])
@@ -1089,8 +1089,9 @@ def api_health_summary():
                     status = "green"
                 result[theatre] = {"status": status, "m9": m9, "blocked": blocked, "at_risk": at_risk}
     except Exception as e:
+        logger.error("health-summary failed: %s", e)
         for t in theatres:
-            result[t] = {"status": "green", "m9": 0, "blocked": 0, "at_risk": 0}
+            result[t] = {"status": "amber", "m9": 0, "blocked": 0, "at_risk": 0, "error": True}
     return result
 
 

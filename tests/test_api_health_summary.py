@@ -1,5 +1,6 @@
 """Tests for /api/health-summary — theatre health status logic."""
 import pytest
+from contextlib import contextmanager
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 from agent.db import init_db, get_db
@@ -19,6 +20,22 @@ def client(db):
          patch("dashboard._ensure_db"):
         from dashboard import app
         yield TestClient(app, raise_server_exceptions=False)
+
+
+@contextmanager
+def _seeded_client(db, accounts_and_signals):
+    """Helper: seed DB and yield patched TestClient (patch stays active during use)."""
+    with get_db(db) as conn:
+        for aid, name, theatre, signal, m9 in accounts_and_signals:
+            conn.execute("INSERT INTO accounts (account_id,customer_name,account_theatre) VALUES (?,?,?)",
+                         (aid, name, theatre))
+            conn.execute("INSERT INTO blocked_data (account_id,signal,m9_complete,account_theatre) VALUES (?,?,?,?)",
+                         (aid, signal, m9, theatre))
+    with patch("dashboard.get_db", side_effect=lambda *a, **k: get_db(db)), \
+         patch("dashboard.init_db"), \
+         patch("dashboard._ensure_db"):
+        from dashboard import app as _app
+        yield TestClient(_app, raise_server_exceptions=False)
 
 
 def test_returns_200(client):
@@ -56,46 +73,22 @@ def test_empty_db_all_green(client):
 
 
 def test_red_when_blocked_gt_5(db):
-    with get_db(db) as conn:
-        for i in range(6):
-            conn.execute("INSERT INTO accounts (account_id,customer_name,account_theatre) VALUES (?,?,?)",
-                         (f"e{i}", f"Co{i}", "EMEA"))
-            conn.execute("INSERT INTO blocked_data (account_id,signal,m9_complete,account_theatre) VALUES (?,?,?,?)",
-                         (f"e{i}", "blocked", 0, "EMEA"))
-    with patch("dashboard.get_db", side_effect=lambda *a, **k: get_db(db)), \
-         patch("dashboard.init_db"), \
-         patch("dashboard._ensure_db"):
-        from dashboard import app
-        data = TestClient(app).get("/api/health-summary").json()
+    accounts = [(f"e{i}", f"Co{i}", "EMEA", "blocked", 0) for i in range(6)]
+    with _seeded_client(db, accounts) as c:
+        data = c.get("/api/health-summary").json()
     assert data["EMEA"]["status"] == "red"
     assert data["EMEA"]["blocked"] == 6
 
 
 def test_amber_when_blocked_3_to_5(db):
-    with get_db(db) as conn:
-        for i in range(3):
-            conn.execute("INSERT INTO accounts (account_id,customer_name,account_theatre) VALUES (?,?,?)",
-                         (f"e{i}", f"Co{i}", "EMEA"))
-            conn.execute("INSERT INTO blocked_data (account_id,signal,m9_complete,account_theatre) VALUES (?,?,?,?)",
-                         (f"e{i}", "blocked", 0, "EMEA"))
-    with patch("dashboard.get_db", side_effect=lambda *a, **k: get_db(db)), \
-         patch("dashboard.init_db"), \
-         patch("dashboard._ensure_db"):
-        from dashboard import app
-        data = TestClient(app).get("/api/health-summary").json()
+    accounts = [(f"e{i}", f"Co{i}", "EMEA", "blocked", 0) for i in range(3)]
+    with _seeded_client(db, accounts) as c:
+        data = c.get("/api/health-summary").json()
     assert data["EMEA"]["status"] == "amber"
 
 
 def test_m9_count_correct(db):
-    with get_db(db) as conn:
-        for i in range(4):
-            conn.execute("INSERT INTO accounts (account_id,customer_name,account_theatre) VALUES (?,?,?)",
-                         (f"e{i}", f"Co{i}", "EMEA"))
-            conn.execute("INSERT INTO blocked_data (account_id,signal,m9_complete,account_theatre) VALUES (?,?,?,?)",
-                         (f"e{i}", "green", 1, "EMEA"))
-    with patch("dashboard.get_db", side_effect=lambda *a, **k: get_db(db)), \
-         patch("dashboard.init_db"), \
-         patch("dashboard._ensure_db"):
-        from dashboard import app
-        data = TestClient(app).get("/api/health-summary").json()
+    accounts = [(f"e{i}", f"Co{i}", "EMEA", "green", 1) for i in range(4)]
+    with _seeded_client(db, accounts) as c:
+        data = c.get("/api/health-summary").json()
     assert data["EMEA"]["m9"] == 4
