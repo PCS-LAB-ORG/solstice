@@ -1,0 +1,23 @@
+/* Solstice Design Tokens — Ops Center Cyan */
+:root {
+  --bg:       #0a0e1a;
+  --surface:  #0f1729;
+  --border:   #1e2d40;
+  --accent:   #22d3ee;
+  --text:     #e2e8f0;
+  --muted:    #475569;
+  --green:    #10b981;
+  --amber:    #f59e0b;
+  --red:      #ef4444;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+.glow-cyan { box-shadow: 0 0 12px rgba(34, 211, 238, .3); }
+.kpi-number { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.signal-green { color: var(--green); }
+.signal-amber { color: var(--amber); }
+.signal-red   { color: var(--red);   }
+.badge-green  { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
+.badge-amber  { background: rgba(245,158,11,.15);  color: var(--amber); border: 1px solid rgba(245,158,11,.3); }
+.badge-red    { background: rgba(239,68,68,.15);   color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
