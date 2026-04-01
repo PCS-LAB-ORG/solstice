@@ -2183,7 +2183,8 @@ def api_m1_suggestions(theatre: str = ""):
                        s.status, s.signal, s.category,
                        b.status_detail, b.upgrade_notes, b.health_notes,
                        b.cc_rep, b.cc_dsm, b.churn_risk, b.dc_progress,
-                       a.live_fire, b.m3_planned, b.m8_planned, b.m9_planned
+                       a.live_fire, b.m3_planned, b.m8_planned, b.m9_planned,
+                       a.account_id
                 FROM m1_suggestions s
                 LEFT JOIN accounts a ON a.customer_name=s.account_name
                 LEFT JOIN blocked_data b ON b.account_id=a.account_id

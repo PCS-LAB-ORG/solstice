@@ -216,7 +216,8 @@ function loadM1() {
       var sigC = {green:'#10b981', at_risk:'#f59e0b', blocked:'#ef4444'};
       container.innerHTML = top10.map(function(r) {
         var sc = sigC[r.signal] || '#475569';
-        return '<div onclick="S.openAccountCard(\'' + E(r.account_id) + '\')" '
+        var aid = r.account_id ? 'S.openAccountCard(\'' + E(r.account_id) + '\')' : '';
+        return '<div ' + (aid ? 'onclick="' + aid + '" style="cursor:pointer"' : '') + ' '
           + 'style="padding:.5rem 1rem;border-bottom:1px solid #1e2d40;cursor:pointer;display:flex;align-items:center;gap:.6rem" '
           + 'onmouseover="this.style.background=\'rgba(255,255,255,.02)\'" onmouseout="this.style.background=\'\'">'
           + '<span style="width:6px;height:6px;border-radius:50%;background:' + sc + ';flex-shrink:0"></span>'
@@ -227,7 +228,7 @@ function loadM1() {
           + (r.churn_risk ? '<span class="badge badge-amber" style="font-size:8px;padding:1px 5px;flex-shrink:0">' + E(r.churn_risk) + '</span>' : '')
           + '</div>';
       }).join('');
-    }).catch(console.error);
+    }).catch(function(e){ console.error('M1 error',e); document.getElementById('m1-list').textContent='Error loading'; });
 }
 
 // ── CSE workload ─────────────────────────────────────────────────
