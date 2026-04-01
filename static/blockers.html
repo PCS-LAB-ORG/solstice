@@ -136,6 +136,8 @@ var TYPES = [
   {key:'tech_blocker',    color:'#8b5cf6', bg:'rgba(139,92,246,.12)', label:'Technical Blocker',    desc:'CoE / product gap blocking progress'},
   {key:'active_deal',     color:'#3b82f6', bg:'rgba(59,130,246,.12)', label:'Active Deal',          desc:'XSIAM or other deal in flight'},
   {key:'other',           color:'#475569', bg:'rgba(71,85,105,.12)',  label:'Other',                desc:'Other blockers'},
+  {key:'sla_breach',      color:'#ef4444', bg:'rgba(239,68,68,.08)',  label:'SLA Breach',           desc:'M3\u2192M8 >14d or M8\u2192M9 >28d'},
+  {key:'m1_plan',         color:'#22d3ee', bg:'rgba(34,211,238,.08)', label:'M1 Action Plan',       desc:'Accounts needing M1 outreach'},
 ];
 
 var SIG_COLORS = {green:'#10b981', blocked:'#ef4444', at_risk:'#f59e0b'};
@@ -171,6 +173,8 @@ function setT(el, t) {
 }
 
 // ── Fetch + populate dropdowns ──────────────────────────────────────────────
+function _showErr() { var el=document.getElementById('sections'); el.textContent=''; var d=document.createElement('div'); d.className='empty-state'; d.textContent='Error loading data'; el.appendChild(d); }
+
 function load() {
   _pushUrl();
   var region = document.getElementById('f-region').value;
@@ -178,16 +182,39 @@ function load() {
   var url = '/api/blockers?theatre=' + encodeURIComponent(_theatre)
           + '&region=' + encodeURIComponent(region)
           + '&cse='    + encodeURIComponent(cse);
-  fetch(url)
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      _data = d;
-      _rebuildDropdowns(d, cse);
-      render();
-    })
-    .catch(function() {
-      document.getElementById('sections').innerHTML = '<div class="empty-state"><div class="empty-icon">&#x26a0;</div>Error loading data</div>';
+
+  Promise.all([
+    fetch(url).then(function(r){return r.json();}),
+    fetch('/api/sla-breaches?theatre='+encodeURIComponent(_theatre)).then(function(r){return r.json();}),
+    fetch('/api/m1-suggestions?theatre='+encodeURIComponent(_theatre)).then(function(r){return r.json();})
+  ]).then(function(results) {
+    var d = results[0];
+    var sla = results[1] || [];
+    var m1cats = results[2] || [];
+
+    d.sla_breach = sla.map(function(r) {
+      return {
+        account_id: r.account_id, customer_name: r.customer_name,
+        active_cse: r.active_cse, sales_region: '', signal: 'blocked',
+        status_detail: 'M3\u2192M8: '+(r.sla_m3_m8_days||'\u2014')+'d | M8\u2192M9: '+(r.sla_m8_m9_days||'\u2014')+'d',
+        health_notes: (r.sla_m3_m8_breach?'M3\u2192M8 BREACH ':'')+(r.sla_m8_m9_breach?'M8\u2192M9 BREACH':''),
+        dc_progress: r.dc_progress||'', subtype:'sla_breach',
+      };
     });
+
+    var m1flat = [];
+    (m1cats||[]).forEach(function(cat){ (cat.accounts||[]).forEach(function(a){ m1flat.push({
+      account_id: a.account_id||'', customer_name: a.account_name||'',
+      active_cse: a.assigned_cse||'', sales_region: a.region||'', signal: a.signal||'',
+      status_detail: a.notes||a.status_detail||'', health_notes: '',
+      dc_progress: a.dc_progress||'', subtype:'m1_plan',
+    });}); });
+    d.m1_plan = m1flat;
+
+    _data = d;
+    _rebuildDropdowns(d, cse);
+    render();
+  }).catch(_showErr);
 }
 
 function _rebuildDropdowns(d, currentCse) {

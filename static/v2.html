@@ -44,27 +44,27 @@
     <div id="funnel-bars" style="display:flex;flex-direction:column;gap:.6rem"></div>
   </div>
 
-  <!-- Two-column layout: SLA + M1 -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
-
-    <!-- SLA breach list -->
-    <div style="background:#0f1729;border:1px solid #1e2d40;border-radius:8px;overflow:hidden">
-      <div style="padding:.8rem 1rem;border-bottom:1px solid #1e2d40;display:flex;align-items:center;justify-content:space-between">
+  <!-- SLA Breaches — full width, all accounts -->
+  <div style="background:#0f1729;border:1px solid #1e2d40;border-radius:8px;overflow:hidden;margin-bottom:1.5rem">
+    <div style="padding:.8rem 1rem;border-bottom:1px solid #1e2d40;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:.75rem">
         <span style="font-size:9px;color:#475569;letter-spacing:2px;text-transform:uppercase">SLA BREACHES</span>
         <span id="sla-count" style="font-size:10px;color:#ef4444;font-family:'JetBrains Mono',monospace">—</span>
       </div>
-      <div id="sla-list" style="padding:.5rem 0;max-height:360px;overflow-y:auto"></div>
+      <a href="/blockers" style="font-size:9px;color:#22d3ee;text-decoration:none">→ Blockers for full call prep</a>
     </div>
-
-    <!-- M1 Action plan -->
-    <div style="background:#0f1729;border:1px solid #1e2d40;border-radius:8px;overflow:hidden">
-      <div style="padding:.8rem 1rem;border-bottom:1px solid #1e2d40;display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:9px;color:#475569;letter-spacing:2px;text-transform:uppercase">M1 ACTION PLAN</span>
-        <span id="m1-count" style="font-size:10px;color:#22d3ee;font-family:'JetBrains Mono',monospace">—</span>
-      </div>
-      <div id="m1-list" style="padding:.5rem 0;max-height:360px;overflow-y:auto"></div>
+    <div style="overflow-x:auto">
+      <table id="sla-table" style="width:100%;border-collapse:collapse;font-size:10px">
+        <thead><tr style="color:#475569;font-size:8px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid #1e2d40">
+          <th style="text-align:left;padding:6px 12px">Account</th>
+          <th style="text-align:left;padding:6px 12px">CSE</th>
+          <th style="text-align:right;padding:6px 12px">M3→M8 days</th>
+          <th style="text-align:right;padding:6px 12px">M8→M9 days</th>
+          <th style="text-align:left;padding:6px 12px">DC Progress</th>
+        </tr></thead>
+        <tbody id="sla-list"></tbody>
+      </table>
     </div>
-
   </div>
 
 
@@ -164,29 +164,28 @@ function loadSLA() {
     .then(function(r){return r.json();})
     .then(function(rows) {
       document.getElementById('sla-count').textContent = rows.length;
-      var container = document.getElementById('sla-list');
+      var tbody = document.getElementById('sla-list');
       if (!rows.length) {
-        container.innerHTML = '<div style="padding:.75rem 1rem;font-size:10px;color:#475569">No SLA violations</div>';
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:.75rem 1rem;font-size:10px;color:#475569;text-align:center">No SLA violations</td></tr>';
         return;
       }
-      var top10 = rows.slice(0, 10);
-      container.innerHTML = top10.map(function(r) {
-        var b38 = r.sla_m3_m8_breach, b89 = r.sla_m8_m9_breach;
-        var badges = '';
-        if (b38) badges += '<span class="badge badge-red" style="font-size:8px;padding:1px 5px">M3&#8594;M8</span> ';
-        if (b89) badges += '<span class="badge badge-amber" style="font-size:8px;padding:1px 5px">M8&#8594;M9</span>';
-        var slaHtml = S.slaCountdownHTML(r.m3_actual||r.m3_planned, r.m3_planned, r.m8_actual||r.m8_planned, r.m9_planned, r.m9_actual);
-        return '<div onclick="S.openAccountCard(\'' + E(r.account_id) + '\')" '
-          + 'style="padding:.5rem 1rem;border-bottom:1px solid #1e2d40;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem" '
+      var DC_COL = {Green:'#10b981',Yellow:'#f59e0b',Red:'#ef4444'};
+      tbody.innerHTML = rows.map(function(r) {
+        var d38 = r.sla_m3_m8_days != null ? r.sla_m3_m8_days+'d' : '—';
+        var d89 = r.sla_m8_m9_days != null ? r.sla_m8_m9_days+'d' : '—';
+        var c38 = r.sla_m3_m8_breach ? '#ef4444' : '#475569';
+        var c89 = r.sla_m8_m9_breach ? '#f59e0b' : '#475569';
+        var dcCol = DC_COL[r.dc_progress] || '#475569';
+        var aid = r.account_id || '';
+        return '<tr onclick="' + (aid ? 'S.openAccountCard(\'' + E(aid) + '\')' : '') + '" '
+          + 'style="border-bottom:1px solid #1e2d40;cursor:' + (aid?'pointer':'default') + '" '
           + 'onmouseover="this.style.background=\'rgba(255,255,255,.02)\'" onmouseout="this.style.background=\'\'">'
-          + '<div style="min-width:0">'
-          + '<div style="font-size:10px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + E(r.customer_name) + '</div>'
-          + '<div style="font-size:8.5px;color:#475569;margin-top:2px">' + E(r.active_cse||'—') + '</div>'
-          + '</div>'
-          + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">'
-          + badges + (slaHtml ? '<div style="margin-top:2px">' + slaHtml + '</div>' : '')
-          + '</div>'
-          + '</div>';
+          + '<td style="padding:7px 12px;font-weight:600;color:#e2e8f0">' + E(r.customer_name) + '</td>'
+          + '<td style="padding:7px 12px;color:#475569">' + E(r.active_cse||'—') + '</td>'
+          + '<td style="padding:7px 12px;text-align:right;font-family:monospace;color:' + c38 + '">' + d38 + '</td>'
+          + '<td style="padding:7px 12px;text-align:right;font-family:monospace;color:' + c89 + '">' + d89 + '</td>'
+          + '<td style="padding:7px 12px"><span style="font-size:9px;color:' + dcCol + '">' + E(r.dc_progress||'—') + '</span></td>'
+          + '</tr>';
       }).join('');
     }).catch(console.error);
 }
@@ -307,8 +306,6 @@ function refreshData() {
 function loadAll() {
   loadMilestones();
   loadSLA();
-  loadM1();
-  loadCSE();
 }
 
 initTheatre();
