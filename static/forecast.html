@@ -233,7 +233,7 @@ function renderTheatreTiles(d){
 }
 
 function loadSLA(){
-  fetch('/api/sla-breaches')
+  fetch('/api/sla-breaches?theatre='+encodeURIComponent(_t))
     .then(function(r){return r.json();})
     .then(function(rows){
       if(!rows||!rows.length){
