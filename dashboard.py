@@ -1095,6 +1095,33 @@ def api_health_summary():
     return result
 
 
+@app.get("/api/cse-workload")
+def api_cse_workload(theatre: str = ""):
+    """Per-CSE account load, blocked/at-risk counts, M9 this month."""
+    from datetime import date as _date
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            rows = conn.execute("""
+                SELECT a.active_cse as cse,
+                       COUNT(*) as account_count,
+                       SUM(CASE WHEN b.signal='blocked' AND b.m9_complete=0 THEN 1 ELSE 0 END) as blocked_count,
+                       SUM(CASE WHEN b.signal='at_risk' AND b.m9_complete=0 THEN 1 ELSE 0 END) as at_risk_count,
+                       SUM(CASE WHEN b.m9_complete=1
+                           AND substr(b.m9_actual,1,7)=? THEN 1 ELSE 0 END) as m9_this_month
+                FROM accounts a
+                JOIN blocked_data b ON a.account_id=b.account_id
+                WHERE a.active_cse!='' AND a.customer_name!=''
+                  AND (? = '' OR UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=UPPER(?))
+                GROUP BY a.active_cse
+                ORDER BY blocked_count DESC, account_count DESC
+            """, (_date.today().strftime("%Y-%m"), theatre, theatre)).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("cse-workload failed: %s", e)
+        return []
+
+
 @app.get("/api/theatres")
 def api_theatres():
     """List distinct theatres with account counts."""
