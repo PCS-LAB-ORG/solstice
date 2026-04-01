@@ -1024,9 +1024,9 @@ def api_update_tab(url: str):
 
 
 @app.get("/api/sla-breaches")
-def api_sla_breaches():
+def api_sla_breaches(theatre: str = ""):
     """SLA breach report — M3→M8 >14d or M8→M9 >28d, prospective from Mar 9."""
-    milestones = _load_milestones()
+    milestones = _load_milestones(theatre=theatre)
     breaches = [
         {k: v for k, v in r.items() if k in (
             'customer_name','active_cse','status','live_fire','dc_progress',
@@ -1232,13 +1232,15 @@ def api_compare():
                 m9_this_week = sum(1 for r in rows if r[1] and r[2] and r[2] >= monday)
                 blocked      = sum(1 for r in rows if r[0]=="blocked" and not r[1])
                 at_risk      = sum(1 for r in rows if r[0]=="at_risk" and not r[1])
+                sla_rows = _load_milestones(theatre=theatre)
+                sla_overdue = sum(1 for r in sla_rows if r.get('sla_m3_m8_breach') or r.get('sla_m8_m9_breach'))
                 result.append({
                     "theatre":      theatre,
                     "m9_total":     m9_total,
                     "m9_this_week": m9_this_week,
                     "blocked":      blocked,
                     "at_risk":      at_risk,
-                    "sla_overdue":  0,  # computed from milestone dates in future enhancement
+                    "sla_overdue":  sla_overdue,
                 })
     except Exception as e:
         logger.error("compare failed: %s", e)
@@ -1327,16 +1329,20 @@ def api_forecast(theatre: str = ""):
             for w in range(3, -1, -1):
                 week_start = (today - timedelta(days=today.weekday()) - timedelta(weeks=w))
                 week_end = week_start + timedelta(days=6)
-                n = conn.execute("""
-                    SELECT COUNT(*) FROM status_history sh
-                    LEFT JOIN accounts a ON a.account_id=sh.account_id
-                    WHERE sh.field_name='M9 Upgrade Complete'
-                      AND sh.new_status='Y'
-                      AND sh.source IN ('pipeline','backfill')
-                      AND date(sh.changed_at) BETWEEN ? AND ?
-                      AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
+                n_m9 = conn.execute("""
+                    SELECT COUNT(*) FROM blocked_data b
+                    JOIN accounts a ON a.account_id=b.account_id
+                    WHERE b.m9_complete=1 AND b.m9_actual BETWEEN ? AND ?
+                      AND (? = '' OR UPPER(COALESCE(b.account_theatre,a.account_theatre,'EMEA'))=UPPER(?))
                 """, (str(week_start), str(week_end), theatre, theatre)).fetchone()[0]
-                velocity.append({"week_start": str(week_start), "week_end": str(week_end), "m9_count": n,
+                n_m8 = conn.execute("""
+                    SELECT COUNT(*) FROM blocked_data b
+                    JOIN accounts a ON a.account_id=b.account_id
+                    WHERE b.m8_started=1 AND b.m8_actual BETWEEN ? AND ?
+                      AND (? = '' OR UPPER(COALESCE(b.account_theatre,a.account_theatre,'EMEA'))=UPPER(?))
+                """, (str(week_start), str(week_end), theatre, theatre)).fetchone()[0]
+                velocity.append({"week_start": str(week_start), "week_end": str(week_end),
+                                 "m9_count": n_m9, "m8_count": n_m8,
                                  "label": week_start.strftime("%d %b")})
 
         def parse_date(s):
@@ -1368,7 +1374,17 @@ def api_forecast(theatre: str = ""):
         counts = [v['m9_count'] for v in velocity]
         trend = "up" if counts[-1] > counts[0] else "down" if counts[-1] < counts[0] else "flat"
 
-        return {"next_targets": next_targets, "overdue": overdue,
+        # Deduplicate by customer_name — same company can appear twice (case-variant IDs)
+        seen_names = set()
+        next_targets_dedup, overdue_dedup = [], []
+        for r in next_targets:
+            n = (r.get('customer_name') or '').lower().strip()
+            if n not in seen_names: seen_names.add(n); next_targets_dedup.append(r)
+        for r in overdue:
+            n = (r.get('customer_name') or '').lower().strip()
+            if n not in seen_names: seen_names.add(n); overdue_dedup.append(r)
+
+        return {"next_targets": next_targets_dedup, "overdue": overdue_dedup,
                 "velocity": velocity, "trend": trend}
     except Exception as e:
         return {"error": str(e)}

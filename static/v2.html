@@ -141,6 +141,7 @@ function renderKPIs(rows) {
 function renderFunnel(rows) {
   var tot = rows.length || 1;
   var steps = [
+    {key:'m1_complete', label:'M1 Outreach'},
     {key:'m3_complete', label:'M3 Buy-in'},
     {key:'m8_started',  label:'M8 Started'},
     {key:'m9_complete', label:'M9 Done'},
@@ -167,7 +168,7 @@ function renderFunnel(rows) {
 
 // ── SLA breaches ──────────────────────────────────────────────────
 function loadSLA() {
-  fetch('/api/sla-breaches')
+  fetch('/api/sla-breaches?theatre=' + encodeURIComponent(_theatre))
     .then(function(r){return r.json();})
     .then(function(rows) {
       document.getElementById('sla-count').textContent = rows.length;

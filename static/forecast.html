@@ -200,10 +200,12 @@ function renderVelocity(d){
     var prev=i>0?vel[i-1].m9_count:null;
     var arr=prev===null?'':v.m9_count>prev?'&#8593;':v.m9_count<prev?'&#8595;':'';
     var arrc=arr==='&#8593;'?'var(--green)':arr==='&#8595;'?'var(--red)':'var(--muted)';
+    var m8c = v.m8_count !== undefined ? v.m8_count : '—';
     html+='<div class="vel-w'+(isCur?' cur':'')+'">'
       +'<div class="wlbl">'+E(v.label)+'</div>'
       +'<div class="wnum" style="color:'+(isCur?'var(--green)':'var(--muted)')+'">'+v.m9_count+'</div>'
       +'<div class="wsub">M9 done</div>'
+      +'<div style="font-size:10px;color:var(--accent);font-family:monospace;margin-top:3px">'+m8c+' M8</div>'
       +(arr?'<span class="varr" style="color:'+arrc+'">'+arr+'</span>':'')
       +'</div>';
   });
