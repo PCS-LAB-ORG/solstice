@@ -1,3 +1,5 @@
+/* NOTE: Pages must include JetBrains Mono from Google Fonts:
+   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"> */
 /* Solstice Design Tokens — Ops Center Cyan */
 :root {
   --bg:       #0a0e1a;
@@ -9,11 +11,12 @@
   --green:    #10b981;
   --amber:    #f59e0b;
   --red:      #ef4444;
+  --mono:     'JetBrains Mono', monospace;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
 .glow-cyan { box-shadow: 0 0 12px rgba(34, 211, 238, .3); }
-.kpi-number { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.kpi-number { font-family: var(--mono); font-size: 2.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
 .signal-green { color: var(--green); }
 .signal-amber { color: var(--amber); }
 .signal-red   { color: var(--red);   }
