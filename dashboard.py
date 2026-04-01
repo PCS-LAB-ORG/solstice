@@ -1604,6 +1604,18 @@ def page_audit():
     if html_path.exists(): return html_path.read_text()
     return "<h1>audit page not found</h1>"
 
+@app.get("/cse", response_class=HTMLResponse)
+def dashboard_cse():
+    return (Path(__file__).parent / "static" / "cse.html").read_text(encoding="utf-8")
+
+@app.get("/weekly", response_class=HTMLResponse)
+def dashboard_weekly():
+    return (Path(__file__).parent / "static" / "weekly.html").read_text(encoding="utf-8")
+
+@app.get("/compare", response_class=HTMLResponse)
+def dashboard_compare():
+    return (Path(__file__).parent / "static" / "compare.html").read_text(encoding="utf-8")
+
 @app.get("/api/daily-brief")
 def api_daily_brief(date: str = "", theatre: str = ""):
     """Leadership daily briefing — movements for a given date + 7-day trend."""

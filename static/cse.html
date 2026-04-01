@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x2600;</text></svg>">
+<title>Solstice — CSE Workload</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/static/solstice.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body style="background:#0a0e1a;color:#e2e8f0;min-height:100vh">
+<nav id="s-nav" style="display:flex;align-items:center;padding:.6rem 1.5rem;background:#0f1729;border-bottom:1px solid #1e2d40;gap:12px"></nav>
+<div id="main" style="padding:1.5rem"></div>
+<script src="/static/solstice.js"></script>
+<script>
+S.initNav('cse');
+S.restoreCard();
+var theatre=new URLSearchParams(location.search).get('theatre')||'';
+function load(){
+  fetch('/api/cse-workload'+(theatre?'?theatre='+encodeURIComponent(theatre):'')).then(function(r){return r.json();}).then(render).catch(function(){});
+}
+function render(rows){
+  var main=document.getElementById('main');
+  if(!rows.length){main.innerHTML='<p style="color:#475569;padding:2rem">No CSE data available.</p>';return;}
+  var avg=rows.reduce(function(a,r){return a+r.account_count;},0)/rows.length;
+  var pills=['','EMEA','JAPAC','AMER','LATAM'].map(function(t){
+    return '<a href="/cse'+(t?'?theatre='+t:'')+'" style="font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid '+((theatre||'')===(t||'')?'#22d3ee':'#1e2d40')+';color:'+((theatre||'')===(t||'')?'#22d3ee':'#475569')+';text-decoration:none">'+(t||'All')+'</a>';
+  }).join('');
+  var rows_html=rows.map(function(r){
+    var pct=Math.min(Math.round((r.account_count/Math.max(avg*2,1))*100),100);
+    var hi=r.blocked_count>5;
+    return '<tr style="border-bottom:1px solid #1e2d40;'+(hi?'background:rgba(239,68,68,.05)':'')+'">'
+      +'<td style="padding:10px 12px;font-weight:600;color:#e2e8f0">'+S.esc(r.cse)+'</td>'
+      +'<td style="text-align:right;padding:10px 12px;font-family:monospace">'+r.account_count+'</td>'
+      +'<td style="text-align:right;padding:10px 12px;font-family:monospace;color:'+(r.blocked_count>0?'#ef4444':'#475569')+';font-weight:'+(r.blocked_count>5?700:400)+'">'+r.blocked_count+'</td>'
+      +'<td style="text-align:right;padding:10px 12px;font-family:monospace;color:'+(r.at_risk_count>0?'#f59e0b':'#475569')+'">'+r.at_risk_count+'</td>'
+      +'<td style="text-align:right;padding:10px 12px;font-family:monospace;color:#10b981">'+r.m9_this_month+'</td>'
+      +'<td style="padding:10px 12px;min-width:120px"><div style="background:#1e2d40;height:6px;border-radius:3px"><div style="background:'+(hi?'#ef4444':'#22d3ee')+';width:'+pct+'%;height:100%;border-radius:3px"></div></div></td>'
+      +'</tr>';
+  }).join('');
+  main.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">'
+    +'<h1 style="font-size:1.1rem;font-weight:700;color:#f0f6fc;font-family:monospace">CSE WORKLOAD</h1>'
+    +'<div style="display:flex;gap:.5rem">'+pills+'</div></div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
+    +'<thead><tr style="color:#475569;text-transform:uppercase;font-size:9px;letter-spacing:1px;border-bottom:2px solid #1e2d40">'
+    +'<th style="text-align:left;padding:8px 12px">CSE</th>'
+    +'<th style="text-align:right;padding:8px 12px">Accounts</th>'
+    +'<th style="text-align:right;padding:8px 12px">Blocked</th>'
+    +'<th style="text-align:right;padding:8px 12px">At Risk</th>'
+    +'<th style="text-align:right;padding:8px 12px">M9 This Month</th>'
+    +'<th style="padding:8px 12px">Load</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rows_html+'</tbody></table>';
+}
+load();
+</script>
+</body></html>

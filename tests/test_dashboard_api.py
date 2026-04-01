@@ -160,3 +160,17 @@ class TestRootRedirect:
     def test_root_redirects(self, client):
         r = client.get("/", follow_redirects=False)
         assert r.status_code in (307, 301, 302)
+
+
+class TestNewPageRoutes:
+    def test_cse_page_returns_200(self, client):
+        r = client.get("/cse")
+        assert r.status_code == 200
+
+    def test_weekly_page_returns_200(self, client):
+        r = client.get("/weekly")
+        assert r.status_code == 200
+
+    def test_compare_page_returns_200(self, client):
+        r = client.get("/compare")
+        assert r.status_code == 200

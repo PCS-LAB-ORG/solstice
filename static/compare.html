@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x2600;</text></svg>">
+<title>Solstice — Compare</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/static/solstice.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body style="background:#0a0e1a;color:#e2e8f0;min-height:100vh">
+<nav id="s-nav" style="display:flex;align-items:center;padding:.6rem 1.5rem;background:#0f1729;border-bottom:1px solid #1e2d40;gap:12px"></nav>
+<div id="main" style="padding:1.5rem"></div>
+<script src="/static/solstice.js"></script>
+<script>
+S.initNav('compare');
+S.restoreCard();
+fetch('/api/compare').then(function(r){return r.json();}).then(render).catch(function(){});
+function render(data){
+  var ts=data.theatres||[];
+  var main=document.getElementById('main');
+  var metrics=[
+    {key:'m9_this_week',label:'M9 This Week',color:'#22d3ee'},
+    {key:'blocked',label:'Blocked',color:'#ef4444'},
+    {key:'at_risk',label:'At Risk',color:'#f59e0b'},
+    {key:'sla_overdue',label:'SLA Overdue',color:'#ef4444'},
+  ];
+  var maxVals={};
+  metrics.forEach(function(m){maxVals[m.key]=Math.max.apply(null,ts.map(function(t){return t[m.key]||0;}).concat([1]));});
+  var cols=ts.map(function(t){
+    var bars=metrics.map(function(m){
+      var pct=Math.round(((t[m.key]||0)/maxVals[m.key])*100);
+      return '<div><div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+        +'<span style="font-size:9px;color:#475569">'+m.label+'</span>'
+        +'<span style="font-size:10px;color:'+m.color+';font-family:monospace;font-weight:700">'+(t[m.key]||0)+'</span></div>'
+        +'<div style="background:#1e2d40;height:4px;border-radius:2px"><div style="background:'+m.color+';width:'+pct+'%;height:100%;border-radius:2px"></div></div></div>';
+    }).join('');
+    return '<div style="background:#0f1729;border:1px solid #1e2d40;border-radius:8px;overflow:hidden">'
+      +'<div style="padding:12px;border-bottom:1px solid #1e2d40;text-align:center">'
+      +'<div style="font-size:10px;color:#475569;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">'+t.theatre+'</div>'
+      +'<div class="kpi-number" style="font-size:2rem">'+t.m9_total+'</div>'
+      +'<div style="font-size:9px;color:#475569">M9 total</div></div>'
+      +'<div style="padding:12px;display:flex;flex-direction:column;gap:10px">'+bars+'</div></div>';
+  }).join('');
+  main.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">'
+    +'<h1 style="font-size:1.1rem;font-weight:700;color:#f0f6fc;font-family:monospace">THEATRE COMPARISON</h1>'
+    +'<button onclick="S.exportCSV(window._cmpData,\'solstice-compare.csv\')" style="background:#0f1729;border:1px solid #22d3ee;color:#22d3ee;padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px">Export CSV</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">'+cols+'</div>';
+  window._cmpData=ts;
+}
+</script>
+</body></html>
