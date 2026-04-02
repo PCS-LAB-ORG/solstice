@@ -52,17 +52,6 @@
     <div style="padding:1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem" id="compare-grid"></div>
   </div>
 
-  <!-- M1 Action Plan -->
-  <div class="card" style="margin-bottom:1.5rem">
-    <div class="card-head">
-      <div style="display:flex;align-items:center;gap:.5rem">
-        <span class="card-title">M1 ACTION PLAN</span>
-        <span class="badge badge-sky">AI-assisted</span>
-        <span class="badge badge-gray mono" id="m1-count"></span>
-      </div>
-    </div>
-    <div id="m1-list"></div>
-  </div>
 
 </div>
 
@@ -124,29 +113,45 @@ function renderKPIs(rows) {
 
 function renderFunnel(rows) {
   var tot = rows.length || 1;
+  var today = new Date(); today.setHours(0,0,0,0);
+  function parseDate(s) { if (!s) return null; var d = new Date(s.split(' ')[0]); return isNaN(d) ? null : d; }
   var steps = [
-    {key:'m1_complete', label:'M1 Outreach'},
-    {key:'m3_complete', label:'M3 Buy-in'},
-    {key:'m8_started',  label:'M8 Started'},
-    {key:'m9_complete', label:'M9 Done'},
+    {key:'m1_complete', planned:'m1_planned', label:'M1 Outreach',  col:'#0ea5e9'},
+    {key:'m3_complete', planned:'m3_planned', label:'M3 EB Buy-in', col:'#0ea5e9'},
+    {key:'m8_started',  planned:'m8_planned', label:'M8 Started',   col:'#f59e0b'},
+    {key:'m9_complete', planned:'m9_planned', label:'M9 Done',      col:'#10b981'},
   ];
-  var counts = {};
-  steps.forEach(function(s) { counts[s.key] = rows.filter(function(r){return r[s.key];}).length; });
-  var maxW = 100;
   var container = document.getElementById('funnel-bars');
-  var barColors = {m1_complete:'#0ea5e9', m3_complete:'#0ea5e9', m8_started:'#f59e0b', m9_complete:'#10b981'};
   container.innerHTML = steps.map(function(s) {
-    var n = counts[s.key] || 0;
-    var pct = Math.round(n / tot * 100);
-    var col = barColors[s.key] || '#0ea5e9';
-    return '<div class="funnel-row">'
-      + '<div class="funnel-label">' + E(s.label) + '</div>'
-      + '<div class="funnel-track">'
-      + '<div class="funnel-bar" style="background:' + col + ';width:' + pct + '%;transition:width .4s"></div>'
+    var done  = rows.filter(function(r){ return r[s.key]; }).length;
+    var pct   = Math.round(done / tot * 100);
+    // accounts not yet done that have a planned date
+    var notDone = rows.filter(function(r){ return !r[s.key]; });
+    var withPlan = notDone.filter(function(r){ return parseDate(r[s.planned]); });
+    var overdue  = withPlan.filter(function(r){ return parseDate(r[s.planned]) < today; }).length;
+    var upcoming = withPlan.length - overdue;
+    // nearest upcoming planned date
+    var upcomingDates = withPlan
+      .map(function(r){ return parseDate(r[s.planned]); })
+      .filter(function(d){ return d >= today; })
+      .sort(function(a,b){ return a-b; });
+    var nextDate = upcomingDates.length ? upcomingDates[0].toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}) : null;
+
+    var meta = '';
+    if (overdue)  meta += '<span class="badge badge-red" style="font-size:8px;padding:1px 5px">' + overdue + ' overdue</span> ';
+    if (upcoming && nextDate) meta += '<span class="badge badge-gray" style="font-size:8px;padding:1px 5px">' + upcoming + ' planned · next ' + nextDate + '</span>';
+
+    return '<div style="margin-bottom:.9rem">'
+      + '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:4px">'
+        + '<span style="font-size:10px;font-weight:700;color:var(--text);width:90px;flex-shrink:0">' + s.label + '</span>'
+        + '<div style="display:flex;gap:.25rem;flex-wrap:wrap;flex:1">' + meta + '</div>'
+        + '<span style="font-size:10px;font-weight:700;font-family:var(--mono);color:' + s.col + ';white-space:nowrap">' + done + ' <span style="color:var(--muted);font-weight:400">/ ' + tot + '</span></span>'
+        + '<span style="font-size:10px;font-weight:700;font-family:var(--mono);color:' + s.col + ';width:36px;text-align:right">' + pct + '%</span>'
       + '</div>'
-      + '<div class="funnel-count">' + n + '</div>'
-      + '<div class="funnel-pct">' + pct + '%</div>'
-      + '</div>';
+      + '<div class="funnel-track">'
+        + '<div class="funnel-bar" style="background:' + s.col + ';width:' + pct + '%;transition:width .4s"></div>'
+      + '</div>'
+    + '</div>';
   }).join('');
 }
 
@@ -301,7 +306,6 @@ function refreshData() {
 function loadAll() {
   loadMilestones();
   loadCompare();
-  loadM1();
   fetch('/api/stats').then(function(r){return r.json();}).then(function(s){
     var el=document.getElementById('last-sync');
     if(el && s.last_run) el.textContent='synced '+s.last_run;
