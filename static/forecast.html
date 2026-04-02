@@ -79,14 +79,6 @@
     <div class="trend-footer" id="trend-footer">—</div>
   </div>
 
-  <!-- SLA breaches -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Active SLA Windows</span>
-      <span style="font-size:9px;color:var(--muted)">M3→M8 ≤14d · M8→M9 ≤28d</span>
-    </div>
-    <div id="sla-body"><div class="empty">Loading…</div></div>
-  </div>
 
 </div>
 <!-- RIGHT COLUMN -->
@@ -149,7 +141,6 @@ function load(){
       renderTheatreTiles(d);
     })
     .catch(function(){document.getElementById('forecast-body').innerHTML='<div class="empty">Error loading forecast</div>';});
-  loadSLA();
 }
 
 function renderForecast(d){
