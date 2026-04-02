@@ -1860,18 +1860,22 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
             """,
                 (theatre, theatre, region, f"%{region}%", cse, cse),
             ).fetchall()
-        result = {
-            "no_contact": [],
-            "core_rep_blocking": [],
-            "tech_blocker": [],
-            "active_deal": [],
-            "other": [],
+        known = {
+            "churn",
+            "no_contact",
+            "customer_delay",
+            "core_rep_blocking",
+            "tech_blocker",
+            "active_deal",
+            "legal_blocker",
+            "self_hosted",
         }
+        result: dict = {}
         for r in rows:
             d = dict(r)
-            st = d.get("subtype") or "other"
-            bucket = st if st in result else "other"
-            result[bucket].append(d)
+            st = d.get("subtype") or ""
+            bucket = st if st in known else "other"
+            result.setdefault(bucket, []).append(d)
         return result
     except Exception as e:
         return {"error": str(e)}

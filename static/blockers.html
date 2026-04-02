@@ -112,13 +112,15 @@ var _m1Loading = false;
 var _expandedRow = null;  // currently expanded row key
 
 var TYPES = [
-  {key:'m1_plan',         color:'#0ea5e9', bg:'rgba(14,165,233,.08)', label:'M1 Action Plan',       desc:'Accounts needing M1 outreach'},
-  {key:'sla_breach',      color:'#ef4444', bg:'rgba(239,68,68,.08)',  label:'SLA Breach',           desc:'M3\u2192M8 >14d or M8\u2192M9 >28d'},
-  {key:'no_contact',      color:'#ef4444', bg:'rgba(239,68,68,.12)',  label:'No Contact',           desc:'CSE cannot reach NGS Sales Specialist'},
-  {key:'core_rep_blocking',color:'#f59e0b',bg:'rgba(245,158,11,.12)', label:'Rep Blocking',         desc:'Account team asked CSE to hold'},
-  {key:'tech_blocker',    color:'#8b5cf6', bg:'rgba(139,92,246,.12)', label:'Technical Blocker',    desc:'CoE / product gap blocking progress'},
-  {key:'active_deal',     color:'#3b82f6', bg:'rgba(59,130,246,.12)', label:'Active Deal',          desc:'XSIAM or other deal in flight'},
-  {key:'other',           color:'#94a3b8', bg:'rgba(148,163,184,.12)',label:'Other',                desc:'Other blockers'},
+  {key:'m1_plan',          color:'#0ea5e9', bg:'rgba(14,165,233,.08)',  label:'M1 Action Plan',    desc:'Accounts needing M1 outreach'},
+  {key:'sla_breach',       color:'#ef4444', bg:'rgba(239,68,68,.08)',   label:'SLA Breach',        desc:'M3\u2192M8 >14d or M8\u2192M9 >28d'},
+  {key:'churn',            color:'#dc2626', bg:'rgba(220,38,38,.10)',   label:'Churn Risk',        desc:'Customer decided not to upgrade or deal lost'},
+  {key:'no_contact',       color:'#ef4444', bg:'rgba(239,68,68,.12)',   label:'No Contact',        desc:'Cannot reach customer — no response or refusing to meet'},
+  {key:'customer_delay',   color:'#f97316', bg:'rgba(249,115,22,.10)',  label:'Customer Delay',    desc:'Customer pushing to delay — capacity, readiness or preference'},
+  {key:'core_rep_blocking',color:'#f59e0b', bg:'rgba(245,158,11,.12)',  label:'Rep Blocking',      desc:'Account team asked CSE to hold'},
+  {key:'tech_blocker',     color:'#8b5cf6', bg:'rgba(139,92,246,.12)',  label:'Technical Blocker', desc:'CoE / product gap / provisioning blocking progress'},
+  {key:'active_deal',      color:'#3b82f6', bg:'rgba(59,130,246,.12)',  label:'Active Deal',       desc:'XSIAM or other deal in flight'},
+  {key:'legal_blocker',    color:'#64748b', bg:'rgba(100,116,139,.10)', label:'Legal Blocker',     desc:'Legal reason blocking customer outreach or upgrade'},
 ];
 
 var SIG_COLORS = {green:'#10b981', blocked:'#ef4444', at_risk:'#f59e0b'};

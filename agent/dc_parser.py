@@ -13,6 +13,7 @@ Key fields extracted:
   - DC assignment      → dc_assignment
   - Owner: End to end upgrade → owner_e2e
 """
+
 from __future__ import annotations
 import csv
 import json
@@ -33,36 +34,97 @@ def _yn(val: str) -> bool:
 def _signal_from_detail(status_detail: str) -> str:
     """Derive signal from DC Status Detail emoji prefix. Returns '' when no emoji recognised."""
     d = status_detail.strip()
-    if d.startswith('\U00002705') or d.startswith('✅'): return 'green'
-    if d.startswith('\U0001f6d1') or d.startswith('🛑'): return 'blocked'
-    if d.startswith('\U0001f44e') or d.startswith('👎'): return 'at_risk'
-    return ''  # empty status_detail or unrecognised prefix — not 'at_risk' by default
+    if d.startswith("\U00002705") or d.startswith("✅"):
+        return "green"
+    if d.startswith("\U0001f6d1") or d.startswith("🛑"):
+        return "blocked"
+    if d.startswith("\U0001f44e") or d.startswith("👎"):
+        return "at_risk"
+    return ""  # empty status_detail or unrecognised prefix — not 'at_risk' by default
 
 
 def _subtype_from_detail(status_detail: str) -> str:
     """Derive blocker subtype from DC Status Detail text."""
     d = status_detail.lower()
-    if 'not able to contact or connect with ngs' in d or 'internal kick-off' in d: return 'no_contact'
-    if 'core rep is blocking' in d or 'account team is blocking' in d: return 'core_rep_blocking'
-    if 'technical reason' in d or 'technical blocker' in d or 'tech limitation' in d: return 'tech_blocker'
-    if 'active deal' in d: return 'active_deal'
-    if 'self-hosted' in d or 'self hosted' in d: return 'self_hosted'
-    return ''
+    # Churn / lost — highest priority, surface immediately
+    if (
+        "decided to churn" in d
+        or "will not upgrade" in d
+        or ("tech validation" in d and "but lost" in d)
+    ):
+        return "churn"
+    # No contact — cannot reach customer
+    if (
+        "not able to contact" in d
+        or "internal kick-off" in d
+        or "no response" in d
+        or "refusing to meet" in d
+        or "escalating outreach" in d
+        or "blocked from customer outreach" in d
+    ):
+        return "no_contact"
+    # Core rep / account team blocking
+    if (
+        "core rep is blocking" in d
+        or "account team is blocking" in d
+        or "account team decided to delay" in d
+        or "ngs sales and core team" in d
+    ):
+        return "core_rep_blocking"
+    # Technical blocker
+    if (
+        "technical reason" in d
+        or "technical blocker" in d
+        or "tech limitation" in d
+        or "self-hosted" in d
+        or "self hosted" in d
+        or "behind schedule due to technical" in d
+        or "confirmed technical blockers" in d
+        or "tenant provision" in d
+        or "activation" in d
+    ):
+        return "tech_blocker"
+    # Active deal in flight
+    if "active deal" in d:
+        return "active_deal"
+    # Customer-side delay (non-technical)
+    if (
+        "pushes to delay" in d
+        or "paused by the customer" in d
+        or "would like to delay" in d
+        or "behind schedule due to customer capacity" in d
+        or "customer capacity" in d
+        or "customer is not ready" in d
+    ):
+        return "customer_delay"
+    # Legal blocker
+    if "legal reason" in d or "legal block" in d:
+        return "legal_blocker"
+    return ""
 
 
 def _status_from_dc(status_detail: str, pc_status: str) -> str:
     """Derive EMEA-style engagement status from DC fields."""
     d = status_detail.lower()
-    if 'upgrade complete' in d or pc_status == 'CC NNL': return 'Completed'
-    if 'upgrade started' in d or 'upgrade in progress' in d: return 'In Progress'
-    if 'tech validation' in d and 'won' in d: return 'Customer Engaged'
-    if 'customer meeting completed' in d: return 'Customer Engaged'
-    if 'customer outreach complete' in d: return 'Account team contacted'
-    if 'outreach made' in d: return 'Account team contacted'
-    if pc_status == 'Churn': return 'Churning/Churned'
-    if 'blocked from internal kick-off' in d: return 'Account team contacted'
-    if 'blocked from customer outreach' in d: return 'Account team contacted'
-    return 'Account team contacted'
+    if "upgrade complete" in d or pc_status == "CC NNL":
+        return "Completed"
+    if "upgrade started" in d or "upgrade in progress" in d:
+        return "In Progress"
+    if "tech validation" in d and "won" in d:
+        return "Customer Engaged"
+    if "customer meeting completed" in d:
+        return "Customer Engaged"
+    if "customer outreach complete" in d:
+        return "Account team contacted"
+    if "outreach made" in d:
+        return "Account team contacted"
+    if pc_status == "Churn":
+        return "Churning/Churned"
+    if "blocked from internal kick-off" in d:
+        return "Account team contacted"
+    if "blocked from customer outreach" in d:
+        return "Account team contacted"
+    return "Account team contacted"
 
 
 def _clean_cse(val: str) -> str:
@@ -92,72 +154,105 @@ def parse_dc_csv(filepath: Path) -> list[dict]:
             aid = row.get("pc_end_customer_account_id", "").strip().lower()
             if not aid:
                 continue
-            records.append({
-                "account_id":       aid,
-                "account_name":     row.get("pc_account_name", "").strip(),
-                "account_theatre":  theatre,
-                "active_cse":       _clean_cse(row.get("CSE Assigned", "")),
-                "dc_assignment":    row.get("DC assignment", "").strip(),
-                "owner_e2e":        row.get("Owner: End to end upgrade", "").strip(),
-                "dc_status":        row.get("PC_CC_Migration_status", "").strip(),
-                "cohort":           row.get("customer_size_cohort_classification", "").strip(),
-                "email_sent":       row.get("Email sent", "").strip(),
-                "status_detail":    row.get("Status Detail", "").strip(),
-                "live_fire":        _yn(row.get("Live-fire", "")),
-                # Milestones
-                "m0_complete":      _yn(row.get("M0:Internal Kickoff Complete", "")),
-                "m1_complete":      _yn(row.get("M1:Customer Outreach Complete", "")),
-                "m1_planned":       row.get("Date - M1:Internal Kickoff Complete", "").strip(),
-                "m2_complete":      _yn(row.get("M2:Entitlements and Plan aligned with customer", "")),
-                "m2_planned":       row.get("Date - M2:Entitlements and Plan aligned with customer", "").strip(),
-                "m3_complete":      _yn(row.get("M3:EB Buy-in Meeting Complete", "")),
-                "m3_planned":       row.get("M3 Planned date", "").strip(),
-                "m3_actual":        row.get("Date - M3:EB Buy-in Meeting Complete", "").strip(),
-                "m4_complete":      _yn(row.get("M4:Discovery complete", "")),
-                "m4_planned":       row.get("Date - M4:Discovery complete", "").strip(),
-                "m5_complete":      _yn(row.get("M5:Tech validation complete", "")),
-                "m5_planned":       row.get("Date - M5:Tech validation complete", "").strip(),
-                "m7_complete":      _yn(row.get("M7:Legal and operational upgrade readiness", "")),
-                "m8_started":       _yn(row.get("M8:Upgrade started", "")),
-                "m8_planned":       row.get("M8 Planned date", "").strip(),
-                "m8_actual":        row.get("Date - M8:Upgrade started", "").strip(),
-                "m9_complete":      _yn(row.get("M9:Upgrade complete", "")),
-                "m9_planned":       row.get("M9 Planned date", "").strip(),
-                "m9_actual":        row.get("Date - M9:Upgrade complete", "").strip(),
-                "upgrade_notes":      row.get("Upgrade Notes", "").strip(),
-                "health_notes":       row.get("Account Health Notes", "").strip(),
-                "pm_status":          row.get("PM Status", "").strip(),
-                "dc_progress":        row.get("DC Upgrade Progress Status", "").strip(),
-                "cc_rep":             row.get("cc_Rep (SPO)", "").strip(),
-                "cc_dsm":             row.get("cc_DSM (SPO)", "").strip(),
-                "churn_risk":         row.get("DC Indicated account churn risk", "").strip(),
-                # Derived fields — signal, subtype, status from DC Status Detail
-                "signal":   _signal_from_detail(row.get("Status Detail", "")),
-                "subtype":  _subtype_from_detail(row.get("Status Detail", "")),
-                "status":   _status_from_dc(row.get("Status Detail", ""), row.get("PC_CC_Migration_status", "")),
-                # Extended fields
-                "last_edited_by":     row.get("Last edited by", "").strip(),
-                "last_edited_date":   row.get("Last edited date", "").strip(),
-                "roadmap_url":        row.get("roadmap", "").strip(),
-                "ps_plan_url":        row.get("ps plan", "").strip(),
-                "account_region":     row.get("account_region", "").strip(),
-                "current_project_status": row.get("current_project_status", "").strip(),
-                "next_renewal_date":  row.get("next_cloud_renewal_date", "").strip(),
-                "past_due_planned":   row.get("Past due planned dates", "").strip(),
-                "upgrade_duration_weeks": row.get("Planned upgrade duration (weeks)", "").strip(),
-                "has_partner":        row.get("Is there partner", "").strip(),
-                "upgrade_partner":    row.get("Upgrade partner name", "").strip(),
-                "m1_details":         row.get("M1 Details", "").strip(),
-                "m3_details":         row.get("M3 Details", "").strip(),
-                "m5_details":         row.get("M5 Details", "").strip(),
-                "milestone_aging":    row.get("Milestone aging calculation", "").strip(),
-                "days_since_milestone": row.get("Days since milestones advanced", "").strip(),
-                "momentum_x":         row.get("MomentumX", "").strip(),
-                "entitlement_provision": row.get("entitlement_provision", "").strip(),
-                "activation_status":  row.get("activation_tenant_status", "").strip(),
-                "posture_workloads":  row.get("Posture workloads", "").strip(),
-                "merged_at":          datetime.now(timezone.utc).isoformat(),
-            })
+            records.append(
+                {
+                    "account_id": aid,
+                    "account_name": row.get("pc_account_name", "").strip(),
+                    "account_theatre": theatre,
+                    "active_cse": _clean_cse(row.get("CSE Assigned", "")),
+                    "dc_assignment": row.get("DC assignment", "").strip(),
+                    "owner_e2e": row.get("Owner: End to end upgrade", "").strip(),
+                    "dc_status": row.get("PC_CC_Migration_status", "").strip(),
+                    "cohort": row.get(
+                        "customer_size_cohort_classification", ""
+                    ).strip(),
+                    "email_sent": row.get("Email sent", "").strip(),
+                    "status_detail": row.get("Status Detail", "").strip(),
+                    "live_fire": _yn(row.get("Live-fire", "")),
+                    # Milestones
+                    "m0_complete": _yn(row.get("M0:Internal Kickoff Complete", "")),
+                    "m1_complete": _yn(row.get("M1:Customer Outreach Complete", "")),
+                    "m1_planned": row.get(
+                        "Date - M1:Internal Kickoff Complete", ""
+                    ).strip(),
+                    "m2_complete": _yn(
+                        row.get("M2:Entitlements and Plan aligned with customer", "")
+                    ),
+                    "m2_planned": row.get(
+                        "Date - M2:Entitlements and Plan aligned with customer", ""
+                    ).strip(),
+                    "m3_complete": _yn(row.get("M3:EB Buy-in Meeting Complete", "")),
+                    "m3_planned": row.get("M3 Planned date", "").strip(),
+                    "m3_actual": row.get(
+                        "Date - M3:EB Buy-in Meeting Complete", ""
+                    ).strip(),
+                    "m4_complete": _yn(row.get("M4:Discovery complete", "")),
+                    "m4_planned": row.get("Date - M4:Discovery complete", "").strip(),
+                    "m5_complete": _yn(row.get("M5:Tech validation complete", "")),
+                    "m5_planned": row.get(
+                        "Date - M5:Tech validation complete", ""
+                    ).strip(),
+                    "m7_complete": _yn(
+                        row.get("M7:Legal and operational upgrade readiness", "")
+                    ),
+                    "m8_started": _yn(row.get("M8:Upgrade started", "")),
+                    "m8_planned": row.get("M8 Planned date", "").strip(),
+                    "m8_actual": row.get("Date - M8:Upgrade started", "").strip(),
+                    "m9_complete": _yn(row.get("M9:Upgrade complete", "")),
+                    "m9_planned": row.get("M9 Planned date", "").strip(),
+                    "m9_actual": row.get("Date - M9:Upgrade complete", "").strip(),
+                    "upgrade_notes": row.get("Upgrade Notes", "").strip(),
+                    "health_notes": row.get("Account Health Notes", "").strip(),
+                    "pm_status": row.get("PM Status", "").strip(),
+                    "dc_progress": row.get("DC Upgrade Progress Status", "").strip(),
+                    "cc_rep": row.get("cc_Rep (SPO)", "").strip(),
+                    "cc_dsm": row.get("cc_DSM (SPO)", "").strip(),
+                    "churn_risk": row.get(
+                        "DC Indicated account churn risk", ""
+                    ).strip(),
+                    # Derived fields — signal, subtype, status from DC Status Detail
+                    "signal": _signal_from_detail(row.get("Status Detail", "")),
+                    "subtype": _subtype_from_detail(row.get("Status Detail", "")),
+                    "status": _status_from_dc(
+                        row.get("Status Detail", ""),
+                        row.get("PC_CC_Migration_status", ""),
+                    ),
+                    # Extended fields
+                    "last_edited_by": row.get("Last edited by", "").strip(),
+                    "last_edited_date": row.get("Last edited date", "").strip(),
+                    "roadmap_url": row.get("roadmap", "").strip(),
+                    "ps_plan_url": row.get("ps plan", "").strip(),
+                    "account_region": row.get("account_region", "").strip(),
+                    "current_project_status": row.get(
+                        "current_project_status", ""
+                    ).strip(),
+                    "next_renewal_date": row.get("next_cloud_renewal_date", "").strip(),
+                    "past_due_planned": row.get("Past due planned dates", "").strip(),
+                    "upgrade_duration_weeks": row.get(
+                        "Planned upgrade duration (weeks)", ""
+                    ).strip(),
+                    "has_partner": row.get("Is there partner", "").strip(),
+                    "upgrade_partner": row.get("Upgrade partner name", "").strip(),
+                    "m1_details": row.get("M1 Details", "").strip(),
+                    "m3_details": row.get("M3 Details", "").strip(),
+                    "m5_details": row.get("M5 Details", "").strip(),
+                    "milestone_aging": row.get(
+                        "Milestone aging calculation", ""
+                    ).strip(),
+                    "days_since_milestone": row.get(
+                        "Days since milestones advanced", ""
+                    ).strip(),
+                    "momentum_x": row.get("MomentumX", "").strip(),
+                    "entitlement_provision": row.get(
+                        "entitlement_provision", ""
+                    ).strip(),
+                    "activation_status": row.get(
+                        "activation_tenant_status", ""
+                    ).strip(),
+                    "posture_workloads": row.get("Posture workloads", "").strip(),
+                    "merged_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
     logger.info("DC CSE Tracker: parsed %d records across all theatres", len(records))
     return records
 
@@ -206,10 +301,15 @@ def merge_into_state(records: list[dict], state_file: Path) -> dict:
     state["dc_last_updated"] = datetime.now(timezone.utc).isoformat()
     state_file.write_text(json.dumps(state, indent=2, ensure_ascii=False))
 
-    logger.info("DC merge: %d/%d matched, %d unmatched",
-                matched, len(records), len(unmatched))
-    return {"total": len(records), "matched": matched,
-            "unmatched": len(unmatched), "unmatched_list": unmatched}
+    logger.info(
+        "DC merge: %d/%d matched, %d unmatched", matched, len(records), len(unmatched)
+    )
+    return {
+        "total": len(records),
+        "matched": matched,
+        "unmatched": len(unmatched),
+        "unmatched_list": unmatched,
+    }
 
 
 def load_and_merge(csv_path: Path, state_file: Path) -> dict:
