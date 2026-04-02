@@ -15,6 +15,7 @@
 .schip.act{border-color:var(--sky-border);color:var(--sky);background:var(--sky-light)}
 .schip-total{font-size:9px;color:var(--muted);margin-left:.25rem}
 
+@keyframes spin { to { transform: rotate(360deg); } }
 /* Subtype sections */
 .bsec{margin-bottom:1rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow-sm)}
 .shdr{display:flex;align-items:center;gap:.65rem;padding:.6rem 1rem;background:var(--surface-2);cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:background .15s}
@@ -107,6 +108,7 @@ S.restoreCard();
 // ── State ───────────────────────────────────────────────────────────────────
 var _theatre = '';
 var _data = {};
+var _m1Loading = false;
 var _expandedRow = null;  // currently expanded row key
 
 var TYPES = [
@@ -196,6 +198,7 @@ function load() {
       d.sla_breach = [];
       d.m1_plan = [];
       _data = d;
+      _m1Loading = true;
       _rebuildDropdowns(d, cse);
       render();
 
@@ -205,11 +208,11 @@ function load() {
         .then(function(sla){ _data.sla_breach=_normSla(sla); render(); })
         .catch(function(){});
 
-      // Load M1 async — update when ready (may be slow due to LLM)
+      // Load M1 async — may be slow due to LLM; show hourglass until done
       fetch('/api/m1-suggestions?theatre='+encodeURIComponent(_theatre))
         .then(function(r){return r.json();})
-        .then(function(m1){ _data.m1_plan=_normM1(m1); render(); })
-        .catch(function(){});
+        .then(function(m1){ _m1Loading=false; _data.m1_plan=_normM1(m1); render(); })
+        .catch(function(){ _m1Loading=false; });
     })
     .catch(_showErr);
 }
@@ -283,13 +286,21 @@ function render() {
       });
     });
 
+    var isM1Loading = (type.key === 'm1_plan' && _m1Loading);
+    var iconHtml = isM1Loading
+      ? '<div class="shdr-icon" style="background:'+type.bg+';color:'+type.color+';animation:spin 1.2s linear infinite">&#x231B;</div>'
+      : '<div class="shdr-icon" style="background:'+type.bg+';color:'+type.color+'">'+items.length+'</div>';
+    var aiHtml = isM1Loading
+      ? '<span style="font-size:8px;color:var(--muted);font-style:italic">AI generating&#x2026;</span>'
+      : _signalSummaryHtml(items);
+
     secHtml += '<div class="bsec" id="sec-'+type.key+'">'
       + '<div class="shdr" onclick="toggleSec(this,\'sec-'+type.key+'\')">'
-        + '<div class="shdr-icon" style="background:'+type.bg+';color:'+type.color+'">'+items.length+'</div>'
+        + iconHtml
         + '<span class="shdr-title">'+E(type.label)+'</span>'
         + '<span class="shdr-desc">— '+E(type.desc)+'</span>'
         + '<div class="shdr-cnt">'
-          + _signalSummaryHtml(items)
+          + aiHtml
           + '<span class="chev">&#9660;</span>'
         + '</div>'
       + '</div>'
