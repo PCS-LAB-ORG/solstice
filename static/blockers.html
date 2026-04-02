@@ -259,7 +259,8 @@ function render() {
         || (a.active_cse    || '').toLowerCase().indexOf(q) >= 0
         || (a.sales_region  || '').toLowerCase().indexOf(q) >= 0;
     });
-    if (!items.length) return;
+    var isM1Loading = (type.key === 'm1_plan' && _m1Loading);
+    if (!items.length && !isM1Loading) return;
     total += items.length;
 
     // Summary chip
@@ -286,7 +287,6 @@ function render() {
       });
     });
 
-    var isM1Loading = (type.key === 'm1_plan' && _m1Loading);
     var iconHtml = isM1Loading
       ? '<div class="shdr-icon" style="background:'+type.bg+';color:'+type.color+';animation:spin 1.2s linear infinite">&#x231B;</div>'
       : '<div class="shdr-icon" style="background:'+type.bg+';color:'+type.color+'">'+items.length+'</div>';
