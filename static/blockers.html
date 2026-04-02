@@ -176,7 +176,10 @@ function setT(el, t) {
 function _showErr() { var el=document.getElementById('sections'); if(!el)return; el.textContent=''; var d=document.createElement('div'); d.className='empty-state'; d.textContent='Error loading data'; el.appendChild(d); }
 
 function _normSla(sla) {
-  return (sla||[]).map(function(r) {
+  var seen = {};
+  return (sla||[]).filter(function(r){
+    var key=(r.customer_name||'').toLowerCase().trim(); if(!key||seen[key])return false; seen[key]=1; return true;
+  }).map(function(r) {
     return {
       account_id: r.account_id, customer_name: r.customer_name,
       active_cse: r.active_cse, sales_region: '', signal: 'blocked',
@@ -188,13 +191,17 @@ function _normSla(sla) {
 }
 
 function _normM1(m1cats) {
-  var flat = [];
-  (m1cats||[]).forEach(function(cat){ (cat.accounts||[]).forEach(function(a){ flat.push({
-    account_id: a.account_id||'', customer_name: a.account_name||'',
-    active_cse: a.assigned_cse||'', sales_region: a.region||'', signal: a.signal||'',
-    status_detail: a.notes||a.status_detail||'', health_notes: '',
-    dc_progress: a.dc_progress||'', subtype:'m1_plan',
-  });}); });
+  var flat = []; var seen = {};
+  (m1cats||[]).forEach(function(cat){ (cat.accounts||[]).forEach(function(a){
+    var key = (a.account_name||'').toLowerCase().trim();
+    if (!key || seen[key]) return; seen[key] = 1;
+    flat.push({
+      account_id: a.account_id||'', customer_name: a.account_name||'',
+      active_cse: a.assigned_cse||'', sales_region: a.region||'', signal: a.signal||'',
+      status_detail: a.notes||a.status_detail||'', health_notes: '',
+      dc_progress: a.dc_progress||'', subtype:'m1_plan',
+    });
+  }); });
   return flat;
 }
 
