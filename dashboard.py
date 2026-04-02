@@ -2333,9 +2333,9 @@ def dashboard_weekly():
 
 @app.get("/compare", response_class=HTMLResponse)
 def dashboard_compare():
-    return (Path(__file__).parent / "static" / "compare.html").read_text(
-        encoding="utf-8"
-    )
+    from fastapi.responses import RedirectResponse
+
+    return RedirectResponse(url="/ops", status_code=301)
 
 
 @app.get("/api/daily-brief")

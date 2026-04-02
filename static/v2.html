@@ -45,25 +45,11 @@
     <div class="card-body"><div id="funnel-bars"></div></div>
   </div>
 
-  <!-- SLA Breaches -->
+
+  <!-- Theatre Comparison -->
   <div class="card" style="margin-bottom:1.5rem">
-    <div class="card-head">
-      <div style="display:flex;align-items:center;gap:.75rem">
-        <span class="card-title">SLA BREACHES</span>
-        <span class="badge badge-red mono" id="sla-count">—</span>
-      </div>
-      <a href="/blockers" class="text-link">→ Blockers for full call prep</a>
-    </div>
-    <div style="overflow-x:auto"><table id="sla-table" class="s-table">
-      <thead><tr>
-        <th>Account</th>
-        <th>CSE</th>
-        <th style="text-align:right">M3→M8 days</th>
-        <th style="text-align:right">M8→M9 days</th>
-        <th>DC Progress</th>
-      </tr></thead>
-      <tbody id="sla-list"></tbody>
-    </table></div>
+    <div class="card-head"><span class="card-title">THEATRE COMPARISON</span></div>
+    <div style="padding:1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem" id="compare-grid"></div>
   </div>
 
   <!-- M1 Action Plan -->
@@ -164,36 +150,38 @@ function renderFunnel(rows) {
   }).join('');
 }
 
-// ── SLA breaches ──────────────────────────────────────────────────
-function loadSLA() {
-  fetch('/api/sla-breaches?theatre=' + encodeURIComponent(_theatre))
-    .then(function(r){return r.json();})
-    .then(function(rows) {
-      document.getElementById('sla-count').textContent = rows.length;
-      var tbody = document.getElementById('sla-list');
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-muted" style="padding:.75rem 1rem;text-align:center">No SLA violations</td></tr>';
-        return;
-      }
-      var DC_BADGE = {Green:'badge-green', Yellow:'badge-amber', Red:'badge-red'};
-      tbody.innerHTML = rows.map(function(r) {
-        var d38 = r.sla_m3_m8_days != null ? r.sla_m3_m8_days+'d' : '—';
-        var d89 = r.sla_m8_m9_days != null ? r.sla_m8_m9_days+'d' : '—';
-        var cls38 = r.sla_m3_m8_breach ? 'badge badge-red mono' : 'mono text-muted';
-        var cls89 = r.sla_m8_m9_breach ? 'badge badge-amber mono' : 'mono text-muted';
-        var dcBadge = DC_BADGE[r.dc_progress] || 'badge-gray';
-        var aid = r.account_id || '';
-        return '<tr onclick="' + (aid ? 'S.openAccountCard(\'' + E(aid) + '\')' : '') + '" '
-          + 'style="cursor:' + (aid?'pointer':'default') + '" '
-          + 'onmouseover="this.style.background=\'var(--surface-2)\'" onmouseout="this.style.background=\'\'">'
-          + '<td class="fw-600">' + E(r.customer_name) + '</td>'
-          + '<td class="text-muted">' + E(r.active_cse||'—') + '</td>'
-          + '<td style="text-align:right"><span class="' + cls38 + '">' + d38 + '</span></td>'
-          + '<td style="text-align:right"><span class="' + cls89 + '">' + d89 + '</span></td>'
-          + '<td><span class="badge ' + dcBadge + '">' + E(r.dc_progress||'—') + '</span></td>'
-          + '</tr>';
+// ── Theatre comparison ────────────────────────────────────────────
+function loadCompare() {
+  fetch('/api/compare').then(function(r){return r.json();}).then(function(data){
+    var ts = data.theatres || [];
+    var TH_COLS = {'EMEA':'#0ea5e9','AMER':'#3b82f6','JAPAC':'#a78bfa','LATAM':'#f59e0b'};
+    var metrics = [
+      {key:'m9_this_week', label:'M9 This Week', color:'var(--sky)'},
+      {key:'blocked',      label:'Blocked',      color:'var(--red)'},
+      {key:'at_risk',      label:'At Risk',       color:'var(--amber)'},
+      {key:'sla_overdue',  label:'SLA Overdue',   color:'var(--red)'},
+    ];
+    var maxVals = {};
+    metrics.forEach(function(m){ maxVals[m.key] = Math.max.apply(null, ts.map(function(t){return t[m.key]||0;}).concat([1])); });
+    var cols = ts.map(function(t){
+      var thcol = TH_COLS[t.theatre] || 'var(--sky)';
+      var bars = metrics.map(function(m){
+        var pct = Math.round(((t[m.key]||0) / maxVals[m.key]) * 100);
+        return '<div><div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+          + '<span style="font-size:9px;color:var(--muted)">' + m.label + '</span>'
+          + '<span style="font-size:10px;color:' + m.color + ';font-family:var(--mono);font-weight:700">' + (t[m.key]||0) + '</span></div>'
+          + '<div style="background:var(--surface-2);height:4px;border-radius:2px">'
+          + '<div style="background:' + m.color + ';width:' + pct + '%;height:100%;border-radius:2px"></div></div></div>';
       }).join('');
-    }).catch(console.error);
+      return '<div class="card">'
+        + '<div class="card-head" style="background:' + thcol + '10;border-bottom:1px solid ' + thcol + '30">'
+          + '<span class="card-title" style="color:' + thcol + ';letter-spacing:1px">' + t.theatre + '</span>'
+          + '<span class="kpi-number" style="font-size:1.4rem;color:' + thcol + '">' + t.m9_total + '</span>'
+        + '</div>'
+        + '<div style="padding:12px;display:flex;flex-direction:column;gap:10px">' + bars + '</div></div>';
+    }).join('');
+    document.getElementById('compare-grid').innerHTML = cols;
+  }).catch(function(){});
 }
 
 // ── M1 action plan ────────────────────────────────────────────────
@@ -312,7 +300,7 @@ function refreshData() {
 // ── Load all ──────────────────────────────────────────────────────
 function loadAll() {
   loadMilestones();
-  loadSLA();
+  loadCompare();
   loadM1();
   fetch('/api/stats').then(function(r){return r.json();}).then(function(s){
     var el=document.getElementById('last-sync');

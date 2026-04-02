@@ -251,7 +251,6 @@ var _PAGES = [
   {id:'audit',   label:'Audit',    url:'/audit'},
   {id:'cse',     label:'CSE',      url:'/cse'},
   {id:'weekly',  label:'Weekly',   url:'/weekly'},
-  {id:'compare', label:'Compare',  url:'/compare'},
 ];
 
 S.initNav = function(activePage) {
