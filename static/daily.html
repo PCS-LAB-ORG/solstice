@@ -4,65 +4,62 @@
 <title>Solstice — Daily Briefing</title>
 
 <link rel="stylesheet" href="/static/solstice.css">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-.pill{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:12px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;transition:all .15s}
-.pill:hover{border-color:var(--accent);color:var(--accent)}
-.pill.act{border-color:var(--accent);color:var(--accent);background:rgba(34,211,238,.08)}
-.date-nav button{background:rgba(34,211,238,.07);border:1px solid var(--border);color:var(--text);padding:.28rem .65rem;border-radius:4px;cursor:pointer;font-size:12px;font-family:var(--mono);transition:all .15s}
-.date-nav button:hover{background:rgba(34,211,238,.14);border-color:var(--accent)}
-.date-display{font-family:var(--mono);font-size:12px;font-weight:700;padding:.28rem .9rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:4px;color:var(--accent);min-width:90px;text-align:center}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem 1rem;position:relative;overflow:hidden}
+.date-nav button{background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:.28rem .65rem;border-radius:4px;cursor:pointer;font-size:12px;font-family:var(--mono);transition:all .15s}
+.date-nav button:hover{background:var(--sky-light);border-color:var(--sky-border)}
+.date-display{font-family:var(--mono);font-size:12px;font-weight:700;padding:.28rem .9rem;background:var(--sky-light);border:1px solid var(--sky-border);border-radius:4px;color:var(--sky);min-width:90px;text-align:center}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem 1rem;position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
 .kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
-.kpi.m9::before{background:var(--green)}.kpi.m8::before{background:var(--accent)}
+.kpi.m9::before{background:var(--green)}.kpi.m8::before{background:var(--sky)}
 .kpi.m3::before{background:var(--amber)}.kpi.cse::before{background:#ec4899}
 .kpi.reg::before{background:var(--red)}.kpi.tot::before{background:var(--muted)}
 .kpi.m1::before{background:#a78bfa}.kpi.m5::before{background:#3b82f6}
 .kpi-n{font-size:26px;font-weight:700;line-height:1;margin-bottom:.2rem;font-family:var(--mono)}
-.kpi-n.m9{color:var(--green)}.kpi-n.m8{color:var(--accent)}.kpi-n.m3{color:var(--amber)}
+.kpi-n.m9{color:var(--green)}.kpi-n.m8{color:var(--sky)}.kpi-n.m3{color:var(--amber)}
 .kpi-n.cse{color:#ec4899}.kpi-n.reg{color:var(--red)}.kpi-n.tot{color:var(--muted)}
 .kpi-n.m1{color:#a78bfa}.kpi-n.m5{color:#3b82f6}
 .kpi-label{font-size:8.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)}
-.cum-banner{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.75rem 1.2rem;display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem}
+.cum-banner{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1.2rem;display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;box-shadow:var(--shadow-sm)}
 .cum-n{font-size:20px;font-weight:700;line-height:1;font-family:var(--mono)}
 .cum-label{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
-.sec{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
 .sec-hdr{padding:.65rem 1rem;display:flex;align-items:center;gap:.6rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:background .15s}
-.sec-hdr:hover{background:rgba(34,211,238,.02)}
+.sec-hdr:hover{background:var(--surface-2)}
 .sec-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--mono)}
-.sec-count{background:rgba(34,211,238,.1);color:var(--accent);padding:1px 7px;border-radius:3px;font-size:9px;font-family:var(--mono)}
-.sec-arrow{margin-left:auto;font-size:10px;color:var(--border);transition:transform .2s}
+.sec-count{background:var(--sky-light);color:var(--sky);padding:1px 7px;border-radius:3px;font-size:9px;font-family:var(--mono)}
+.sec-arrow{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s}
 .sec.collapsed .sec-arrow{transform:rotate(-90deg)}
 .sec.collapsed .sec-body{display:none}
 .sec-body{padding:.4rem}
-.move{display:grid;grid-template-columns:auto 1fr auto;gap:.45rem .6rem;padding:.45rem .5rem;border-radius:5px;align-items:center;border-bottom:1px solid rgba(30,45,64,.5)}
+.move{display:grid;grid-template-columns:auto 1fr auto;gap:.45rem .6rem;padding:.45rem .5rem;border-radius:5px;align-items:center;border-bottom:1px solid var(--border-soft)}
 .move:last-child{border-bottom:none}
-.move:hover{background:rgba(255,255,255,.02)}
+.move:hover{background:var(--surface-2)}
 .move-badge{font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap}
-.move-name{font-size:10px;font-weight:700}
+.move-name{font-size:10px;font-weight:700;color:var(--text)}
 .move-sub{font-size:8px;color:var(--muted)}
 .move-change{font-family:var(--mono);font-size:8.5px;text-align:right}
 .empty{padding:1.5rem;text-align:center;color:var(--muted);font-size:10px}
 .trend-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.18rem}
 .trend-day{font-family:var(--mono);font-size:6.5px;color:var(--muted);width:46px;flex-shrink:0}
-.trend-stack{flex:1;display:flex;height:8px;border-radius:2px;overflow:hidden;background:rgba(255,255,255,.04)}
+.trend-stack{flex:1;display:flex;height:8px;border-radius:2px;overflow:hidden;background:var(--surface-2)}
 .trend-seg{height:100%;transition:width .4s}
 .trend-n{font-family:var(--mono);font-size:7px;color:var(--muted);width:18px;text-align:right}
-.trend-today .trend-day{color:var(--accent);font-weight:700}
-.trend-today .trend-stack{outline:1px solid rgba(34,211,238,.35)}
+.trend-today .trend-day{color:var(--sky);font-weight:700}
+.trend-today .trend-stack{outline:1px solid var(--sky-border)}
 .th-tile{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.5rem .85rem}
 .th-tile-name{font-size:8px;font-weight:700;color:var(--muted);letter-spacing:.1em;margin-bottom:.35rem;font-family:var(--mono)}
-.rbtn{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:var(--accent);padding:.3rem .85rem;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;font-family:var(--mono);transition:all .15s;margin-left:auto}
-.rbtn:hover{background:rgba(34,211,238,.18);border-color:var(--accent)}
+.rbtn{background:var(--sky-light);border:1px solid var(--sky-border);color:var(--sky);padding:.3rem .85rem;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;font-family:var(--mono);transition:all .15s;margin-left:auto}
+.rbtn:hover{background:#bae6fd;border-color:var(--sky)}
 .rbtn:disabled{opacity:.5;cursor:default}
-#s-console{font-family:var(--mono);font-size:9px;background:#050810;border:1px solid var(--border);border-radius:6px;padding:.6rem;max-height:160px;overflow-y:auto;margin-top:.75rem;line-height:1.6}
+#s-console{font-family:var(--mono);font-size:9px;background:var(--text);color:#f0f6fc;border:1px solid var(--border);border-radius:6px;padding:.6rem;max-height:160px;overflow-y:auto;margin-top:.75rem;line-height:1.6}
 </style>
 </head>
-<body style="background:#0a0e1a;color:#e2e8f0;min-height:100vh">
-<nav id="s-nav" style="display:flex;align-items:center;padding:.6rem 1.5rem;background:#0f1729;border-bottom:1px solid #1e2d40;gap:12px;position:sticky;top:0;z-index:100"></nav>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
 
 <!-- Sub-header -->
-<div style="background:#0f1729;border-bottom:1px solid #1e2d40;padding:.45rem 1.5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:44px;z-index:90">
+<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:.45rem 1.5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:44px;z-index:90">
   <div class="date-nav" style="display:flex;align-items:center;gap:.4rem">
     <button onclick="shiftDay(-1)">&#9664;</button>
     <div class="date-display" id="disp-date">—</div>
@@ -77,7 +74,7 @@
   <button class="pill" data-t="LATAM" onclick="setDTheatre(this,'LATAM')">LATAM</button>
 </div>
 
-<div id="main" style="padding:1.5rem;max-width:1160px;margin:0 auto">
+<div id="main" class="s-main">
 
   <!-- Theatre breakdown -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem" id="theatre-breakdown"></div>
@@ -85,7 +82,7 @@
   <!-- Cumulative banner -->
   <div class="cum-banner" style="margin-bottom:.75rem">
     <div><div class="cum-n" style="color:var(--green)" id="c-m9">—</div><div class="cum-label">M9 Complete</div></div>
-    <div><div class="cum-n" style="color:var(--accent)" id="c-m8">—</div><div class="cum-label">M8 Started</div></div>
+    <div><div class="cum-n" style="color:var(--sky)" id="c-m8">—</div><div class="cum-label">M8 Started</div></div>
     <div><div class="cum-n" style="color:#3b82f6" id="c-m5">—</div><div class="cum-label">M5 Tech Valid.</div></div>
     <div><div class="cum-n" style="color:var(--amber)" id="c-m3">—</div><div class="cum-label">M3 Buy-in</div></div>
     <div><div class="cum-n" style="color:var(--muted)" id="c-acc">—</div><div class="cum-label">Total Accounts</div></div>
@@ -136,7 +133,7 @@
       <div class="sec collapsed" id="sec-reg">
         <div class="sec-hdr" onclick="toggleSec('sec-reg')">
           <span class="sec-title">Regressions (Y&#8594;N)</span>
-          <span class="sec-count" id="cnt-reg" style="background:rgba(239,68,68,.1);color:var(--red)">0</span>
+          <span class="sec-count" id="cnt-reg" style="background:var(--red-light);color:var(--red)">0</span>
           <span class="sec-arrow">&#9660;</span>
         </div>
         <div class="sec-body" id="body-reg"><div class="empty">No regressions today</div></div>
@@ -157,7 +154,7 @@
         <div style="padding:.4rem .25rem" id="trend-body"></div>
         <div style="display:flex;flex-wrap:wrap;gap:.4rem .75rem;padding:.25rem .25rem .5rem;font-size:8px;color:var(--muted)">
           <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:var(--green);margin-right:2px;vertical-align:middle"></span>M9</span>
-          <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:var(--accent);margin-right:2px;vertical-align:middle"></span>M8</span>
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:var(--sky);margin-right:2px;vertical-align:middle"></span>M8</span>
         </div>
       </div>
     </div>
@@ -171,9 +168,9 @@ S.initNav('daily'); S.restoreCard();
 
 var E=S.esc;
 var _curDate='', _dtheatre='';
-var MC={'M9 Upgrade Complete':'#10b981','M8 Upgrade Started':'#22d3ee','M7 Legal':'#8b5cf6',
+var MC={'M9 Upgrade Complete':'#10b981','M8 Upgrade Started':'#0ea5e9','M7 Legal':'#8b5cf6',
   'M5 Tech Validation':'#3b82f6','M4 Discovery':'#06b6d4','M3 Buy-in':'#f59e0b',
-  'M2 Entitlements':'#f97316','M1 Outreach':'#a78bfa','cse':'#ec4899','status':'#475569'};
+  'M2 Entitlements':'#f97316','M1 Outreach':'#a78bfa','cse':'#ec4899','status':'#94a3b8'};
 var MI={'M9 Upgrade Complete':'M9','M8 Upgrade Started':'M8','M7 Legal':'M7',
   'M5 Tech Validation':'M5','M4 Discovery':'M4','M3 Buy-in':'M3',
   'M2 Entitlements':'M2','M1 Outreach':'M1','cse':'CSE','status':'STS'};
@@ -211,7 +208,7 @@ function setDTheatre(el,t){
 }
 
 function moveCard(m){
-  var mc=MC[m.field_name]||'#475569';
+  var mc=MC[m.field_name]||'#94a3b8';
   var mi=MI[m.field_name]||'?';
   var label=LABELS[m.field_name]||m.field_name||'Movement';
   var isCse=m.field_name==='cse';
@@ -231,7 +228,7 @@ function moveCard(m){
     +'<div><div class="move-name">'+E(m.customer_name||'—')+'</div>'
       +'<div class="move-sub">'+E(m.active_cse||'—')+' &middot; '+E(m.region||m.area||'—')+'</div></div>'
     +'<div class="move-change"><div>'+chg+'</div>'
-      +(time?'<div style="color:var(--border);font-size:8px;font-family:var(--mono)">'+E(time)+'</div>':'')+'</div>'
+      +(time?'<div style="color:var(--muted);font-size:8px;font-family:var(--mono)">'+E(time)+'</div>':'')+'</div>'
     +'</div>';
 }
 
@@ -287,13 +284,13 @@ function render(d){
   if(regs.length>0)document.getElementById('sec-reg').classList.remove('collapsed');
   // Theatre breakdown
   var bd=document.getElementById('theatre-breakdown');
-  var TH=[{k:'EMEA',c:'#22d3ee'},{k:'AMER',c:'#3b82f6'},{k:'JAPAC',c:'#a78bfa'},{k:'LATAM',c:'#f59e0b'}];
+  var TH=[{k:'EMEA',c:'#0ea5e9'},{k:'AMER',c:'#3b82f6'},{k:'JAPAC',c:'#a78bfa'},{k:'LATAM',c:'#f59e0b'}];
   bd.innerHTML=TH.map(function(t){
     var s=(d.theatre_totals&&d.theatre_totals[t.k])||{m9:0,m8:0,m3:0};
     return '<div class="th-tile"><div class="th-tile-name" style="color:'+t.c+'">'+t.k+'</div>'
       +'<div style="display:flex;gap:.65rem">'
       +'<div><div style="font-size:18px;font-weight:700;color:var(--green);font-family:var(--mono)">'+s.m9+'</div><div style="font-size:7px;color:var(--muted)">M9</div></div>'
-      +'<div><div style="font-size:18px;font-weight:700;color:var(--accent);font-family:var(--mono)">'+s.m8+'</div><div style="font-size:7px;color:var(--muted)">M8</div></div>'
+      +'<div><div style="font-size:18px;font-weight:700;color:var(--sky);font-family:var(--mono)">'+s.m8+'</div><div style="font-size:7px;color:var(--muted)">M8</div></div>'
       +'<div><div style="font-size:18px;font-weight:700;color:var(--amber);font-family:var(--mono)">'+s.m3+'</div><div style="font-size:7px;color:var(--muted)">M3</div></div>'
       +'</div></div>';
   }).join('');
@@ -309,7 +306,7 @@ function render(d){
       +'<div class="trend-day">'+fmtDisp(t.date)+'</div>'
       +'<div class="trend-stack">'
         +(pctM9?'<div class="trend-seg" style="width:'+pctM9+'%;background:var(--green)" title="M9: '+m9+'"></div>':'')
-        +(pctM8?'<div class="trend-seg" style="width:'+pctM8+'%;background:var(--accent)" title="M8: '+m8+'"></div>':'')
+        +(pctM8?'<div class="trend-seg" style="width:'+pctM8+'%;background:var(--sky)" title="M8: '+m8+'"></div>':'')
       +'</div>'
       +'<div class="trend-n">'+(total||'')+'</div>'
     +'</div>';
