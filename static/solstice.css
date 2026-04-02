@@ -1,26 +1,134 @@
-/* NOTE: Pages must include JetBrains Mono from Google Fonts:
-   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"> */
-/* Solstice Design Tokens — Ops Center Cyan */
+/* Solstice Design System v2 — Light SaaS
+   Fonts: Plus Jakarta Sans (UI) + JetBrains Mono (data)
+   Each page must include:
+   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+*/
+
+/* ── Tokens ─────────────────────────────────────────────── */
 :root {
-  --bg:       #0a0e1a;
-  --surface:  #0f1729;
-  --border:   #1e2d40;
-  --accent:   #22d3ee;
-  --text:     #e2e8f0;
-  --muted:    #475569;
-  --green:    #10b981;
-  --amber:    #f59e0b;
-  --red:      #ef4444;
-  --mono:     'JetBrains Mono', monospace;
+  --bg:          #f8fafc;
+  --surface:     #ffffff;
+  --surface-2:   #f1f5f9;
+  --nav-bg:      #0c4a6e;
+  --border:      #e2e8f0;
+  --border-soft: #f1f5f9;
+  --text:        #0f172a;
+  --text-2:      #374151;
+  --muted:       #94a3b8;
+  --sky:         #0ea5e9;
+  --sky-light:   #e0f2fe;
+  --sky-border:  #bae6fd;
+  --accent:      var(--sky);
+  --green:       #10b981;
+  --amber:       #f59e0b;
+  --red:         #ef4444;
+  --green-light: #d1fae5;
+  --amber-light: #fef3c7;
+  --red-light:   #fee2e2;
+  --mono:        'JetBrains Mono', monospace;
+  --font:        'Plus Jakarta Sans', system-ui, sans-serif;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:   0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+  --radius:      10px;
+  --radius-sm:   6px;
 }
+
+/* ── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
-.glow-cyan { box-shadow: 0 0 12px rgba(34, 211, 238, .3); }
-.kpi-number { font-family: var(--mono); font-size: 2.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
-.signal-green { color: var(--green); }
-.signal-amber { color: var(--amber); }
-.signal-red   { color: var(--red);   }
-.badge-green  { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
-.badge-amber  { background: rgba(245,158,11,.15);  color: var(--amber); border: 1px solid rgba(245,158,11,.3); }
-.badge-red    { background: rgba(239,68,68,.15);   color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
-.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); }
+
+/* ── Nav ────────────────────────────────────────────────── */
+.s-nav {
+  background: var(--nav-bg);
+  height: 44px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.s-main { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+/* ── Cards ──────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.card-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title { font-size: 12px; font-weight: 700; color: var(--text); }
+.card-body  { padding: 16px; }
+
+/* ── KPI Cards ──────────────────────────────────────────── */
+.kpi-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid transparent;
+}
+.kpi-card.sky   { border-left-color: var(--sky); }
+.kpi-card.amber { border-left-color: var(--amber); }
+.kpi-card.red   { border-left-color: var(--red); }
+.kpi-card.green { border-left-color: var(--green); }
+.kpi-label  { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.kpi-number { font-family: var(--mono); font-size: 32px; font-weight: 700; color: var(--text); line-height: 1; }
+.kpi-delta  { font-size: 11px; font-weight: 600; margin-top: 6px; }
+.delta-up   { color: var(--green); }
+.delta-down { color: var(--red); }
+.delta-neu  { color: var(--muted); }
+
+/* ── Badges ─────────────────────────────────────────────── */
+.badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+.badge-red   { background: var(--red-light);   color: #dc2626; }
+.badge-amber { background: var(--amber-light);  color: #d97706; }
+.badge-green { background: var(--green-light);  color: #059669; }
+.badge-sky   { background: var(--sky-light);    color: #0284c7; }
+.badge-gray  { background: var(--surface-2);    color: #64748b; }
+
+/* ── Pills (theatre filter) ─────────────────────────────── */
+.pill {
+  font-size: 11px; font-weight: 600; padding: 4px 12px;
+  border-radius: 20px; cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface); color: #64748b; transition: all .15s;
+  user-select: none;
+}
+.pill.active, .pill.act { background: var(--sky-light); color: #0284c7; border-color: var(--sky-border); }
+.pill:hover:not(.active) { border-color: #cbd5e1; color: var(--text); }
+
+/* ── Tables ─────────────────────────────────────────────── */
+.s-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.s-table th {
+  text-align: left; padding: 8px 12px;
+  font-size: 9px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  background: var(--surface-2); border-bottom: 1px solid var(--border-soft);
+}
+.s-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-soft); color: var(--text-2); vertical-align: middle; }
+.s-table tr:last-child td { border-bottom: none; }
+.s-table tr:hover td { background: var(--surface-2); }
+
+/* ── Funnel bars ────────────────────────────────────────── */
+.funnel-row   { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.funnel-label { font-size: 10px; font-weight: 700; color: var(--muted); width: 24px; font-family: var(--mono); }
+.funnel-track { flex: 1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.funnel-bar   { height: 100%; border-radius: 4px; }
+.funnel-pct   { font-size: 10px; font-weight: 700; font-family: var(--mono); width: 32px; text-align: right; }
+.funnel-count { font-size: 10px; color: var(--muted); font-family: var(--mono); width: 44px; text-align: right; }
+
+/* ── Utility ────────────────────────────────────────────── */
+.mono       { font-family: var(--mono); }
+.text-link  { color: var(--sky); font-size: 10px; font-weight: 600; text-decoration: none; }
+.text-link:hover { text-decoration: underline; }
+.text-muted { color: var(--muted); }
+.fw-600     { font-weight: 600; }
+.fw-700     { font-weight: 700; }

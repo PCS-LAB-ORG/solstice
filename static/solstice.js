@@ -258,21 +258,32 @@ S.initNav = function(activePage) {
   var nav = document.getElementById('s-nav');
   if (!nav) return;
   var links = _PAGES.map(function(p) {
-    var active = p.id===activePage;
-    return '<a href="'+p.url+'" style="font-size:11px;font-weight:'+(active?700:400)+';color:'+(active?'#22d3ee':'#475569')+';text-decoration:none;'+(active?'border-bottom:2px solid #22d3ee;padding-bottom:2px':'')+'">'+(active?'<span class="glow-cyan">'+p.label+'</span>':p.label)+'</a>';
+    var active = p.id === activePage;
+    return '<a href="' + p.url + '" style="'
+      + 'font-family:\'Plus Jakarta Sans\',system-ui,sans-serif;'
+      + 'font-size:12px;font-weight:' + (active ? '600' : '500') + ';'
+      + 'color:' + (active ? '#ffffff' : 'rgba(255,255,255,.45)') + ';'
+      + 'text-decoration:none;'
+      + 'height:44px;display:flex;align-items:center;padding:0 14px;'
+      + 'border-bottom:2px solid ' + (active ? '#0ea5e9' : 'transparent') + ';'
+      + 'transition:color .15s;'
+      + '">' + p.label + '</a>';
   }).join('');
 
-  nav.innerHTML = '<div style="display:flex;align-items:center;gap:20px;flex:1">'
-    +'<span style="font-size:12px;font-weight:700;color:#22d3ee;letter-spacing:1px;font-family:monospace">\u2600 SOLSTICE</span>'
-    +'<div style="display:flex;gap:16px">'+links+'</div>'
-    +'</div>'
-    +'<div id="s-health" style="display:flex;gap:8px;align-items:center"></div>'
-    +'<div style="position:relative;margin-left:12px">'
-    +'<input id="g-search" type="text" placeholder="\u2315 Account..." autocomplete="off"'
-    +' style="background:rgba(255,255,255,.05);border:1px solid #1e2d40;border-radius:4px;color:#e2e8f0;font-size:10px;padding:.28rem .65rem;width:150px;outline:none;transition:width .2s"'
-    +' oninput="S.gSearch(this.value)" onfocus="this.style.width=\'210px\'" onblur="S.closeSearch();setTimeout(function(){var e=document.getElementById(\'g-search\');if(e)e.style.width=\'150px\'},200)">'
-    +'<div id="g-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:280px;background:#0f1729;border:1px solid #1e2d40;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:1000;max-height:320px;overflow-y:auto"></div>'
-    +'</div>';
+  nav.innerHTML = '<div style="display:flex;align-items:center;gap:0;flex:1">'
+    + '<div style="display:flex;align-items:center;gap:8px;padding-right:20px;margin-right:4px;border-right:1px solid rgba(255,255,255,.1)">'
+    + '<div style="width:22px;height:22px;background:#0ea5e9;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">&#9728;</div>'
+    + '<span style="font-family:\'Plus Jakarta Sans\',system-ui;font-size:13px;font-weight:700;color:white;letter-spacing:-.2px">Solstice</span>'
+    + '</div>'
+    + '<div style="display:flex;gap:0">' + links + '</div>'
+    + '</div>'
+    + '<div id="s-health" style="display:flex;gap:8px;align-items:center"></div>'
+    + '<div style="position:relative;margin-left:12px">'
+    + '<input id="g-search" type="text" placeholder="&#9013; Account..." autocomplete="off"'
+    + ' style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:white;font-size:10px;padding:.28rem .65rem;width:150px;outline:none;transition:width .2s;font-family:\'Plus Jakarta Sans\',system-ui"'
+    + ' oninput="S.gSearch(this.value)" onfocus="this.style.width=\'210px\'" onblur="S.closeSearch();setTimeout(function(){var e=document.getElementById(\'g-search\');if(e)e.style.width=\'150px\'},200)">'
+    + '<div id="g-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:280px;background:white;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:1000;max-height:320px;overflow-y:auto"></div>'
+    + '</div>';
 
   _refreshHealth();
   setInterval(_refreshHealth, 5*60*1000);
@@ -287,7 +298,7 @@ function _refreshHealth() {
       var icons = {green:'\ud83d\udfe2',amber:'\ud83d\udfe1',red:'\ud83d\udd34'};
       el.innerHTML = Object.keys(data).map(function(t) {
         var v = data[t];
-        return '<span title="'+t+': '+v.m9+' M9 \u00b7 '+v.blocked+' blocked" style="font-size:10px;cursor:default">'+(icons[v.status]||'\u26aa')+' <span style="color:#475569;font-size:9px">'+t+'</span></span>';
+        return '<span title="'+t+': '+v.m9+' M9 \u00b7 '+v.blocked+' blocked" style="font-size:10px;cursor:default">'+(icons[v.status]||'\u26aa')+' <span style="color:#94a3b8;font-size:9px">'+t+'</span></span>';
       }).join('');
     }).catch(function(){});
 }

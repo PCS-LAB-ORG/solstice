@@ -4,32 +4,25 @@
 <title>Solstice — Velocity &amp; Forecast</title>
 
 <link rel="stylesheet" href="/static/solstice.css">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-.pill{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:12px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;transition:all .15s}
-.pill:hover{border-color:var(--accent);color:var(--accent)}
-.pill.act{border-color:var(--accent);color:var(--accent);background:rgba(34,211,238,.08)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.card-hdr{padding:.65rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-hdr h3{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:var(--mono)}
-.card-hdr .sub{font-size:9px;color:var(--muted);font-family:var(--mono)}
 .conf{display:inline-flex;align-items:center;font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px}
 .conf-high{background:rgba(16,185,129,.12);color:var(--green)}
 .conf-med{background:rgba(245,158,11,.12);color:var(--amber)}
 .conf-low{background:rgba(239,68,68,.12);color:var(--red)}
 .dcdot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:3px}
-.ft-hdr{display:grid;grid-template-columns:18px 2fr .9fr .8fr .7fr .8fr;background:var(--bg);border-bottom:1px solid var(--border)}
-.ft-hdr span{padding:.3rem .5rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;font-family:var(--mono);border-right:1px solid rgba(30,45,64,.5)}
+.ft-hdr{display:grid;grid-template-columns:18px 2fr .9fr .8fr .7fr .8fr;background:var(--surface-2);border-bottom:1px solid var(--border)}
+.ft-hdr span{padding:.3rem .5rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;font-family:var(--mono);border-right:1px solid var(--border-soft)}
 .ft-hdr span:last-child{border-right:none}
-.ftrow{display:grid;grid-template-columns:18px 2fr .9fr .8fr .7fr .8fr;border-bottom:1px solid rgba(30,45,64,.5);align-items:center}
+.ftrow{display:grid;grid-template-columns:18px 2fr .9fr .8fr .7fr .8fr;border-bottom:1px solid var(--border-soft);align-items:center}
 .ftrow:last-child{border-bottom:none}
-.ftrow:hover{background:rgba(34,211,238,.03)}
+.ftrow:hover{background:var(--surface-2)}
 .fc{padding:.45rem .5rem;font-size:9.5px}
-.overdue-banner{padding:.4rem 1rem;background:rgba(239,68,68,.06);border-top:1px solid rgba(239,68,68,.15);font-size:9px;color:var(--red);font-family:var(--mono)}
+.overdue-banner{padding:.4rem 1rem;background:var(--red-light);border-top:1px solid #fca5a5;font-size:9px;color:#dc2626;font-family:var(--mono)}
 .vel-grid{display:grid;grid-template-columns:repeat(4,1fr)}
 .vel-w{padding:.85rem .75rem;text-align:center;border-right:1px solid var(--border);position:relative}
 .vel-w:last-child{border-right:none}
-.vel-w.cur{background:rgba(16,185,129,.04)}
+.vel-w.cur{background:var(--green-light)}
 .wlbl{font-size:8px;font-family:var(--mono);color:var(--muted);margin-bottom:.35rem}
 .wnum{font-size:28px;font-weight:700;line-height:1;margin-bottom:3px;font-family:var(--mono)}
 .wsub{font-size:8px;color:var(--muted)}
@@ -40,17 +33,17 @@
 .th-name{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;font-family:var(--mono)}
 .th-big{font-size:22px;font-weight:700;line-height:1;font-family:var(--mono)}
 .th-sub{font-size:8px;color:var(--muted);margin-top:2px}
-.sla-row{display:grid;grid-template-columns:2fr 1fr 1fr;border-bottom:1px solid rgba(30,45,64,.5);align-items:center;padding:.45rem .75rem}
+.sla-row{display:grid;grid-template-columns:2fr 1fr 1fr;border-bottom:1px solid var(--border-soft);align-items:center;padding:.45rem .75rem}
 .sla-row:last-child{border-bottom:none}
-.sla-row:hover{background:rgba(255,255,255,.018)}
+.sla-row:hover{background:var(--surface-2)}
 .empty{padding:1.75rem;text-align:center;color:var(--muted);font-size:10px}
 </style>
 </head>
-<body style="background:#0a0e1a;color:#e2e8f0;min-height:100vh">
-<nav id="s-nav" style="display:flex;align-items:center;padding:.6rem 1.5rem;background:#0f1729;border-bottom:1px solid #1e2d40;gap:12px;position:sticky;top:0;z-index:100"></nav>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
 
 <!-- Sub-header: theatre filter pills -->
-<div style="background:#0f1729;border-bottom:1px solid #1e2d40;padding:.45rem 1.5rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;position:sticky;top:44px;z-index:90">
+<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:.45rem 1.5rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;position:sticky;top:44px;z-index:90">
   <span style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-right:.25rem">THEATRE</span>
   <button class="pill act" data-t="" onclick="setT(this,'')">All</button>
   <button class="pill" data-t="EMEA" onclick="setT(this,'EMEA')">EMEA</button>
@@ -60,15 +53,15 @@
   <span id="date-range" style="margin-left:auto;font-size:9px;color:var(--muted);font-family:var(--mono)">—</span>
 </div>
 
-<div id="main" style="padding:1.5rem;max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 320px;gap:1.25rem;align-items:start">
+<div id="main" class="s-main" style="max-width:1180px;display:grid;grid-template-columns:1fr 320px;gap:1.25rem;align-items:start">
 <!-- LEFT COLUMN -->
 <div style="display:flex;flex-direction:column;gap:1.1rem">
 
   <!-- Next-week M9 targets -->
   <div class="card">
-    <div class="card-hdr">
-      <h3>Next 7 Days — M9 Targets</h3>
-      <span class="sub" id="theatre-label">All Theatres</span>
+    <div class="card-head">
+      <span class="card-title">Next 7 Days — M9 Targets</span>
+      <span style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="theatre-label">All Theatres</span>
     </div>
     <div class="ft-hdr">
       <span></span><span>Account</span><span>M9 Date</span><span>Theatre</span><span>DC</span><span>Confidence</span>
@@ -78,9 +71,9 @@
 
   <!-- 4-week velocity -->
   <div class="card">
-    <div class="card-hdr">
-      <h3>4-Week M9 Velocity</h3>
-      <span class="sub" id="vel-sub">Last 4 weeks</span>
+    <div class="card-head">
+      <span class="card-title">4-Week M9 Velocity</span>
+      <span style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="vel-sub">Last 4 weeks</span>
     </div>
     <div class="vel-grid" id="vel-grid"></div>
     <div class="trend-footer" id="trend-footer">—</div>
@@ -88,7 +81,10 @@
 
   <!-- SLA breaches -->
   <div class="card">
-    <div class="card-hdr"><h3>Active SLA Windows</h3><span class="sub">M3→M8 ≤14d · M8→M9 ≤28d</span></div>
+    <div class="card-head">
+      <span class="card-title">Active SLA Windows</span>
+      <span style="font-size:9px;color:var(--muted)">M3→M8 ≤14d · M8→M9 ≤28d</span>
+    </div>
     <div id="sla-body"><div class="empty">Loading…</div></div>
   </div>
 
@@ -98,14 +94,17 @@
 
   <!-- Next week by theatre -->
   <div class="card">
-    <div class="card-hdr"><h3>Next Week by Theatre</h3><span class="sub">M9 targets</span></div>
+    <div class="card-head">
+      <span class="card-title">Next Week by Theatre</span>
+      <span style="font-size:9px;color:var(--muted)">M9 targets</span>
+    </div>
     <div class="th-grid" id="th-tiles"></div>
   </div>
 
   <!-- Confidence legend -->
   <div class="card">
-    <div class="card-hdr"><h3>Confidence Logic</h3></div>
-    <div style="padding:.85rem 1rem;font-size:9px;color:var(--muted);line-height:2">
+    <div class="card-head"><span class="card-title">Confidence Logic</span></div>
+    <div class="card-body" style="font-size:9px;color:var(--muted);line-height:2">
       <div><span class="conf conf-high" style="margin-right:.4rem">HIGH</span>M8 active + DC Green</div>
       <div><span class="conf conf-med" style="margin-right:.4rem">MED</span>M8 active, DC not Green</div>
       <div><span class="conf conf-low" style="margin-right:.4rem">LOW</span>M8 not yet started</div>
@@ -122,7 +121,7 @@ S.initNav('forecast'); S.restoreCard();
 var E=S.esc;
 var _t='',_raw={};
 var DC_C={'Green':'#10b981','Yellow':'#f59e0b','Red':'#ef4444'};
-var TH_COLS={'EMEA':'#22d3ee','AMER':'#3b82f6','JAPAC':'#a78bfa','LATAM':'#f59e0b'};
+var TH_COLS={'EMEA':'#0ea5e9','AMER':'#3b82f6','JAPAC':'#a78bfa','LATAM':'#f59e0b'};
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function setT(el,t){
@@ -168,7 +167,7 @@ function renderForecast(d){
       var th=a.account_theatre||'';
       var thcol=TH_COLS[th]||'var(--muted)';
       var lbl=a.m8_started?'M9':'M8';
-      var lcol=a.m8_started?'var(--green)':'var(--accent)';
+      var lcol=a.m8_started?'var(--green)':'var(--sky)';
       html+='<div class="ftrow">'
         +'<div class="fc" style="color:'+lcol+';font-size:9px;text-align:center;font-weight:700;font-family:var(--mono)">'+lbl+'</div>'
         +'<div class="fc"><div style="font-weight:700;font-size:10px">'+E(a.customer_name)+'</div>'
@@ -205,7 +204,7 @@ function renderVelocity(d){
       +'<div class="wlbl">'+E(v.label)+'</div>'
       +'<div class="wnum" style="color:'+(isCur?'var(--green)':'var(--muted)')+'">'+v.m9_count+'</div>'
       +'<div class="wsub">M9 done</div>'
-      +'<div style="font-size:10px;color:var(--accent);font-family:monospace;margin-top:3px">'+m8c+' M8</div>'
+      +'<div style="font-size:10px;color:var(--sky);font-family:monospace;margin-top:3px">'+m8c+' M8</div>'
       +(arr?'<span class="varr" style="color:'+arrc+'">'+arr+'</span>':'')
       +'</div>';
   });
@@ -240,7 +239,7 @@ function loadSLA(){
         document.getElementById('sla-body').innerHTML='<div class="empty">No active SLA windows</div>';
         return;
       }
-      var html='<div style="display:grid;grid-template-columns:2fr 1fr 1fr;border-bottom:1px solid var(--border);padding:.3rem .75rem;background:var(--bg)">'
+      var html='<div style="display:grid;grid-template-columns:2fr 1fr 1fr;border-bottom:1px solid var(--border);padding:.3rem .75rem;background:var(--surface-2)">'
         +'<span style="font-size:7.5px;font-weight:700;letter-spacing:.09em;color:var(--muted);font-family:var(--mono)">ACCOUNT</span>'
         +'<span style="font-size:7.5px;font-weight:700;letter-spacing:.09em;color:var(--muted);font-family:var(--mono)">SLA STATUS</span>'
         +'<span style="font-size:7.5px;font-weight:700;letter-spacing:.09em;color:var(--muted);font-family:var(--mono)">CSE</span>'
