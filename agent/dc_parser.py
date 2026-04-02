@@ -53,6 +53,9 @@ def _subtype_from_detail(status_detail: str) -> str:
         or ("tech validation" in d and "but lost" in d)
     ):
         return "churn"
+    # Legal blocker — check before no_contact (legal reason can appear in outreach strings)
+    if "legal reason" in d or "legal block" in d:
+        return "legal_blocker"
     # No contact — cannot reach customer
     if (
         "not able to contact" in d

@@ -117,10 +117,10 @@ S.gSearch = function(q) {
       dd.innerHTML = data.map(function(a) {
         var sc = SC[a.signal]||'#475569';
         var aid = (a.account_id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return '<div onclick="S.openAccountCard(\''+aid+'\')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid #1e2d40;display:flex;align-items:center;gap:.5rem">'
+        return '<div onclick="S.openAccountCard(\''+aid+'\')" style="padding:.5rem .8rem;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem" onmouseover="this.style.background=\'var(--surface-2)\'" onmouseout="this.style.background=\'\'">'
           +'<span style="width:6px;height:6px;border-radius:50%;background:'+sc+';flex-shrink:0;display:inline-block"></span>'
-          +'<div><div style="font-size:10px;font-weight:700;color:#e2e8f0">'+_esc(a.customer_name)+'</div>'
-          +'<div style="font-size:8px;color:#475569">'+_esc(a.active_cse||'\u2014')+' \u00b7 '+_esc(a.sales_region||'\u2014')+'</div></div></div>';
+          +'<div><div style="font-size:10px;font-weight:700;color:var(--text)">'+_esc(a.customer_name)+'</div>'
+          +'<div style="font-size:8px;color:var(--muted)">'+_esc(a.active_cse||'\u2014')+' \u00b7 '+_esc(a.sales_region||'\u2014')+'</div></div></div>';
       }).join('');
       dd.style.display='block';
     }).catch(function(){ dd.style.display='none'; });

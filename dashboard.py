@@ -1870,10 +1870,15 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
             "legal_blocker",
             "self_hosted",
         }
+        from agent.dc_parser import _subtype_from_detail
+
         result: dict = {}
         for r in rows:
             d = dict(r)
             st = d.get("subtype") or ""
+            # Re-classify on-the-fly if not in known set (handles stale DB entries)
+            if st not in known:
+                st = _subtype_from_detail(d.get("status_detail") or "") or "other"
             bucket = st if st in known else "other"
             result.setdefault(bucket, []).append(d)
         return result
