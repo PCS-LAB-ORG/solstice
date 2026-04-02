@@ -44,7 +44,7 @@ function render(data){
   }).join('');
   main.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">'
     +'<h1 style="font-size:1.1rem;font-weight:700;color:#f0f6fc;font-family:monospace">THEATRE COMPARISON</h1>'
-    +'<button onclick="S.exportCSV(window._cmpData,\'solstice-compare.csv\')" style="background:#0f1729;border:1px solid #22d3ee;color:#22d3ee;padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px">Export CSV</button>'
+    +''
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">'+cols+'</div>';
   window._cmpData=ts;
