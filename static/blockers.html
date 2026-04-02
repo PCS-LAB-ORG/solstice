@@ -173,7 +173,30 @@ function setT(el, t) {
 }
 
 // ── Fetch + populate dropdowns ──────────────────────────────────────────────
-function _showErr() { var el=document.getElementById('sections'); el.textContent=''; var d=document.createElement('div'); d.className='empty-state'; d.textContent='Error loading data'; el.appendChild(d); }
+function _showErr() { var el=document.getElementById('sections'); if(!el)return; el.textContent=''; var d=document.createElement('div'); d.className='empty-state'; d.textContent='Error loading data'; el.appendChild(d); }
+
+function _normSla(sla) {
+  return (sla||[]).map(function(r) {
+    return {
+      account_id: r.account_id, customer_name: r.customer_name,
+      active_cse: r.active_cse, sales_region: '', signal: 'blocked',
+      status_detail: 'M3\u2192M8: '+(r.sla_m3_m8_days||'\u2014')+'d | M8\u2192M9: '+(r.sla_m8_m9_days||'\u2014')+'d',
+      health_notes: (r.sla_m3_m8_breach?'M3\u2192M8 BREACH ':'')+(r.sla_m8_m9_breach?'M8\u2192M9 BREACH':''),
+      dc_progress: r.dc_progress||'', subtype:'sla_breach',
+    };
+  });
+}
+
+function _normM1(m1cats) {
+  var flat = [];
+  (m1cats||[]).forEach(function(cat){ (cat.accounts||[]).forEach(function(a){ flat.push({
+    account_id: a.account_id||'', customer_name: a.account_name||'',
+    active_cse: a.assigned_cse||'', sales_region: a.region||'', signal: a.signal||'',
+    status_detail: a.notes||a.status_detail||'', health_notes: '',
+    dc_progress: a.dc_progress||'', subtype:'m1_plan',
+  });}); });
+  return flat;
+}
 
 function load() {
   _pushUrl();
@@ -183,38 +206,29 @@ function load() {
           + '&region=' + encodeURIComponent(region)
           + '&cse='    + encodeURIComponent(cse);
 
-  Promise.all([
-    fetch(url).then(function(r){return r.json();}),
-    fetch('/api/sla-breaches?theatre='+encodeURIComponent(_theatre)).then(function(r){return r.json();}),
-    fetch('/api/m1-suggestions?theatre='+encodeURIComponent(_theatre)).then(function(r){return r.json();})
-  ]).then(function(results) {
-    var d = results[0];
-    var sla = results[1] || [];
-    var m1cats = results[2] || [];
+  // Load main blockers first — render immediately, then augment with SLA+M1
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      d.sla_breach = [];
+      d.m1_plan = [];
+      _data = d;
+      _rebuildDropdowns(d, cse);
+      render();
 
-    d.sla_breach = sla.map(function(r) {
-      return {
-        account_id: r.account_id, customer_name: r.customer_name,
-        active_cse: r.active_cse, sales_region: '', signal: 'blocked',
-        status_detail: 'M3\u2192M8: '+(r.sla_m3_m8_days||'\u2014')+'d | M8\u2192M9: '+(r.sla_m8_m9_days||'\u2014')+'d',
-        health_notes: (r.sla_m3_m8_breach?'M3\u2192M8 BREACH ':'')+(r.sla_m8_m9_breach?'M8\u2192M9 BREACH':''),
-        dc_progress: r.dc_progress||'', subtype:'sla_breach',
-      };
-    });
+      // Load SLA async — update when ready
+      fetch('/api/sla-breaches?theatre='+encodeURIComponent(_theatre))
+        .then(function(r){return r.json();})
+        .then(function(sla){ _data.sla_breach=_normSla(sla); render(); })
+        .catch(function(){});
 
-    var m1flat = [];
-    (m1cats||[]).forEach(function(cat){ (cat.accounts||[]).forEach(function(a){ m1flat.push({
-      account_id: a.account_id||'', customer_name: a.account_name||'',
-      active_cse: a.assigned_cse||'', sales_region: a.region||'', signal: a.signal||'',
-      status_detail: a.notes||a.status_detail||'', health_notes: '',
-      dc_progress: a.dc_progress||'', subtype:'m1_plan',
-    });}); });
-    d.m1_plan = m1flat;
-
-    _data = d;
-    _rebuildDropdowns(d, cse);
-    render();
-  }).catch(_showErr);
+      // Load M1 async — update when ready (may be slow due to LLM)
+      fetch('/api/m1-suggestions?theatre='+encodeURIComponent(_theatre))
+        .then(function(r){return r.json();})
+        .then(function(m1){ _data.m1_plan=_normM1(m1); render(); })
+        .catch(function(){});
+    })
+    .catch(_showErr);
 }
 
 function _rebuildDropdowns(d, currentCse) {
