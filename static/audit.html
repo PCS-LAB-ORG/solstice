@@ -4,42 +4,42 @@
 <title>Solstice — Audit Log</title>
 
 <link rel="stylesheet" href="/static/solstice.css">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.65rem 1rem;text-align:center}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.65rem 1rem;text-align:center;box-shadow:var(--shadow-sm)}
 .stat-n{font-size:22px;font-weight:700;line-height:1;font-family:var(--mono)}
 .stat-l{font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-top:3px;font-family:var(--mono)}
 .fbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
 .fbar input{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:9px;padding:5px 10px;flex:1;min-width:200px;outline:none;font-family:var(--mono);transition:border-color .15s}
-.fbar input:focus{border-color:var(--accent)}
+.fbar input:focus{border-color:var(--sky)}
 select.fsel{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:9px;padding:5px 8px;font-family:var(--mono);cursor:pointer;transition:border-color .15s}
-select.fsel:focus{outline:none;border-color:var(--accent)}
-.export-btn{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);color:var(--accent);font-size:9px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:var(--mono);white-space:nowrap;transition:all .15s}
-.export-btn:hover{background:rgba(34,211,238,.15);border-color:var(--accent)}
+select.fsel:focus{outline:none;border-color:var(--sky)}
+.export-btn{background:var(--sky-light);border:1px solid var(--sky-border);color:var(--sky);font-size:9px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:var(--mono);white-space:nowrap;transition:all .15s}
+.export-btn:hover{background:#bae6fd;border-color:var(--sky)}
 .day-grp{margin-bottom:1.1rem}
-.day-hdr{font-size:8px;font-family:var(--mono);letter-spacing:.1em;color:var(--muted);padding:.3rem 0 .35rem;border-bottom:1px solid rgba(30,45,64,.6);margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
-.day-cnt{color:var(--border)}
+.day-hdr{font-size:8px;font-family:var(--mono);letter-spacing:.1em;color:var(--muted);padding:.3rem 0 .35rem;border-bottom:1px solid var(--border);margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+.day-cnt{color:var(--muted)}
 .entry{display:grid;grid-template-columns:3px 1fr;gap:0 .65rem;margin-bottom:.28rem}
 .bar{border-radius:2px;align-self:stretch;margin:.15rem 0}
-.body{background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.055);border-radius:6px;padding:.45rem .75rem;transition:border-color .15s}
-.body:hover{border-color:rgba(34,211,238,.15)}
-.body.glow-m9{box-shadow:0 0 12px rgba(16,185,129,.1);border-color:rgba(16,185,129,.18)}
-.body.glow-m8{border-color:rgba(34,211,238,.12)}
-.body.glow-reg{border-color:rgba(239,68,68,.18)}
+.body{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.45rem .75rem;transition:border-color .15s;box-shadow:var(--shadow-sm)}
+.body:hover{border-color:var(--sky-border)}
+.body.glow-m9{box-shadow:0 0 8px rgba(16,185,129,.15);border-color:#6ee7b7}
+.body.glow-m8{border-color:var(--sky-border)}
+.body.glow-reg{border-color:#fca5a5}
 .etop{display:flex;align-items:center;gap:.4rem;margin-bottom:.2rem}
 .ebadge{font-family:var(--mono);font-size:7.5px;font-weight:700;padding:1px 6px;border-radius:3px}
-.eacct{font-size:10px;font-weight:700}
+.eacct{font-size:10px;font-weight:700;color:var(--text)}
 .etime{margin-left:auto;font-family:var(--mono);font-size:8px;color:var(--muted)}
-.echg{font-family:var(--mono);font-size:9px;margin-bottom:.18rem}
+.echg{font-family:var(--mono);font-size:9px;margin-bottom:.18rem;color:var(--text-2)}
 .emeta{font-size:8px;color:var(--muted);display:flex;gap:.5rem;align-items:center}
 .empty{padding:2rem;text-align:center;color:var(--muted);font-size:11px}
 .range-tag{font-size:8px;color:var(--muted);font-family:var(--mono);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 8px}
 </style>
 </head>
-<body style="background:#0a0e1a;color:#e2e8f0;min-height:100vh">
-<nav id="s-nav" style="display:flex;align-items:center;padding:.6rem 1.5rem;background:#0f1729;border-bottom:1px solid #1e2d40;gap:12px;position:sticky;top:0;z-index:100"></nav>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
 
-<div id="main" style="padding:1.5rem;max-width:1100px;margin:0 auto">
+<div id="main" class="s-main">
 
   <!-- Stats bar -->
   <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-bottom:1rem" id="stats"></div>
@@ -68,6 +68,7 @@ select.fsel:focus{outline:none;border-color:var(--accent)}
       <option value="asc">Oldest First</option>
     </select>
     <span id="date-range-tag" class="range-tag">—</span>
+    <button class="export-btn" onclick="exportAudit()">Export CSV</button>
   </div>
 
   <!-- Timeline -->
@@ -82,13 +83,13 @@ S.initNav('audit'); S.restoreCard();
 var E=S.esc;
 var _rows=[];
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-var MC={'M9 Upgrade Complete':'#10b981','M8 Upgrade Started':'#22d3ee','M7 Legal':'#8b5cf6',
+var MC={'M9 Upgrade Complete':'#10b981','M8 Upgrade Started':'#0ea5e9','M7 Legal':'#8b5cf6',
   'M5 Tech Validation':'#3b82f6','M4 Discovery':'#06b6d4','M3 Buy-in':'#f59e0b',
-  'M2 Entitlements':'#f97316','M1 Outreach':'#a78bfa','cse':'#ec4899','status':'#475569'};
+  'M2 Entitlements':'#f97316','M1 Outreach':'#a78bfa','cse':'#ec4899','status':'#94a3b8'};
 var MI={'M9 Upgrade Complete':'M9','M8 Upgrade Started':'M8','M7 Legal':'M7',
   'M5 Tech Validation':'M5','M4 Discovery':'M4','M3 Buy-in':'M3',
   'M2 Entitlements':'M2','M1 Outreach':'M1','cse':'CSE','status':'STS'};
-var TH_C={'EMEA':'#22d3ee','AMER':'#3b82f6','JAPAC':'#a78bfa','LATAM':'#f59e0b'};
+var TH_C={'EMEA':'#0ea5e9','AMER':'#3b82f6','JAPAC':'#a78bfa','LATAM':'#f59e0b'};
 
 function loadAudit(){
   var theatre=document.getElementById('f-theatre').value;
@@ -117,7 +118,7 @@ function buildStats(rows){
   var accts=new Set(rows.map(function(r){return r.customer_name;}));
   document.getElementById('stats').innerHTML=
     stat(m9,'#10b981','M9 Complete')
-    +stat(m8,'#22d3ee','M8 Started')
+    +stat(m8,'#0ea5e9','M8 Started')
     +stat(m3,'#f59e0b','M3 Buy-in')
     +stat(cse,'#ec4899','CSE Changes')
     +stat(reg,'#ef4444','Regressions')
@@ -168,7 +169,7 @@ function renderRows(){
     html+='<div class="day-grp">'
       +'<div class="day-hdr">'+E(grp.label)+' <span class="day-cnt">('+grp.entries.length+')</span></div>';
     grp.entries.forEach(function(r){
-      var mc=MC[r.field_name]||'#475569';
+      var mc=MC[r.field_name]||'#94a3b8';
       var mi=MI[r.field_name]||r.field_name||'?';
       var isM9=r.field_name==='M9 Upgrade Complete';
       var isM8=r.field_name==='M8 Upgrade Started';
@@ -193,7 +194,7 @@ function renderRows(){
         +'<div class="body '+glow+'">'
           +'<div class="etop">'
             +'<span class="ebadge" style="background:'+mc+'22;color:'+mc+'">'+E(mi)+'</span>'
-            +'<span class="eacct" style="color:'+(isM9?'var(--green)':isM8?'var(--accent)':'var(--text)')+'">'+E(name)+'</span>'
+            +'<span class="eacct" style="color:'+(isM9?'var(--green)':isM8?'var(--sky)':'var(--text)')+'">'+E(name)+'</span>'
             +(time?'<span class="etime">'+E(time)+'</span>':'')
           +'</div>'
           +'<div class="echg">'+chgHtml+'</div>'
