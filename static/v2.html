@@ -16,6 +16,7 @@
   <!-- Theatre filter pills + Refresh -->
   <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
     <div id="theatre-pills" style="display:flex;gap:.5rem;flex-wrap:wrap;flex:1"></div>
+    <span id="last-sync" style="font-size:9px;color:#475569;font-family:'JetBrains Mono',monospace"></span>
     <button onclick="refreshData()" style="background:#0f1729;border:1px solid #22d3ee;color:#22d3ee;padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;flex-shrink:0">&#10227; Refresh Data</button>
   </div>
 
@@ -306,6 +307,10 @@ function refreshData() {
 function loadAll() {
   loadMilestones();
   loadSLA();
+  fetch('/api/stats').then(function(r){return r.json();}).then(function(s){
+    var el=document.getElementById('last-sync');
+    if(el && s.last_run) el.textContent='synced '+s.last_run;
+  }).catch(function(){});
 }
 
 initTheatre();
