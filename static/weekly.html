@@ -6,11 +6,11 @@
 <title>Solstice — Weekly</title>
 
 <link rel="stylesheet" href="/static/solstice.css">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body style="background:#0a0e1a;color:#e2e8f0;min-height:100vh">
-<nav id="s-nav" style="display:flex;align-items:center;padding:.6rem 1.5rem;background:#0f1729;border-bottom:1px solid #1e2d40;gap:12px"></nav>
-<div id="main" style="padding:1.5rem"></div>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
+<div id="main" class="s-main"></div>
 <script src="/static/solstice.js"></script>
 <script>
 S.initNav('weekly');
@@ -28,31 +28,31 @@ function _section(title,color,items,dateField){
   if(!items.length)return '';
   var rows=items.map(function(a){
     var aid=(a.account_id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return '<div onclick="S.openAccountCard(\''+aid+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #1e2d40;cursor:pointer" onmouseover="this.style.background=\'#1e2d40\'" onmouseout="this.style.background=\'\'">'
-      +'<div><div style="font-size:11px;font-weight:600;color:#e2e8f0">'+S.esc(a.customer_name||'')+'</div>'
-      +'<div style="font-size:9px;color:#475569">'+S.esc(a.active_cse||'—')+' · '+S.esc(a.sales_region||'—')+'</div></div>'
-      +'<span style="font-size:10px;color:#475569">'+String(a[dateField]||'').slice(0,10)+'</span></div>';
+    return '<div onclick="S.openAccountCard(\''+aid+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border-soft);cursor:pointer" onmouseover="this.style.background=\'var(--surface-2)\'" onmouseout="this.style.background=\'\'">'
+      +'<div><div style="font-size:11px;font-weight:600;color:var(--text)">'+S.esc(a.customer_name||'')+'</div>'
+      +'<div style="font-size:9px;color:var(--muted)">'+S.esc(a.active_cse||'—')+' · '+S.esc(a.sales_region||'—')+'</div></div>'
+      +'<span style="font-size:10px;color:var(--muted)">'+String(a[dateField]||'').slice(0,10)+'</span></div>';
   }).join('');
-  return '<div style="background:#0f1729;border:1px solid #1e2d40;border-radius:6px;overflow:hidden;margin-bottom:1rem">'
-    +'<div style="padding:10px 12px;border-bottom:1px solid #1e2d40;display:flex;justify-content:space-between">'
-    +'<span style="font-size:10px;font-weight:700;color:'+color+';letter-spacing:1px;text-transform:uppercase">'+title+'</span>'
-    +'<span style="font-size:10px;color:#475569">'+items.length+'</span></div>'+rows+'</div>';
+  return '<div class="card" style="margin-bottom:1rem">'
+    +'<div class="card-head">'
+    +'<span class="card-title" style="color:'+color+'">'+title+'</span>'
+    +'<span class="badge badge-gray">'+items.length+'</span></div>'+rows+'</div>';
 }
 function render(data){
   var main=document.getElementById('main');
   var total=(data.new_m9||[]).length+(data.m8_started||[]).length+(data.newly_blocked||[]).length+(data.resolved||[]).length;
   main.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem">'
-    +'<div><h1 style="font-size:1.1rem;font-weight:700;color:#f0f6fc;font-family:monospace">WEEKLY MOVEMENTS</h1>'
-    +'<div style="font-size:10px;color:#475569;margin-top:2px">Week of '+(data.week_of||'')+'  · '+total+' movements</div></div>'
+    +'<div><h1 style="font-size:1rem;font-weight:800;color:var(--text)">Weekly Movements</h1>'
+    +'<div style="font-size:10px;color:var(--muted);margin-top:2px">Week of '+(data.week_of||'')+'  · '+total+' movements</div></div>'
     +'<div style="display:flex;gap:.5rem;align-items:center">'
-    +'<button onclick="prevWeek()" style="background:#0f1729;border:1px solid #1e2d40;color:#e2e8f0;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px">← Prev</button>'
-    +'<button onclick="nextWeek()" style="background:#0f1729;border:1px solid #1e2d40;color:#e2e8f0;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px">Next →</button>'
+    +'<button onclick="prevWeek()" class="pill">← Prev</button>'
+    +'<button onclick="nextWeek()" class="pill">Next →</button>'
     +'</div></div>'
-    +(total===0?'<p style="color:#475569">No movements this week.</p>':'')
-    +_section('✓ New M9 Complete','#10b981',data.new_m9||[],'m9_actual')
-    +_section('→ M8 Started','#22d3ee',data.m8_started||[],'m8_actual')
-    +_section('🛑 Newly Blocked','#ef4444',data.newly_blocked||[],'')
-    +_section('✓ Resolved','#10b981',data.resolved||[],'');
+    +(total===0?'<p class="text-muted">No movements this week.</p>':'')
+    +_section('New M9 Complete','var(--green)',data.new_m9||[],'m9_actual')
+    +_section('M8 Started','var(--sky)',data.m8_started||[],'m8_actual')
+    +_section('Newly Blocked','var(--red)',data.newly_blocked||[],'')
+    +_section('Resolved','var(--green)',data.resolved||[],'');
 }
 load();
 </script>
