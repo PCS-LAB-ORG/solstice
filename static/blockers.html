@@ -131,13 +131,13 @@ var _data = {};
 var _expandedRow = null;  // currently expanded row key
 
 var TYPES = [
+  {key:'m1_plan',         color:'#22d3ee', bg:'rgba(34,211,238,.08)', label:'M1 Action Plan',       desc:'Accounts needing M1 outreach'},
+  {key:'sla_breach',      color:'#ef4444', bg:'rgba(239,68,68,.08)',  label:'SLA Breach',           desc:'M3\u2192M8 >14d or M8\u2192M9 >28d'},
   {key:'no_contact',      color:'#ef4444', bg:'rgba(239,68,68,.12)',  label:'No Contact',           desc:'CSE cannot reach NGS Sales Specialist'},
   {key:'core_rep_blocking',color:'#f59e0b',bg:'rgba(245,158,11,.12)', label:'Rep Blocking',         desc:'Account team asked CSE to hold'},
   {key:'tech_blocker',    color:'#8b5cf6', bg:'rgba(139,92,246,.12)', label:'Technical Blocker',    desc:'CoE / product gap blocking progress'},
   {key:'active_deal',     color:'#3b82f6', bg:'rgba(59,130,246,.12)', label:'Active Deal',          desc:'XSIAM or other deal in flight'},
   {key:'other',           color:'#475569', bg:'rgba(71,85,105,.12)',  label:'Other',                desc:'Other blockers'},
-  {key:'sla_breach',      color:'#ef4444', bg:'rgba(239,68,68,.08)',  label:'SLA Breach',           desc:'M3\u2192M8 >14d or M8\u2192M9 >28d'},
-  {key:'m1_plan',         color:'#22d3ee', bg:'rgba(34,211,238,.08)', label:'M1 Action Plan',       desc:'Accounts needing M1 outreach'},
 ];
 
 var SIG_COLORS = {green:'#10b981', blocked:'#ef4444', at_risk:'#f59e0b'};
