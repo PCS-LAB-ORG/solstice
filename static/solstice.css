@@ -18,6 +18,7 @@
   --sky:         #0ea5e9;
   --sky-light:   #e0f2fe;
   --sky-border:  #bae6fd;
+  --accent:      var(--sky);
   --green:       #10b981;
   --amber:       #f59e0b;
   --red:         #ef4444;
@@ -101,7 +102,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); }
   background: var(--surface); color: #64748b; transition: all .15s;
   user-select: none;
 }
-.pill.active { background: var(--sky-light); color: #0284c7; border-color: var(--sky-border); }
+.pill.active, .pill.act { background: var(--sky-light); color: #0284c7; border-color: var(--sky-border); }
 .pill:hover:not(.active) { border-color: #cbd5e1; color: var(--text); }
 
 /* ── Tables ─────────────────────────────────────────────── */
