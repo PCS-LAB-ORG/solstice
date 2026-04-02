@@ -28,29 +28,39 @@ def validate_accounts(
     valid: dict = {}
     invalid: list[dict] = []
 
-    for account_id, acc in accounts.items():
+    for account_id_raw, acc in accounts.items():
+        account_id = (
+            account_id_raw.lower()
+        )  # normalize — Salesforce IDs are case-insensitive
         # Rule 1: Salesforce ID format
         if not account_id or not SALESFORCE_ID_PATTERN.match(account_id):
-            invalid.append({
-                "account_id": account_id,
-                "reason": "INVALID_ACCOUNT_ID",
-                "region": acc.get("sales_region", ""),
-                "file": csv_filename,
-            })
+            invalid.append(
+                {
+                    "account_id": account_id,
+                    "reason": "INVALID_ACCOUNT_ID",
+                    "region": acc.get("sales_region", ""),
+                    "file": csv_filename,
+                }
+            )
             logger.debug("INVALID_ACCOUNT_ID: %s (file=%s)", account_id, csv_filename)
             continue
 
         # Rule 2: EMEA region check (empty region passes — unknown, not confirmed non-EMEA)
         region = acc.get("sales_region", "")
         if region and region not in REGIONS:
-            invalid.append({
-                "account_id": account_id,
-                "reason": "NON_EMEA_REGION",
-                "region": region,
-                "file": csv_filename,
-            })
+            invalid.append(
+                {
+                    "account_id": account_id,
+                    "reason": "NON_EMEA_REGION",
+                    "region": region,
+                    "file": csv_filename,
+                }
+            )
             logger.debug(
-                "NON_EMEA_REGION: %s region=%s (file=%s)", account_id, region, csv_filename
+                "NON_EMEA_REGION: %s region=%s (file=%s)",
+                account_id,
+                region,
+                csv_filename,
             )
             continue
 
@@ -78,5 +88,5 @@ def write_validation_errors(invalid_entries: list[dict], log_file: Path) -> None
             region_part = f" region={region}" if region else ""
             f.write(
                 f"[{now}] {reason_code}: account_id={acc_id}{region_part}"
-                f" reason=\"{human}\" file={file_}\n"
+                f' reason="{human}" file={file_}\n'
             )
