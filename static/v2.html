@@ -313,6 +313,7 @@ function refreshData() {
 function loadAll() {
   loadMilestones();
   loadSLA();
+  loadM1();
   fetch('/api/stats').then(function(r){return r.json();}).then(function(s){
     var el=document.getElementById('last-sync');
     if(el && s.last_run) el.textContent='synced '+s.last_run;
