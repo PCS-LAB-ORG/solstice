@@ -381,9 +381,12 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
     """
     import json as _j
     from datetime import datetime as _dt, timezone as _tz
-    from agent.dc_parser import load_and_merge as _mdc
+    from agent.account_list_parser import (
+        parse_account_list_csv as _parse_al,
+        load_name_to_id as _load_n2id,
+    )
 
-    # Snapshot previous dc_data BEFORE merge
+    # Snapshot previous dc_data BEFORE parse (no state.json merge for new parser)
     _prev = _j.loads(state_file.read_text())
     _snap = {}
     for _pid, _pacc in _prev.get("accounts", {}).items():
@@ -391,18 +394,18 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
         if _pd:
             _snap[_pid.lower()] = _pd
 
-    # Merge fresh DC CSV into state.json
-    result = _mdc(data_dir / "dc_cse_tracker.csv", state_file)
-
-    _dc_state = _j.loads(state_file.read_text())
     _now = _dt.now(_tz.utc).isoformat()
     _audit = 0
 
-    # Load ALL theatres via dc_parser — same full field set for every account, no exceptions
-    from agent.dc_parser import parse_dc_csv as _parse_dc
-
+    # Parse Detailed Account List (gid=0) using name→ID lookup
+    _name_to_id = _load_n2id(data_dir)
     _all_dc = {
-        rec["account_id"]: rec for rec in _parse_dc(data_dir / "dc_cse_tracker.csv")
+        rec["account_id"]: rec
+        for rec in _parse_al(data_dir / "dc_cse_tracker.csv", _name_to_id)
+    }
+    result = {
+        "matched": sum(1 for aid in _all_dc if aid in _name_to_id.values()),
+        "total": len(_all_dc),
     }
 
     with get_db() as _conn:
@@ -463,7 +466,7 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                   (account_id, m0_complete, m1_complete, m1_planned,
                    m2_complete, m2_planned, m3_complete, m3_planned,
                    m4_complete, m4_planned, m5_complete, m5_planned,
-                   m7_complete, m8_started, m8_planned, m8_actual,
+                   m6_complete, m7_complete, m8_started, m8_planned, m8_actual,
                    m9_complete, m9_planned, m9_actual,
                    upgrade_notes, dc_progress, owner_e2e, dc_assignment, merged_at,
                    cc_rep, cc_dsm, churn_risk, health_notes,
@@ -474,21 +477,23 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                    days_since_milestone, momentum_x, entitlement_provision,
                    activation_status, posture_workloads, account_theatre,
                    signal, subtype, status_detail, cohort, area, district, team)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 ON CONFLICT(account_id) DO UPDATE SET
                   m0_complete=excluded.m0_complete, m1_complete=excluded.m1_complete,
                   m1_planned=excluded.m1_planned, m2_complete=excluded.m2_complete,
                   m2_planned=excluded.m2_planned, m3_complete=excluded.m3_complete,
                   m3_planned=excluded.m3_planned, m4_complete=excluded.m4_complete,
                   m4_planned=excluded.m4_planned, m5_complete=excluded.m5_complete,
-                  m5_planned=excluded.m5_planned, m7_complete=excluded.m7_complete,
+                  m5_planned=excluded.m5_planned, m6_complete=excluded.m6_complete,
+                  m7_complete=excluded.m7_complete,
                   m8_started=excluded.m8_started, m8_planned=excluded.m8_planned,
                   m8_actual=excluded.m8_actual, m9_complete=excluded.m9_complete,
                   m9_planned=excluded.m9_planned, m9_actual=excluded.m9_actual,
                   upgrade_notes=CASE WHEN excluded.upgrade_notes!='' THEN excluded.upgrade_notes ELSE upgrade_notes END,
                   dc_progress=excluded.dc_progress, owner_e2e=excluded.owner_e2e,
                   dc_assignment=excluded.dc_assignment, merged_at=excluded.merged_at,
-                  cc_rep=excluded.cc_rep, cc_dsm=excluded.cc_dsm,
+                  cc_rep=CASE WHEN excluded.cc_rep!='' THEN excluded.cc_rep ELSE cc_rep END,
+                  cc_dsm=CASE WHEN excluded.cc_dsm!='' THEN excluded.cc_dsm ELSE cc_dsm END,
                   churn_risk=excluded.churn_risk,
                   health_notes=CASE WHEN excluded.health_notes!='' THEN excluded.health_notes ELSE health_notes END,
                   last_edited_by=excluded.last_edited_by, last_edited_date=excluded.last_edited_date,
@@ -517,61 +522,62 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
             """,
                 (
                     _aid,
-                    int(_dd.get("m0_complete", False)),
-                    int(_dd.get("m1_complete", False)),
-                    _dd.get("m1_planned", ""),
-                    int(_dd.get("m2_complete", False)),
-                    _dd.get("m2_planned", ""),
-                    int(_dd.get("m3_complete", False)),
-                    _dd.get("m3_planned", ""),
-                    int(_dd.get("m4_complete", False)),
-                    _dd.get("m4_planned", ""),
-                    int(_dd.get("m5_complete", False)),
-                    _dd.get("m5_planned", ""),
-                    int(_dd.get("m7_complete", False)),
-                    int(_dd.get("m8_started", False)),
-                    _dd.get("m8_planned", ""),
-                    _dd.get("m8_actual", ""),
-                    int(_dd.get("m9_complete", False)),
-                    _dd.get("m9_planned", ""),
-                    _dd.get("m9_actual", ""),
-                    _dd.get("upgrade_notes", ""),
-                    _dd.get("dc_progress", ""),
-                    _dd.get("owner_e2e", ""),
-                    _dd.get("dc_assignment", ""),
-                    _dd.get("merged_at", ""),
-                    _dd.get("cc_rep", ""),
-                    _dd.get("cc_dsm", ""),
-                    _dd.get("churn_risk", ""),
-                    _dd.get("health_notes", ""),
-                    _dd.get("last_edited_by", ""),
-                    _dd.get("last_edited_date", ""),
-                    _dd.get("roadmap_url", ""),
-                    _dd.get("ps_plan_url", ""),
-                    _dd.get("account_region", ""),
-                    _dd.get("current_project_status", ""),
-                    _dd.get("next_renewal_date", ""),
-                    _dd.get("past_due_planned", ""),
-                    _dd.get("upgrade_duration_weeks", ""),
-                    _dd.get("has_partner", ""),
-                    _dd.get("upgrade_partner", ""),
-                    _dd.get("m1_details", ""),
-                    _dd.get("m3_details", ""),
-                    _dd.get("m5_details", ""),
-                    _dd.get("milestone_aging", ""),
-                    _dd.get("days_since_milestone", ""),
-                    _dd.get("momentum_x", ""),
-                    _dd.get("entitlement_provision", ""),
-                    _dd.get("activation_status", ""),
-                    _dd.get("posture_workloads", ""),
-                    _dd.get("account_theatre", "EMEA"),
-                    _dd.get("signal", ""),
-                    _dd.get("subtype", ""),
-                    _dd.get("status_detail", ""),
-                    _dd.get("cohort", ""),
-                    _dd.get("area", ""),
-                    _dd.get("district", ""),
-                    _dd.get("pm_status", ""),
+                    int(_dd.get("m0_complete", False)),  # m0_complete
+                    int(_dd.get("m1_complete", False)),  # m1_complete
+                    "",  # m1_planned (not in sheet)
+                    int(_dd.get("m2_complete", False)),  # m2_complete
+                    "",  # m2_planned (not in sheet)
+                    int(_dd.get("m3_complete", False)),  # m3_complete
+                    _dd.get("m3_planned", ""),  # m3_planned
+                    int(_dd.get("m4_complete", False)),  # m4_complete
+                    "",  # m4_planned (not in sheet)
+                    int(_dd.get("m5_complete", False)),  # m5_complete
+                    "",  # m5_planned (not in sheet)
+                    int(_dd.get("m6_complete", False)),  # m6_complete
+                    int(_dd.get("m7_complete", False)),  # m7_complete
+                    int(_dd.get("m8_started", False)),  # m8_started
+                    _dd.get("m8_planned", ""),  # m8_planned
+                    "",  # m8_actual (not in sheet)
+                    int(_dd.get("m9_complete", False)),  # m9_complete
+                    _dd.get("m9_planned", ""),  # m9_planned
+                    "",  # m9_actual (not in sheet)
+                    _dd.get("upgrade_notes", ""),  # upgrade_notes
+                    _dd.get("dc_progress", ""),  # dc_progress
+                    "",  # owner_e2e (not in sheet)
+                    _dd.get("active_cse", ""),  # dc_assignment ← active_cse
+                    "",  # merged_at (not in sheet)
+                    _dd.get("cc_rep", ""),  # cc_rep
+                    "",  # cc_dsm (not in sheet)
+                    _dd.get("churn_risk", ""),  # churn_risk
+                    _dd.get("health_notes", ""),  # health_notes
+                    "",  # last_edited_by
+                    "",  # last_edited_date
+                    "",  # roadmap_url
+                    "",  # ps_plan_url
+                    _dd.get("sales_region", ""),  # account_region
+                    "",  # current_project_status
+                    _dd.get("next_renewal_date", ""),  # next_renewal_date
+                    "",  # past_due_planned
+                    "",  # upgrade_duration_weeks
+                    "",  # has_partner
+                    "",  # upgrade_partner
+                    "",  # m1_details
+                    "",  # m3_details
+                    "",  # m5_details
+                    "",  # milestone_aging
+                    "",  # days_since_milestone
+                    "",  # momentum_x
+                    "",  # entitlement_provision
+                    "",  # activation_status
+                    "",  # posture_workloads
+                    _dd.get("account_theatre", "EMEA"),  # account_theatre
+                    _dd.get("signal", ""),  # signal
+                    _dd.get("subtype", ""),  # subtype
+                    _dd.get("status_detail", ""),  # status_detail
+                    "",  # cohort
+                    "",  # area
+                    "",  # district
+                    "",  # team
                 ),
             )
             # Diff audit — only accounts with prior dc_data (skip first-load)
@@ -621,6 +627,7 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
 
     # Auto-rebuild m1_suggestions from fresh DB state — no stale data ever served
     _SKIP = {"Churning/Churned", "Cancelled", "Backoff", "Completed"}
+    _SKIP_CSE = {"PS"}  # PS-owned accounts are not in the scale cohort
     _HOLD_KW = [
         "hold off",
         "please hold",
@@ -678,6 +685,11 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                    b.signal,b.status_detail,b.upgrade_notes,b.subtype,b.churn_risk,b.health_notes
             FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
             WHERE a.customer_name!='' AND b.m1_complete=0
+              AND LOWER(a.customer_name) NOT IN (
+                SELECT LOWER(a2.customer_name)
+                FROM accounts a2 JOIN blocked_data b2 ON a2.account_id=b2.account_id
+                WHERE b2.m1_complete=1
+              )
             ORDER BY a.sales_region,a.customer_name""").fetchall()
         _mdb.execute("DELETE FROM m1_suggestions")
         for _mr in _m1_rows:
@@ -693,6 +705,8 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
             )
             if _orig == "Irene Garcia":
                 _load[_cse] = _load.get(_cse, 0) + 1
+            if _orig in _SKIP_CSE:
+                continue
             _st = _mr["status"] or ""
             _sig = _mr["signal"] or ""
             _det = (_mr["status_detail"] or "").lower()
@@ -1894,6 +1908,7 @@ def api_forecast(theatre: str = ""):
 
     today = datetime.now(timezone.utc).date()
     next_week_end = today + timedelta(days=7)
+    three_month_end = today + timedelta(days=90)
 
     try:
         with get_db() as conn:
@@ -1932,7 +1947,7 @@ def api_forecast(theatre: str = ""):
                 return None
 
             velocity = []
-            for w in range(3, -1, -1):
+            for w in range(11, -1, -1):
                 week_start = (
                     today - timedelta(days=today.weekday()) - timedelta(weeks=w)
                 )
@@ -2001,7 +2016,7 @@ def api_forecast(theatre: str = ""):
             if m9d < today:
                 d["status"] = "overdue"
                 overdue.append(d)
-            elif m9d <= next_week_end:
+            elif m9d <= three_month_end:
                 d["status"] = "upcoming"
                 next_targets.append(d)
 
@@ -2028,11 +2043,21 @@ def api_forecast(theatre: str = ""):
                 seen_names.add(n)
                 overdue_dedup.append(r)
 
+        next_week_counts = {"EMEA": 0, "AMER": 0, "JAPAC": 0, "LATAM": 0}
+        for r in next_targets_dedup:
+            raw = r.get("m9_date") or r.get("m9_planned")
+            m9d = parse_date(raw)
+            if m9d and today <= m9d <= next_week_end:
+                t = r.get("account_theatre") or "EMEA"
+                if t in next_week_counts:
+                    next_week_counts[t] += 1
+
         return {
             "next_targets": next_targets_dedup,
             "overdue": overdue_dedup,
             "velocity": velocity,
             "trend": trend,
+            "next_week_counts": next_week_counts,
         }
     except Exception as e:
         return {"error": str(e)}
@@ -2534,10 +2559,15 @@ if __name__ == "__main__":
         _mp(DATA_DIR / "ps_tracker.csv", STATE_FILE)
         print("  ✓ PS tracker merged")
     if (DATA_DIR / "dc_cse_tracker.csv").exists():
-        _run_dc_pipeline(DATA_DIR, STATE_FILE)
-        print(
-            "  ✓ DC CSE Tracker synced via _run_dc_pipeline (all theatres, milestones, audit)"
-        )
+        try:
+            _run_dc_pipeline(DATA_DIR, STATE_FILE)
+            print(
+                "  ✓ DC CSE Tracker synced via _run_dc_pipeline (all theatres, milestones, audit)"
+            )
+        except ValueError as _dc_err:
+            print(
+                f"  ⚠ DC CSE Tracker skipped — wrong sheet format (need gid=0 Detailed Account List): {_dc_err}"
+            )
     _mig(STATE_FILE)
     # Sync live_fire into DB
     _state = _j.loads(STATE_FILE.read_text())
