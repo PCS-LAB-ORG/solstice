@@ -19,7 +19,7 @@
 .ftrow:hover{background:var(--surface-2)}
 .fc{padding:.45rem .5rem;font-size:9.5px}
 .overdue-banner{padding:.4rem 1rem;background:var(--red-light);border-top:1px solid #fca5a5;font-size:9px;color:#dc2626;font-family:var(--mono)}
-.vel-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.vel-grid{display:grid;grid-template-columns:repeat(6,1fr)}
 .vel-w{padding:.85rem .75rem;text-align:center;border-right:1px solid var(--border);position:relative}
 .vel-w:last-child{border-right:none}
 .vel-w.cur{background:var(--green-light)}
@@ -57,26 +57,26 @@
 <!-- LEFT COLUMN -->
 <div style="display:flex;flex-direction:column;gap:1.1rem">
 
-  <!-- Next-week M9 targets -->
+  <!-- 12-week velocity — top of page -->
   <div class="card">
     <div class="card-head">
-      <span class="card-title">Next 7 Days — M9 Targets</span>
+      <span class="card-title">12-Week M9 Velocity</span>
+      <span style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="vel-sub">Last 12 weeks</span>
+    </div>
+    <div class="vel-grid" id="vel-grid"></div>
+    <div class="trend-footer" id="trend-footer">—</div>
+  </div>
+
+  <!-- Next 3 months M9 targets -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Next 3 Months — M9 Targets</span>
       <span style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="theatre-label">All Theatres</span>
     </div>
     <div class="ft-hdr">
       <span></span><span>Account</span><span>M9 Date</span><span>Theatre</span><span>DC</span><span>Confidence</span>
     </div>
     <div id="forecast-body"><div class="empty">Loading…</div></div>
-  </div>
-
-  <!-- 4-week velocity -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">4-Week M9 Velocity</span>
-      <span style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="vel-sub">Last 4 weeks</span>
-    </div>
-    <div class="vel-grid" id="vel-grid"></div>
-    <div class="trend-footer" id="trend-footer">—</div>
   </div>
 
 
@@ -87,8 +87,8 @@
   <!-- Next week by theatre -->
   <div class="card">
     <div class="card-head">
-      <span class="card-title">Next Week by Theatre</span>
-      <span style="font-size:9px;color:var(--muted)">M9 targets</span>
+      <span class="card-title">3 Months by Theatre</span>
+      <span style="font-size:9px;color:var(--muted)">M8 + M9 targets</span>
     </div>
     <div class="th-grid" id="th-tiles"></div>
   </div>
@@ -148,7 +148,7 @@ function renderForecast(d){
   var overdue=d.overdue||[];
   var html='';
   if(!targets.length&&!overdue.length){
-    html='<div class="empty">No M9 targets in next 7 days</div>';
+    html='<div class="empty">No M9 targets in next 3 months</div>';
   } else {
     targets.forEach(function(a){
       var dc=a.dc_progress||'—';
@@ -177,7 +177,7 @@ function renderForecast(d){
   }
   document.getElementById('forecast-body').innerHTML=html;
   var now=new Date();
-  var end=new Date(now); end.setDate(end.getDate()+7);
+  var end=new Date(now); end.setDate(end.getDate()+90);
   document.getElementById('date-range').textContent=
     now.getDate()+' '+MONTHS[now.getMonth()]+' – '+end.getDate()+' '+MONTHS[end.getMonth()];
 }
@@ -204,20 +204,29 @@ function renderVelocity(d){
   var ts={'up':'color:var(--green)','down':'color:var(--red)','flat':'color:var(--muted)'}[trend];
   var tl={'up':'&#9650; Trending UP','down':'&#9660; Trending DOWN','flat':'&#8594; Flat velocity'}[trend];
   var tf=document.getElementById('trend-footer');
-  tf.setAttribute('style',ts); tf.innerHTML=tl+' over 4 weeks';
+  tf.setAttribute('style',ts); tf.innerHTML=tl+' over 12 weeks';
 }
 
 function renderTheatreTiles(d){
   var targets=d.next_targets||[];
-  var byT={'EMEA':0,'AMER':0,'JAPAC':0,'LATAM':0};
-  targets.forEach(function(a){var t=a.account_theatre||'EMEA';if(byT[t]!==undefined)byT[t]++;});
+  var m9T={'EMEA':0,'AMER':0,'JAPAC':0,'LATAM':0};
+  var m8T={'EMEA':0,'AMER':0,'JAPAC':0,'LATAM':0};
+  targets.forEach(function(a){
+    var t=a.account_theatre||'EMEA';
+    if(m9T[t]!==undefined){
+      if(a.m8_started) m9T[t]++;
+      else m8T[t]++;
+    }
+  });
   document.getElementById('th-tiles').innerHTML=
     ['EMEA','AMER','JAPAC','LATAM'].map(function(t){
       var c=TH_COLS[t];
       return '<div class="th-tile">'
         +'<div class="th-name" style="color:'+c+'">'+t+'</div>'
-        +'<div class="th-big" style="color:'+c+'">'+byT[t]+'</div>'
-        +'<div class="th-sub">M9 targets next week</div>'
+        +'<div class="th-big" style="color:'+c+'">'+m9T[t]+'</div>'
+        +'<div style="font-size:9px;color:var(--muted);margin-top:2px">M9 in pipeline</div>'
+        +'<div style="font-size:11px;font-weight:700;font-family:var(--mono);margin-top:4px;color:var(--sky)">'+m8T[t]+'</div>'
+        +'<div style="font-size:8px;color:var(--muted)">M8 not started</div>'
         +'</div>';
     }).join('');
 }

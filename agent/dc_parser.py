@@ -56,6 +56,17 @@ def _subtype_from_detail(status_detail: str) -> str:
     # Legal blocker — check before no_contact (legal reason can appear in outreach strings)
     if "legal reason" in d or "legal block" in d:
         return "legal_blocker"
+    # "Blocked from customer outreach: <reason>" — parse sub-reason first
+    if "blocked from customer outreach" in d:
+        if (
+            "core rep is blocking" in d
+            or "technical reason" in d
+            or "account team" in d
+        ):
+            return "core_rep_blocking"
+        if "active deal" in d:
+            return "active_deal"
+        return "no_contact"
     # No contact — cannot reach customer
     if (
         "not able to contact" in d
@@ -63,7 +74,6 @@ def _subtype_from_detail(status_detail: str) -> str:
         or "no response" in d
         or "refusing to meet" in d
         or "escalating outreach" in d
-        or "blocked from customer outreach" in d
     ):
         return "no_contact"
     # Core rep / account team blocking
@@ -143,6 +153,12 @@ def _clean_cse(val: str) -> str:
     return v
 
 
+def _clean_rep(val: str) -> str:
+    """Normalise rep/DSM name: strip whitespace and reject placeholder dashes."""
+    v = val.strip()
+    return "" if v in ("-", "—", "N/A", "n/a", "TBD", "tbd") else v
+
+
 SUPPORTED_THEATRES = {"EMEA", "JAPAC", "AMER", "LATAM"}
 
 
@@ -208,8 +224,8 @@ def parse_dc_csv(filepath: Path) -> list[dict]:
                     "health_notes": row.get("Account Health Notes", "").strip(),
                     "pm_status": row.get("PM Status", "").strip(),
                     "dc_progress": row.get("DC Upgrade Progress Status", "").strip(),
-                    "cc_rep": row.get("cc_Rep (SPO)", "").strip(),
-                    "cc_dsm": row.get("cc_DSM (SPO)", "").strip(),
+                    "cc_rep": _clean_rep(row.get("cc_Rep (SPO)", "")),
+                    "cc_dsm": _clean_rep(row.get("cc_DSM (SPO)", "")),
                     "churn_risk": row.get(
                         "DC Indicated account churn risk", ""
                     ).strip(),

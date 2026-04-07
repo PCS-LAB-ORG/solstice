@@ -173,16 +173,19 @@ function _normSla(sla) {
 
 function _normM1(m1cats) {
   var flat = []; var seen = {};
-  (m1cats||[]).forEach(function(cat){ (cat.accounts||[]).forEach(function(a){
-    var key = (a.account_name||'').toLowerCase().trim();
-    if (!key || seen[key]) return; seen[key] = 1;
-    flat.push({
-      account_id: a.account_id||'', customer_name: a.account_name||'',
-      active_cse: a.assigned_cse||'', sales_region: a.region||'', signal: a.signal||'',
-      status_detail: a.notes||a.status_detail||'', health_notes: '',
-      dc_progress: a.dc_progress||'', subtype:'m1_plan',
+  (m1cats||[]).forEach(function(cat){
+    if (cat.category !== 'actionable') return;
+    (cat.accounts||[]).forEach(function(a){
+      var key = (a.account_name||'').toLowerCase().trim();
+      if (!key || seen[key]) return; seen[key] = 1;
+      flat.push({
+        account_id: a.account_id||'', customer_name: a.account_name||'',
+        active_cse: a.assigned_cse||'', sales_region: a.region||'', signal: a.signal||'',
+        status_detail: a.notes||a.status_detail||'', health_notes: '',
+        dc_progress: a.dc_progress||'', subtype:'m1_plan',
+      });
     });
-  }); });
+  });
   return flat;
 }
 
@@ -251,12 +254,16 @@ function _rebuildDropdowns(d, currentCse) {
 // ── Render all sections ─────────────────────────────────────────────────────
 function render() {
   var q = (document.getElementById('f-search').value || '').toLowerCase();
+  var filterRegion = (document.getElementById('f-region').value || '').toLowerCase();
+  var filterCse    = (document.getElementById('f-cse').value || '').toLowerCase();
   var total = 0;
   var sumHtml  = '';
   var secHtml  = '';
 
   TYPES.forEach(function(type) {
     var items = (_data[type.key] || []).filter(function(a) {
+      if (filterRegion && (a.sales_region || '').toLowerCase().indexOf(filterRegion) < 0) return false;
+      if (filterCse    && (a.active_cse   || '').toLowerCase() !== filterCse) return false;
       return !q
         || (a.customer_name || '').toLowerCase().indexOf(q) >= 0
         || (a.active_cse    || '').toLowerCase().indexOf(q) >= 0

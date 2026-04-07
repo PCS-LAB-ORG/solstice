@@ -289,65 +289,56 @@ def api_cse():
 
 def _download_live_from_drive() -> dict:
     """
-    Download all 4 live CSVs from Google Drive using browser auth.
-    Opens each export URL → browser (corp Okta auth) downloads to ~/Downloads
-    → moves to data/ → pipeline runs on fresh data.
+    Download DC CSE Tracker CSV directly from Google Drive using ADC token.
+    Reads file ID from the locally synced .gsheet file — no browser needed.
     """
-    import json as _j, glob as _g, shutil as _sh, time as _t, os as _os
-    from datetime import datetime, timezone
+    import json as _j, warnings as _w, subprocess as _sp
 
-    config = _j.loads((DATA_DIR / "drive_config.json").read_text())
-    downloads = Path.home() / "Downloads"
-    results = {}
+    _w.filterwarnings("ignore")
+    try:
+        import requests as _req
+    except ImportError:
+        return {"DC CSE Tracker": "⚠️ requests not installed"}
 
-    # Only DC CSE Tracker is used by the pipeline — emea_accounts and blocked_accounts
-    # are no longer pipeline sources (DC is sole source of truth for all data).
-    FILE_MAP = {
-        "DC CSE Tracker": ("dc_cse_tracker.csv", None),
-        # emea_accounts.csv and blocked_accounts.csv removed — DC CSE Tracker is sole source
-    }
+    DRIVE_ROOT = (
+        Path.home()
+        / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com/My Drive/EMEA CC "
+    )
+    gsheet = (
+        DRIVE_ROOT
+        / "DC CSE Tracker (Instant sync underlying data to upgrade tracker).gsheet"
+    )
 
-    for f in config["files"]:
-        name = f["name"]
-        if name not in FILE_MAP:
-            continue
-        dest_name, gid = FILE_MAP[name]
-        file_id = f.get("file_id", "")
-        if not file_id:
-            continue
+    try:
+        file_id = _j.loads(gsheet.read_text())["doc_id"]
+    except Exception as e:
+        return {"DC CSE Tracker": f"⚠️ cannot read .gsheet: {e}"}
 
-        # Use stored gid for blocked accounts (tab-aware)
-        if name == "EMEA Solistce Blocked Accounts":
-            gid = f.get("current_gid", gid)
+    try:
+        token = _sp.check_output(
+            ["gcloud", "auth", "application-default", "print-access-token"],
+            text=True,
+            stderr=_sp.DEVNULL,
+        ).strip()
+    except Exception as e:
+        return {"DC CSE Tracker": f"⚠️ ADC token failed: {e}"}
 
-        url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv"
-        if gid:
-            url += f"&gid={gid}"
-
-        # Track existing downloads before opening browser
-        before = set(_g.glob(str(downloads / "*.csv")))
-        subprocess.Popen(["open", url])
-        _t.sleep(0.5)
-
-        # Wait up to 20s for new CSV in Downloads
-        deadline = _t.monotonic() + 20
-        downloaded = None
-        while _t.monotonic() < deadline:
-            _t.sleep(1)
-            after = set(_g.glob(str(downloads / "*.csv")))
-            new_files = after - before
-            if new_files:
-                downloaded = sorted(new_files, key=_os.path.getmtime)[-1]
-                break
-
-        if downloaded:
-            dest = DATA_DIR / dest_name
-            _sh.move(downloaded, dest)
-            results[name] = f"✅ downloaded → {dest_name}"
-        else:
-            results[name] = "⚠️ no download detected (check browser)"
-
-    return results
+    try:
+        r = _req.get(
+            f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv",
+            headers={"Authorization": f"Bearer {token}"},
+            verify=False,
+            allow_redirects=True,
+            timeout=30,
+        )
+        if r.status_code != 200:
+            return {"DC CSE Tracker": f"⚠️ Drive returned {r.status_code}"}
+        dest = DATA_DIR / "dc_cse_tracker.csv"
+        dest.write_text(r.content.decode("utf-8"), encoding="utf-8")
+        rows = r.text.count("\n")
+        return {"DC CSE Tracker": f"✅ {rows} rows downloaded from Drive"}
+    except Exception as e:
+        return {"DC CSE Tracker": f"⚠️ download failed: {e}"}
 
 
 _DC_MILESTONE_WATCH = [
@@ -397,14 +388,14 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
     _now = _dt.now(_tz.utc).isoformat()
     _audit = 0
 
-    # Parse Detailed Account List (gid=0) using name→ID lookup
-    _name_to_id = _load_n2id(data_dir)
+    # Parse Sheet1 (full DC CSE Tracker — all theatres, all milestones)
+    from agent.dc_parser import parse_dc_csv as _parse_dc
+
     _all_dc = {
-        rec["account_id"]: rec
-        for rec in _parse_al(data_dir / "dc_cse_tracker.csv", _name_to_id)
+        rec["account_id"]: rec for rec in _parse_dc(data_dir / "dc_cse_tracker.csv")
     }
     result = {
-        "matched": sum(1 for aid in _all_dc if aid in _name_to_id.values()),
+        "matched": len(_all_dc),
         "total": len(_all_dc),
     }
 
@@ -522,62 +513,62 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
             """,
                 (
                     _aid,
-                    int(_dd.get("m0_complete", False)),  # m0_complete
-                    int(_dd.get("m1_complete", False)),  # m1_complete
-                    "",  # m1_planned (not in sheet)
-                    int(_dd.get("m2_complete", False)),  # m2_complete
-                    "",  # m2_planned (not in sheet)
-                    int(_dd.get("m3_complete", False)),  # m3_complete
-                    _dd.get("m3_planned", ""),  # m3_planned
-                    int(_dd.get("m4_complete", False)),  # m4_complete
-                    "",  # m4_planned (not in sheet)
-                    int(_dd.get("m5_complete", False)),  # m5_complete
-                    "",  # m5_planned (not in sheet)
-                    int(_dd.get("m6_complete", False)),  # m6_complete
-                    int(_dd.get("m7_complete", False)),  # m7_complete
-                    int(_dd.get("m8_started", False)),  # m8_started
-                    _dd.get("m8_planned", ""),  # m8_planned
-                    "",  # m8_actual (not in sheet)
-                    int(_dd.get("m9_complete", False)),  # m9_complete
-                    _dd.get("m9_planned", ""),  # m9_planned
-                    "",  # m9_actual (not in sheet)
-                    _dd.get("upgrade_notes", ""),  # upgrade_notes
-                    _dd.get("dc_progress", ""),  # dc_progress
-                    "",  # owner_e2e (not in sheet)
-                    _dd.get("active_cse", ""),  # dc_assignment ← active_cse
-                    "",  # merged_at (not in sheet)
-                    _dd.get("cc_rep", ""),  # cc_rep
-                    "",  # cc_dsm (not in sheet)
-                    _dd.get("churn_risk", ""),  # churn_risk
-                    _dd.get("health_notes", ""),  # health_notes
-                    "",  # last_edited_by
-                    "",  # last_edited_date
-                    "",  # roadmap_url
-                    "",  # ps_plan_url
-                    _dd.get("sales_region", ""),  # account_region
-                    "",  # current_project_status
-                    _dd.get("next_renewal_date", ""),  # next_renewal_date
-                    "",  # past_due_planned
-                    "",  # upgrade_duration_weeks
-                    "",  # has_partner
-                    "",  # upgrade_partner
-                    "",  # m1_details
-                    "",  # m3_details
-                    "",  # m5_details
-                    "",  # milestone_aging
-                    "",  # days_since_milestone
-                    "",  # momentum_x
-                    "",  # entitlement_provision
-                    "",  # activation_status
-                    "",  # posture_workloads
-                    _dd.get("account_theatre", "EMEA"),  # account_theatre
-                    _dd.get("signal", ""),  # signal
-                    _dd.get("subtype", ""),  # subtype
-                    _dd.get("status_detail", ""),  # status_detail
-                    "",  # cohort
-                    "",  # area
-                    "",  # district
-                    "",  # team
+                    int(_dd.get("m0_complete", False)),
+                    int(_dd.get("m1_complete", False)),
+                    _dd.get("m1_planned", ""),
+                    int(_dd.get("m2_complete", False)),
+                    _dd.get("m2_planned", ""),
+                    int(_dd.get("m3_complete", False)),
+                    _dd.get("m3_planned", ""),
+                    int(_dd.get("m4_complete", False)),
+                    _dd.get("m4_planned", ""),
+                    int(_dd.get("m5_complete", False)),
+                    _dd.get("m5_planned", ""),
+                    int(_dd.get("m6_complete", False)),
+                    int(_dd.get("m7_complete", False)),
+                    int(_dd.get("m8_started", False)),
+                    _dd.get("m8_planned", ""),
+                    _dd.get("m8_actual", ""),
+                    int(_dd.get("m9_complete", False)),
+                    _dd.get("m9_planned", ""),
+                    _dd.get("m9_actual", ""),
+                    _dd.get("upgrade_notes", ""),
+                    _dd.get("dc_progress", ""),
+                    _dd.get("owner_e2e", ""),
+                    _dd.get("dc_assignment", ""),
+                    _dd.get("merged_at", ""),
+                    _dd.get("cc_rep", ""),
+                    _dd.get("cc_dsm", ""),
+                    _dd.get("churn_risk", ""),
+                    _dd.get("health_notes", ""),
+                    _dd.get("last_edited_by", ""),
+                    _dd.get("last_edited_date", ""),
+                    _dd.get("roadmap_url", ""),
+                    _dd.get("ps_plan_url", ""),
+                    _dd.get("account_region", ""),
+                    _dd.get("current_project_status", ""),
+                    _dd.get("next_renewal_date", ""),
+                    _dd.get("past_due_planned", ""),
+                    _dd.get("upgrade_duration_weeks", ""),
+                    _dd.get("has_partner", ""),
+                    _dd.get("upgrade_partner", ""),
+                    _dd.get("m1_details", ""),
+                    _dd.get("m3_details", ""),
+                    _dd.get("m5_details", ""),
+                    _dd.get("milestone_aging", ""),
+                    _dd.get("days_since_milestone", ""),
+                    _dd.get("momentum_x", ""),
+                    _dd.get("entitlement_provision", ""),
+                    _dd.get("activation_status", ""),
+                    _dd.get("posture_workloads", ""),
+                    _dd.get("account_theatre", "EMEA"),
+                    _dd.get("signal", ""),
+                    _dd.get("subtype", ""),
+                    _dd.get("status_detail", ""),
+                    _dd.get("cohort", ""),
+                    _dd.get("area", ""),
+                    _dd.get("district", ""),
+                    _dd.get("team", ""),
                 ),
             )
             # Diff audit — only accounts with prior dc_data (skip first-load)
@@ -685,6 +676,7 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                    b.signal,b.status_detail,b.upgrade_notes,b.subtype,b.churn_risk,b.health_notes
             FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
             WHERE a.customer_name!='' AND b.m1_complete=0
+              AND b.cohort = 'Scale cohort'
               AND LOWER(a.customer_name) NOT IN (
                 SELECT LOWER(a2.customer_name)
                 FROM accounts a2 JOIN blocked_data b2 ON a2.account_id=b2.account_id
@@ -907,85 +899,17 @@ async def api_run_full(request: Request):
         yield event(
             "Google Drive",
             "DOWNLOADING",
-            "Opening export URLs in browser — corp auth handles it",
+            "Pulling DC CSE Tracker via ADC token from local Drive mount",
         )
-        import glob as _g2, os as _os2, shutil as _sh2
-
-        downloads = Path.home() / "Downloads"
-        _cfg = json.loads((data_dir / "drive_config.json").read_text())
-        FILE_MAP2 = {
-            "DC CSE Tracker": ("dc_cse_tracker.csv", None),
-            # PS Tracker excluded — Drive default tab exports wrong format
-        }
-        for _f in _cfg["files"]:
-            _name = _f["name"]
-            if _name not in FILE_MAP2:
-                continue
-            _dest_name, _ = FILE_MAP2[_name]
-            _fid = _f.get("file_id", "")
-            if not _fid:
-                continue
-            _gid = _f.get("current_gid", "") if "Blocked" in _name else ""
-            _url = f"https://docs.google.com/spreadsheets/d/{_fid}/export?format=csv"
-            if _gid:
-                _url += f"&gid={_gid}"
-            _before = set(_g2.glob(str(downloads / "*.csv")))
-            subprocess.Popen(["open", _url])
-            await asyncio.sleep(0.3)
-            _deadline = asyncio.get_event_loop().time() + 15
-            _got = False
-            while asyncio.get_event_loop().time() < _deadline:
-                await asyncio.sleep(1)
-                _after = set(_g2.glob(str(downloads / "*.csv")))
-                _new = _after - _before
-                if _new:
-                    _dl = sorted(_new, key=_os2.path.getmtime)[-1]
-                    _sh2.move(_dl, data_dir / _dest_name)
-                    _rows = (
-                        sum(
-                            1 for _ in open(data_dir / _dest_name, encoding="utf-8-sig")
-                        )
-                        - 1
-                    )
-                    yield event("  →", "OK", f"{_name}: {_rows} rows (LIVE)", "green")
-                    _got = True
-                    break
-            if not _got:
-                yield event(
-                    "  →", "WARN", f"{_name}: browser download pending", "amber"
-                )
+        dl_results = _download_live_from_drive()
+        for _name, _msg in dl_results.items():
+            _color = "green" if "✅" in _msg else "amber"
+            yield event(
+                "  →", "OK" if "✅" in _msg else "WARN", f"{_name}: {_msg}", _color
+            )
         await asyncio.sleep(0.2)
 
-        yield event("CSV Files", "CHECK", "Verifying downloaded files")
-        for name, path in csvs.items():
-            if path.exists():
-                import csv as _csv
-
-                rows = sum(1 for _ in open(path, encoding="utf-8-sig")) - 1
-                size = path.stat().st_size // 1024
-                yield event("  →", "OK", f"{name}: {rows} rows · {size}KB", "green")
-            else:
-                yield event("  →", "MISSING", f"{name}: not found", "red")
-        await asyncio.sleep(0.1)
-
-        # Step 3: PS tracker (supplementary — Clarizen IDs, PSC names)
-        yield event("PS Tracker", "LOADING", "Supplementary PS engagement data")
-        yield event("PS Tracker", "LOADING", "Fuzzy name matching (threshold 0.85)")
-        try:
-            from agent.ps_parser import load_and_merge as mp
-
-            p = mp(data_dir / "ps_tracker.csv", data_dir / "state.json")
-            yield event(
-                "  →",
-                "OK",
-                f"{p['matched']}/{p['total']} matched · {p['unmatched']} not in EMEA tracker",
-                "green",
-            )
-        except Exception as e:
-            yield event("  →", "ERROR", str(e)[:80], "red")
-        await asyncio.sleep(0.1)
-
-        # Step 4b: DC CSE Tracker (master — milestones, CSE, diff audit)
+        # Step 3: DC CSE Tracker (master — milestones, CSE, diff audit)
         yield event(
             "DC CSE Tracker",
             "LOADING",
@@ -1009,61 +933,24 @@ async def api_run_full(request: Request):
             yield event("  →", "ERROR", str(e)[:80], "red")
         await asyncio.sleep(0.1)
 
-        # Step 5: AI Enricher
-        yield event(
-            "Ollama Enricher",
-            "RUNNING",
-            "Extracting blocker/owner/accountable from comments (qwen2.5:14b)",
-        )
+        # Step 4: Data Quality
+        yield event("Data Quality", "CHECK", "Verifying DC CSE Tracker")
         try:
-            from agent.enricher import enrich_accounts
-
-            e = enrich_accounts(data_dir / "state.json")
-            yield event(
-                "  →",
-                "OK",
-                f"{e['enriched']} enriched · {e['skipped']} cached (comments unchanged)",
-                "green",
-            )
-        except Exception as e:
-            yield event("  →", "ERROR", str(e)[:80], "red")
-        await asyncio.sleep(0.1)
-
-        # Step 6: DB Sync
-        yield event("SQLite DB", "SYNCING", "Writing all accounts to solstice.db")
-        try:
-            from agent.db import sync_all
-
-            s = sync_all(data_dir / "state.json")
-            with get_db() as conn:
-                total_rows = conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
-                history_rows = conn.execute(
-                    "SELECT COUNT(*) FROM status_history"
+            with get_db() as _dqconn:
+                _n = _dqconn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
+                _no_cse = _dqconn.execute(
+                    "SELECT COUNT(*) FROM accounts WHERE active_cse IS NULL OR active_cse=''"
                 ).fetchone()[0]
+                _m9 = (
+                    _dqconn.execute(
+                        "SELECT SUM(m9_complete) FROM blocked_data"
+                    ).fetchone()[0]
+                    or 0
+                )
             yield event(
                 "  →",
                 "OK",
-                f"{s['synced']} accounts synced · {s['status_changes']} status changes · {history_rows} history rows · {s['errors']} errors",
-                "green",
-            )
-        except Exception as e:
-            yield event("  →", "ERROR", str(e)[:80], "red")
-        await asyncio.sleep(0.1)
-
-        # Step 7: Validate data quality
-        yield event("Data Quality", "CHECK", "Cross-checking all 3 CSVs")
-        try:
-            import json as _json2
-
-            state = _json2.loads((data_dir / "state.json").read_text())
-            accs = list(state.get("accounts", {}).values())
-            no_st = sum(1 for a in accs if not (a.get("status") or "").strip())
-            no_cse = sum(1 for a in accs if not (a.get("active_cse") or "").strip())
-            live_fire = sum(1 for a in accs if a.get("live_fire"))
-            yield event(
-                "  →",
-                "OK",
-                f"{len(accs)} accounts total · {no_st} missing status · {no_cse} no CSE · {live_fire} live fire",
+                f"{_n} accounts · {_no_cse} no CSE · {_m9} M9 complete",
                 "green",
             )
         except Exception as e:
@@ -1867,6 +1754,7 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
                 WHERE a.customer_name != ''
                   AND b.signal IN ('blocked','at_risk')
                   AND b.m9_complete = 0
+                  AND b.cohort = 'Scale cohort'
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                   AND (? = '' OR LOWER(a.sales_region) LIKE LOWER(?))
                   AND (? = '' OR a.active_cse = ?)
@@ -1920,6 +1808,7 @@ def api_forecast(theatre: str = ""):
                        b.dc_progress, b.churn_risk, b.m8_actual
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != '' AND b.m9_complete=0
+                  AND b.cohort = 'Scale cohort'
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY b.m9_planned
             """,
@@ -2568,7 +2457,10 @@ if __name__ == "__main__":
             print(
                 f"  ⚠ DC CSE Tracker skipped — wrong sheet format (need gid=0 Detailed Account List): {_dc_err}"
             )
-    _mig(STATE_FILE)
+    try:
+        _mig(STATE_FILE)
+    except Exception as _mig_err:
+        print(f"  ⚠ state migration skipped: {_mig_err}")
     # Sync live_fire into DB
     _state = _j.loads(STATE_FILE.read_text())
     with get_db() as _conn:
