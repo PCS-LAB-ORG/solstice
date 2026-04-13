@@ -84,13 +84,14 @@ def _subtype_from_detail(status_detail: str) -> str:
         or "ngs sales and core team" in d
     ):
         return "core_rep_blocking"
+    # Self-hosted deployment — distinct from generic tech blockers
+    if "self-hosted" in d or "self hosted" in d:
+        return "self_hosted"
     # Technical blocker
     if (
         "technical reason" in d
         or "technical blocker" in d
         or "tech limitation" in d
-        or "self-hosted" in d
-        or "self hosted" in d
         or "behind schedule due to technical" in d
         or "confirmed technical blockers" in d
         or "tenant provision" in d
