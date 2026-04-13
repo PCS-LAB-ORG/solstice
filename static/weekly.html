@@ -4,56 +4,140 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x2600;</text></svg>">
 <title>Solstice — Weekly</title>
-
 <link rel="stylesheet" href="/static/solstice.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+.tiles{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.tile{background:var(--surface);border-radius:8px;box-shadow:var(--shadow-sm);padding:12px 16px;flex:1;min-width:72px;border-top:3px solid transparent;cursor:pointer;transition:.15s}
+.tile:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.tile.dim{opacity:.35;cursor:default}
+.tile-n{font-size:24px;font-weight:800;font-family:var(--mono);line-height:1}
+.tile-l{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+.w-sec{margin-bottom:20px}
+.w-sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border-soft)}
+.w-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.w-title{font-size:12px;font-weight:700;color:var(--text);flex:1}
+.w-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.w-card{background:var(--surface);border-radius:8px;box-shadow:var(--shadow-sm);display:flex;overflow:hidden;cursor:pointer;transition:.15s}
+.w-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.w-bar{width:4px;flex-shrink:0}
+.w-body{padding:11px 13px;flex:1;min-width:0}
+.w-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-cse{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-date{font-size:9px;font-family:var(--mono);color:var(--muted);margin-top:5px}
+</style>
 </head>
 <body>
 <nav id="s-nav" class="s-nav"></nav>
+<div style="padding:.5rem 1.5rem;border-bottom:1px solid var(--border-soft);display:flex;gap:.5rem;flex-wrap:wrap;background:var(--surface)">
+  <button class="pill act" data-t="" onclick="setT(this,'')">All</button>
+  <button class="pill" data-t="EMEA" onclick="setT(this,'EMEA')">EMEA</button>
+  <button class="pill" data-t="AMER" onclick="setT(this,'AMER')">AMER</button>
+  <button class="pill" data-t="JAPAC" onclick="setT(this,'JAPAC')">JAPAC</button>
+  <button class="pill" data-t="LATAM" onclick="setT(this,'LATAM')">LATAM</button>
+</div>
 <div id="main" class="s-main"></div>
-<script src="/static/solstice.js"></script>
+<script src="/static/solstice.js?v=2"></script>
 <script>
 S.initNav('weekly');
 S.restoreCard();
-var params=new URLSearchParams(location.search);
-var currentDate=params.get('date')||'';
-var theatre=params.get('theatre')||'';
-function prevWeek(){var d=currentDate?new Date(currentDate):new Date();d.setDate(d.getDate()-7);currentDate=d.toISOString().slice(0,10);load();}
-function nextWeek(){var d=currentDate?new Date(currentDate):new Date();d.setDate(d.getDate()+7);currentDate=d.toISOString().slice(0,10);load();}
-function load(){
-  var qp=[];if(currentDate)qp.push('date='+currentDate);if(theatre)qp.push('theatre='+encodeURIComponent(theatre));
-  fetch('/api/weekly-movements'+(qp.length?'?'+qp.join('&'):'')).then(function(r){return r.json();}).then(render).catch(function(){});
+
+var params = new URLSearchParams(location.search);
+var currentDate = params.get('date') || '';
+var theatre = params.get('theatre') || '';
+
+if (theatre) {
+  document.querySelectorAll('.pill[data-t]').forEach(function(p) {
+    p.classList.toggle('act', p.dataset.t === theatre);
+  });
 }
-function _section(title,color,items,dateField){
-  if(!items.length)return '';
-  var rows=items.map(function(a){
-    var aid=(a.account_id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return '<div onclick="S.openAccountCard(\''+aid+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border-soft);cursor:pointer" onmouseover="this.style.background=\'var(--surface-2)\'" onmouseout="this.style.background=\'\'">'
-      +'<div><div style="font-size:11px;font-weight:600;color:var(--text)">'+S.esc(a.customer_name||'')+'</div>'
-      +'<div style="font-size:9px;color:var(--muted)">'+S.esc(a.active_cse||'—')+' · '+S.esc(a.sales_region||'—')+'</div></div>'
-      +'<span style="font-size:10px;color:var(--muted)">'+String(a[dateField]||'').slice(0,10)+'</span></div>';
+
+function setT(el, t) {
+  document.querySelectorAll('.pill[data-t]').forEach(function(p) { p.classList.remove('act'); });
+  el.classList.add('act');
+  theatre = t;
+  load();
+}
+
+// Default to previous week for leadership view (last week is "done")
+function _lastMonday() {
+  var d = new Date();
+  d.setDate(d.getDate() - d.getDay() - 6); // last Monday
+  return d.toISOString().slice(0, 10);
+}
+if (!currentDate) currentDate = _lastMonday();
+
+function prevWeek() { var d = new Date(currentDate); d.setDate(d.getDate()-7); currentDate = d.toISOString().slice(0,10); load(); }
+function nextWeek() { var d = new Date(currentDate); d.setDate(d.getDate()+7); currentDate = d.toISOString().slice(0,10); load(); }
+
+function load() {
+  var qp = ['date=' + currentDate];
+  if (theatre) qp.push('theatre=' + encodeURIComponent(theatre));
+  fetch('/api/weekly-movements?' + qp.join('&'))
+    .then(function(r) { return r.json(); }).then(render).catch(function() {});
+}
+
+var MILESTONES = [
+  { key: 'm8_started',     label: 'M8 Started',         color: 'var(--sky)',    dateField: 'm8_actual' },
+  { key: 'new_m9',         label: 'M9 Complete',         color: 'var(--green)',  dateField: 'milestone_date' },
+  { key: 'm1_outreach',    label: 'M1 Outreach',         color: 'var(--sky)',    dateField: 'milestone_date' },
+  { key: 'm2_entitlements',label: 'M2 Entitlements',     color: 'var(--sky)',    dateField: 'milestone_date' },
+  { key: 'm3_buyin',       label: 'M3 Buy-in',           color: 'var(--teal)',   dateField: 'milestone_date' },
+  { key: 'm4_discovery',   label: 'M4 Discovery',        color: '#8b5cf6',       dateField: 'milestone_date' },
+  { key: 'm5_tech',        label: 'M5 Tech Validation',  color: 'var(--amber)',  dateField: 'milestone_date' },
+];
+
+function _tile(m, count) {
+  var cls = count === 0 ? ' dim' : '';
+  return '<div class="tile' + cls + '" style="border-top-color:' + m.color + '" onclick="scrollTo(0,document.getElementById(\'sec-' + m.key + '\').offsetTop-20)">'
+    + '<div class="tile-n" style="color:' + m.color + '">' + count + '</div>'
+    + '<div class="tile-l">' + S.esc(m.label) + '</div></div>';
+}
+
+function _section(m, items) {
+  if (!items.length) return '';
+  var cards = items.map(function(a) {
+    var aid = (a.account_id || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var date = m.dateField ? (S.fmtDateTime ? S.fmtDateTime(a[m.dateField]) : String(a[m.dateField]||'').slice(0,10)) : '—';
+    return '<div class="w-card" onclick="S.openAccountCard(\'' + aid + '\')">'
+      + '<div class="w-bar" style="background:' + m.color + '"></div>'
+      + '<div class="w-body">'
+      + '<div class="w-name">' + S.esc(a.customer_name || '') + '</div>'
+      + '<div class="w-cse">' + S.esc(a.active_cse || '—') + ' · ' + S.esc(a.sales_region || '—') + '</div>'
+      + '<div class="w-date">' + (date || '—') + '</div>'
+      + '</div></div>';
   }).join('');
-  return '<div class="card" style="margin-bottom:1rem">'
-    +'<div class="card-head">'
-    +'<span class="card-title" style="color:'+color+'">'+title+'</span>'
-    +'<span class="badge badge-gray">'+items.length+'</span></div>'+rows+'</div>';
+  return '<div class="w-sec" id="sec-' + m.key + '">'
+    + '<div class="w-sec-hdr">'
+    + '<div class="w-dot" style="background:' + m.color + '"></div>'
+    + '<span class="w-title">' + S.esc(m.label) + '</span>'
+    + '<span class="badge badge-gray">' + items.length + '</span></div>'
+    + '<div class="w-grid">' + cards + '</div></div>';
 }
-function render(data){
-  var main=document.getElementById('main');
-  var total=(data.new_m9||[]).length+(data.m8_started||[]).length+(data.newly_blocked||[]).length+(data.resolved||[]).length;
-  main.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem">'
-    +'<div><h1 style="font-size:1rem;font-weight:800;color:var(--text)">Weekly Movements</h1>'
-    +'<div style="font-size:10px;color:var(--muted);margin-top:2px">Week of '+(data.week_of||'')+'  · '+total+' movements</div></div>'
-    +'<div style="display:flex;gap:.5rem;align-items:center">'
-    +'<button onclick="prevWeek()" class="pill">← Prev</button>'
-    +'<button onclick="nextWeek()" class="pill">Next →</button>'
-    +'</div></div>'
-    +(total===0?'<p class="text-muted">No movements this week.</p>':'')
-    +_section('New M9 Complete','var(--green)',data.new_m9||[],'m9_actual')
-    +_section('M8 Started','var(--sky)',data.m8_started||[],'m8_actual')
-    +_section('Newly Blocked','var(--red)',data.newly_blocked||[],'')
-    +_section('Resolved','var(--green)',data.resolved||[],'');
+
+function render(data) {
+  var main = document.getElementById('main');
+  var total = MILESTONES.reduce(function(s, m) { return s + (data[m.key] || []).length; }, 0);
+
+  var tiles = '<div class="tiles">' + MILESTONES.map(function(m) {
+    return _tile(m, (data[m.key] || []).length);
+  }).join('') + '</div>';
+
+  var sections = MILESTONES.map(function(m) {
+    return _section(m, data[m.key] || []);
+  }).join('');
+
+  main.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:.5rem">'
+    + '<div><h1 style="font-size:1rem;font-weight:800;color:var(--text)">Weekly Movements</h1>'
+    + '<div style="font-size:10px;color:var(--muted);margin-top:2px">Week of ' + (data.week_of || '') + ' · ' + total + ' movements</div></div>'
+    + '<div style="display:flex;gap:.5rem">'
+    + '<button onclick="prevWeek()" class="pill">← Prev</button>'
+    + '<button onclick="nextWeek()" class="pill">Next →</button>'
+    + '</div></div>'
+    + tiles
+    + (total === 0 ? '<p class="text-muted">No movements this week.</p>' : sections);
 }
+
 load();
 </script>
 </body></html>

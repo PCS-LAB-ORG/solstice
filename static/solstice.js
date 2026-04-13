@@ -11,6 +11,55 @@
 (function(S) {
 'use strict';
 
+// ── Date formatting (local time) ─────────────────────────────────────────────
+
+/**
+ * Parse any date string the platform uses:
+ *   ISO UTC  "2026-04-13T09:22:42+00:00"
+ *   DC       "4/13/2026 9:22:42"   (treated as UTC, same source as API server)
+ *   Plain    "2026-04-13"
+ * Returns a Date object or null.
+ */
+S.parseDate = function(s) {
+  if (!s) return null;
+  s = String(s).trim();
+  // ISO with offset — native parse handles this correctly
+  if (s.indexOf('T') !== -1 || s.indexOf('+') !== -1 || s.slice(-1) === 'Z') {
+    var d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+  // DC format: M/D/YYYY H:MM:SS or M/D/YYYY
+  var dc = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (dc) {
+    return new Date(Date.UTC(+dc[3], +dc[1]-1, +dc[2], +(dc[4]||0), +(dc[5]||0), +(dc[6]||0)));
+  }
+  // Plain YYYY-MM-DD — treat as local midnight
+  var d2 = new Date(s + (s.length === 10 ? 'T00:00:00' : ''));
+  return isNaN(d2) ? null : d2;
+};
+
+/** Format date+time in browser local time: "Apr 13 · 09:22" */
+S.fmtDateTime = function(s) {
+  var d = S.parseDate(s);
+  if (!d) return '—';
+  return d.toLocaleDateString(undefined, {month:'short', day:'numeric'})
+    + ' · ' + d.toLocaleTimeString(undefined, {hour:'2-digit', minute:'2-digit', hour12:false});
+};
+
+/** Format date only in browser local time: "Apr 13, 2026" */
+S.fmtDate = function(s) {
+  var d = S.parseDate(s);
+  if (!d) return '—';
+  return d.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+};
+
+/** Format time only in browser local time: "09:22" */
+S.fmtTime = function(s) {
+  var d = S.parseDate(s);
+  if (!d) return '—';
+  return d.toLocaleTimeString(undefined, {hour:'2-digit', minute:'2-digit', hour12:false});
+};
+
 // ── Pure functions ────────────────────────────────────────────────────────────
 
 /**
@@ -189,7 +238,7 @@ function _renderCard(d) {
       +'<span style="color:#e2e8f0">'+_esc(h.field_name||'status')+'</span>'
       +' <span style="color:#475569">'+_esc(h.old_status||'\u2014')+' \u2192 </span>'
       +'<span style="color:#22d3ee">'+_esc(h.new_status||'\u2014')+'</span>'
-      +'<span style="float:right">'+String(h.changed_at||'').slice(0,10)+'</span>'
+      +'<span style="float:right">'+S.fmtDateTime(h.changed_at)+'</span>'
       +'</div>';
   }).join('');
 
@@ -251,6 +300,7 @@ var _PAGES = [
   {id:'audit',   label:'Audit',    url:'/audit'},
   {id:'cse',     label:'CSE',      url:'/cse'},
   {id:'weekly',  label:'Weekly',   url:'/weekly'},
+  {id:'scope',   label:'Scope',    url:'/scope'},
 ];
 
 S.initNav = function(activePage) {

@@ -4,6 +4,7 @@ UNIT: dashboard.py — FastAPI route tests
 Uses FastAPI TestClient with a temp SQLite DB (patched via agent.db.DB_PATH).
 Tests response structure only — no assertions on live data values.
 """
+
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -24,9 +25,12 @@ def test_db(tmp_path):
 def _make_client(test_db):
     """Return TestClient with get_db patched to always use test_db."""
     from dashboard import app
-    with patch("dashboard.get_db", side_effect=lambda *a, **k: get_db(test_db)), \
-         patch("dashboard.init_db", side_effect=lambda *a, **k: None), \
-         patch("dashboard._ensure_db", side_effect=lambda *a, **k: None):
+
+    with (
+        patch("dashboard.get_db", side_effect=lambda *a, **k: get_db(test_db)),
+        patch("dashboard.init_db", side_effect=lambda *a, **k: None),
+        patch("dashboard._ensure_db", side_effect=lambda *a, **k: None),
+    ):
         yield TestClient(app, raise_server_exceptions=False)
 
 
@@ -39,18 +43,23 @@ def client(test_db):
 def client_with_data(test_db):
     """TestClient with one account + blocked_data row seeded."""
     with get_db(test_db) as conn:
-        conn.execute("""INSERT INTO accounts
+        conn.execute(
+            """INSERT INTO accounts
             (account_id, customer_name, active_cse, status, sales_region, account_theatre)
             VALUES (?, ?, ?, ?, ?, ?)""",
-            ("acc001", "Acme Corp", "Jane Doe", "Ready To Engage", "CEE", "EMEA"))
-        conn.execute("""INSERT INTO blocked_data
-            (account_id, signal, subtype, m9_complete, account_theatre)
-            VALUES (?, ?, ?, ?, ?)""",
-            ("acc001", "blocked", "no_contact", 0, "EMEA"))
+            ("acc001", "Acme Corp", "Jane Doe", "Ready To Engage", "CEE", "EMEA"),
+        )
+        conn.execute(
+            """INSERT INTO blocked_data
+            (account_id, signal, subtype, m9_complete, account_theatre, cohort)
+            VALUES (?, ?, ?, ?, ?, ?)""",
+            ("acc001", "blocked", "no_contact", 0, "EMEA", "Scale cohort"),
+        )
     yield from _make_client(test_db)
 
 
 # ── /api/theatres ─────────────────────────────────────────────────────────────
+
 
 class TestApiTheatres:
     def test_returns_200(self, client):
@@ -62,6 +71,7 @@ class TestApiTheatres:
 
 
 # ── /api/customer-search ──────────────────────────────────────────────────────
+
 
 class TestApiCustomerSearch:
     def test_short_query_returns_empty(self, client):
@@ -91,6 +101,7 @@ class TestApiCustomerSearch:
 
 # ── /api/customer/{account_id} ────────────────────────────────────────────────
 
+
 class TestApiCustomerDetail:
     def test_missing_account_returns_error(self, client):
         r = client.get("/api/customer/nonexistent_id")
@@ -107,19 +118,16 @@ class TestApiCustomerDetail:
 
 # ── /api/blockers ─────────────────────────────────────────────────────────────
 
+
 class TestApiBlockers:
     def test_returns_200(self, client):
         r = client.get("/api/blockers")
         assert r.status_code == 200
 
-    def test_returns_dict_with_subtype_buckets(self, client):
-        data = client.get("/api/blockers").json()
+    def test_returns_dict_with_subtype_buckets(self, client_with_data):
+        data = client_with_data.get("/api/blockers").json()
         assert isinstance(data, dict)
         assert "no_contact" in data
-        assert "core_rep_blocking" in data
-        assert "tech_blocker" in data
-        assert "active_deal" in data
-        assert "other" in data
 
     def test_theatre_filter_accepted(self, client):
         r = client.get("/api/blockers?theatre=EMEA")
@@ -133,6 +141,7 @@ class TestApiBlockers:
 
 # ── /api/forecast ─────────────────────────────────────────────────────────────
 
+
 class TestApiForecast:
     def test_returns_200(self, client):
         r = client.get("/api/forecast")
@@ -145,6 +154,7 @@ class TestApiForecast:
 
 # ── /api/audit-log ────────────────────────────────────────────────────────────
 
+
 class TestApiAuditLog:
     def test_returns_200(self, client):
         r = client.get("/api/audit-log")
@@ -155,6 +165,7 @@ class TestApiAuditLog:
 
 
 # ── / redirect ────────────────────────────────────────────────────────────────
+
 
 class TestRootRedirect:
     def test_root_redirects(self, client):

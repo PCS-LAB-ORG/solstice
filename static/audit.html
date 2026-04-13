@@ -76,7 +76,7 @@ select.fsel:focus{outline:none;border-color:var(--sky)}
 
 </div>
 
-<script src="/static/solstice.js"></script>
+<script src="/static/solstice.js?v=2"></script>
 <script>
 S.initNav('audit'); S.restoreCard();
 
@@ -155,7 +155,7 @@ function renderRows(){
     }
     return true;
   });
-  if(sort==='desc')rows=rows.slice().reverse();
+  if(sort==='asc')rows=rows.slice().reverse();
   if(!rows.length){document.getElementById('timeline').innerHTML='<div class="empty">No entries match filters</div>';return;}
   var byDay={},dayOrder=[];
   rows.forEach(function(r){
