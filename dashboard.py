@@ -811,6 +811,12 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
                 )
                 _bf += 1
     result["history_backfilled"] = _bf
+
+    # Update last_run in state.json
+    _state_data = _j.loads(state_file.read_text())
+    _state_data["last_run"] = _dt.now(_tz.utc).isoformat()
+    state_file.write_text(_j.dumps(_state_data))
+
     return result
 
 
@@ -1318,7 +1324,7 @@ def _load_audit_log(theatre: str = "") -> list:
                              (SELECT a2.account_theatre FROM accounts a2
                               WHERE a2.customer_name=sh.new_status LIMIT 1),
                              'EMEA'))=UPPER(?))))
-                ORDER BY sh.changed_at ASC
+                ORDER BY sh.changed_at DESC
                 LIMIT 2000
             """,
                 (theatre, theatre, theatre, theatre),
@@ -1561,8 +1567,27 @@ def api_weekly_movements(theatre: str = "", date: str = ""):
 
         base = f"""
             FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
-            WHERE a.customer_name!='' {t_filter}
+            WHERE a.customer_name!='' AND b.cohort='Scale cohort' {t_filter}
         """
+
+        def _sh_milestone(field_name):
+            """Accounts that hit a milestone this week via status_history."""
+            return _q(
+                f"""
+                SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
+                       MAX(sh.changed_at) as milestone_date,
+                       COALESCE(b.account_theatre, a.account_theatre,'EMEA') as account_theatre
+                FROM accounts a
+                JOIN blocked_data b ON a.account_id=b.account_id
+                JOIN status_history sh ON sh.account_id=a.account_id
+                WHERE a.customer_name!='' AND b.cohort='Scale cohort' {t_filter}
+                  AND sh.field_name=? AND sh.new_status='Y'
+                  AND sh.changed_at>=? AND sh.changed_at<=?
+                GROUP BY a.account_id
+                ORDER BY milestone_date DESC
+                """,
+                t_params + (field_name, mon_s, sun_s + "T23:59:59"),
+            )
 
         # Fetch all M9/M8 completed and filter by date in Python (DC dates are M/D/YYYY not ISO)
         all_m9 = _q(
@@ -1635,8 +1660,13 @@ def api_weekly_movements(theatre: str = "", date: str = ""):
 
         return {
             "week_of": mon_s,
-            "new_m9": new_m9,
+            "m1_outreach": _sh_milestone("M1 Outreach"),
+            "m2_entitlements": _sh_milestone("M2 Entitlements"),
+            "m3_buyin": _sh_milestone("M3 Buy-in"),
+            "m4_discovery": _sh_milestone("M4 Discovery"),
+            "m5_tech": _sh_milestone("M5 Tech Validation"),
             "m8_started": m8_started,
+            "new_m9": new_m9,
             "newly_blocked": newly_blocked,
             "resolved": resolved,
         }
@@ -2254,6 +2284,48 @@ def dashboard_weekly():
     )
 
 
+@app.get("/scope", response_class=HTMLResponse)
+def dashboard_scope():
+    return (Path(__file__).parent / "static" / "scope.html").read_text(encoding="utf-8")
+
+
+@app.get("/api/scope")
+def api_scope(theatre: str = "EMEA"):
+    """EMEA scale cohort in-scope accounts — not churned, M9 not complete."""
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            rows = conn.execute(
+                """
+                SELECT b.account_id,
+                       a.customer_name, a.active_cse, a.sales_region, a.status,
+                       b.account_theatre, b.cohort, b.area, b.dc_progress, b.signal, b.subtype,
+                       b.status_detail, b.upgrade_notes, b.health_notes, b.notes,
+                       b.cc_rep, b.cc_dsm, b.churn_risk,
+                       b.m0_complete, b.m1_complete, b.m2_complete, b.m3_complete,
+                       b.m4_complete, b.m5_complete, b.m6_complete, b.m7_complete,
+                       b.m8_started, b.m9_complete,
+                       b.m8_planned, b.m9_planned, b.m8_actual, b.m9_actual,
+                       b.m1_details, b.m3_details, b.m5_details,
+                       b.milestone_category, b.has_partner, b.upgrade_partner,
+                       b.next_renewal_date, b.current_project_status
+                FROM blocked_data b
+                JOIN accounts a ON a.account_id = b.account_id
+                WHERE b.cohort = 'Scale cohort'
+                  AND UPPER(b.account_theatre) = UPPER(?)
+                  AND (a.status IS NULL OR a.status != 'Churning/Churned')
+                  AND (b.status_detail IS NULL OR b.status_detail NOT LIKE '%decided to churn%')
+                  AND (b.m9_complete IS NULL OR b.m9_complete != 1)
+                ORDER BY a.active_cse, a.customer_name
+                """,
+                (theatre,),
+            ).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("api_scope failed: %s", e)
+        return []
+
+
 @app.get("/compare", response_class=HTMLResponse)
 def dashboard_compare():
     from fastapi.responses import RedirectResponse
@@ -2268,7 +2340,9 @@ def api_daily_brief(date: str = "", theatre: str = ""):
     from datetime import datetime, timedelta
 
     if not date:
-        date = datetime.utcnow().strftime("%Y-%m-%d")
+        from datetime import date as _date
+
+        date = _date.today().isoformat()
     try:
         target = datetime.strptime(date, "%Y-%m-%d")
     except:

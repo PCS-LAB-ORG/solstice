@@ -162,7 +162,7 @@
   </div><!-- /two-col -->
 </div><!-- /main -->
 
-<script src="/static/solstice.js"></script>
+<script src="/static/solstice.js?v=2"></script>
 <script>
 S.initNav('daily'); S.restoreCard();
 
@@ -214,7 +214,7 @@ function moveCard(m){
   var isCse=m.field_name==='cse';
   var isStatus=m.field_name==='status';
   var isReg=m.new_status==='N'&&m.old_status==='Y';
-  var time=(m.changed_at||'').substring(11,16);
+  var time=S.fmtTime(m.changed_at);
   var chg='';
   if(isCse||isStatus){
     chg='<span style="color:var(--muted)">'+E(m.old_status||'—')+'</span> &#8594; <span style="color:'+mc+';font-weight:700">'+E(m.new_status||'—')+'</span>';
