@@ -279,10 +279,14 @@ function render(d){
   // Auto-expand sections with data
   ['sec-upgrades','sec-milestones'].forEach(function(id){
     var sec=document.getElementById(id);
-    var cnt=parseInt(sec.querySelector('.sec-count').textContent)||0;
-    if(cnt>0)sec.classList.remove('collapsed'); else sec.classList.add('collapsed');
+    var cntEl=sec.querySelector('.shdr-cnt,.sec-count');
+    var cnt=cntEl?parseInt(cntEl.textContent)||0:0;
+    var hdr=sec.querySelector('.shdr');
+    if(hdr){if(cnt>0)hdr.classList.remove('collapsed');else hdr.classList.add('collapsed');}
+    var body=sec.querySelector('.sbody');
+    if(body){if(cnt>0)body.classList.remove('hidden');else body.classList.add('hidden');}
   });
-  if(regs.length>0)document.getElementById('sec-reg').classList.remove('collapsed');
+  if(regs.length>0){var rh=document.querySelector('#sec-reg .shdr');if(rh)rh.classList.remove('collapsed');var rb=document.querySelector('#sec-reg .sbody');if(rb)rb.classList.remove('hidden');}
   // Theatre breakdown
   var bd=document.getElementById('theatre-breakdown');
   var TH=[{k:'EMEA',c:'#0ea5e9'},{k:'AMER',c:'#3b82f6'},{k:'JAPAC',c:'#a78bfa'},{k:'LATAM',c:'#f59e0b'}];
