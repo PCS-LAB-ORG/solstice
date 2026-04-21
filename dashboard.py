@@ -342,6 +342,7 @@ def _download_live_from_drive() -> dict:
 
 
 _DC_MILESTONE_WATCH = [
+    ("m0_complete", "M0 Kickoff"),
     ("m1_complete", "M1 Outreach"),
     ("m2_complete", "M2 Entitlements"),
     ("m3_complete", "M3 Buy-in"),
