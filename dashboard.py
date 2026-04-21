@@ -1824,7 +1824,11 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
                        b.signal, b.subtype, b.status_detail, b.upgrade_notes,
                        b.health_notes, b.dc_progress, b.churn_risk,
                        b.cc_rep, b.cc_dsm, b.cohort, b.area, b.district,
-                       b.m8_started, b.m9_complete, b.m3_complete
+                       b.m8_started, b.m9_complete, b.m3_complete,
+                       b.last_edited_by, b.last_edited_date,
+                       b.current_project_status,
+                       b.m1_details, b.m3_details, b.m5_details,
+                       a.account_id
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != ''
                   AND b.signal IN ('blocked','at_risk')

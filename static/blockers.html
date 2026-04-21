@@ -401,6 +401,22 @@ function _expandPanelHtml(a) {
   var dcpText = a.dc_progress    || '—';
   var unText  = a.upgrade_notes  || '';
 
+  // Last edited
+  var leBy  = (a.last_edited_by  || '').replace(/@paloaltonetworks\.com/,'');
+  var leDate= (a.last_edited_date|| '').split(' ')[0];
+  var leHtml= (leBy||leDate) ? E(leBy||'—')+' &middot; '+E(leDate||'—') : '—';
+
+  // Current project status
+  var cpsText = a.current_project_status || '';
+
+  // Milestone details
+  function _mdet(label, val){
+    if(!val || _EMPTY.indexOf((val||'').trim().toLowerCase())!==-1) return '';
+    return '<div style="margin-top:4px"><span style="font-size:8px;color:var(--muted);font-family:var(--mono)">'+label+'</span> '
+      +'<span style="font-size:8.5px">'+E(val)+'</span></div>';
+  }
+  var mdetHtml = _mdet('M1:',a.m1_details)+_mdet('M3:',a.m3_details)+_mdet('M5:',a.m5_details);
+
   return '<div class="expand-grid">'
     + '<div>'
       + '<div class="ef-label">Status Detail</div>'
@@ -423,8 +439,17 @@ function _expandPanelHtml(a) {
       + '<div class="ef-val">'+(a.cc_rep||'—')+' / '+(a.cc_dsm||'—')+'</div>'
     + '</div>'
     + '<div>'
+      + '<div class="ef-label">Last Edited</div>'
+      + '<div class="ef-val">'+leHtml+'</div>'
+    + '</div>'
+    + (cpsText ? '<div>'
+      + '<div class="ef-label">Project Status</div>'
+      + '<div class="ef-val">'+E(cpsText)+'</div>'
+    + '</div>' : '')
+    + '<div>'
       + '<div class="ef-label">Milestones</div>'
       + '<div style="display:flex;gap:4px;align-items:flex-end;margin-top:2px">'+msPips+'</div>'
+      + mdetHtml
     + '</div>'
     + '</div>'
     + (tags.length ? '<div class="tags-row">'+tags.join('')+'</div>' : '');
