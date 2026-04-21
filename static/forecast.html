@@ -162,7 +162,7 @@ function renderForecast(d){
   var targets=(d.next_targets||[])
     .filter(function(a){ return !_hideChurn || !_isChurn(a); })
     .slice().sort(function(a,b){return (a.m9_date||'').localeCompare(b.m9_date||'');});
-  var overdue=(d.overdue||[]).filter(function(a){ return !_hideChurn || !_isChurn(a); });
+  var overdue=(d.overdue||[]);
   var counter = document.getElementById('forecast-counter');
   if(counter) counter.textContent = targets.length + (overdue.length ? ' + '+overdue.length+' overdue' : '');
   var html='';
