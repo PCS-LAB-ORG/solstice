@@ -1488,10 +1488,33 @@ def api_health_summary():
 @app.get("/api/cse-workload")
 def api_cse_workload(theatre: str = ""):
     """Per-CSE account load, blocked/at-risk counts, M9 this month."""
-    from datetime import date as _date
+    from datetime import date as _date, datetime as _dt
 
     _ensure_db()
     try:
+        today = _date.today()
+        cur_year, cur_month = today.year, today.month
+
+        def _is_this_month(s):
+            if not s:
+                return False
+            s = str(s).strip()
+            for fmt in (
+                "%m/%d/%Y %H:%M:%S",
+                "%m/%d/%Y",
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d",
+            ):
+                try:
+                    d = _dt.strptime(
+                        s.split(" ")[0] if " " in s and not fmt.endswith("%S") else s,
+                        fmt.split(" ")[0],
+                    ).date()
+                    return d.year == cur_year and d.month == cur_month
+                except Exception:
+                    pass
+            return False
+
         with get_db() as conn:
             rows = conn.execute(
                 """
@@ -1499,18 +1522,39 @@ def api_cse_workload(theatre: str = ""):
                        COUNT(*) as account_count,
                        SUM(CASE WHEN b.signal='blocked' AND b.m9_complete=0 THEN 1 ELSE 0 END) as blocked_count,
                        SUM(CASE WHEN b.signal='at_risk' AND b.m9_complete=0 THEN 1 ELSE 0 END) as at_risk_count,
-                       SUM(CASE WHEN b.m9_complete=1
-                           AND substr(b.m9_actual,1,7)=? THEN 1 ELSE 0 END) as m9_this_month
+                       b.m9_complete, b.m9_actual
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.active_cse!='' AND a.customer_name!=''
                   AND (? = '' OR UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=UPPER(?))
-                GROUP BY a.active_cse
-                ORDER BY blocked_count DESC, account_count DESC
+                GROUP BY a.active_cse, b.m9_complete, b.m9_actual
+                ORDER BY a.active_cse
             """,
-                (_date.today().strftime("%Y-%m"), theatre, theatre),
+                (theatre, theatre),
             ).fetchall()
-        return [dict(r) for r in rows]
+
+        # Aggregate in Python so DC date parsing works correctly
+        from collections import defaultdict
+
+        agg = defaultdict(
+            lambda: {
+                "account_count": 0,
+                "blocked_count": 0,
+                "at_risk_count": 0,
+                "m9_this_month": 0,
+            }
+        )
+        for r in rows:
+            cse = r["cse"]
+            agg[cse]["account_count"] += r["account_count"]
+            agg[cse]["blocked_count"] += r["blocked_count"]
+            agg[cse]["at_risk_count"] += r["at_risk_count"]
+            if r["m9_complete"] and _is_this_month(r["m9_actual"]):
+                agg[cse]["m9_this_month"] += r["account_count"]
+
+        result = [{"cse": cse, **v} for cse, v in agg.items()]
+        result.sort(key=lambda x: (-x["blocked_count"], -x["account_count"]))
+        return result
     except Exception as e:
         logger.error("cse-workload failed: %s", e)
         return []
@@ -1832,7 +1876,7 @@ def api_forecast(theatre: str = ""):
         with get_db() as conn:
             targets = conn.execute(
                 """
-                SELECT a.customer_name, a.active_cse, a.sales_region,
+                SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
                        COALESCE(a.account_theatre,'EMEA') as account_theatre,
                        b.m9_planned, b.m8_planned, b.m8_started, b.m9_complete,
                        b.dc_progress, b.churn_risk, b.m8_actual
@@ -2282,6 +2326,83 @@ def dashboard_weekly():
     return (Path(__file__).parent / "static" / "weekly.html").read_text(
         encoding="utf-8"
     )
+
+
+@app.get("/pc-cc", response_class=HTMLResponse)
+def dashboard_pc_cc():
+    return (Path(__file__).parent / "static" / "pc_cc.html").read_text(encoding="utf-8")
+
+
+@app.get("/api/pc-cc-accounts")
+def api_pc_cc_accounts():
+    import csv as _csv
+
+    data_dir = Path(__file__).parent / "data"
+    accounts_file = data_dir / "pc_cc_accounts.csv"
+    mapping_file = data_dir / "cc_resource_mapping.csv"
+    if not accounts_file.exists() or not mapping_file.exists():
+        return []
+
+    def _norm(s):
+        return s.strip().lower() if s else ""
+
+    region_map = {}
+    with open(mapping_file) as f:
+        for r in _csv.DictReader(f):
+            reg = _norm(r.get("Region", ""))
+            if not reg:
+                continue
+            rsm = r.get("CC-RSM", "").strip()
+            dsm = r.get("CC-DSM", "").strip()
+            area = r.get("Area", "").strip()
+            if (
+                reg not in region_map
+                or "no coverage" in region_map[reg]["cc_rsm"].lower()
+            ):
+                region_map[reg] = {"area": area, "cc_rsm": rsm, "cc_dsm": dsm}
+
+    results = []
+    with open(accounts_file) as f, get_db() as conn:
+        for acc in _csv.DictReader(f):
+            sid = acc.get("sfdc_account_id", "").strip().lower()
+            name = acc.get("sfdc_account_name", "").strip()
+            region = acc.get("account_region", "").strip()
+            mig = acc.get("PC_CC_Migration_status", "").strip()
+
+            db_row = conn.execute(
+                "SELECT a.active_cse FROM accounts a "
+                "JOIN blocked_data b ON a.account_id=b.account_id "
+                "WHERE LOWER(a.account_id)=?",
+                (sid,),
+            ).fetchone()
+
+            rm = region_map.get(_norm(region), {})
+            cc_rsm = rm.get("cc_rsm", "No Coverage")
+            cc_dsm = rm.get("cc_dsm", "")
+            area = rm.get("area", "")
+            cse = (
+                db_row["active_cse"] if db_row and db_row["active_cse"] else "— No CSE"
+            )
+            no_rsm = "no coverage" in cc_rsm.lower() or "no match" in cc_rsm.lower()
+
+            results.append(
+                {
+                    "account_id": sid,
+                    "name": name,
+                    "cse": cse,
+                    "area": area,
+                    "region": region,
+                    "migration": mig,
+                    "priority": "PC to CC Migration" in mig,
+                    "cc_rsm": cc_rsm,
+                    "cc_dsm": cc_dsm,
+                    "no_rsm": no_rsm,
+                    "in_solstice": bool(db_row),
+                }
+            )
+
+    results.sort(key=lambda x: (x["cse"], x["name"]))
+    return results
 
 
 @app.get("/scope", response_class=HTMLResponse)

@@ -223,7 +223,8 @@ function moveCard(m){
   } else {
     chg='<span style="color:'+mc+'">&#10003; '+E(label)+'</span>';
   }
-  return '<div class="move">'
+  var aid=m.account_id?'S.openAccountCard(\''+m.account_id+'\')':'';
+  return '<div class="move"'+(aid?' onclick="'+aid+'" style="cursor:pointer"':'')+' >'
     +'<span class="move-badge" style="background:'+mc+'22;color:'+mc+'">'+E(mi)+'</span>'
     +'<div><div class="move-name">'+E(m.customer_name||'—')+'</div>'
       +'<div class="move-sub">'+E(m.active_cse||'—')+' &middot; '+E(m.region||m.area||'—')+'</div></div>'

@@ -159,7 +159,8 @@ function renderForecast(d){
       var thcol=TH_COLS[th]||'var(--muted)';
       var lbl=a.m8_started?'M9':'M8';
       var lcol=a.m8_started?'var(--green)':'var(--sky)';
-      html+='<div class="ftrow">'
+      var aid=a.account_id?'S.openAccountCard(\''+a.account_id+'\')':'';
+      html+='<div class="ftrow"'+(aid?' onclick="'+aid+'" style="cursor:pointer"':'')+' >'
         +'<div class="fc" style="color:'+lcol+';font-size:9px;text-align:center;font-weight:700;font-family:var(--mono)">'+lbl+'</div>'
         +'<div class="fc"><div style="font-weight:700;font-size:10px">'+E(a.customer_name)+'</div>'
           +'<div style="font-size:8px;color:var(--muted)">'+E(a.active_cse||'—')+'</div></div>'
