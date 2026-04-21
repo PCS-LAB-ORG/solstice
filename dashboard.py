@@ -1884,7 +1884,8 @@ def api_forecast(theatre: str = ""):
                 SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
                        COALESCE(a.account_theatre,'EMEA') as account_theatre,
                        b.m9_planned, b.m8_planned, b.m8_started, b.m9_complete,
-                       b.dc_progress, b.churn_risk, b.m8_actual
+                       b.dc_progress, b.churn_risk, b.m8_actual,
+                       b.subtype, b.signal
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != '' AND b.m9_complete=0
                   AND b.cohort = 'Scale cohort'

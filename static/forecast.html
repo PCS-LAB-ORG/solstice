@@ -50,6 +50,8 @@
   <button class="pill" data-t="AMER" onclick="setT(this,'AMER')">AMER</button>
   <button class="pill" data-t="JAPAC" onclick="setT(this,'JAPAC')">JAPAC</button>
   <button class="pill" data-t="LATAM" onclick="setT(this,'LATAM')">LATAM</button>
+  <span style="width:1px;height:16px;background:var(--border);margin:0 .25rem"></span>
+  <button id="churn-toggle" class="pill" onclick="toggleChurn(this)" title="147 churned accounts have M9 dates but will never upgrade">Hide Churned</button>
   <span id="date-range" style="margin-left:auto;font-size:9px;color:var(--muted);font-family:var(--mono)">—</span>
 </div>
 
@@ -109,11 +111,22 @@
 <script src="/static/solstice.js?v=2"></script>
 <script>
 S.initNav('forecast'); S.restoreCard();
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('churn-toggle');
+  if(btn){btn.classList.add('act');}
+});
 
 var E=S.esc;
-var _t='',_raw={};
+var _t='',_raw={},_hideChurn=true;
 var DC_C={'Green':'#10b981','Yellow':'#f59e0b','Red':'#ef4444'};
 var TH_COLS={'EMEA':'#0ea5e9','AMER':'#3b82f6','JAPAC':'#a78bfa','LATAM':'#f59e0b'};
+
+function toggleChurn(btn){
+  _hideChurn=!_hideChurn;
+  btn.classList.toggle('act',_hideChurn);
+  btn.textContent=_hideChurn?'Hide Churned':'Show Churned';
+  if(_raw&&Object.keys(_raw).length) renderForecast(_raw);
+}
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function setT(el,t){
@@ -144,8 +157,11 @@ function load(){
 }
 
 function renderForecast(d){
-  var targets=(d.next_targets||[]).slice().sort(function(a,b){return (a.m9_date||'').localeCompare(b.m9_date||'');});
-  var overdue=d.overdue||[];
+  function _isChurn(a){ return (a.subtype||'')==='churn' || (a.signal||'')==='churn'; }
+  var targets=(d.next_targets||[])
+    .filter(function(a){ return !_hideChurn || !_isChurn(a); })
+    .slice().sort(function(a,b){return (a.m9_date||'').localeCompare(b.m9_date||'');});
+  var overdue=(d.overdue||[]).filter(function(a){ return !_hideChurn || !_isChurn(a); });
   var html='';
   if(!targets.length&&!overdue.length){
     html='<div class="empty">No M9 targets in next 3 months</div>';
