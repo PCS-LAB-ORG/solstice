@@ -117,6 +117,18 @@ def _subtype_from_detail(status_detail: str) -> str:
     return ""
 
 
+def _derive_subtype(status_detail: str, saas_sh: str) -> str:
+    """Subtype from status_detail, with SH Only override for blocked accounts."""
+    subtype = _subtype_from_detail(status_detail)
+    # SH Only accounts blocked by their deployment — override only if not already
+    # classified as something stronger (churn takes priority)
+    if saas_sh == "SH Only" and subtype not in ("churn",):
+        signal = _signal_from_detail(status_detail)
+        if signal == "blocked":
+            return "self_hosted"
+    return subtype
+
+
 def _status_from_dc(status_detail: str, pc_status: str) -> str:
     """Derive EMEA-style engagement status from DC fields."""
     d = status_detail.lower()
@@ -232,7 +244,10 @@ def parse_dc_csv(filepath: Path) -> list[dict]:
                     ).strip(),
                     # Derived fields — signal, subtype, status from DC Status Detail
                     "signal": _signal_from_detail(row.get("Status Detail", "")),
-                    "subtype": _subtype_from_detail(row.get("Status Detail", "")),
+                    "subtype": _derive_subtype(
+                        row.get("Status Detail", ""),
+                        row.get("PC_SAAS_vs_SH", "").strip(),
+                    ),
                     "status": _status_from_dc(
                         row.get("Status Detail", ""),
                         row.get("PC_CC_Migration_status", ""),
