@@ -311,8 +311,17 @@ def _download_live_from_drive() -> dict:
 
     try:
         file_id = _j.loads(gsheet.read_text())["doc_id"]
-    except Exception as e:
-        return {"DC CSE Tracker": f"⚠️ cannot read .gsheet: {e}"}
+    except Exception:
+        # .gsheet not available (e.g. running in Docker) — fall back to drive_config.json
+        try:
+            config_path = Path(__file__).parent / "data" / "drive_config.json"
+            cfg_files = _j.loads(config_path.read_text()).get("files", [])
+            dc_entry = next((f for f in cfg_files if f.get("role") == "MASTER"), None)
+            file_id = dc_entry["file_id"] if dc_entry else None
+            if not file_id:
+                return {"DC CSE Tracker": "⚠️ no file_id in drive_config.json"}
+        except Exception as e2:
+            return {"DC CSE Tracker": f"⚠️ cannot resolve Drive file ID: {e2}"}
 
     try:
         token = _sp.check_output(
