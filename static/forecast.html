@@ -164,7 +164,9 @@ function renderForecast(d){
     .slice().sort(function(a,b){return (a.m9_date||'').localeCompare(b.m9_date||'');});
   var overdue=(d.overdue||[]);
   var counter = document.getElementById('forecast-counter');
-  if(counter) counter.textContent = targets.length + (overdue.length ? ' + '+overdue.length+' overdue' : '');
+  var allTargets = (d.next_targets||[]).slice().sort(function(a,b){return (a.m9_date||'').localeCompare(b.m9_date||'');});
+  var churnCount = allTargets.filter(_isChurn).length;
+  if(counter) counter.textContent = targets.length + ' active' + (churnCount ? '  ·  '+churnCount+' churned' : '');
   var html='';
   if(!targets.length&&!overdue.length){
     html='<div class="empty">No M9 targets in next 3 months</div>';
