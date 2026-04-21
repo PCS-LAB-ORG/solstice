@@ -10,6 +10,7 @@
 .conf-high{background:rgba(16,185,129,.12);color:var(--green)}
 .conf-med{background:rgba(245,158,11,.12);color:var(--amber)}
 .conf-low{background:rgba(239,68,68,.12);color:var(--red)}
+.conf-churn{background:rgba(148,163,184,.12);color:#94a3b8;text-decoration:line-through}
 .dcdot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:3px}
 .ft-hdr{display:grid;grid-template-columns:18px 2fr .9fr .8fr .7fr .8fr;background:var(--surface-2);border-bottom:1px solid var(--border)}
 .ft-hdr span{padding:.3rem .5rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;font-family:var(--mono);border-right:1px solid var(--border-soft)}
@@ -100,9 +101,10 @@
   <div class="card">
     <div class="card-head"><span class="card-title">Confidence Logic</span></div>
     <div class="card-body" style="font-size:9px;color:var(--muted);line-height:2">
-      <div><span class="conf conf-high" style="margin-right:.4rem">HIGH</span>M8 active + DC Green</div>
-      <div><span class="conf conf-med" style="margin-right:.4rem">MED</span>M8 active, DC not Green</div>
-      <div><span class="conf conf-low" style="margin-right:.4rem">LOW</span>M8 not yet started</div>
+      <div><span class="conf conf-high" style="margin-right:.4rem">HIGH</span>M8 active + DC Green + not blocked</div>
+      <div><span class="conf conf-med" style="margin-right:.4rem">MED</span>M8 active but DC Yellow or at-risk · OR M8 not started + DC Green + signal green</div>
+      <div><span class="conf conf-low" style="margin-right:.4rem">LOW</span>M8 not started, blocked or DC not green</div>
+      <div><span class="conf conf-churn" style="margin-right:.4rem">CHURN</span>Customer confirmed not upgrading — date is stale, hide with toggle</div>
     </div>
   </div>
 
@@ -175,7 +177,7 @@ function renderForecast(d){
       var dc=a.dc_progress||'—';
       var dcc=DC_C[dc]||'var(--muted)';
       var conf=a.confidence||'LOW';
-      var cclass={'HIGH':'conf-high','MED':'conf-med','LOW':'conf-low'}[conf]||'conf-low';
+      var cclass={'HIGH':'conf-high','MED':'conf-med','LOW':'conf-low','CHURN':'conf-churn'}[conf]||'conf-low';
       var th=a.account_theatre||'';
       var thcol=TH_COLS[th]||'var(--muted)';
       var lbl=a.m8_started?'M9':'M8';

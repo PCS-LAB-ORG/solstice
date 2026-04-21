@@ -1973,13 +1973,20 @@ def api_forecast(theatre: str = ""):
             m9d = parse_date(d.get("m9_planned"))
             if not m9d:
                 continue
-            confidence = (
-                "HIGH"
-                if d["m8_started"] and d["dc_progress"] == "Green"
-                else "MED"
-                if d["m8_started"]
-                else "LOW"
-            )
+            subtype = d.get("subtype") or ""
+            signal = d.get("signal") or ""
+            m8 = bool(d["m8_started"])
+            dc = d.get("dc_progress") or ""
+            if subtype == "churn":
+                confidence = "CHURN"
+            elif m8 and dc == "Green" and signal != "blocked":
+                confidence = "HIGH"
+            elif m8 and (dc == "Yellow" or signal == "at_risk"):
+                confidence = "MED"
+            elif not m8 and dc == "Green" and signal == "green":
+                confidence = "MED"
+            else:
+                confidence = "LOW"
             d["confidence"] = confidence
             d["m9_date"] = str(m9d)
             if m9d < today:
