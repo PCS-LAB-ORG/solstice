@@ -319,20 +319,20 @@ S.initNav = function(activePage) {
       + '">' + p.label + '</a>';
   }).join('');
 
-  nav.innerHTML = '<div style="display:flex;align-items:center;gap:0;flex:1">'
-    + '<div style="display:flex;align-items:center;gap:8px;padding-right:20px;margin-right:4px;border-right:1px solid rgba(255,255,255,.1)">'
+  nav.innerHTML = '<div style="display:flex;align-items:center;gap:0;flex:1;min-width:0">'
+    + '<div style="display:flex;align-items:center;gap:8px;padding-right:20px;margin-right:4px;border-right:1px solid rgba(255,255,255,.1);flex-shrink:0">'
     + '<div style="width:22px;height:22px;background:#0ea5e9;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">&#9728;</div>'
     + '<span style="font-family:\'Plus Jakarta Sans\',system-ui;font-size:13px;font-weight:700;color:white;letter-spacing:-.2px">Solstice</span>'
     + '</div>'
     + '<div style="display:flex;gap:0">' + links + '</div>'
     + '</div>'
-    + '<div id="s-health" style="display:flex;gap:8px;align-items:center"></div>'
-    + '<div style="position:relative;margin-left:12px">'
-    + '<input id="g-search" type="text" placeholder="&#9013; Account..." autocomplete="off"'
-    + ' style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:white;font-size:10px;padding:.28rem .65rem;width:150px;outline:none;transition:width .2s;font-family:\'Plus Jakarta Sans\',system-ui"'
-    + ' oninput="S.gSearch(this.value)" onfocus="this.style.width=\'210px\'" onblur="S.closeSearch();setTimeout(function(){var e=document.getElementById(\'g-search\');if(e)e.style.width=\'150px\'},200)">'
-    + '<div id="g-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:280px;background:white;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:1000;max-height:320px;overflow-y:auto"></div>'
-    + '</div>';
+    + '<div style="position:relative;flex:0 0 auto;margin:0 16px">'
+    + '<input id="g-search" type="text" placeholder="Search account..." autocomplete="off"'
+    + ' style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;color:white;font-size:10.5px;padding:.32rem .9rem;width:220px;outline:none;transition:width .2s,background .2s;font-family:\'Plus Jakarta Sans\',system-ui"'
+    + ' oninput="S.gSearch(this.value)" onfocus="this.style.width=\'280px\';this.style.background=\'rgba(255,255,255,.14)\'" onblur="S.closeSearch();setTimeout(function(){var e=document.getElementById(\'g-search\');if(e){e.style.width=\'220px\';e.style.background=\'rgba(255,255,255,.08)\'}},200)">'
+    + '<div id="g-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);width:300px;background:white;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:1000;max-height:320px;overflow-y:auto"></div>'
+    + '</div>'
+    + '<div id="s-health" style="display:flex;gap:8px;align-items:center;flex-shrink:0"></div>';
 
   _refreshHealth();
   setInterval(_refreshHealth, 5*60*1000);
