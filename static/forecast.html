@@ -155,8 +155,10 @@ var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','D
 
 function setT(el,t){
   _t=t;
-  document.querySelectorAll('.pill').forEach(function(p){p.classList.remove('act');});
+  document.querySelectorAll('.pill[data-t]').forEach(function(p){p.classList.remove('act');});
   el.classList.add('act');
+  var ctBtn=document.getElementById('churn-toggle');
+  if(ctBtn) ctBtn.classList.toggle('act',_hideChurn);
   document.getElementById('theatre-label').textContent=t||'All Theatres';
   load();
 }
@@ -181,7 +183,7 @@ function load(){
 }
 
 function renderForecast(d){
-  function _isChurn(a){ return (a.subtype||'')==='churn' || (a.signal||'')==='churn'; }
+  function _isChurn(a){ return (a.subtype||'')==='churn'; }
   var targets=(d.next_targets||[])
     .filter(function(a){ return !_hideChurn || !_isChurn(a); })
     .slice().sort(function(a,b){return (a.m9_date||'').localeCompare(b.m9_date||'');});
@@ -253,7 +255,7 @@ function renderForecast(d){
   });
 
   odEl.innerHTML='<div class="bsec">'
-    +'<div class="shdr collapsed" onclick="var b=this.nextElementSibling;this.classList.toggle(\'collapsed\');b.classList.toggle(\'hidden\')">'
+    +'<div class="shdr collapsed" id="od-shdr">'
     +'<div class="shdr-icon" style="background:rgba(239,68,68,.12);color:#dc2626">'+overdue.length+'</div>'
     +'<span class="shdr-title" style="color:#dc2626">Overdue</span>'
     +'<span class="shdr-desc">— M9 date passed, upgrade not complete</span>'
@@ -337,7 +339,7 @@ function loadSLA(){
           +'<div>'+slaHtml+'</div>'
           +'<div style="font-size:9px;color:var(--muted)">'+E(r.active_cse||'—')+'</div>'
           +'</div>';
-      });
+  var odHdr=odEl.querySelector('#od-shdr');if(odHdr)odHdr.addEventListener('click',function(){S.toggleSec(this);});      });
       if(rows.length>15)html+='<div style="padding:.5rem 1rem;font-size:9px;color:var(--muted);font-family:var(--mono)">+ '+(rows.length-15)+' more breaches</div>';
       document.getElementById('sla-body').innerHTML=html;
     })

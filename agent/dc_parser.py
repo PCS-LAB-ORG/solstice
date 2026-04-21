@@ -122,7 +122,7 @@ def _derive_subtype(status_detail: str, saas_sh: str) -> str:
     subtype = _subtype_from_detail(status_detail)
     # SH Only accounts blocked by their deployment — override only if not already
     # classified as something stronger (churn takes priority)
-    if saas_sh == "SH Only" and subtype not in ("churn",):
+    if saas_sh == "SH Only" and subtype not in ("churn", "core_rep_blocking", "legal_blocker", "active_deal"):
         signal = _signal_from_detail(status_detail)
         if signal == "blocked":
             return "self_hosted"
