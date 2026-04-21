@@ -305,7 +305,7 @@ function render() {
       : _signalSummaryHtml(items);
 
     secHtml += '<div class="bsec" id="sec-'+type.key+'">'
-      + '<div class="shdr" onclick="toggleSec(this,\'sec-'+type.key+'\')">'
+      + '<div class="shdr collapsed" onclick="toggleSec(this,\'sec-'+type.key+'\')">'
         + iconHtml
         + '<span class="shdr-title">'+E(type.label)+'</span>'
         + '<span class="shdr-desc">— '+E(type.desc)+'</span>'
@@ -314,7 +314,7 @@ function render() {
           + '<span class="chev">&#9660;</span>'
         + '</div>'
       + '</div>'
-      + '<div class="sbody">'+rowsHtml+'</div>'
+      + '<div class="sbody hidden">'+rowsHtml+'</div>'
       + '</div>';
   });
 
