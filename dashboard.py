@@ -2146,28 +2146,13 @@ def api_customer_detail(account_id: str):
 
 
 def _generate_m1_rationale(cat: str, accounts: list, total: int) -> str:
-    """Generate LLM rationale for a category. Falls back to static if Ollama unavailable."""
-    static = {
-        "actionable": f"{total} accounts have no active blocker. CSEs should send M1 outreach email or schedule customer call this week. Priority: 🔥 live-fire accounts and those already in Ready To Engage status.",
-        "acct_team": f"{total} accounts are gated by the account team (Sales Hold, core rep blocking, or explicit hold request). CSEs must first align with the Sales Rep before reaching out to the customer. Do not contact the customer directly.",
-        "unblock": f"All {total} accounts are MTN group entities blocked by a single Strata/Firewall escalation. Resolving this one escalation unlocks all {total} M1 outreach actions simultaneously. Pushkar Kakkar should escalate the Strata side as top priority.",
-        "skip": f"{total} accounts are hard blocked: churning/churned, cancelled, or confirmed tech limitations. No M1 outreach action required this cycle. Revisit after status changes.",
-    }
-    try:
-        from agent.llm import chat, _is_running
-
-        if not _is_running():
-            return static.get(cat, "")
-        names = [a["account_name"] for a in accounts[:12]]
-        prompt = (
-            f"You are a Cortex Cloud migration program manager. Write a 2-sentence action rationale "
-            f"for CSEs about the '{cat}' M1 outreach category ({total} accounts). "
-            f"Sample accounts: {', '.join(names[:8])}. "
-            f"Be direct, operational, no fluff. Plain text only, no markdown."
-        )
-        return chat(prompt, expect_json=False).strip()
-    except:
-        return static.get(cat, "")
+    """Static rationale per M1 category — no AI."""
+    return {
+        "actionable": f"{total} accounts have no active blocker — send M1 outreach email or schedule a call this week. Prioritise 🔥 live-fire accounts first.",
+        "acct_team": f"{total} accounts are gated by the account team. Align with the Sales Rep before contacting the customer.",
+        "unblock": f"{total} accounts are blocked by a shared escalation. Resolve the escalation to unlock all outreach simultaneously.",
+        "skip": f"{total} accounts are hard blocked (churning, cancelled, or tech limitation). No action required this cycle.",
+    }.get(cat, "")
 
 
 @app.get("/api/m1-suggestions")
