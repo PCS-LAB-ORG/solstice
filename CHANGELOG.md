@@ -2,6 +2,19 @@
 
 ---
 
+## v2.1.0 — Docker + Daily page fixes (2026-04-21)
+
+7 commits since v2.0.0.
+
+- **Docker**: `Dockerfile` + `docker-compose.yml` — `docker compose up -d` is now the only way to run. `data/` volume-mounted so DB and CSVs persist. ADC credentials mounted for Google Drive refresh.
+- **Drive fallback**: `_download_from_drive()` falls back to `drive_config.json` MASTER entry when `.gsheet` file is not mounted (Docker environment). Refresh Data now works without Google Drive Desktop.
+- **README**: full rewrite — Docker-first, step-by-step setup, all page URLs, architecture, design system reference.
+- **Daily page — collapse bug**: `.sec-count` → `.shdr-cnt` mismatch after design refactor caused `querySelector` to return null → TypeError → "Error loading" in upgrades section. Fixed.
+- **Daily page — font**: section headers were `font-family: var(--mono)` (JetBrains Mono) — switched to Plus Jakarta Sans 700 matching all other pages. Monospace was also causing right-column clipping on move cards.
+- **Daily page — count badges**: section counts ("2", "24") were plain black text. Now sky-blue rounded pill badges matching KPI aesthetic. Regressions count stays red.
+
+---
+
 ## v2.0.0 — Full Dashboard Overhaul (2026-04-21)
 
 25 commits. Solstice v2 — production-ready ops dashboard.
