@@ -12,6 +12,10 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
+    labels:
+      - "com.docker.desktop.extension.name=Solstice"
+      - "com.docker.desktop.extension.metadata.description=CC Migration Dashboard"
+      - "traefik.http.routers.solstice.rule=PathPrefix(`/`)"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8200/ops"]
       interval: 30s
