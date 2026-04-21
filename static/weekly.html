@@ -96,23 +96,28 @@ function _tile(m, count) {
 
 function _section(m, items) {
   if (!items.length) return '';
-  var cards = items.map(function(a) {
+  var rows = items.map(function(a) {
     var aid = (a.account_id || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     var date = m.dateField ? (S.fmtDateTime ? S.fmtDateTime(a[m.dateField]) : String(a[m.dateField]||'').slice(0,10)) : '—';
-    return '<div class="w-card" onclick="S.openAccountCard(\'' + aid + '\')">'
-      + '<div class="w-bar" style="background:' + m.color + '"></div>'
-      + '<div class="w-body">'
-      + '<div class="w-name">' + S.esc(a.customer_name || '') + '</div>'
-      + '<div class="w-cse">' + S.esc(a.active_cse || '—') + ' · ' + S.esc(a.sales_region || '—') + '</div>'
-      + '<div class="w-date">' + (date || '—') + '</div>'
-      + '</div></div>';
+    return '<div class="arow" style="grid-template-columns:2.5fr 1.5fr 1fr" onclick="S.openAccountCard(\'' + aid + '\')">'
+      + '<div><div class="aname">' + S.esc(a.customer_name || '') + '</div>'
+      + '<div style="font-size:8px;color:var(--muted)">' + S.esc(a.active_cse || '—') + ' · ' + S.esc(a.sales_region || '—') + '</div></div>'
+      + '<div style="font-size:9px;font-family:var(--mono);color:var(--muted)">' + (date || '—') + '</div>'
+      + '<div style="font-size:9px;color:var(--muted);font-family:var(--mono)">' + S.esc(a.account_theatre||'') + '</div>'
+      + '</div>';
   }).join('');
-  return '<div class="w-sec" id="sec-' + m.key + '">'
-    + '<div class="w-sec-hdr">'
-    + '<div class="w-dot" style="background:' + m.color + '"></div>'
-    + '<span class="w-title">' + S.esc(m.label) + '</span>'
-    + '<span class="badge badge-gray">' + items.length + '</span></div>'
-    + '<div class="w-grid">' + cards + '</div></div>';
+  return '<div class="bsec" id="sec-' + m.key + '">'
+    + '<div class="shdr collapsed" onclick="S.toggleSec(this)">'
+    + '<div class="shdr-icon" style="background:' + m.color + '22;color:' + m.color + '">' + items.length + '</div>'
+    + '<span class="shdr-title">' + S.esc(m.label) + '</span>'
+    + '<div class="shdr-cnt"><span class="chev">&#9660;</span></div></div>'
+    + '<div class="sbody hidden">'
+    + '<div style="display:grid;grid-template-columns:2.5fr 1.5fr 1fr;background:var(--surface-2);border-bottom:1px solid var(--border)">'
+    + '<span style="padding:.3rem .8rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700">Account / CSE</span>'
+    + '<span style="padding:.3rem .8rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700">Date</span>'
+    + '<span style="padding:.3rem .8rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700">Theatre</span>'
+    + '</div>'
+    + rows + '</div></div>';
 }
 
 function render(data) {

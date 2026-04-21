@@ -39,10 +39,17 @@ function render(rows){
       +'<td style="padding:10px 12px;min-width:120px"><div style="background:var(--surface-2);height:6px;border-radius:3px"><div style="background:'+(hi?'var(--red)':'var(--sky)')+';width:'+pct+'%;height:100%;border-radius:3px"></div></div></td>'
       +'</tr>';
   }).join('');
-  main.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">'
-    +'<h1 style="font-size:1rem;font-weight:800;color:var(--text)">CSE Workload</h1>'
+  main.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">'
+    +'<div style="font-size:9px;color:var(--muted);font-family:var(--mono)">'+rows.length+' CSEs · avg '+Math.round(avg)+' accounts</div>'
     +'<div style="display:flex;gap:.5rem">'+pills+'</div></div>'
-    +'<div class="card">'
+    +'<div class="bsec">'
+    +'<div class="shdr" onclick="S.toggleSec(this)">'
+    +'<div class="shdr-icon" style="background:rgba(14,165,233,.12);color:var(--sky)">'+rows.length+'</div>'
+    +'<span class="shdr-title">CSE Workload</span>'
+    +'<span class="shdr-desc">— accounts, blocked, at-risk, M9 completions</span>'
+    +'<div class="shdr-cnt"><span class="chev">&#9660;</span></div>'
+    +'</div>'
+    +'<div class="sbody">'
     +'<table class="s-table">'
     +'<thead><tr>'
     +'<th>CSE</th>'
@@ -53,7 +60,7 @@ function render(rows){
     +'<th>Load</th>'
     +'</tr></thead>'
     +'<tbody>'+rows_html+'</tbody></table>'
-    +'</div>';
+    +'</div></div>';
 }
 load();
 </script>

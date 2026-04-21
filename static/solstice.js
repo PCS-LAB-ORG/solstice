@@ -352,6 +352,15 @@ function _refreshHealth() {
     }).catch(function(){});
 }
 
+// ── Shared section toggle ─────────────────────────────────────────────────────
+S.toggleSec = function(hdr, secId) {
+  hdr.classList.toggle('collapsed');
+  var body = secId
+    ? document.querySelector('#' + secId + ' .sbody')
+    : hdr.nextElementSibling;
+  if (body) body.classList.toggle('hidden');
+};
+
 // ── Sync Summary Toast ────────────────────────────────────────────────────────
 
 S.syncSummary = function(events) {
