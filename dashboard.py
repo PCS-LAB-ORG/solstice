@@ -2183,16 +2183,15 @@ def api_m1_suggestions(theatre: str = ""):
             cat = r[6] or "actionable"
             if cat in cats:
                 # Pick best note: upgrade_notes first, then health_notes, then status_detail
-                detail = (r[7] or "").strip()  # status_detail
-                notes = (r[8] or "").strip()  # upgrade_notes
-                health = (r[9] or "").strip()  # health_notes
-                best_note = (
-                    notes
-                    if notes and notes not in ("TBD", "-", "")
-                    else (
-                        health if health and health not in ("TBD", "-", "") else detail
-                    )
-                )
+                _EMPTY = {"tbd", "-", "—", "n/a", "none", ""}
+
+                def _usable(s):
+                    return s.strip() if s and s.strip().lower() not in _EMPTY else ""
+
+                detail = _usable(r[7])  # status_detail
+                notes = _usable(r[8])  # upgrade_notes
+                health = _usable(r[9])  # health_notes
+                best_note = notes or health or detail
                 cats[cat].append(
                     {
                         "account_name": r[1],
