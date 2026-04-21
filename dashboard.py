@@ -2146,13 +2146,13 @@ def api_customer_detail(account_id: str):
 
 
 def _generate_m1_rationale(cat: str, accounts: list, total: int) -> str:
-    """Static rationale per M1 category — no AI."""
-    return {
-        "actionable": f"{total} accounts have no active blocker — send M1 outreach email or schedule a call this week. Prioritise 🔥 live-fire accounts first.",
-        "acct_team": f"{total} accounts are gated by the account team. Align with the Sales Rep before contacting the customer.",
-        "unblock": f"{total} accounts are blocked by a shared escalation. Resolve the escalation to unlock all outreach simultaneously.",
-        "skip": f"{total} accounts are hard blocked (churning, cancelled, or tech limitation). No action required this cycle.",
-    }.get(cat, "")
+    """Rationale built from actual upgrade_notes of accounts in this category."""
+    seen = []
+    for a in accounts:
+        note = (a.get("notes") or "").strip()
+        if note and note not in seen and note not in ("TBD", "-"):
+            seen.append(note)
+    return " | ".join(seen[:5]) if seen else ""
 
 
 @app.get("/api/m1-suggestions")
