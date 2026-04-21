@@ -2195,7 +2195,7 @@ def api_m1_suggestions(theatre: str = ""):
             cat = r[6] or "actionable"
             if cat in cats:
                 # Pick best note: upgrade_notes first, then health_notes, then status_detail
-                _EMPTY = {"tbd", "-", "—", "n/a", "none", ""}
+                _EMPTY = {"tbd", "tbd.", "-", "—", "n/a", "none", ""}
 
                 def _usable(s):
                     return s.strip() if s and s.strip().lower() not in _EMPTY else ""

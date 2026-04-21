@@ -41,15 +41,6 @@
 .sec-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--mono)}
 .sec-count{background:var(--sky-light);color:var(--sky);padding:1px 7px;border-radius:3px;font-size:9px;font-family:var(--mono)}
 
-
-
-
-
-
-
-
-
-
 .empty{padding:1.5rem;text-align:center;color:var(--muted);font-size:10px}
 .trend-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.18rem}
 .trend-day{font-family:var(--mono);font-size:6.5px;color:var(--muted);width:46px;flex-shrink:0}
@@ -132,7 +123,7 @@
         <div class="sbody hidden" id="body-milestones"><div class="empty">None today</div></div>
       </div>
 
-      <div class="bsec collapsed" id="sec-changes">
+      <div class="bsec" id="sec-changes">
         <div class="shdr collapsed" onclick="S.toggleSec(this,'sec-changes')">
           <span class="sec-title">CSE &amp; Status Changes</span>
           <span class="shdr-cnt" id="cnt-changes">0</span>
@@ -141,7 +132,7 @@
         <div class="sbody hidden" id="body-changes"><div class="empty">None today</div></div>
       </div>
 
-      <div class="bsec collapsed" id="sec-reg">
+      <div class="bsec" id="sec-reg">
         <div class="shdr collapsed" onclick="S.toggleSec(this,'sec-reg')">
           <span class="sec-title">Regressions (Y&#8594;N)</span>
           <span class="shdr-cnt" id="cnt-reg" style="background:var(--red-light);color:var(--red)">0</span>
@@ -191,8 +182,6 @@ var LABELS={'M9 Upgrade Complete':'Upgrade Complete','M8 Upgrade Started':'Upgra
   'M2 Entitlements':'Entitlements Aligned','M1 Outreach':'Customer Outreach',
   'cse':'CSE Reassigned','status':'Status Changed'};
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-
 
 function todayStr(){
   var d=new Date();
