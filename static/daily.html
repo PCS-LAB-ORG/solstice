@@ -31,13 +31,14 @@
 .sbody{padding:.4rem}
 .sbody.hidden{display:none}
 .chev{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s}
-.move{display:grid;grid-template-columns:auto 1fr auto;gap:.45rem .6rem;padding:.45rem .5rem;border-radius:5px;align-items:center;border-bottom:1px solid var(--border-soft)}
+.move{display:grid;grid-template-columns:auto 1fr auto;gap:.45rem .6rem;padding:.45rem .75rem;align-items:center;border-bottom:1px solid var(--border-soft)}
 .move:last-child{border-bottom:none}
 .move:hover{background:var(--surface-2);cursor:pointer}
-.move-badge{font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.move-badge{font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0}
 .move-name{font-size:10px;font-weight:700;color:var(--text)}
 .move-sub{font-size:8px;color:var(--muted)}
-.move-change{font-family:var(--mono);font-size:8.5px;text-align:right}
+.move-mid{min-width:0;overflow:hidden}
+.move-change{font-family:var(--mono);font-size:8.5px;text-align:right;white-space:nowrap;padding-right:.25rem}
 .sec-title{font-size:11px;font-weight:700;color:var(--text)}
 .sec-count{background:var(--sky-light);color:var(--sky);padding:1px 7px;border-radius:3px;font-size:9px;font-family:var(--mono)}
 
@@ -226,10 +227,10 @@ function moveCard(m){
   var aid=m.account_id?'S.openAccountCard(\''+m.account_id+'\')':'';
   return '<div class="move"'+(aid?' onclick="'+aid+'" style="cursor:pointer"':'')+' >'
     +'<span class="move-badge" style="background:'+mc+'22;color:'+mc+'">'+E(mi)+'</span>'
-    +'<div><div class="move-name">'+E(m.customer_name||'—')+'</div>'
+    +'<div class="move-mid"><div class="move-name">'+E(m.customer_name||'—')+'</div>'
       +'<div class="move-sub">'+E(m.active_cse||'—')+' &middot; '+E(m.region||m.area||'—')+'</div></div>'
     +'<div class="move-change"><div>'+chg+'</div>'
-      +(time?'<div style="color:var(--muted);font-size:8px;font-family:var(--mono)">'+E(time)+'</div>':'')+'</div>'
+      +(time?'<div style="color:var(--muted);font-size:8px">'+E(time)+'</div>':'')+'</div>'
     +'</div>';
 }
 
