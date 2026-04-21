@@ -40,7 +40,7 @@
 .move-mid{min-width:0;overflow:hidden}
 .move-change{font-family:var(--mono);font-size:8.5px;text-align:right;white-space:nowrap;padding-right:.25rem}
 .sec-title{font-size:11px;font-weight:700;color:var(--text)}
-.sec-count{background:var(--sky-light);color:var(--sky);padding:1px 7px;border-radius:3px;font-size:9px;font-family:var(--mono)}
+.sec-count{background:var(--sky-light);color:var(--sky);padding:2px 10px;border-radius:20px;font-size:13px;font-weight:700;font-family:var(--mono)}
 
 .empty{padding:1.5rem;text-align:center;color:var(--muted);font-size:10px}
 .trend-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.18rem}
@@ -109,7 +109,7 @@
       <div class="bsec" id="sec-upgrades">
         <div class="shdr collapsed" onclick="S.toggleSec(this,'sec-upgrades')">
           <span class="sec-title">Upgrades (M8 + M9)</span>
-          <span class="shdr-cnt" id="cnt-upgrades">0</span>
+          <span class="shdr-cnt sec-count" id="cnt-upgrades">0</span>
           <span class="chev">&#9660;</span>
         </div>
         <div class="sbody hidden" id="body-upgrades"><div class="empty">None today</div></div>
@@ -118,7 +118,7 @@
       <div class="bsec" id="sec-milestones">
         <div class="shdr collapsed" onclick="S.toggleSec(this,'sec-milestones')">
           <span class="sec-title">Other Milestones (M1–M7)</span>
-          <span class="shdr-cnt" id="cnt-milestones">0</span>
+          <span class="shdr-cnt sec-count" id="cnt-milestones">0</span>
           <span class="chev">&#9660;</span>
         </div>
         <div class="sbody hidden" id="body-milestones"><div class="empty">None today</div></div>
@@ -127,7 +127,7 @@
       <div class="bsec" id="sec-changes">
         <div class="shdr collapsed" onclick="S.toggleSec(this,'sec-changes')">
           <span class="sec-title">CSE &amp; Status Changes</span>
-          <span class="shdr-cnt" id="cnt-changes">0</span>
+          <span class="shdr-cnt sec-count" id="cnt-changes">0</span>
           <span class="chev">&#9660;</span>
         </div>
         <div class="sbody hidden" id="body-changes"><div class="empty">None today</div></div>
@@ -136,7 +136,7 @@
       <div class="bsec" id="sec-reg">
         <div class="shdr collapsed" onclick="S.toggleSec(this,'sec-reg')">
           <span class="sec-title">Regressions (Y&#8594;N)</span>
-          <span class="shdr-cnt" id="cnt-reg" style="background:var(--red-light);color:var(--red)">0</span>
+          <span class="shdr-cnt sec-count" style="background:var(--red-light);color:var(--red)" id="cnt-reg">0</span>
           <span class="chev">&#9660;</span>
         </div>
         <div class="sbody hidden" id="body-reg"><div class="empty">No regressions today</div></div>
