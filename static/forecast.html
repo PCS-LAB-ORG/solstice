@@ -38,6 +38,26 @@
 .sla-row:last-child{border-bottom:none}
 .sla-row:hover{background:var(--surface-2)}
 .empty{padding:1.75rem;text-align:center;color:var(--muted);font-size:10px}
+.bsec{margin-bottom:1rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow-sm)}
+.shdr{display:flex;align-items:center;gap:.65rem;padding:.6rem 1rem;background:var(--surface-2);cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:background .15s}
+.shdr:hover{background:#e8edf2}
+.shdr.collapsed{border-bottom:none}
+.shdr-icon{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--mono)}
+.shdr-title{font-size:11px;font-weight:700;color:var(--text)}
+.shdr-desc{font-size:9px;color:var(--muted);margin-left:.15rem}
+.shdr-cnt{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.chev{font-size:9px;color:var(--muted);transition:transform .2s}
+.shdr:not(.collapsed) .chev{transform:rotate(0deg)}
+.shdr.collapsed .chev{transform:rotate(-90deg)}
+.sbody{background:var(--surface)}
+.sbody.hidden{display:none}
+.reg-hdr{display:flex;align-items:center;gap:.5rem;padding:.3rem 1rem;background:var(--surface-2);border-bottom:1px solid var(--border-soft)}
+.reg-hdr .reg-name{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.reg-hdr .reg-cnt{font-size:8px;color:var(--muted);font-family:var(--mono)}
+.arow{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr;align-items:center;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background .1s;padding:.5rem .8rem}
+.arow:last-child{border-bottom:none}
+.arow:hover{background:var(--surface-2)}
+.aname{font-weight:700;font-size:10px;color:var(--text);margin-bottom:2px}
 </style>
 </head>
 <body>
@@ -82,7 +102,9 @@
     </div>
     <div id="forecast-body"><div class="empty">Loading…</div></div>
   </div>
+  </div>
 
+  <div id="overdue-section"></div>
 
 </div>
 <!-- RIGHT COLUMN -->
@@ -193,13 +215,53 @@ function renderForecast(d){
         +'<div class="fc"><span class="conf '+cclass+'">'+conf+'</span></div>'
         +'</div>';
     });
-    if(overdue.length){
-      html+='<div class="overdue-banner">&#9888; '+overdue.length+' overdue: '
-        +overdue.slice(0,3).map(function(a){return E(a.customer_name);}).join(', ')
-        +(overdue.length>3?' + '+(overdue.length-3)+' more':'')+'</div>';
-    }
   }
   document.getElementById('forecast-body').innerHTML=html;
+
+  // Overdue expandable section
+  var odEl = document.getElementById('overdue-section');
+  if(!odEl) return;
+  if(!overdue.length){ odEl.innerHTML=''; return; }
+
+  // Group by theatre
+  var byTh={}, thOrder=[];
+  overdue.forEach(function(a){
+    var th=a.account_theatre||'Unknown';
+    if(!byTh[th]){byTh[th]=[];thOrder.push(th);}
+    byTh[th].push(a);
+  });
+
+  var bodyHtml='<div style="display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr;background:var(--surface-2);border-bottom:1px solid var(--border)">'
+    +'<span style="padding:.3rem .8rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700">Account / CSE</span>'
+    +'<span style="padding:.3rem .8rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700">M9 Planned</span>'
+    +'<span style="padding:.3rem .8rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700">Days Late</span>'
+    +'<span style="padding:.3rem .8rem;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700">Confidence</span>'
+    +'</div>';
+  thOrder.forEach(function(th){
+    bodyHtml+='<div class="reg-hdr"><span class="reg-name">'+E(th)+'</span><span class="reg-cnt">'+byTh[th].length+'</span></div>';
+    byTh[th].forEach(function(a){
+      var conf=a.confidence||'LOW';
+      var cclass={'HIGH':'conf-high','MED':'conf-med','LOW':'conf-low','CHURN':'conf-churn'}[conf]||'conf-low';
+      var aid=a.account_id?'onclick="S.openAccountCard(''+a.account_id+'')"':'';
+      var daysOver=Math.round((new Date()-new Date(a.m9_date))/(1000*86400));
+      bodyHtml+='<div class="arow" '+aid+'>'
+        +'<div><div class="aname">'+E(a.customer_name)+'</div><div style="font-size:8px;color:var(--muted)">'+E(a.active_cse||'—')+'</div></div>'
+        +'<div style="font-family:var(--mono);font-size:9px;color:#dc2626">'+E(a.m9_date||'—')+'</div>'
+        +'<div style="color:#dc2626;font-family:var(--mono);font-size:9px;font-weight:700">+'+daysOver+'d</div>'
+        +'<div><span class="conf '+cclass+'">'+conf+'</span></div>'
+        +'</div>';
+    });
+  });
+
+  odEl.innerHTML='<div class="bsec">'
+    +'<div class="shdr collapsed" onclick="var b=this.querySelector('.sbody')||this.nextElementSibling;this.classList.toggle(\'collapsed\');b.classList.toggle(\'hidden\')">'
+    +'<div class="shdr-icon" style="background:rgba(239,68,68,.12);color:#dc2626">'+overdue.length+'</div>'
+    +'<span class="shdr-title" style="color:#dc2626">Overdue</span>'
+    +'<span class="shdr-desc">— M9 date passed, upgrade not complete</span>'
+    +'<div class="shdr-cnt"><span class="chev">▼</span></div>'
+    +'</div>'
+    +'<div class="sbody hidden">'+bodyHtml+'</div>'
+    +'</div>';
   var now=new Date();
   var end=new Date(now); end.setDate(end.getDate()+90);
   document.getElementById('date-range').textContent=
