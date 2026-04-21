@@ -73,6 +73,7 @@
   <div class="card">
     <div class="card-head">
       <span class="card-title">Next 3 Months — M9 Targets</span>
+      <span id="forecast-counter" style="font-size:11px;font-weight:700;font-family:var(--mono);color:var(--sky);background:rgba(14,165,233,.10);padding:2px 8px;border-radius:4px">—</span>
       <span style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="theatre-label">All Theatres</span>
     </div>
     <div class="ft-hdr">
@@ -162,6 +163,8 @@ function renderForecast(d){
     .filter(function(a){ return !_hideChurn || !_isChurn(a); })
     .slice().sort(function(a,b){return (a.m9_date||'').localeCompare(b.m9_date||'');});
   var overdue=(d.overdue||[]).filter(function(a){ return !_hideChurn || !_isChurn(a); });
+  var counter = document.getElementById('forecast-counter');
+  if(counter) counter.textContent = targets.length + (overdue.length ? ' + '+overdue.length+' overdue' : '');
   var html='';
   if(!targets.length&&!overdue.length){
     html='<div class="empty">No M9 targets in next 3 months</div>';
