@@ -241,7 +241,7 @@ function renderForecast(d){
     byTh[th].forEach(function(a){
       var conf=a.confidence||'LOW';
       var cclass={'HIGH':'conf-high','MED':'conf-med','LOW':'conf-low','CHURN':'conf-churn'}[conf]||'conf-low';
-      var aid=a.account_id?'onclick="S.openAccountCard(''+a.account_id+'')"':'';
+      var aid=a.account_id?'onclick="S.openAccountCard(\''+a.account_id+'\')"':'';
       var daysOver=Math.round((new Date()-new Date(a.m9_date))/(1000*86400));
       bodyHtml+='<div class="arow" '+aid+'>'
         +'<div><div class="aname">'+E(a.customer_name)+'</div><div style="font-size:8px;color:var(--muted)">'+E(a.active_cse||'—')+'</div></div>'
