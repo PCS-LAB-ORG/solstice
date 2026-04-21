@@ -329,6 +329,9 @@ function render() {
   document.getElementById('sections').innerHTML = secHtml;
 }
 
+var _EMPTY = ['tbd','tbd.','n/a','none','-','—',''];
+function _usable(s){ return s && _EMPTY.indexOf(s.trim().toLowerCase())===-1 ? s.trim() : ''; }
+
 // ── Single account row ──────────────────────────────────────────────────────
 function _accountRowHtml(a, rowKey, type) {
   var sigColor = SIG_COLORS[a.signal] || '#94a3b8';
@@ -341,8 +344,6 @@ function _accountRowHtml(a, rowKey, type) {
     ? '<div class="chip"><span class="chip-role">DSM</span> '+E(a.cc_dsm)+'</div>'
     : '<div style="font-size:8px;color:var(--muted);padding:2px 0">No DSM</div>';
 
-  var _EMPTY = ['tbd','tbd.','n/a','none','-','—',''];
-  function _usable(s){ return s && _EMPTY.indexOf(s.trim().toLowerCase())===-1 ? s.trim() : ''; }
   var notesText = (_usable(a.upgrade_notes) || _usable(a.health_notes) || _usable(a.status_detail) || '—').substring(0, 180);
 
   var churnHtml = '';
