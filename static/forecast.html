@@ -253,7 +253,7 @@ function renderForecast(d){
   });
 
   odEl.innerHTML='<div class="bsec">'
-    +'<div class="shdr collapsed" onclick="var b=this.querySelector('.sbody')||this.nextElementSibling;this.classList.toggle(\'collapsed\');b.classList.toggle(\'hidden\')">'
+    +'<div class="shdr collapsed" onclick="var b=this.nextElementSibling;this.classList.toggle(\'collapsed\');b.classList.toggle(\'hidden\')">'
     +'<div class="shdr-icon" style="background:rgba(239,68,68,.12);color:#dc2626">'+overdue.length+'</div>'
     +'<span class="shdr-title" style="color:#dc2626">Overdue</span>'
     +'<span class="shdr-desc">— M9 date passed, upgrade not complete</span>'
