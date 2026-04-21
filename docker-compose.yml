@@ -1,0 +1,20 @@
+services:
+  solstice:
+    build: .
+    container_name: solstice
+    ports:
+      - "8200:8200"
+    volumes:
+      # Persist DB, CSVs, state between restarts
+      - ./data:/app/data
+      # ADC credentials for Google Drive refresh
+      - ~/.config/gcloud:/root/.config/gcloud:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/ops"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

@@ -1,0 +1,14 @@
+# Data — mounted as volume, not baked into image
+data/
+
+# Dev artifacts
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.git/
+*.db-shm
+*.db-wal
+
+# Local dev only
+outputs/
