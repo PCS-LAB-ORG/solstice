@@ -2,6 +2,12 @@
 
 ---
 
+## v2.1.1 — DB populate loop fix (2026-04-22)
+
+- **DB populate loop**: `_populate_db()` was re-running on every API request because `ai_enrichment` count was always 0 after Ollama removal. Check now only requires `blocked_data + status_history > 0`. DB populates once on startup, stops.
+
+---
+
 ## v2.1.0 — Docker + Daily page fixes (2026-04-21)
 
 7 commits since v2.0.0.
