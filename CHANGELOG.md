@@ -2,6 +2,14 @@
 
 ---
 
+## v2.1.2 — Daily page fixes round 2 (2026-04-22)
+
+- **30-Day Trend**: was collapsed by default with hidden body — trend bars never visible. Now open by default.
+- **DB populate loop**: `_populate_db()` re-ran on every request (ai_enrichment always 0 after Ollama removal). Fixed to check only blocked_data + status_history.
+- **Docker Desktop labels**: added container labels so port 8200 shows as clickable link in Docker Desktop board.
+
+---
+
 ## v2.1.1 — DB populate loop fix (2026-04-22)
 
 - **DB populate loop**: `_populate_db()` was re-running on every API request because `ai_enrichment` count was always 0 after Ollama removal. Check now only requires `blocked_data + status_history > 0`. DB populates once on startup, stops.
