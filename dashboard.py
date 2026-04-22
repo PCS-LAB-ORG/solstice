@@ -48,8 +48,8 @@ def _populate_db():
             bd = conn.execute("SELECT COUNT(*) FROM blocked_data").fetchone()[0]
             sh = conn.execute("SELECT COUNT(*) FROM status_history").fetchone()[0]
             ai = conn.execute("SELECT COUNT(*) FROM ai_enrichment").fetchone()[0]
-        if bd > 0 and sh > 0 and ai > 0:
-            return  # All tables populated
+        if bd > 0 and sh > 0:
+            return  # All tables populated (ai_enrichment intentionally unused since Ollama removed)
     except:
         pass
 
