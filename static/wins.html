@@ -151,12 +151,12 @@ fetch('/api/wins').then(function(r){ return r.json(); }).then(function(d) {
   var pm = d['PS 101-650'] || {};
   var pt = d['PS Top 100'] || {};
 
-  buildBlock('blk-scale', 'Ὠ0', 'Scale Cohort',
+  buildBlock('blk-scale', 'Scale', 'Scale Cohort',
     (sc.totals && sc.totals.total ? sc.totals.total : '?') + ' accounts',
     'First-ever self-service scale motion. M9 = fully upgraded without PS engagement.',
     sc, true, false);
 
-  buildBlock('blk-mid', 'ὋC', 'PS Cohort — 101–650',
+  buildBlock('blk-mid', 'PS', 'PS Cohort — 101–650',
     (pm.totals && pm.totals.total ? pm.totals.total : '?') + ' accounts',
     'Mid-market strategic accounts with dedicated PS delivery.',
     pm, true, false);
