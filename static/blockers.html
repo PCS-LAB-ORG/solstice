@@ -112,6 +112,8 @@ var _m1Loading = false;
 var _expandedRow = null;  // currently expanded row key
 
 var TYPES = [
+  {key:'m0_needed',        color:'#dc2626', bg:'rgba(220,38,38,.12)',   label:'M0 Not Started',    desc:'Kickoff never happened — upgrade cannot begin'},
+  {key:'m0_no_m1',         color:'#f97316', bg:'rgba(249,115,22,.10)',  label:'M0 → M1 Stuck', desc:'Kickoff done but no action plan yet'},
   {key:'m1_plan',          color:'#0ea5e9', bg:'rgba(14,165,233,.08)',  label:'M1 Action Plan',    desc:'Accounts needing M1 outreach'},
   {key:'sla_breach',       color:'#ef4444', bg:'rgba(239,68,68,.08)',   label:'SLA Breach',        desc:'M3\u2192M8 >14d or M8\u2192M9 >28d'},
   {key:'churn',            color:'#dc2626', bg:'rgba(220,38,38,.10)',   label:'Churn Risk',        desc:'Customer decided not to upgrade or deal lost'},
@@ -207,6 +209,18 @@ function load() {
       _m1Loading = true;
       _rebuildDropdowns(d, cse);
       render();
+
+      // Load M0 not started — kickoff never happened
+      fetch('/api/m0-needed?theatre='+encodeURIComponent(_theatre))
+        .then(function(r){return r.json();})
+        .then(function(d){ _data.m0_needed=d; render(); })
+        .catch(function(){});
+
+      // Load M0→M1 stuck — kickoff done, no action plan
+      fetch('/api/m0-no-m1?theatre='+encodeURIComponent(_theatre))
+        .then(function(r){return r.json();})
+        .then(function(d){ _data.m0_no_m1=d; render(); })
+        .catch(function(){});
 
       // Load SLA async — update when ready
       fetch('/api/sla-breaches?theatre='+encodeURIComponent(_theatre))

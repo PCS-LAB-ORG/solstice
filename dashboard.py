@@ -2176,6 +2176,95 @@ def _generate_m1_rationale(cat: str, accounts: list, total: int) -> str:
     return " | ".join(seen[:5]) if seen else ""
 
 
+@app.get("/api/m0-needed")
+def api_m0_needed(theatre: str = ""):
+    """Accounts where M0 kickoff has not happened yet."""
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            rows = conn.execute(
+                """
+                SELECT a.customer_name, a.active_cse, a.sales_region,
+                       COALESCE(b.account_theatre, a.account_theatre, 'EMEA') as account_theatre,
+                       b.signal, b.subtype, b.status_detail, b.health_notes,
+                       b.dc_progress, b.cc_rep, b.cc_dsm, b.m1_planned,
+                       a.account_id
+                FROM accounts a JOIN blocked_data b ON a.account_id = b.account_id
+                WHERE a.customer_name != ''
+                  AND (b.m0_complete IS NULL OR b.m0_complete = 0)
+                  AND b.m9_complete = 0
+                  AND (? = '' OR UPPER(COALESCE(b.account_theatre, a.account_theatre, 'EMEA')) = UPPER(?))
+                ORDER BY b.signal, a.sales_region, a.customer_name
+                """,
+                (theatre, theatre),
+            ).fetchall()
+        return [
+            {
+                "account_id": r["account_id"] or "",
+                "customer_name": r["customer_name"] or "",
+                "active_cse": r["active_cse"] or "",
+                "sales_region": r["sales_region"] or "",
+                "account_theatre": r["account_theatre"] or "",
+                "signal": r["signal"] or "",
+                "subtype": "m0_needed",
+                "status_detail": r["status_detail"] or "",
+                "health_notes": r["health_notes"] or "",
+                "dc_progress": r["dc_progress"] or "",
+                "cc_rep": r["cc_rep"] or "",
+                "cc_dsm": r["cc_dsm"] or "",
+                "m1_planned": r["m1_planned"] or "",
+            }
+            for r in rows
+        ]
+    except Exception:
+        return []
+
+
+@app.get("/api/m0-no-m1")
+def api_m0_no_m1(theatre: str = ""):
+    """Accounts where M0 kickoff done but M1 action plan not created yet."""
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            rows = conn.execute(
+                """
+                SELECT a.customer_name, a.active_cse, a.sales_region,
+                       COALESCE(b.account_theatre, a.account_theatre, 'EMEA') as account_theatre,
+                       b.signal, b.subtype, b.status_detail, b.health_notes,
+                       b.dc_progress, b.cc_rep, b.cc_dsm, b.m1_details, b.m1_planned,
+                       a.account_id
+                FROM accounts a JOIN blocked_data b ON a.account_id = b.account_id
+                WHERE a.customer_name != ''
+                  AND b.m0_complete = 1
+                  AND (b.m1_complete IS NULL OR b.m1_complete = 0)
+                  AND b.m9_complete = 0
+                  AND (? = '' OR UPPER(COALESCE(b.account_theatre, a.account_theatre, 'EMEA')) = UPPER(?))
+                ORDER BY b.signal, a.sales_region, a.customer_name
+                """,
+                (theatre, theatre),
+            ).fetchall()
+        return [
+            {
+                "account_id": r["account_id"] or "",
+                "customer_name": r["customer_name"] or "",
+                "active_cse": r["active_cse"] or "",
+                "sales_region": r["sales_region"] or "",
+                "account_theatre": r["account_theatre"] or "",
+                "signal": r["signal"] or "",
+                "subtype": "m0_no_m1",
+                "status_detail": r["m1_details"] or r["status_detail"] or "",
+                "health_notes": r["health_notes"] or "",
+                "dc_progress": r["dc_progress"] or "",
+                "cc_rep": r["cc_rep"] or "",
+                "cc_dsm": r["cc_dsm"] or "",
+                "m1_planned": r["m1_planned"] or "",
+            }
+            for r in rows
+        ]
+    except Exception:
+        return []
+
+
 @app.get("/api/m1-suggestions")
 def api_m1_suggestions(theatre: str = ""):
     """M1 action plan — 4 flat tables with LLM rationale per category."""
@@ -2290,8 +2379,6 @@ def api_wins():
             FROM blocked_data WHERE cohort != ''
         """).fetchone()
     return {"regions": [dict(r) for r in regions], "totals": dict(totals)}
-
-
 
 
 @app.get("/wins", response_class=HTMLResponse)
