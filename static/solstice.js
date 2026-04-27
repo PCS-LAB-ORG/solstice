@@ -301,6 +301,7 @@ var _PAGES = [
   {id:'cse',     label:'CSE',      url:'/cse'},
   {id:'weekly',  label:'Weekly',   url:'/weekly'},
   {id:'scope',   label:'Scope',    url:'/scope'},
+  {id:'wins',    label:'🏆 Wins',  url:'/wins'},
 ];
 
 S.initNav = function(activePage) {
