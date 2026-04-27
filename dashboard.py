@@ -2272,46 +2272,44 @@ async def api_events(request: Request):
 
 @app.get("/api/wins")
 def api_wins():
-    conn = _db()
     cohorts = {
         "Scale": "Scale cohort",
         "PS 101-650": "101-650 Customers",
         "PS Top 100": "Top 100 Customers",
     }
     result = {}
-    for label, cohort in cohorts.items():
-        rows = conn.execute(
-            """
-            SELECT account_theatre as region,
-                   COUNT(*) as total,
-                   SUM(m9_complete) as m9,
-                   SUM(m8_started) as m8,
-                   SUM(m7_complete) as m7,
-                   SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort=?
-            GROUP BY account_theatre ORDER BY m9 DESC, m8 DESC
-        """,
-            (cohort,),
-        ).fetchall()
-        totals = conn.execute(
-            """
-            SELECT COUNT(*) as total, SUM(m9_complete) as m9,
-                   SUM(m8_started) as m8, SUM(m7_complete) as m7,
-                   SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort=?
-        """,
-            (cohort,),
+    with get_db() as conn:
+        for label, cohort in cohorts.items():
+            rows = conn.execute(
+                """
+                SELECT account_theatre as region,
+                       COUNT(*) as total,
+                       SUM(m9_complete) as m9,
+                       SUM(m8_started) as m8,
+                       SUM(m7_complete) as m7,
+                       SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
+                FROM blocked_data WHERE cohort=?
+                GROUP BY account_theatre ORDER BY m9 DESC, m8 DESC
+                """,
+                (cohort,),
+            ).fetchall()
+            totals = conn.execute(
+                """
+                SELECT COUNT(*) as total, SUM(m9_complete) as m9,
+                       SUM(m8_started) as m8, SUM(m7_complete) as m7,
+                       SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
+                FROM blocked_data WHERE cohort=?
+                """,
+                (cohort,),
+            ).fetchone()
+            result[label] = {
+                "regions": [dict(r) for r in rows],
+                "totals": dict(totals),
+            }
+        gt = conn.execute(
+            "SELECT COUNT(*) as total, SUM(m9_complete) as m9, SUM(m8_started) as m8 FROM blocked_data WHERE cohort != ''"
         ).fetchone()
-        result[label] = {
-            "regions": [dict(r) for r in rows],
-            "totals": dict(totals),
-        }
-    # grand total across all cohorts
-    gt = conn.execute("""
-        SELECT COUNT(*) as total, SUM(m9_complete) as m9, SUM(m8_started) as m8
-        FROM blocked_data WHERE cohort != ''
-    """).fetchone()
-    result["_grand"] = dict(gt)
+        result["_grand"] = dict(gt)
     return result
 
 
