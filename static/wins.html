@@ -13,31 +13,32 @@
 .wtbl th{padding:.6rem 1.2rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);font-weight:700;background:var(--surface-2);border-bottom:1px solid var(--border);text-align:left}
 .wtbl th.r{text-align:right}
 .wtbl td{padding:.8rem 1.2rem;font-size:.9rem;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle}
-.wtbl td.r{text-align:right;font-family:var(--mono);font-weight:600}
+.wtbl td.r{text-align:right;font-family:var(--mono)}
 .wtbl tr.tot td{background:var(--surface-2);font-weight:700;border-top:1px solid var(--border);border-bottom:none}
 .wtbl tr:not(.tot):hover td{background:var(--surface-2)}
-.pill9{display:inline-block;background:rgba(56,189,248,.15);color:var(--sky);font-weight:700;font-family:var(--mono);font-size:.9rem;padding:3px 16px;border-radius:20px}
-.pill8{display:inline-block;background:rgba(245,158,11,.1);color:var(--amber);font-weight:700;font-family:var(--mono);font-size:.9rem;padding:3px 16px;border-radius:20px}
-.pillb{display:inline-block;background:rgba(16,185,129,.12);color:var(--green);font-weight:700;font-family:var(--mono);font-size:.9rem;padding:3px 16px;border-radius:20px}
-.zm{color:var(--muted);font-family:var(--mono)}
-.bar-wrap{display:flex;align-items:center;gap:.6rem}
+.n9{font-size:1.2rem;font-weight:800;color:var(--sky)}
+.n8{font-weight:600;color:var(--amber)}
+.nb{font-weight:600;color:var(--green)}
+.nm{color:var(--muted)}
+.bar-w{display:flex;align-items:center;gap:.6rem}
 .bar-bg{height:8px;background:var(--border);border-radius:4px;flex:1;min-width:60px;overflow:hidden}
-.bar-fill{height:100%;background:var(--sky);border-radius:4px;transition:width .4s}
-.bar-pct{font-size:.8rem;font-family:var(--mono);color:var(--muted);min-width:2.5rem;text-align:right}
+.bar-f{height:100%;background:var(--sky);border-radius:4px}
+.bar-t{font-size:.8rem;font-family:var(--mono);color:var(--muted);min-width:2.5rem;text-align:right}
+.upd{font-size:.72rem;color:var(--muted);text-align:right;margin-top:.75rem}
 </style>
 </head>
 <body>
 <div id="s-nav"></div>
-<div class="page-wrap" style="max-width:880px;margin:0 auto;padding:1.5rem 1.5rem 3rem">
+<div class="page-wrap" style="max-width:900px;margin:0 auto;padding:1.5rem 1.5rem 3rem">
 
   <div style="margin-bottom:1.75rem">
     <div style="font-size:1.5rem;font-weight:800;color:var(--text)">&#x1F3C6; Upgrade Wins</div>
-    <div style="font-size:.85rem;color:var(--muted);margin-top:.3rem">All cohorts combined &middot; breakdown by theatre &middot; live data</div>
+    <div style="font-size:.85rem;color:var(--muted);margin-top:.3rem">All cohorts combined &middot; by theatre &middot; live</div>
   </div>
 
   <div class="kpi-row">
-    <div class="kpi"><div class="kpi-num" id="k-m9">-</div><div class="kpi-lbl">M9 Complete</div><div class="kpi-sub">Fully upgraded</div></div>
-    <div class="kpi"><div class="kpi-num" id="k-m8">-</div><div class="kpi-lbl">M8 Active</div><div class="kpi-sub">Upgrade in progress</div></div>
+    <div class="kpi"><div class="kpi-num" id="k-m9">-</div><div class="kpi-lbl">Upgrade Complete</div><div class="kpi-sub">M9 done</div></div>
+    <div class="kpi"><div class="kpi-num" id="k-m8">-</div><div class="kpi-lbl">M8 Active</div><div class="kpi-sub">Upgrade started</div></div>
     <div class="kpi"><div class="kpi-num" id="k-beat">-</div><div class="kpi-lbl">Beat Plan</div><div class="kpi-sub">Ahead of schedule</div></div>
     <div class="kpi"><div class="kpi-num" id="k-total">-</div><div class="kpi-lbl">Total Accounts</div><div class="kpi-sub">All cohorts</div></div>
   </div>
@@ -46,66 +47,55 @@
     <thead><tr>
       <th>Theatre</th>
       <th class="r">Accounts</th>
-      <th class="r">M9 Complete</th>
+      <th class="r">Upgrade Complete</th>
       <th class="r">M8 Active</th>
       <th class="r">Beat Plan</th>
-      <th>M9 Rate</th>
+      <th>Rate</th>
     </tr></thead>
     <tbody id="tbody"></tbody>
   </table>
+  <div class="upd" id="upd"></div>
 
 </div>
 <script src="/static/solstice.js"></script>
 <script>
 S.initNav('wins');
+var FLAGS={AMER:'&#x1F1FA;&#x1F1F8;',EMEA:'&#x1F30D;',JAPAC:'&#x1F30F;',LATAM:'&#x1F30E;'};
 
-var FLAGS = {AMER:'&#x1F1FA;&#x1F1F8;', EMEA:'&#x1F30D;', JAPAC:'&#x1F30F;', LATAM:'&#x1F30E;'};
+fetch('/api/wins').then(function(r){return r.json();}).then(function(d){
+  var t=d.totals||{};
+  document.getElementById('k-m9').textContent   = t.m9||0;
+  document.getElementById('k-m8').textContent   = t.m8||0;
+  document.getElementById('k-beat').textContent = t.beat_plan||0;
+  document.getElementById('k-total').textContent= t.total||0;
+  document.getElementById('upd').textContent    = 'Updated '+new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
-fetch('/api/wins')
-  .then(function(r){ return r.json(); })
-  .then(function(d) {
-    var tot = d.totals || {};
-    document.getElementById('k-m9').textContent    = tot.m9    || 0;
-    document.getElementById('k-m8').textContent    = tot.m8    || 0;
-    document.getElementById('k-beat').textContent  = tot.beat_plan || 0;
-    document.getElementById('k-total').textContent = tot.total  || 0;
+  var regions=d.regions||[];
+  var maxPct=regions.reduce(function(m,r){return r.total?Math.max(m,Math.round((r.m9||0)/r.total*100)):m;},0)||1;
+  var tbody=document.getElementById('tbody');
 
-    var regions = d.regions || [];
-    var maxPct = 0;
-    regions.forEach(function(r) {
-      if (r.total > 0) {
-        var p = Math.round((r.m9 || 0) / r.total * 100);
-        if (p > maxPct) maxPct = p;
-      }
-    });
-
-    var tbody = document.getElementById('tbody');
-
-    regions.forEach(function(r) {
-      var pct = r.total > 0 ? Math.round((r.m9 || 0) / r.total * 100) : 0;
-      var barW = maxPct > 0 ? Math.round(pct / maxPct * 100) : 0;
-      var star = r.region === 'LATAM' && r.m9 > 0 ? ' &#x2605;' : '';
-      var flag = FLAGS[r.region] || '&#x1F310;';
-      var tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + flag + ' <strong>' + (r.region || '?') + '</strong>' + star + '</td>'
-        + '<td class="r zm">' + (r.total || 0) + '</td>'
-        + '<td class="r"><span class="pill9">' + (r.m9 || 0) + '</span></td>'
-        + '<td class="r"><span class="pill8">' + (r.m8 || 0) + '</span></td>'
-        + '<td class="r"><span class="pillb">' + (r.beat_plan || 0) + '</span></td>'
-        + '<td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:' + barW + '%"></div></div><span class="bar-pct">' + pct + '%</span></div></td>';
-      tbody.appendChild(tr);
-    });
-
-    var totPct = tot.total > 0 ? Math.round((tot.m9 || 0) / tot.total * 100) : 0;
-    var totRow = document.createElement('tr');
-    totRow.className = 'tot';
-    totRow.innerHTML = '<td>Total</td>'
-      + '<td class="r">' + (tot.total || 0) + '</td>'
-      + '<td class="r"><span class="pill9">' + (tot.m9 || 0) + '</span></td>'
-      + '<td class="r"><span class="pill8">' + (tot.m8 || 0) + '</span></td>'
-      + '<td class="r"><span class="pillb">' + (tot.beat_plan || 0) + '</span></td>'
-      + '<td class="zm">' + totPct + '%</td>';
-    tbody.appendChild(totRow);
+  regions.forEach(function(r){
+    var pct=r.total?Math.round((r.m9||0)/r.total*100):0;
+    var star=r.region==='LATAM'&&r.m9>0?' &#x2605;':'';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(FLAGS[r.region]||'')+'&nbsp;<strong>'+(r.region||'?')+'</strong>'+star+'</td>'
+      +'<td class="r nm">'+(r.total||0)+'</td>'
+      +'<td class="r"><span class="n9">'+(r.m9||0)+'</span></td>'
+      +'<td class="r"><span class="n8">'+(r.m8||0)+'</span></td>'
+      +'<td class="r"><span class="nb">'+(r.beat_plan||0)+'</span></td>'
+      +'<td><div class="bar-w"><div class="bar-bg"><div class="bar-f" style="width:'+Math.round(pct/maxPct*100)+'%"></div></div><span class="bar-t">'+pct+'%</span></div></td>';
+    tbody.appendChild(tr);
   });
+
+  var tr=document.createElement('tr');tr.className='tot';
+  var tpct=t.total?Math.round((t.m9||0)/t.total*100):0;
+  tr.innerHTML='<td>Total</td>'
+    +'<td class="r">'+(t.total||0)+'</td>'
+    +'<td class="r" style="color:var(--sky)">'+(t.m9||0)+'</td>'
+    +'<td class="r" style="color:var(--amber)">'+(t.m8||0)+'</td>'
+    +'<td class="r" style="color:var(--green)">'+(t.beat_plan||0)+'</td>'
+    +'<td class="nm">'+tpct+'%</td>';
+  tbody.appendChild(tr);
+});
 </script>
 </body></html>
