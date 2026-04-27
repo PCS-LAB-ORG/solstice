@@ -2272,46 +2272,26 @@ async def api_events(request: Request):
 
 @app.get("/api/wins")
 def api_wins():
-    result = {}
     with get_db() as conn:
-        # Scale cohort
-        rows = conn.execute("""
-            SELECT account_theatre as region, COUNT(*) as total,
-                   SUM(m9_complete) as m9, SUM(m8_started) as m8, SUM(m7_complete) as m7,
+        regions = conn.execute("""
+            SELECT account_theatre as region,
+                   COUNT(*) as total,
+                   SUM(m9_complete) as m9,
+                   SUM(m8_started) as m8,
+                   SUM(m7_complete) as m7,
                    SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort='Scale cohort'
+            FROM blocked_data WHERE cohort != ''
             GROUP BY account_theatre ORDER BY m9 DESC, m8 DESC
         """).fetchall()
         totals = conn.execute("""
-            SELECT COUNT(*) as total, SUM(m9_complete) as m9, SUM(m8_started) as m8, SUM(m7_complete) as m7,
+            SELECT COUNT(*) as total, SUM(m9_complete) as m9,
+                   SUM(m8_started) as m8, SUM(m7_complete) as m7,
                    SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort='Scale cohort'
+            FROM blocked_data WHERE cohort != ''
         """).fetchone()
-        result["Scale"] = {"regions": [dict(r) for r in rows], "totals": dict(totals)}
+    return {"regions": [dict(r) for r in regions], "totals": dict(totals)}
 
-        # PS cohort — 101-650 + Top 100 combined
-        rows = conn.execute("""
-            SELECT account_theatre as region, COUNT(*) as total,
-                   SUM(m9_complete) as m9, SUM(m8_started) as m8, SUM(m7_complete) as m7,
-                   SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort IN ('101-650 Customers','Top 100 Customers')
-            GROUP BY account_theatre ORDER BY m9 DESC, m8 DESC
-        """).fetchall()
-        totals = conn.execute("""
-            SELECT COUNT(*) as total, SUM(m9_complete) as m9, SUM(m8_started) as m8, SUM(m7_complete) as m7,
-                   SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort IN ('101-650 Customers','Top 100 Customers')
-        """).fetchone()
-        result["Solstice"] = {
-            "regions": [dict(r) for r in rows],
-            "totals": dict(totals),
-        }
 
-        gt = conn.execute(
-            "SELECT COUNT(*) as total, SUM(m9_complete) as m9, SUM(m8_started) as m8 FROM blocked_data WHERE cohort != ''"
-        ).fetchone()
-        result["_grand"] = dict(gt)
-    return result
 
 
 @app.get("/wins", response_class=HTMLResponse)

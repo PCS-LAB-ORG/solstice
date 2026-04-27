@@ -1,162 +1,125 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x1F3C6;</text></svg>">
-<title>Solstice — Wins</title>
+<title>Solstice &#x2014; Wins</title>
 <link rel="stylesheet" href="/static/solstice.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-.wins-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
-.hero-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem 2rem;text-align:center}
-.hero-num{font-size:3rem;font-weight:800;line-height:1;color:var(--sky)}
-.hero-lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:var(--mono);margin-top:.4rem}
-.hero-sub{font-size:.8rem;color:var(--text-2);margin-top:.25rem}
-.cohort-block{margin-bottom:2.5rem}
-.cohort-title{font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sky);font-family:var(--mono);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
-.c-badge{font-size:.65rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--muted);font-weight:600}
-.wins-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.wins-table th{padding:.5rem 1rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);font-weight:700;background:var(--surface-2);border-bottom:1px solid var(--border);text-align:left}
-.wins-table th.r{text-align:right}
-.wins-table td{padding:.6rem 1rem;font-size:.85rem;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle}
-.wins-table td.r{text-align:right;font-family:var(--mono);font-weight:600}
-.wins-table tr:last-child td{border-bottom:none}
-.wins-table tr.tot td{background:var(--surface-2);font-weight:700;color:var(--sky)}
-.wins-table tr:hover:not(.tot) td{background:var(--surface-2)}
-.p9{display:inline-block;background:rgba(56,189,248,.12);color:var(--sky);font-weight:700;font-family:var(--mono);font-size:.85rem;padding:2px 10px;border-radius:20px}
-.p8{display:inline-block;background:rgba(245,158,11,.08);color:var(--amber);font-weight:700;font-family:var(--mono);font-size:.85rem;padding:2px 10px;border-radius:20px}
-.pb{display:inline-block;background:rgba(16,185,129,.1);color:var(--green);font-weight:700;font-family:var(--mono);font-size:.85rem;padding:2px 10px;border-radius:20px}
-.zm{color:var(--muted);font-family:var(--mono)}
-.rbar-w{display:flex;align-items:center;gap:.5rem}
-.rbar{height:6px;background:var(--border);border-radius:3px;flex:1;overflow:hidden}
-.rbar-f{height:100%;background:var(--sky);border-radius:3px}
-.rbar-t{font-size:.75rem;font-family:var(--mono);color:var(--muted);min-width:3rem;text-align:right}
-.sec-note{font-size:.78rem;color:var(--muted);margin-bottom:1.25rem;font-style:italic}
-.divider{height:1px;background:var(--border);margin:2rem 0}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center}
+.kpi-num{font-size:2.8rem;font-weight:800;line-height:1;color:var(--sky)}
+.kpi-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:var(--mono);margin-top:.4rem}
+.kpi-sub{font-size:.75rem;color:var(--text-2);margin-top:.2rem}
+.wtbl{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:1.5rem}
+.wtbl th{padding:.6rem 1.2rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);font-weight:700;background:var(--surface-2);border-bottom:1px solid var(--border);text-align:left}
+.wtbl th.r{text-align:right}
+.wtbl td{padding:.75rem 1.2rem;font-size:.9rem;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle}
+.wtbl td.r{text-align:right;font-family:var(--mono);font-weight:600}
+.wtbl tr:last-child td{border-bottom:none}
+.wtbl tr.tot td{background:var(--surface-2);font-weight:700;border-top:1px solid var(--border)}
+.wtbl tr:hover:not(.tot) td{background:var(--surface-2)}
+.pill9{display:inline-block;background:rgba(56,189,248,.15);color:var(--sky);font-weight:700;font-family:var(--mono);font-size:.9rem;padding:3px 14px;border-radius:20px;min-width:40px;text-align:center}
+.pill8{display:inline-block;background:rgba(245,158,11,.1);color:var(--amber);font-weight:700;font-family:var(--mono);font-size:.9rem;padding:3px 14px;border-radius:20px;min-width:40px;text-align:center}
+.pillb{display:inline-block;background:rgba(16,185,129,.12);color:var(--green);font-weight:700;font-family:var(--mono);font-size:.9rem;padding:3px 14px;border-radius:20px;min-width:40px;text-align:center}
+.mute{color:var(--muted);font-family:var(--mono)}
+.rbar-w{display:flex;align-items:center;gap:.6rem}
+.rbar{height:7px;background:var(--border);border-radius:4px;flex:1;overflow:hidden;min-width:80px}
+.rbar-f{height:100%;background:var(--sky);border-radius:4px}
+.rbar-t{font-size:.8rem;font-family:var(--mono);color:var(--muted);min-width:2.8rem;text-align:right}
 </style>
 </head>
 <body>
 <div id="s-nav"></div>
-<div class="page-wrap" style="max-width:900px;margin:0 auto;padding:1.5rem 1.5rem 3rem">
+<div class="page-wrap" style="max-width:860px;margin:0 auto;padding:1.5rem 1.5rem 3rem">
 
   <div style="margin-bottom:1.75rem">
     <div style="font-size:1.5rem;font-weight:800;color:var(--text)">&#x1F3C6; Upgrade Wins</div>
-    <div style="font-size:.85rem;color:var(--muted);margin-top:.25rem">Scale cohort + Solstice Global &middot; Live milestone progress</div>
+    <div style="font-size:.85rem;color:var(--muted);margin-top:.3rem">All cohorts combined &middot; breakdown by theatre &middot; live data</div>
   </div>
 
-  <div class="wins-hero">
-    <div class="hero-card"><div class="hero-num" id="kpi-m9">—</div><div class="hero-lbl">M9 Complete</div><div class="hero-sub">Fully upgraded</div></div>
-    <div class="hero-card"><div class="hero-num" id="kpi-m8">—</div><div class="hero-lbl">M8 Active</div><div class="hero-sub">Upgrade in progress</div></div>
-    <div class="hero-card"><div class="hero-num" id="kpi-total">—</div><div class="hero-lbl">Total Accounts</div><div class="hero-sub">All cohorts</div></div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-num" id="k-m9">&#x2014;</div><div class="kpi-lbl">M9 Complete</div><div class="kpi-sub">Fully upgraded</div></div>
+    <div class="kpi"><div class="kpi-num" id="k-m8">&#x2014;</div><div class="kpi-lbl">M8 Active</div><div class="kpi-sub">Upgrade in progress</div></div>
+    <div class="kpi"><div class="kpi-num" id="k-beat">&#x2014;</div><div class="kpi-lbl">Beat Plan</div><div class="kpi-sub">Finished ahead of date</div></div>
+    <div class="kpi"><div class="kpi-num" id="k-total">&#x2014;</div><div class="kpi-lbl">Total Accounts</div><div class="kpi-sub">All cohorts</div></div>
   </div>
 
-  <div class="cohort-block" id="blk-scale"></div>
-  <div class="divider"></div>
-  <div class="cohort-block" id="blk-mid"></div>
+  <table class="wtbl" id="wtbl">
+    <thead><tr>
+      <th>Theatre</th>
+      <th class="r">Accounts</th>
+      <th class="r">M9 Complete</th>
+      <th class="r">M8 Active</th>
+      <th class="r">Beat Plan</th>
+      <th>M9 Rate</th>
+    </tr></thead>
+    <tbody id="wtbl-body"></tbody>
+  </table>
 
 </div>
 <script src="/static/solstice.js"></script>
 <script>
 S.initNav('wins');
 
-var FLAGS = {AMER:'&#x1F1FA;&#x1F1F8;', EMEA:'&#x1F1EA;&#x1F1FA;', JAPAC:'&#x1F30F;', LATAM:'&#x1F30E;'};
+var FLAGS = {AMER:'&#x1F1FA;&#x1F1F8;',EMEA:'&#x1F1EA;&#x1F1FA;',JAPAC:'&#x1F30F;',LATAM:'&#x1F30E;'};
 
-function mkPill(v, cls) {
-  if (!v) return '<span class="zm">—</span>';
-  var el = document.createElement('span');
-  el.className = cls;
-  el.textContent = v;
-  return el.outerHTML;
+function pill(val, cls) {
+  var sp = document.createElement('span');
+  if (!val) { sp.className='mute'; sp.textContent='0'; return sp; }
+  sp.className = cls; sp.textContent = val; return sp;
 }
 
-function mkBar(n, total) {
-  if (!total) return '';
-  var pct = Math.round((n||0) / total * 100);
-  var wrap = document.createElement('div'); wrap.className = 'rbar-w';
-  var bar  = document.createElement('div'); bar.className  = 'rbar';
-  var fill = document.createElement('div'); fill.className = 'rbar-f'; fill.style.width = pct + '%';
-  var txt  = document.createElement('span'); txt.className = 'rbar-t'; txt.textContent = pct + '%';
-  bar.appendChild(fill); wrap.appendChild(bar); wrap.appendChild(txt);
-  return wrap.outerHTML;
+function bar(n, total) {
+  if (!total) return document.createTextNode('');
+  var pct = Math.round((n||0)/total*100);
+  var w = document.createElement('div'); w.className='rbar-w';
+  var b = document.createElement('div'); b.className='rbar';
+  var f = document.createElement('div'); f.className='rbar-f'; f.style.width=pct+'%';
+  var t = document.createElement('span'); t.className='rbar-t'; t.textContent=pct+'%';
+  b.appendChild(f); w.appendChild(b); w.appendChild(t);
+  return w;
 }
 
-function buildTable(data, showBeat, showM7) {
-  var rows = data.regions || [];
-  var tot  = data.totals  || {};
+function addRow(tbody, r, isTot) {
+  var tr = tbody.insertRow();
+  if (isTot) tr.className='tot';
 
-  var tbl = document.createElement('table');
-  tbl.className = 'wins-table';
+  // Theatre
+  var td0 = tr.insertCell();
+  if (isTot) {
+    td0.textContent = 'Total';
+  } else {
+    var star = (r.region==='LATAM' && r.m9>0) ? ' ★' : '';
+    td0.innerHTML = (FLAGS[r.region]||'&#x1F310;') + ' ';
+    var b2 = document.createElement('strong'); b2.textContent = (r.region||'?') + star;
+    td0.appendChild(b2);
+  }
 
-  var thead = tbl.createTHead();
-  var hr = thead.insertRow();
-  ['Region','Accounts','M9 Complete','M8 Active'].forEach(function(h,i) {
-    var th = document.createElement('th');
-    th.textContent = h;
-    if (i > 0) th.className = 'r';
-    hr.appendChild(th);
-  });
-  if (showM7)   { var th = document.createElement('th'); th.className='r'; th.textContent='M7 Done';   hr.appendChild(th); }
-  if (showBeat) { var th = document.createElement('th'); th.className='r'; th.textContent='Beat Plan'; hr.appendChild(th); }
-  var th2 = document.createElement('th'); th2.textContent = 'M9 Rate'; hr.appendChild(th2);
+  // Accounts
+  var td1 = tr.insertCell(); td1.className='r mute'; td1.textContent = r.total||0;
 
-  var tbody = tbl.createTBody();
+  // M9
+  var td2 = tr.insertCell(); td2.className='r'; td2.appendChild(pill(r.m9,'pill9'));
 
-  rows.forEach(function(r) {
-    var tr = tbody.insertRow();
-    var star = (r.region === 'LATAM' && r.m9 > 0) ? ' &#x2605;' : '';
-    var regionCell = tr.insertCell(); regionCell.innerHTML = (FLAGS[r.region]||'&#x1F310;') + ' <strong>' + (r.region||'?') + '</strong>' + star;
-    var totCell = tr.insertCell(); totCell.className='r'; totCell.textContent = r.total||0;
-    var m9Cell  = tr.insertCell(); m9Cell.className='r';  m9Cell.innerHTML = mkPill(r.m9, 'p9');
-    var m8Cell  = tr.insertCell(); m8Cell.className='r';  m8Cell.innerHTML = mkPill(r.m8, 'p8');
-    if (showM7)   { var c = tr.insertCell(); c.className='r zm'; c.textContent = r.m7||0; }
-    if (showBeat) { var c = tr.insertCell(); c.className='r'; c.innerHTML = mkPill(r.beat_plan,'pb'); }
-    var barCell = tr.insertCell(); barCell.style.minWidth='130px'; barCell.innerHTML = mkBar(r.m9, r.total);
-  });
+  // M8
+  var td3 = tr.insertCell(); td3.className='r'; td3.appendChild(pill(r.m8,'pill8'));
 
-  // total row
-  var tr = tbody.insertRow(); tr.className = 'tot';
-  var tc0 = tr.insertCell(); tc0.textContent = 'Total';
-  var tc1 = tr.insertCell(); tc1.className='r'; tc1.textContent = tot.total||0;
-  var tc2 = tr.insertCell(); tc2.className='r'; tc2.innerHTML = mkPill(tot.m9,'p9');
-  var tc3 = tr.insertCell(); tc3.className='r'; tc3.innerHTML = mkPill(tot.m8,'p8');
-  if (showM7)   { var c = tr.insertCell(); c.className='r'; c.textContent = tot.m7||0; }
-  if (showBeat) { var c = tr.insertCell(); c.className='r'; c.innerHTML = mkPill(tot.beat_plan,'pb'); }
-  var tc4 = tr.insertCell(); tc4.innerHTML = mkBar(tot.m9, tot.total);
+  // Beat plan
+  var td4 = tr.insertCell(); td4.className='r'; td4.appendChild(pill(r.beat_plan,'pillb'));
 
-  return tbl;
+  // Rate bar
+  var td5 = tr.insertCell(); td5.style.minWidth='140px'; td5.appendChild(bar(r.m9, r.total));
 }
 
-function buildBlock(id, emoji, title, badge, note, data, showBeat, showM7) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = '';
+fetch('/api/wins').then(function(r){return r.json();}).then(function(d){
+  var tot = d.totals || {};
+  document.getElementById('k-m9').textContent    = tot.m9    || 0;
+  document.getElementById('k-m8').textContent    = tot.m8    || 0;
+  document.getElementById('k-beat').textContent  = tot.beat_plan || 0;
+  document.getElementById('k-total').textContent = tot.total  || 0;
 
-  var hdr = document.createElement('div'); hdr.className = 'cohort-title';
-  hdr.textContent = emoji + ' ' + title + ' ';
-  var b = document.createElement('span'); b.className = 'c-badge'; b.textContent = badge;
-  hdr.appendChild(b); el.appendChild(hdr);
-
-  if (note) { var nd = document.createElement('div'); nd.className = 'sec-note'; nd.textContent = note; el.appendChild(nd); }
-
-  el.appendChild(buildTable(data, showBeat, showM7));
-}
-
-fetch('/api/wins').then(function(r){ return r.json(); }).then(function(d) {
-  var g = d['_grand'] || {};
-  document.getElementById('kpi-m9').textContent    = g.m9    || 0;
-  document.getElementById('kpi-m8').textContent    = g.m8    || 0;
-  document.getElementById('kpi-total').textContent = g.total || 0;
-
-  var sc = d['Scale']    || {};
-  var sg = d['Solstice'] || {};
-
-  buildBlock('blk-scale', '', 'Scale Cohort',
-    (sc.totals && sc.totals.total ? sc.totals.total : '?') + ' accounts',
-    'Self-service scale motion. M9 = fully upgraded.',
-    sc, true, false);
-
-  buildBlock('blk-mid', '', 'Solstice Global',
-    (sg.totals && sg.totals.total ? sg.totals.total : '?') + ' accounts',
-    'Strategic accounts tracked globally in Solstice.',
-    sg, true, true);
+  var tbody = document.getElementById('wtbl-body');
+  (d.regions||[]).forEach(function(r){ addRow(tbody, r, false); });
+  addRow(tbody, tot, true);
 });
 </script>
 </body></html>
