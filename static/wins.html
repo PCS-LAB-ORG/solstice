@@ -1,62 +1,50 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Solstice - Wins</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x1F3C6;</text></svg>">
+<title>Solstice — Wins</title>
 <link rel="stylesheet" href="/static/solstice.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center}
-.kpi-num{font-size:2.8rem;font-weight:800;line-height:1.1;color:var(--sky)}
-.kpi-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:var(--mono);margin-top:.5rem}
-.kpi-sub{font-size:.75rem;color:var(--text-2);margin-top:.25rem}
-.wtbl{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:1.5rem}
-.wtbl th{padding:.6rem 1.2rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);font-weight:700;background:var(--surface-2);border-bottom:1px solid var(--border);text-align:left}
+.kpi-row{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.kpi-row .kpi-card{flex:1;min-width:120px}
+.wtbl{width:100%;border-collapse:collapse}
+.wtbl th{padding:.45rem .75rem;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);font-weight:700;background:var(--surface);border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
 .wtbl th.r{text-align:right}
-.wtbl td{padding:.8rem 1.2rem;font-size:.9rem;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle}
+.wtbl td{padding:.6rem .75rem;font-size:.88rem;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle}
 .wtbl td.r{text-align:right;font-family:var(--mono)}
-.wtbl tr.tot td{background:var(--surface-2);font-weight:700;border-top:1px solid var(--border);border-bottom:none}
-.wtbl tr:not(.tot):hover td{background:var(--surface-2)}
+.wtbl tr:hover:not(.tot) td{background:var(--surface-2)}
+.wtbl tr.tot td{background:var(--surface-2);font-weight:700;border-top:2px solid var(--border);border-bottom:none}
 .n9{font-size:1.2rem;font-weight:800;color:var(--sky)}
 .n8{font-weight:600;color:var(--amber)}
 .nb{font-weight:600;color:var(--green)}
 .nm{color:var(--muted)}
-.bar-w{display:flex;align-items:center;gap:.6rem}
-.bar-bg{height:8px;background:var(--border);border-radius:4px;flex:1;min-width:60px;overflow:hidden}
+.bar-w{display:flex;align-items:center;gap:.5rem}
+.bar-bg{height:7px;background:var(--border);border-radius:4px;flex:1;min-width:50px;overflow:hidden}
 .bar-f{height:100%;background:var(--sky);border-radius:4px}
-.bar-t{font-size:.8rem;font-family:var(--mono);color:var(--muted);min-width:2.5rem;text-align:right}
-.upd{font-size:.72rem;color:var(--muted);text-align:right;margin-top:.75rem}
+.bar-t{font-size:.75rem;font-family:var(--mono);color:var(--muted);min-width:2.2rem;text-align:right}
 </style>
 </head>
 <body>
-<div id="s-nav"></div>
-<div class="page-wrap" style="max-width:900px;margin:0 auto;padding:1.5rem 1.5rem 3rem">
-
-  <div style="margin-bottom:1.75rem">
-    <div style="font-size:1.5rem;font-weight:800;color:var(--text)">&#x1F3C6; Upgrade Wins</div>
-    <div style="font-size:.85rem;color:var(--muted);margin-top:.3rem">All cohorts combined &middot; by theatre &middot; live</div>
-  </div>
+<nav id="s-nav" class="s-nav"></nav>
+<div class="s-main">
+  <div style="font-size:.75rem;color:var(--muted);margin-bottom:1rem;font-family:var(--mono)">ALL COHORTS &middot; BREAKDOWN BY THEATRE &middot; LIVE DATA</div>
 
   <div class="kpi-row">
-    <div class="kpi"><div class="kpi-num" id="k-m9">-</div><div class="kpi-lbl">Upgrade Complete</div><div class="kpi-sub">M9 done</div></div>
-    <div class="kpi"><div class="kpi-num" id="k-m8">-</div><div class="kpi-lbl">M8 Active</div><div class="kpi-sub">Upgrade started</div></div>
-    <div class="kpi"><div class="kpi-num" id="k-beat">-</div><div class="kpi-lbl">Beat Plan</div><div class="kpi-sub">Ahead of schedule</div></div>
-    <div class="kpi"><div class="kpi-num" id="k-total">-</div><div class="kpi-lbl">Total Accounts</div><div class="kpi-sub">All cohorts</div></div>
+    <div class="kpi-card sky"><div class="kpi-label">Upgrade Complete</div><div class="kpi-number" id="k-m9">—</div><div class="kpi-delta delta-neu">M9 done</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">M8 Active</div><div class="kpi-number" id="k-m8">—</div><div class="kpi-delta delta-neu">Upgrade started</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Beat Plan</div><div class="kpi-number" id="k-beat">—</div><div class="kpi-delta delta-neu">Ahead of date</div></div>
+    <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">Total Accounts</div><div class="kpi-number" id="k-total">—</div><div class="kpi-delta delta-neu">All cohorts</div></div>
   </div>
 
   <table class="wtbl">
     <thead><tr>
-      <th>Theatre</th>
-      <th class="r">Accounts</th>
-      <th class="r">Upgrade Complete</th>
-      <th class="r">M8 Active</th>
-      <th class="r">Beat Plan</th>
-      <th>Rate</th>
+      <th>Theatre</th><th class="r">Accounts</th><th class="r">Upgrade Complete</th><th class="r">M8 Active</th><th class="r">Beat Plan</th><th>Rate</th>
     </tr></thead>
     <tbody id="tbody"></tbody>
   </table>
-  <div class="upd" id="upd"></div>
-
+  <div style="font-size:.7rem;color:var(--muted);margin-top:.5rem;text-align:right;font-family:var(--mono)" id="upd"></div>
 </div>
+
 <script src="/static/solstice.js"></script>
 <script>
 S.initNav('wins');
@@ -68,7 +56,7 @@ fetch('/api/wins').then(function(r){return r.json();}).then(function(d){
   document.getElementById('k-m8').textContent   = t.m8||0;
   document.getElementById('k-beat').textContent = t.beat_plan||0;
   document.getElementById('k-total').textContent= t.total||0;
-  document.getElementById('upd').textContent    = 'Updated '+new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('upd').textContent='Updated '+new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
   var regions=d.regions||[];
   var maxPct=regions.reduce(function(m,r){return r.total?Math.max(m,Math.round((r.m9||0)/r.total*100)):m;},0)||1;
@@ -88,13 +76,12 @@ fetch('/api/wins').then(function(r){return r.json();}).then(function(d){
   });
 
   var tr=document.createElement('tr');tr.className='tot';
-  var tpct=t.total?Math.round((t.m9||0)/t.total*100):0;
-  tr.innerHTML='<td>Total</td>'
-    +'<td class="r">'+(t.total||0)+'</td>'
-    +'<td class="r" style="color:var(--sky)">'+(t.m9||0)+'</td>'
+  var tp=t.total?Math.round((t.m9||0)/t.total*100):0;
+  tr.innerHTML='<td>Total</td><td class="r">'+(t.total||0)+'</td>'
+    +'<td class="r" style="color:var(--sky);font-size:1.1rem">'+(t.m9||0)+'</td>'
     +'<td class="r" style="color:var(--amber)">'+(t.m8||0)+'</td>'
     +'<td class="r" style="color:var(--green)">'+(t.beat_plan||0)+'</td>'
-    +'<td class="nm">'+tpct+'%</td>';
+    +'<td class="nm">'+tp+'%</td>';
   tbody.appendChild(tr);
 });
 </script>
