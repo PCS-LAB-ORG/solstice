@@ -39,7 +39,7 @@
 
   <div style="margin-bottom:1.75rem">
     <div style="font-size:1.5rem;font-weight:800;color:var(--text)">&#x1F3C6; Upgrade Wins</div>
-    <div style="font-size:.85rem;color:var(--muted);margin-top:.25rem">Scale cohort + PS cohorts &middot; Live milestone progress</div>
+    <div style="font-size:.85rem;color:var(--muted);margin-top:.25rem">Scale cohort + Solstice Global &middot; Live milestone progress</div>
   </div>
 
   <div class="wins-hero">
@@ -51,8 +51,6 @@
   <div class="cohort-block" id="blk-scale"></div>
   <div class="divider"></div>
   <div class="cohort-block" id="blk-mid"></div>
-  <div class="divider"></div>
-  <div class="cohort-block" id="blk-top"></div>
 
 </div>
 <script src="/static/solstice.js"></script>
@@ -147,24 +145,18 @@ fetch('/api/wins').then(function(r){ return r.json(); }).then(function(d) {
   document.getElementById('kpi-m8').textContent    = g.m8    || 0;
   document.getElementById('kpi-total').textContent = g.total || 0;
 
-  var sc = d['Scale']      || {};
-  var pm = d['PS 101-650'] || {};
-  var pt = d['PS Top 100'] || {};
+  var sc = d['Scale']    || {};
+  var sg = d['Solstice'] || {};
 
-  buildBlock('blk-scale', 'Scale', 'Scale Cohort',
+  buildBlock('blk-scale', '', 'Scale Cohort',
     (sc.totals && sc.totals.total ? sc.totals.total : '?') + ' accounts',
-    'First-ever self-service scale motion. M9 = fully upgraded without PS engagement.',
+    'Self-service scale motion. M9 = fully upgraded.',
     sc, true, false);
 
-  buildBlock('blk-mid', 'PS', 'PS Cohort — 101–650',
-    (pm.totals && pm.totals.total ? pm.totals.total : '?') + ' accounts',
-    'Mid-market strategic accounts with dedicated PS delivery.',
-    pm, true, false);
-
-  buildBlock('blk-top', '⭐', 'PS Cohort — Top 100',
-    (pt.totals && pt.totals.total ? pt.totals.total : '?') + ' accounts',
-    'Largest strategic accounts. All in flight. M8 active = upgrade underway.',
-    pt, false, true);
+  buildBlock('blk-mid', '', 'Solstice Global',
+    (sg.totals && sg.totals.total ? sg.totals.total : '?') + ' accounts',
+    'Strategic accounts tracked globally in Solstice.',
+    sg, true, true);
 });
 </script>
 </body></html>
