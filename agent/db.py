@@ -32,9 +32,8 @@ def get_db(path: Path = DB_PATH) -> sqlite3.Connection:
     """Return a connection with row_factory=sqlite3.Row."""
     conn = sqlite3.connect(str(path), check_same_thread=False, timeout=15)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA journal_mode=DELETE")
     conn.execute("PRAGMA foreign_keys=ON")
-    conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA busy_timeout=10000")
     return conn
 

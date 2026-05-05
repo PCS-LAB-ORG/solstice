@@ -1532,6 +1532,7 @@ def api_cse_workload(theatre: str = ""):
                        COUNT(*) as account_count,
                        SUM(CASE WHEN b.signal='blocked' AND b.m9_complete=0 THEN 1 ELSE 0 END) as blocked_count,
                        SUM(CASE WHEN b.signal='at_risk' AND b.m9_complete=0 THEN 1 ELSE 0 END) as at_risk_count,
+                       SUM(CASE WHEN b.m8_started=1 AND b.m9_complete=0 THEN 1 ELSE 0 END) as m8_count,
                        b.m9_complete, b.m9_actual
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
@@ -1552,6 +1553,7 @@ def api_cse_workload(theatre: str = ""):
                 "blocked_count": 0,
                 "at_risk_count": 0,
                 "m9_this_month": 0,
+                "m8_count": 0,
             }
         )
         for r in rows:
@@ -1559,11 +1561,12 @@ def api_cse_workload(theatre: str = ""):
             agg[cse]["account_count"] += r["account_count"]
             agg[cse]["blocked_count"] += r["blocked_count"]
             agg[cse]["at_risk_count"] += r["at_risk_count"]
+            agg[cse]["m8_count"] += r["m8_count"]
             if r["m9_complete"] and _is_this_month(r["m9_actual"]):
                 agg[cse]["m9_this_month"] += r["account_count"]
 
         result = [{"cse": cse, **v} for cse, v in agg.items()]
-        result.sort(key=lambda x: (-x["blocked_count"], -x["account_count"]))
+        result.sort(key=lambda x: (-x["m8_count"], -x["account_count"]))
         return result
     except Exception as e:
         logger.error("cse-workload failed: %s", e)
