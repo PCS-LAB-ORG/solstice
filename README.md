@@ -1,7 +1,7 @@
-# Solstice v2.0
+# Solstice v2.1
 
 Global CC Migration monitor — EMEA, JAPAC, AMER, LATAM.
-FastAPI + SQLite + vanilla JS. Docker-first. 8-page ops dashboard.
+FastAPI + SQLite + vanilla JS. Docker-first. 10-page ops dashboard.
 
 ---
 
@@ -58,12 +58,14 @@ docker compose ps               # check status
 | URL | Purpose |
 |---|---|
 | [`/ops`](http://localhost:8200/ops) | Main ops: KPI counters, milestone funnel, M1 action plan, theatre comparison |
-| [`/blockers`](http://localhost:8200/blockers) | Call prep: blocked/at-risk accounts grouped by subtype, expanded detail panel |
+| [`/blockers`](http://localhost:8200/blockers) | Call prep: blocked/at-risk accounts grouped by subtype (incl. M0 Not Started, M0→M1 Stuck), expanded detail panel |
 | [`/forecast`](http://localhost:8200/forecast) | Velocity: 12-week M9 trend, 3-month targets, overdue section, confidence logic |
 | [`/daily`](http://localhost:8200/daily) | Leadership briefing: daily movements grouped by milestone type |
 | [`/audit`](http://localhost:8200/audit) | Full change history with field/theatre/sort filters |
-| [`/cse`](http://localhost:8200/cse) | CSE workload: account load, blocked counts, M9 velocity |
+| [`/cse`](http://localhost:8200/cse) | CSE workload: M8 in-flight count per CSE, sorted by load, theatre filter |
 | [`/weekly`](http://localhost:8200/weekly) | Weekly digest: new M9, M8 started, newly blocked, resolved |
+| [`/scope`](http://localhost:8200/scope) | Account scope explorer: full account list with milestone status per theatre |
+| [`/wins`](http://localhost:8200/wins) | Upgrade wins: M9 complete counts and M8 active by theatre with rate bars |
 
 ---
 
@@ -100,20 +102,22 @@ dashboard.py          FastAPI entry point — all routes + API endpoints
 Dockerfile            python:3.13-slim + gcloud CLI
 docker-compose.yml    port 8200, data/ volume, ADC credentials mount
 agent/
-  db.py               SQLite schema + upsert operations
+  db.py               SQLite schema + upsert operations (journal_mode=DELETE for Docker compat)
   dc_parser.py        DC CSE Tracker CSV parser — all theatres, M0-M9, signal/subtype
   differ.py           Audit diff engine (field-level change detection)
   validator.py        Salesforce ID validation + theatre filter
 static/
   solstice.css        Design system tokens + shared components (bsec/shdr/sbody/arow)
-  solstice.js         Shared JS — nav, search, account modal, S.toggleSec
+  solstice.js         Shared JS — nav, search, account modal, S.toggleSec, SLA countdown
   v2.html             /ops
-  blockers.html       /blockers
+  blockers.html       /blockers  (M0 Not Started + M0→M1 Stuck sections at top)
   forecast.html       /forecast
   daily.html          /daily
   audit.html          /audit
-  cse.html            /cse
+  cse.html            /cse       (M8 in-flight count per CSE)
   weekly.html         /weekly
+  scope.html          /scope
+  wins.html           /wins
 data/
   solstice.db         SQLite — all account state, milestone history, audit log (volume-mounted)
   dc_cse_tracker.csv  Last downloaded DC CSV (volume-mounted)
@@ -139,10 +143,66 @@ All pages share `static/solstice.js` via `window.S` and `static/solstice.css`:
 | `S.syncSummary(events)` | Dismissible toast after pipeline refresh |
 | `S.exportCSV(rows, fn)` | Client-side CSV download |
 
+## SLA thresholds (current)
+
+Defined in `static/solstice.js` — `S.slaCountdown()` and `S.blockerAge()`:
+
+| Phase | Current SLA | Amber | Red |
+|---|:-:|:-:|:-:|
+| M3 → M8 | 14d | — | > 14d |
+| M8 → M9 | 28d | — | > 28d |
+| Blocker age | — | > 7d | > 21d |
+
+> Data analysis (Apr 2026, n=201 M3→M8, n=35 M8→M9) suggests raising to 30d / 45d / 30d respectively. To update, edit the `used > N` and `limit:N` values in `slaCountdown` and `days<=N` in `blockerAge`.
+
+---
+
+## Operator runbook
+
+### Day-to-day
+
+1. Open **http://localhost:8200/ops** — check KPI counters and M1 action plan
+2. Click **Refresh Data** to pull latest from Google Drive (takes ~10s)
+3. Use **global search** (top-right) to jump to any account
+4. Click any account row to open the detail modal (milestones, SLA badge, call prep, history)
+
+### Key pages for each role
+
+| Role | Go to |
+|---|---|
+| CSE / DSM daily check | `/blockers` → filter by theatre |
+| Leadership update | `/daily` or `/weekly` |
+| M8 upgrade tracking | `/cse` → see M8 in-flight per CSE |
+| Theatre wins overview | `/wins` |
+| Full account list | `/scope` |
+| Change audit | `/audit` |
+
+### Theatre filter
+
+Every page has theatre pills: **All / EMEA / JAPAC / AMER / LATAM**. Add `?theatre=EMEA` to any URL to deep-link a filtered view.
+
+### If the app shows a disk I/O error
+
+```bash
+# On the host (not inside the container):
+sqlite3 data/solstice.db "PRAGMA wal_checkpoint(TRUNCATE);"
+rm -f data/solstice.db-wal data/solstice.db-shm
+docker compose restart
+```
+
+### Rebuilding after code changes
+
+```bash
+docker compose build --no-cache
+docker compose up -d
+```
+
+---
+
 ## Tests
 
 ```bash
-# Python (321 tests) — run inside container or locally
+# Python — run inside container or locally
 python3 -m pytest tests/ -q
 
 # JavaScript pure functions

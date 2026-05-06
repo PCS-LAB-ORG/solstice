@@ -2,6 +2,17 @@
 
 ---
 
+## v2.2.0 — Wins, Scope, CSE M8 view, M0/M1 blockers, DB stability (2026-05-06)
+
+- **New page `/wins`**: M9 complete + M8 active counts by theatre with rate bars. Uses Solstice design system (`kpi-card`, `wtbl`).
+- **New page `/scope`**: Full account list with milestone status, theatre filter, signal badges.
+- **Blockers page**: Added two new sections at top — *M0 Not Started* (kickoff never happened) and *M0→M1 Stuck* (kickoff done, no action plan yet). Fetches `/api/m0-needed` and `/api/m0-no-m1`.
+- **CSE page**: Simplified to show only CSE name + M8 in-flight count, sorted by load. Removed blocked/at-risk/M9 columns. Added `m8_count` to `/api/cse-workload` response.
+- **DB stability**: `agent/db.py` — switched `PRAGMA journal_mode` from `WAL` to `DELETE`. WAL mode is incompatible with Docker macOS volume mounts and caused `sqlite3.OperationalError: disk I/O error` on startup. Also added `busy_timeout=10000` and removed `synchronous=NORMAL`.
+- **README**: Full operator runbook added — day-to-day workflow, role-based page guide, theatre filter deep-links, disk I/O error recovery, rebuild instructions, SLA threshold reference.
+
+---
+
 ## v2.1.2 — Daily page fixes round 2 (2026-04-22)
 
 - **30-Day Trend**: was collapsed by default with hidden body — trend bars never visible. Now open by default.
