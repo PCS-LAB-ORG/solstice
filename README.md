@@ -12,34 +12,48 @@ FastAPI + SQLite + vanilla JS. Docker-first. 10-page ops dashboard.
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed (`gcloud` in PATH)
 - ADC credentials configured: `gcloud auth application-default login`
+- [Google Drive for Desktop](https://www.google.com/drive/download/) installed and signed in
 
-### 1. Clone the repo
+### 1. Install and configure Google Drive for Desktop
+
+Solstice reads the DC CSE Tracker directly from your local Google Drive mount. Without this the **Refresh Data** button will not work.
+
+1. Download and install [Google Drive for Desktop](https://www.google.com/drive/download/)
+2. Sign in with your Palo Alto Networks Google account
+3. In the app settings → **Google Drive** → select **Mirror files** (not Stream) so files are available locally
+4. Wait for the initial sync to complete
+5. Find the `DC CSE Tracker` file in your local Google Drive folder and note its path — it will look like:
+   - **macOS:** `/Users/<you>/Google Drive/My Drive/...`
+   - **Windows:** `G:\My Drive\...`
+6. Open `data/drive_config.json` and confirm the file ID matches the tracker. The pipeline uses the Google Drive API (not the local path) but the local mount is required for ADC token resolution to work correctly.
+
+### 2. Clone the repo
 
 ```bash
 git clone https://github.com/shpapy/solstice.git
 cd solstice
 ```
 
-### 2. Start the container
+### 3. Start the container
 
 ```bash
 docker compose up -d
 ```
 
-That's it. The dashboard is now running at **http://localhost:8200/ops**
+The dashboard is now running at **http://localhost:8200/ops**
 
-### 3. Load fresh data
+### 4. Load fresh data
 
 Click **Refresh Data** on any page (top-right button).
 
 The pipeline will:
 1. Get an ADC token via `gcloud auth application-default print-access-token`
-2. Download the DC CSE Tracker directly from Google Drive
+2. Download the DC CSE Tracker directly from Google Drive API
 3. Parse all milestones (M0–M9), signals, subtypes across all theatres
 4. Rebuild the M1 action plan and audit history
 5. Refresh the dashboard
 
-> **Note:** Google Drive Desktop does not need to be installed. Data is fetched via the Google Drive API using your ADC token.
+> **Troubleshooting Refresh Data:** If the refresh fails with an auth error, run `gcloud auth application-default login` and restart the container with `docker compose restart`.
 
 ### Useful commands
 
