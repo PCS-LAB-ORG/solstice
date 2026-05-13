@@ -2,6 +2,17 @@
 
 ---
 
+## v2.4.0 — Central Technical COE Tracker integration (2026-05-13)
+
+### New
+- **`coe_issues` table**: 816 rows from COE Tracker Sheet1 — feature requests and upgrade blockers per account (Issue ID, theatre, area, account name, technical issue, priority, module, status, timeline, outcome, Top 100 flag).
+- **`coe_bugs` table**: 745 rows from COE Tracker Cortex Bugs tab — XSUP-linked bugs per account with SPO DC classification and engineering escalation status.
+- **`_parse_and_store_coe()`**: parses both sheets from xlsx bytes, drops and repopulates both tables on every Refresh Data call.
+- **`drive_config.json`**: Central Technical COE Tracker added (`file_id: 1o0uH_9KrerxzognhRnquucwkrEMl6lzY6nhX13HMG0U`, role: `coe`, sheets: `Sheet1` + `Cortex Bugs`).
+- **`_download_live_from_drive()`**: COE Tracker download wired in alongside DC CSE + XSUP pulls — reports `✅ N issues + M bugs synced` or `⚠️` on failure.
+
+---
+
 ## v2.3.0 — Parity Gaps DB, M1 Bust-Doors Plan, Data Refresh (2026-05-13)
 
 ### New DB Tables

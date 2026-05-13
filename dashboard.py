@@ -358,6 +358,109 @@ def _parse_and_store_xsup(xlsx_path: Path) -> int:
     return len(data)
 
 
+def _parse_and_store_coe(xlsx_bytes: bytes) -> tuple[int, int]:
+    """
+    Parse Sheet1 (feature/blocker requests) and Cortex Bugs from the Central
+    Technical COE Tracker xlsx. Drops and repopulates coe_issues + coe_bugs.
+    Returns (issue_count, bug_count).
+    """
+    try:
+        import openpyxl as _xl, io as _io
+    except ImportError:
+        return (0, 0)
+
+    wb = _xl.load_workbook(_io.BytesIO(xlsx_bytes), data_only=True)
+    now = datetime.now(timezone.utc).isoformat()
+
+    def _s(v):
+        return str(v or "").strip()
+
+    # ── Sheet1 ────────────────────────────────────────────────────────────────
+    ws1 = wb["Sheet1"]
+    rows1 = list(ws1.iter_rows(values_only=True))
+    h1 = [_s(c) for c in rows1[0]]
+
+    def _c1(row, name):
+        try:
+            return _s(row[h1.index(name)])
+        except (ValueError, IndexError):
+            return ""
+
+    issue_rows = []
+    for row in rows1[1:]:
+        if not any(v for v in row if v is not None and str(v).strip()):
+            continue
+        issue_rows.append(
+            (
+                _c1(row, "Issue ID"),
+                _c1(row, "Timestamp"),
+                _c1(row, "Upgrade Blocker"),
+                _c1(row, "Request Type"),
+                _c1(row, "DC Assigned (TRR)"),
+                _c1(row, "Core Theater"),
+                _c1(row, "Core Area"),
+                _c1(row, "Account Name"),
+                _c1(row, "Technical issue")[:600],
+                _c1(row, "Requirements")[:600],
+                _c1(row, "Priority"),
+                _c1(row, "Module"),
+                _c1(row, "Issue Category"),
+                _c1(row, "Resource Name"),
+                _c1(row, "Issue Notes (PM/Engg/SPO DC)")[:600],
+                _c1(row, "Status - Has the question been answered definitively?"),
+                _c1(row, "Timeline/ Answer")[:400],
+                _c1(row, "Outcome - is this in the product currently?"),
+                _c1(row, "Top 100"),
+                now,
+            )
+        )
+
+    # ── Cortex Bugs ───────────────────────────────────────────────────────────
+    ws2 = wb["Cortex Bugs"]
+    rows2 = list(ws2.iter_rows(values_only=True))
+
+    bug_rows = []
+    for row in rows2[1:]:
+        if not any(v for v in row if v is not None and str(v).strip()):
+            continue
+        bug_rows.append(
+            (
+                _s(row[0]),  # account_name
+                _s(row[1]),  # xsup_number
+                _s(row[2]),  # xsup_assignee
+                _s(row[3]),  # xsup_priority
+                _s(row[4]),  # xsup_status
+                _s(row[5]),  # spo_dc_classification
+                _s(row[6]),  # eng_escalation_status
+                _s(row[7]),  # component
+                _s(row[8])[:400],  # summary
+                _s(row[9])[:600],  # notes
+                now,
+            )
+        )
+
+    with get_db() as conn:
+        conn.execute("DELETE FROM coe_issues")
+        conn.executemany(
+            """INSERT INTO coe_issues
+               (issue_id,timestamp,upgrade_blocker,request_type,dc_assigned,theatre,area,
+                account_name,technical_issue,requirements,priority,module,issue_category,
+                resource_name,issue_notes,status,timeline_answer,outcome,top_100,synced_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            issue_rows,
+        )
+        conn.execute("DELETE FROM coe_bugs")
+        conn.executemany(
+            """INSERT INTO coe_bugs
+               (account_name,xsup_number,xsup_assignee,xsup_priority,xsup_status,
+                spo_dc_classification,eng_escalation_status,component,summary,notes,synced_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            bug_rows,
+        )
+
+    return (len(issue_rows), len(bug_rows))
+
+
 def _download_live_from_drive() -> dict:
     """
     Download DC CSE Tracker CSV directly from Google Drive using ADC token.
@@ -446,6 +549,33 @@ def _download_live_from_drive() -> dict:
         result["XSUP Tracker"] = "⚠️ .gsheet not found — Drive not mounted"
     except Exception as xe:
         result["XSUP Tracker"] = f"⚠️ XSUP download failed: {xe}"
+
+    # Download Central Technical COE Tracker (Sheet1 + Cortex Bugs)
+    COE_GSHEET = (
+        Path.home()
+        / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com"
+        / "My Drive/Cortex Cloud Work/Central Technical COE Tracker.gsheet"
+    )
+    try:
+        coe_file_id = _j.loads(COE_GSHEET.read_text())["doc_id"]
+        cr = _req.get(
+            f"https://docs.google.com/spreadsheets/d/{coe_file_id}/export?format=xlsx",
+            headers={"Authorization": f"Bearer {token}"},
+            verify=False,
+            allow_redirects=True,
+            timeout=60,
+        )
+        if cr.status_code == 200:
+            coe_counts = _parse_and_store_coe(cr.content)
+            result["COE Tracker"] = (
+                f"✅ {coe_counts[0]} issues + {coe_counts[1]} bugs synced"
+            )
+        else:
+            result["COE Tracker"] = f"⚠️ Drive returned {cr.status_code}"
+    except FileNotFoundError:
+        result["COE Tracker"] = "⚠️ .gsheet not found — Drive not mounted"
+    except Exception as ce:
+        result["COE Tracker"] = f"⚠️ COE download failed: {ce}"
 
     return result
 
