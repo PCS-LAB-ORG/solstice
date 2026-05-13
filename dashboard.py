@@ -439,23 +439,57 @@ def _parse_and_store_coe(xlsx_bytes: bytes) -> tuple[int, int]:
             )
         )
 
+    import re as _re
+
+    def _norm(s):
+        s = s.lower().strip()
+        s = _re.sub(
+            r"\b(limited|ltd|inc|corp|corporation|llc|plc|sa|spa|nv|bv|ab|as|oy|gmbh|kg|s\.a\.|s\.p\.a\.)\b\.?",
+            "",
+            s,
+        )
+        s = _re.sub(r"[^a-z0-9\s]", " ", s)
+        return " ".join(s.split())
+
     with get_db() as conn:
+        # Build account_id lookup (exact + normalised)
+        _acct_exact = {
+            str(r["customer_name"]).strip().lower(): r["account_id"]
+            for r in conn.execute(
+                "SELECT account_id, customer_name FROM accounts WHERE customer_name IS NOT NULL"
+            )
+        }
+        _acct_norm = {_norm(k): v for k, v in _acct_exact.items()}
+
+        def _match_account(name):
+            if not name:
+                return None
+            if name.lower() in _acct_exact:
+                return _acct_exact[name.lower()]
+            n = _norm(name)
+            if n in _acct_norm:
+                return _acct_norm[n]
+            for k, v in _acct_norm.items():
+                if n[:20] and k.startswith(n[:20]):
+                    return v
+            return None
+
         conn.execute("DELETE FROM coe_issues")
         conn.executemany(
             """INSERT INTO coe_issues
                (issue_id,timestamp,upgrade_blocker,request_type,dc_assigned,theatre,area,
-                account_name,technical_issue,requirements,priority,module,issue_category,
+                account_name,account_id,technical_issue,requirements,priority,module,issue_category,
                 resource_name,issue_notes,status,timeline_answer,outcome,top_100,synced_at)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            issue_rows,
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            [r[:8] + (_match_account(r[7]),) + r[8:] for r in issue_rows],
         )
         conn.execute("DELETE FROM coe_bugs")
         conn.executemany(
             """INSERT INTO coe_bugs
-               (account_name,xsup_number,xsup_assignee,xsup_priority,xsup_status,
+               (account_name,account_id,xsup_number,xsup_assignee,xsup_priority,xsup_status,
                 spo_dc_classification,eng_escalation_status,component,summary,notes,synced_at)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
-            bug_rows,
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+            [r[:1] + (_match_account(r[0]),) + r[1:] for r in bug_rows],
         )
 
     return (len(issue_rows), len(bug_rows))
