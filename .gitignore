@@ -4,6 +4,8 @@ data/solstice.db-shm
 data/solstice.db-wal
 data/state.json
 data/*.csv
+data/*.xlsx
+data/*.json
 
 # Outputs
 outputs/
