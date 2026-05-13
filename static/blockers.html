@@ -126,6 +126,7 @@ S.restoreCard();
 // ── State ───────────────────────────────────────────────────────────────────
 var _theatre = '';
 var _data = {};
+var _coeCache = {};       // account_id → {issues, bugs} from blockers payload
 var _m1Loading = false;
 var _expandedRow = null;  // currently expanded row key
 
@@ -227,6 +228,15 @@ function load() {
       d.m1_plan = [];
       _data = d;
       _m1Loading = true;
+      // Build COE cache from payload
+      _coeCache = {};
+      Object.keys(d).forEach(function(bucket) {
+        (d[bucket]||[]).forEach(function(a) {
+          if (a.account_id) {
+            _coeCache[a.account_id] = {issues: a.coe_issues||[], bugs: a.coe_bugs||[]};
+          }
+        });
+      });
       _rebuildDropdowns(d, cse);
       render();
 
@@ -487,7 +497,6 @@ function _xsupRowHtml(a, rowKey, type) {
 
 function _xsupExpandHtml(a) {
   var priColor = PRI_COLORS[a._xsup_pri] || '#94a3b8';
-  var coeId = 'coe-x-' + (a.account_id||'').replace(/[^a-z0-9]/gi,'_') + '_' + Math.random().toString(36).slice(2,6);
   var rows = (a._xsup_items||[]).map(function(x){
     return '<tr>'
       + '<td style="padding:4px 8px;font-size:8.5px;font-family:var(--mono);white-space:nowrap;color:'+priColor+'">'+E(x.xsup_number)+'</td>'
@@ -505,7 +514,7 @@ function _xsupExpandHtml(a) {
     + '</tr></thead>'
     + '<tbody>'+rows+'</tbody>'
     + '</table>'
-    + '<div class="coe-section" id="'+coeId+'"><div class="coe-section-title">⚙ COE Issues &amp; Cortex Bugs <span style="font-weight:400;color:var(--muted);font-style:italic">loading…</span></div></div>';
+    + '<div class="coe-section"><div class="coe-section-title">⚙ COE Issues &amp; Cortex Bugs</div></div>';
 }
 
 // ── Expand panel content ────────────────────────────────────────────────────
@@ -570,8 +579,6 @@ function _expandPanelHtml(a) {
   }
   var mdetHtml = _mdet('M1:',a.m1_details)+_mdet('M3:',a.m3_details)+_mdet('M5:',a.m5_details);
 
-  var coeId = 'coe-' + (a.account_id || '').replace(/[^a-z0-9]/gi,'_') + '_' + Math.random().toString(36).slice(2,6);
-
   return '<div class="expand-grid">'
     + '<div>'
       + '<div class="ef-label">Status Detail</div>'
@@ -608,9 +615,7 @@ function _expandPanelHtml(a) {
     + '</div>'
     + '</div>'
     + (tags.length ? '<div class="tags-row">'+tags.join('')+'</div>' : '')
-    + '<div class="coe-section" id="'+coeId+'">'
-      + '<div class="coe-section-title">⚙ COE Issues &amp; Cortex Bugs <span style="font-weight:400;color:var(--muted);font-style:italic">loading…</span></div>'
-    + '</div>';
+    + '<div class="coe-section"><div class="coe-section-title">⚙ COE Issues &amp; Cortex Bugs</div></div>';
 }
 
 // ── COE enrichment renderer ─────────────────────────────────────────────────
@@ -716,18 +721,13 @@ function toggleRow(rowKey) {
     panel.classList.add('show');
     row.classList.add('expanded');
     _expandedRow = rowKey;
-    // Lazy-load COE enrichment
+    // Render COE data from payload (already in the account object)
     var coeEl = panel.querySelector('.coe-section');
     if (coeEl && !coeEl.dataset.loaded) {
       coeEl.dataset.loaded = '1';
-      var accountId   = row.dataset.accountId  || '';
-      var accountName = row.dataset.accountName || '';
-      var qs = accountId ? 'account_id='+encodeURIComponent(accountId)
-                         : 'account_name='+encodeURIComponent(accountName);
-      fetch('/api/coe-account?' + qs)
-        .then(function(r){ return r.json(); })
-        .then(function(d){ _setHtml(coeEl, _renderCoe(d)); })
-        .catch(function(){ _setHtml(coeEl, '<div class="coe-section-title">⚙ COE Issues &amp; Cortex Bugs</div><div class="coe-none">Could not load</div>'); });
+      var acctKey = row.dataset.accountId || row.dataset.accountName || '';
+      var coeData = _coeCache[acctKey] || {issues:[], bugs:[]};
+      _setHtml(coeEl, _renderCoe(coeData));
     }
   }
 }

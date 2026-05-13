@@ -2174,6 +2174,47 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
                 st = _subtype_from_detail(d.get("status_detail") or "") or "other"
             bucket = st if st in known else "other"
             result.setdefault(bucket, []).append(d)
+
+        # Enrich every account with COE issues + bugs (one bulk query each)
+        all_ids = list(
+            {
+                d["account_id"]
+                for accounts in result.values()
+                for d in accounts
+                if d.get("account_id")
+            }
+        )
+        if all_ids:
+            placeholders = ",".join("?" * len(all_ids))
+            with get_db() as conn2:
+                coe_issues_rows = conn2.execute(
+                    f"""SELECT account_id, issue_id, upgrade_blocker, technical_issue,
+                               priority, module, issue_category, status, timeline_answer
+                        FROM coe_issues WHERE account_id IN ({placeholders})
+                        ORDER BY account_id, priority, issue_id""",
+                    all_ids,
+                ).fetchall()
+                coe_bugs_rows = conn2.execute(
+                    f"""SELECT account_id, xsup_number, xsup_priority, xsup_status,
+                               spo_dc_classification, eng_escalation_status, component, summary
+                        FROM coe_bugs WHERE account_id IN ({placeholders})
+                        ORDER BY account_id, xsup_priority, xsup_number""",
+                    all_ids,
+                ).fetchall()
+
+            issues_by_acct: dict = {}
+            for r in coe_issues_rows:
+                issues_by_acct.setdefault(r["account_id"], []).append(dict(r))
+            bugs_by_acct: dict = {}
+            for r in coe_bugs_rows:
+                bugs_by_acct.setdefault(r["account_id"], []).append(dict(r))
+
+            for accounts in result.values():
+                for d in accounts:
+                    aid = d.get("account_id") or ""
+                    d["coe_issues"] = issues_by_acct.get(aid, [])
+                    d["coe_bugs"] = bugs_by_acct.get(aid, [])
+
         return result
     except Exception as e:
         return {"error": str(e)}
@@ -2767,48 +2808,6 @@ def _xsup_synced_at() -> str:
             return r["synced_at"] if r else ""
     except Exception:
         return ""
-
-
-@app.get("/api/coe-account")
-def api_coe_account(account_id: str = "", account_name: str = ""):
-    """COE issues + Cortex Bugs for a specific account. Used to enrich the blockers expand panel."""
-    _ensure_db()
-    try:
-        with get_db() as conn:
-            # Match by account_id first, fall back to name fuzzy match
-            if account_id:
-                issues = conn.execute(
-                    """SELECT issue_id, upgrade_blocker, technical_issue, requirements,
-                              priority, module, issue_category, status, timeline_answer, outcome
-                       FROM coe_issues WHERE account_id=? ORDER BY priority, issue_id""",
-                    (account_id,),
-                ).fetchall()
-                bugs = conn.execute(
-                    """SELECT xsup_number, xsup_priority, xsup_status,
-                              spo_dc_classification, eng_escalation_status, component, summary, notes
-                       FROM coe_bugs WHERE account_id=? ORDER BY xsup_priority, xsup_number""",
-                    (account_id,),
-                ).fetchall()
-            else:
-                issues = conn.execute(
-                    """SELECT issue_id, upgrade_blocker, technical_issue, requirements,
-                              priority, module, issue_category, status, timeline_answer, outcome
-                       FROM coe_issues WHERE LOWER(account_name)=LOWER(?) ORDER BY priority, issue_id""",
-                    (account_name,),
-                ).fetchall()
-                bugs = conn.execute(
-                    """SELECT xsup_number, xsup_priority, xsup_status,
-                              spo_dc_classification, eng_escalation_status, component, summary, notes
-                       FROM coe_bugs WHERE LOWER(account_name)=LOWER(?) ORDER BY xsup_priority, xsup_number""",
-                    (account_name,),
-                ).fetchall()
-
-        return {
-            "issues": [dict(r) for r in issues],
-            "bugs": [dict(r) for r in bugs],
-        }
-    except Exception as e:
-        return {"issues": [], "bugs": [], "error": str(e)}
 
 
 @app.get("/api/wins")
