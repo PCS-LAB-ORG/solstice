@@ -2,6 +2,24 @@
 
 ---
 
+## v2.3.0 — Parity Gaps DB, M1 Bust-Doors Plan, Data Refresh (2026-05-13)
+
+### New DB Tables
+- **`parity_gaps`**: 10 product parity gaps blocking CC upgrades — gap ID, title, description, roadmap ETA. ARR intentionally excluded.
+- **`parity_gap_accounts`**: 32 rows linking each parity gap to matched accounts in the tracker — includes M8/M9 status and DC status per account.
+- Gaps tracked: ServiceNow connector ($34M ARR blocked), custom rules query language, MSSP multi-tenant mgmt, agent/Defender parity, Azure excessive permissions, China cloud regions, VMware Tanzu, data security scanning, compliance framework linking, misconfiguration detection latency.
+- SLB and Cox not found in tracker — flagged as unmatched.
+
+### New Output
+- **`outputs/m1_bust_doors_plan.xlsx`**: 14-tab Excel for leadership. Tab 1 = 35 actionable bust-doors accounts (priority, CSE, DC, Rep, DSM, M9 date, why actionable, next step). Tabs 2–14 = 180 excluded accounts grouped by reason (GCP China blocked, churning, do-not-engage, escalation risk, competitive, product gap, just deployed, no usage, timing, partner/MSSP, on hold, red no detail).
+
+### Data Refresh
+- `data/dc_cse_tracker.csv` refreshed (2026-05-13).
+- `data/xsup_tracker.xlsx` added.
+- Removed stale CSVs: `blocked_accounts.csv`, `emea_accounts.csv`, `ps_tracker.csv`.
+
+---
+
 ## v2.2.0 — Wins, Scope, CSE M8 view, M0/M1 blockers, DB stability (2026-05-06)
 
 - **New page `/wins`**: M9 complete + M8 active counts by theatre with rate bars. Uses Solstice design system (`kpi-card`, `wtbl`).

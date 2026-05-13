@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x1F3AF;</text></svg>">
+<title>Solstice — Scope</title>
+<link rel="stylesheet" href="/static/solstice.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+.query-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem}
+.query-title{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.12em;font-family:var(--mono);margin-bottom:.6rem}
+.query-criteria{display:flex;flex-wrap:wrap;gap:.4rem}
+.qc{display:flex;align-items:center;gap:.35rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.25rem .6rem;font-size:9px;font-family:var(--mono);color:var(--text)}
+.qc-field{color:var(--sky);font-weight:700}
+.qc-op{color:var(--muted)}
+.qc-val{color:var(--green)}
+.qc-val.neg{color:var(--red)}
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.scope-table{width:100%;border-collapse:collapse;font-size:10px}
+.scope-table th{background:var(--surface);border-bottom:2px solid var(--border);padding:.45rem .6rem;text-align:left;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:.08em;font-family:var(--mono);white-space:nowrap;position:sticky;top:44px;z-index:10}
+.scope-table td{padding:.45rem .6rem;border-bottom:1px solid var(--border-soft);vertical-align:top;color:var(--text)}
+.scope-table tr:hover td{background:var(--surface-2);cursor:pointer}
+.ms-badge{display:inline-block;font-size:7px;font-weight:700;font-family:var(--mono);padding:1px 4px;border-radius:3px;margin:1px;background:var(--sky-light);color:var(--sky);border:1px solid var(--sky-border)}
+.ms-badge.done{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
+.dc-green{color:#10b981;font-weight:700}
+.dc-yellow{color:#f59e0b;font-weight:700}
+.dc-red{color:#ef4444;font-weight:700}
+.sig-blocked{background:#fee2e2;color:#b91c1c;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700}
+.sig-at_risk{background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700}
+.sig-green{background:#d1fae5;color:#065f46;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700}
+.note-cell{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:9px}
+.count-tag{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--sky);background:var(--sky-light);border:1px solid var(--sky-border);border-radius:4px;padding:.2rem .5rem;margin-left:.5rem}
+.subtype-tag{font-size:8px;font-family:var(--mono);color:var(--muted);background:var(--surface-2);border:1px solid var(--border);border-radius:3px;padding:1px 4px}
+</style>
+</head>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
+<div class="s-main">
+
+  <!-- Query criteria -->
+  <div class="query-card">
+    <div class="query-title">ACTIVE QUERY — EMEA SCALE COHORT IN SCOPE</div>
+    <div class="query-criteria">
+      <div class="qc"><span class="qc-field">theatre</span><span class="qc-op">=</span><span class="qc-val">EMEA</span></div>
+      <div class="qc"><span class="qc-field">customer_size_cohort_classification</span><span class="qc-op">=</span><span class="qc-val">Scale cohort</span></div>
+      <div class="qc"><span class="qc-field">PC_CC_Migration_status</span><span class="qc-op">≠</span><span class="qc-val neg">Churn</span></div>
+      <div class="qc"><span class="qc-field">Status Detail</span><span class="qc-op">≠</span><span class="qc-val neg">🛑 confirmed churn</span></div>
+      <div class="qc"><span class="qc-field">M9:Upgrade complete</span><span class="qc-op">≠</span><span class="qc-val neg">Y</span></div>
+    </div>
+  </div>
+
+  <!-- Filters + count -->
+  <div class="filters">
+    <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">Filter:</span>
+    <button class="pill act" data-sig="" onclick="setFilter(this,'sig','')">All</button>
+    <button class="pill" data-sig="green" onclick="setFilter(this,'sig','green')">Green</button>
+    <button class="pill" data-sig="at_risk" onclick="setFilter(this,'sig','at_risk')">At Risk</button>
+    <button class="pill" data-sig="blocked" onclick="setFilter(this,'sig','blocked')">Blocked</button>
+    <span style="color:var(--border)">|</span>
+    <input id="f-search" placeholder="Search name / CSE…" style="background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:9px;padding:4px 10px;outline:none;font-family:var(--mono);width:180px" oninput="render()">
+    <span class="count-tag" id="count-tag">—</span>
+  </div>
+
+  <!-- Table -->
+  <div style="overflow-x:auto">
+  <table class="scope-table" id="scope-tbl">
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>CSE</th>
+        <th>Region</th>
+        <th>Milestones</th>
+        <th>DC</th>
+        <th>Signal</th>
+        <th>Subtype</th>
+        <th>CC Rep</th>
+        <th>CC DSM</th>
+        <th>Churn Risk</th>
+        <th>M8 Planned</th>
+        <th>M9 Planned</th>
+        <th>Project Status</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="scope-body"></tbody>
+  </table>
+  </div>
+</div>
+
+<script src="/static/solstice.js?v=2"></script>
+<script>
+S.initNav('scope');
+S.restoreCard();
+
+var _all = [], _sigFilter = '';
+var MS = ['m0_complete','m1_complete','m2_complete','m3_complete','m4_complete','m5_complete','m6_complete','m7_complete','m8_started','m9_complete'];
+var ML = ['M0','M1','M2','M3','M4','M5','M6','M7','M8','M9'];
+
+function setFilter(el, type, val) {
+  _sigFilter = val;
+  document.querySelectorAll('[data-sig]').forEach(function(b){ b.classList.toggle('act', b.dataset.sig === val); });
+  render();
+}
+
+function dcClass(v) {
+  if (!v) return '';
+  if (v === 'Green') return 'dc-green';
+  if (v === 'Yellow') return 'dc-yellow';
+  if (v === 'Red') return 'dc-red';
+  return '';
+}
+
+function sigBadge(v) {
+  if (!v) return '—';
+  return '<span class="sig-' + S.esc(v) + '">' + S.esc(v) + '</span>';
+}
+
+function msBadges(row) {
+  var out = '';
+  MS.forEach(function(col, i) {
+    if (row[col] && String(row[col]) !== '0') out += '<span class="ms-badge done">' + ML[i] + '</span>';
+  });
+  return out || '<span style="color:var(--muted);font-size:9px">—</span>';
+}
+
+function noteText(row) {
+  return (row.upgrade_notes || row.health_notes || row.notes || '').replace(/\n/g,' ').trim();
+}
+
+function render() {
+  var q = (document.getElementById('f-search').value || '').toLowerCase();
+  var rows = _all.filter(function(r) {
+    if (_sigFilter && r.signal !== _sigFilter) return false;
+    if (q) {
+      var hay = ((r.customer_name || '') + ' ' + (r.active_cse || '') + ' ' + (r.sales_region || '')).toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+  document.getElementById('count-tag').textContent = rows.length + ' accounts';
+  var html = '';
+  rows.forEach(function(r) {
+    var aid = (r.account_id || '').replace(/'/g, "\\'");
+    var note = S.esc(noteText(r).substring(0, 120));
+    var dc = r.dc_progress || '';
+    html += '<tr onclick="S.openAccountCard(\'' + aid + '\')">'
+      + '<td style="font-weight:600;min-width:160px">' + S.esc(r.customer_name || '') + '</td>'
+      + '<td style="min-width:120px;color:var(--muted)">' + S.esc(r.active_cse || '—') + '</td>'
+      + '<td style="min-width:110px;color:var(--muted);font-size:9px">' + S.esc(r.sales_region || '—') + '</td>'
+      + '<td style="min-width:140px">' + msBadges(r) + '</td>'
+      + '<td class="' + dcClass(dc) + '">' + S.esc(dc || '—') + '</td>'
+      + '<td>' + sigBadge(r.signal) + '</td>'
+      + '<td><span class="subtype-tag">' + S.esc(r.subtype || '—') + '</span></td>'
+      + '<td style="font-size:9px;color:var(--muted)">' + S.esc(r.cc_rep || '—') + '</td>'
+      + '<td style="font-size:9px;color:var(--muted)">' + S.esc(r.cc_dsm || '—') + '</td>'
+      + '<td style="font-size:9px" class="' + dcClass(r.churn_risk) + '">' + S.esc(r.churn_risk || '—') + '</td>'
+      + '<td style="font-size:9px;color:var(--muted);font-family:var(--mono)">' + S.esc((r.m8_planned || '').substring(0,10)) + '</td>'
+      + '<td style="font-size:9px;color:var(--muted);font-family:var(--mono)">' + S.esc((r.m9_planned || '').substring(0,10)) + '</td>'
+      + '<td style="font-size:9px;color:var(--muted)">' + S.esc(r.current_project_status || '—') + '</td>'
+      + '<td class="note-cell" title="' + note + '">' + note + '</td>'
+      + '</tr>';
+  });
+  document.getElementById('scope-body').innerHTML = html;
+}
+
+fetch('/api/scope?theatre=EMEA')
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    _all = data;
+    render();
+  })
+  .catch(function(){ document.getElementById('scope-body').innerHTML = '<tr><td colspan="14" style="text-align:center;color:var(--muted)">Error loading data</td></tr>'; });
+</script>
+</body></html>

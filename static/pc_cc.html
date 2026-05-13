@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x1F3AF;</text></svg>">
+<title>Solstice — PC→CC Action List</title>
+<link rel="stylesheet" href="/static/solstice.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+.tiles{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.tile{background:var(--surface);border-radius:8px;box-shadow:var(--shadow-sm);padding:12px 16px;flex:1;min-width:90px;border-top:3px solid transparent}
+.tile-n{font-size:26px;font-weight:800;font-family:var(--mono);line-height:1}
+.tile-l{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+.cse-block{margin-bottom:28px}
+.cse-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border-soft)}
+.cse-name{font-size:13px;font-weight:800;color:var(--text)}
+.cse-sub{font-size:10px;color:var(--muted);margin-left:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.card{background:var(--surface);border-radius:8px;box-shadow:var(--shadow-sm);display:flex;overflow:hidden;transition:.15s}
+.card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.card-bar{width:4px;flex-shrink:0}
+.card-body{padding:11px 13px;flex:1;min-width:0}
+.card-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-region{font-size:10px;color:var(--muted);margin-bottom:6px}
+.card-rsm{font-size:10px;color:var(--text-2);margin-bottom:2px}
+.card-dsm{font-size:9px;color:var(--muted)}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px}
+.tag-priority{background:var(--green-light);color:#059669}
+.tag-nomap{background:var(--red-light);color:#dc2626}
+.tag-nocse{background:var(--amber-light);color:#d97706}
+.tag-cold{background:var(--surface-2);color:var(--muted)}
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:20px}
+</style>
+</head>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
+<div id="main" class="s-main"></div>
+<script src="/static/solstice.js?v=2"></script>
+<script>
+S.initNav('');
+S.restoreCard();
+
+var _all = [], _filter = '';
+
+function load() {
+  fetch('/api/pc-cc-accounts').then(function(r){return r.json();}).then(function(data) {
+    _all = data;
+    render();
+  }).catch(function(){
+    document.getElementById('main').innerHTML = '<p class="text-muted">Error loading data.</p>';
+  });
+}
+
+function setFilter(f) {
+  _filter = f;
+  document.querySelectorAll('.pill[data-f]').forEach(function(p){
+    p.classList.toggle('act', p.dataset.f === f);
+  });
+  render();
+}
+
+function render() {
+  var data = _filter === 'priority' ? _all.filter(function(a){return a.priority;})
+           : _filter === 'nomap'    ? _all.filter(function(a){return a.no_rsm;})
+           : _all;
+
+  var total    = data.length;
+  var priority = data.filter(function(a){return a.priority;}).length;
+  var nomap    = data.filter(function(a){return a.no_rsm;}).length;
+  var nocse    = data.filter(function(a){return a.cse==='— No CSE';}).length;
+
+  // count by cse
+  var cseCounts = {};
+  data.forEach(function(a){ cseCounts[a.cse] = (cseCounts[a.cse]||0)+1; });
+
+  var main = document.getElementById('main');
+  main.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:.5rem">'
+    +'<div><h1 style="font-size:1rem;font-weight:800">PC → CC Action List</h1>'
+    +'<div style="font-size:10px;color:var(--muted);margin-top:2px">EMEA · '+total+' accounts · M1 not started</div></div></div>'
+
+    +'<div class="tiles">'
+    +'<div class="tile" style="border-top-color:var(--sky)"><div class="tile-n" style="color:var(--sky)">'+total+'</div><div class="tile-l">Total Accounts</div></div>'
+    +'<div class="tile" style="border-top-color:var(--green)"><div class="tile-n" style="color:var(--green)">'+priority+'</div><div class="tile-l">Priority (PC→CC)</div></div>'
+    +'<div class="tile" style="border-top-color:var(--red)"><div class="tile-n" style="color:var(--red)">'+nomap+'</div><div class="tile-l">No CC-RSM</div></div>'
+    +'<div class="tile" style="border-top-color:var(--amber)"><div class="tile-n" style="color:var(--amber)">'+nocse+'</div><div class="tile-l">No CSE</div></div>'
+    +'</div>'
+
+    +'<div class="filter-bar">'
+    +'<button class="pill act" data-f="" onclick="setFilter(\'\')">All</button>'
+    +'<button class="pill" data-f="priority" onclick="setFilter(\'priority\')">Priority only ★</button>'
+    +'<button class="pill" data-f="nomap" onclick="setFilter(\'nomap\')">No CC-RSM ⚠</button>'
+    +'</div>';
+
+  // group by CSE
+  var byCSE = {}, cseOrder = [];
+  data.forEach(function(a) {
+    if (!byCSE[a.cse]) { byCSE[a.cse] = []; cseOrder.push(a.cse); }
+    byCSE[a.cse].push(a);
+  });
+
+  cseOrder.forEach(function(cse) {
+    var accts = byCSE[cse];
+    var warm  = accts.filter(function(a){return a.priority;}).length;
+    var noRsm = accts.filter(function(a){return a.no_rsm;}).length;
+
+    var cards = accts.map(function(a) {
+      var barColor = a.priority ? 'var(--green)' : a.no_rsm ? 'var(--red)' : 'var(--sky)';
+      var tags = '';
+      if (a.priority) tags += '<span class="tag tag-priority">★ PC→CC</span>';
+      if (a.no_rsm)   tags += '<span class="tag tag-nomap">⚠ No CC-RSM</span>';
+      if (!a.in_solstice) tags += '<span class="tag tag-nocse">Not in DB</span>';
+      if (!a.priority && !a.no_rsm) tags += '<span class="tag tag-cold">PC Not Migrated</span>';
+
+      var aid = (a.account_id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      var click = a.in_solstice ? ' style="cursor:pointer" onclick="S.openAccountCard(\''+aid+'\')"' : '';
+      return '<div class="card">'
+        +'<div class="card-bar" style="background:'+barColor+'"></div>'
+        +'<div class="card-body"'+click+'>'
+        +'<div class="card-name">'+S.esc(a.name)+(a.in_solstice?' <span style="font-size:8px;color:var(--sky)">↗</span>':'')+'</div>'
+        +'<div class="card-region">'+S.esc(a.area)+' · '+S.esc(a.region)+'</div>'
+        +'<div class="card-rsm">RSM: '+S.esc(a.cc_rsm)+'</div>'
+        +(a.cc_dsm?'<div class="card-dsm">DSM: '+S.esc(a.cc_dsm)+'</div>':'')
+        +'<div class="card-tags">'+tags+'</div>'
+        +'</div></div>';
+    }).join('');
+
+    var warningText = '';
+    if (noRsm) warningText += ' · <span style="color:var(--red);font-size:10px">⚠ '+noRsm+' without CC-RSM</span>';
+
+    main.innerHTML +=
+      '<div class="cse-block">'
+      +'<div class="cse-hdr">'
+      +'<div class="cse-name">'+S.esc(cse)+'</div>'
+      +'<span class="badge badge-gray">'+accts.length+'</span>'
+      +(warm?'<span class="badge badge-green">'+warm+' priority</span>':'')
+      +warningText+'</div>'
+      +'<div class="grid">'+cards+'</div>'
+      +'</div>';
+  });
+}
+
+load();
+</script>
+</body></html>

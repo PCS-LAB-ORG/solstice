@@ -287,6 +287,77 @@ def api_cse():
     return _load_cse()
 
 
+_XSUP_CLOSED = {"Closed", "Done", "Engineering Resolved"}
+
+
+def _parse_and_store_xsup(xlsx_path: Path) -> int:
+    """
+    Parse Open XSUPs tab from xlsx, drop closed statuses, upsert into xsup_data.
+    Returns count of open XSUPs stored.
+    Runs account_id matching against accounts table by name (fuzzy-tolerant lower strip).
+    """
+    try:
+        import openpyxl as _xl
+    except ImportError:
+        return 0
+
+    wb = _xl.load_workbook(str(xlsx_path), read_only=True, data_only=True)
+    ws = wb["Open XSUPs"]
+    rows = list(ws.iter_rows(values_only=True))
+    if not rows:
+        return 0
+
+    headers = [str(h).strip() if h is not None else "" for h in rows[0][:22]]
+    data = []
+    for row in rows[1:]:
+        rec = dict(zip(headers, row[:22]))
+        if not any(v for v in rec.values() if v is not None and str(v).strip()):
+            continue
+        status = str(rec.get("XSUP Status") or "").strip()
+        if status in _XSUP_CLOSED or not status:
+            continue
+        acct = str(rec.get("Account Name") or "").strip()
+        if not acct:
+            continue
+        data.append(rec)
+
+    now = datetime.now(timezone.utc).isoformat()
+    with get_db() as conn:
+        # Build name→account_id lookup (lower-stripped)
+        acct_map = {
+            str(r["customer_name"]).strip().lower(): r["account_id"]
+            for r in conn.execute("SELECT account_id, customer_name FROM accounts")
+            if r["customer_name"]
+        }
+        conn.execute("DELETE FROM xsup_data")
+        for rec in data:
+            acct_name = str(rec.get("Account Name") or "").strip()
+            account_id = acct_map.get(acct_name.lower())
+            conn.execute(
+                """
+                INSERT INTO xsup_data
+                  (account_name, account_id, case_number, case_status, case_theatre,
+                   xsup_number, xsup_priority, xsup_status, summary, component, notes, synced_at)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    acct_name,
+                    account_id,
+                    str(rec.get("Case Number") or "").strip(),
+                    str(rec.get("Case Status") or "").strip(),
+                    str(rec.get("Case Theatre") or "").strip(),
+                    str(rec.get("XSUP Number") or "").strip(),
+                    str(rec.get("XSUP Priority") or "").strip(),
+                    str(rec.get("XSUP Status") or "").strip(),
+                    str(rec.get("Summary") or "").strip()[:400],
+                    str(rec.get("Component") or "").strip(),
+                    str(rec.get("Notes") or "").strip()[:600],
+                    now,
+                ),
+            )
+    return len(data)
+
+
 def _download_live_from_drive() -> dict:
     """
     Download DC CSE Tracker CSV directly from Google Drive using ADC token.
@@ -345,9 +416,38 @@ def _download_live_from_drive() -> dict:
         dest = DATA_DIR / "dc_cse_tracker.csv"
         dest.write_text(r.content.decode("utf-8"), encoding="utf-8")
         rows = r.text.count("\n")
-        return {"DC CSE Tracker": f"✅ {rows} rows downloaded from Drive"}
+        result = {"DC CSE Tracker": f"✅ {rows} rows downloaded from Drive"}
     except Exception as e:
-        return {"DC CSE Tracker": f"⚠️ download failed: {e}"}
+        result = {"DC CSE Tracker": f"⚠️ download failed: {e}"}
+
+    # Download XSUP tracker (same ADC token — always alongside DC CSE Tracker)
+    XSUP_GSHEET = (
+        Path.home()
+        / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com"
+        / "My Drive/Cortex Cloud Work/Cortex Cloud Open XSUPs with TAC.gsheet"
+    )
+    try:
+        xsup_file_id = _j.loads(XSUP_GSHEET.read_text())["doc_id"]
+        xr = _req.get(
+            f"https://docs.google.com/spreadsheets/d/{xsup_file_id}/export?format=xlsx",
+            headers={"Authorization": f"Bearer {token}"},
+            verify=False,
+            allow_redirects=True,
+            timeout=60,
+        )
+        if xr.status_code == 200:
+            xsup_dest = DATA_DIR / "xsup_tracker.xlsx"
+            xsup_dest.write_bytes(xr.content)
+            xsup_rows = _parse_and_store_xsup(xsup_dest)
+            result["XSUP Tracker"] = f"✅ {xsup_rows} open XSUPs synced"
+        else:
+            result["XSUP Tracker"] = f"⚠️ Drive returned {xr.status_code}"
+    except FileNotFoundError:
+        result["XSUP Tracker"] = "⚠️ .gsheet not found — Drive not mounted"
+    except Exception as xe:
+        result["XSUP Tracker"] = f"⚠️ XSUP download failed: {xe}"
+
+    return result
 
 
 _DC_MILESTONE_WATCH = [
@@ -949,7 +1049,37 @@ async def api_run_full(request: Request):
             yield event("  →", "ERROR", str(e)[:80], "red")
         await asyncio.sleep(0.1)
 
-        # Step 4: Data Quality
+        # Step 4: XSUP Tracker
+        yield event("XSUP Tracker", "CHECK", "Verifying Open XSUPs data in DB")
+        try:
+            with get_db() as _xconn:
+                _xt = _xconn.execute("SELECT COUNT(*) FROM xsup_data").fetchone()[0]
+                _xp1 = _xconn.execute(
+                    "SELECT COUNT(*) FROM xsup_data WHERE xsup_priority='P1'"
+                ).fetchone()[0]
+                _xp2 = _xconn.execute(
+                    "SELECT COUNT(*) FROM xsup_data WHERE xsup_priority='P2'"
+                ).fetchone()[0]
+                _xmatched = _xconn.execute(
+                    "SELECT COUNT(*) FROM xsup_data WHERE account_id IS NOT NULL"
+                ).fetchone()[0]
+                _xsynced = _xconn.execute(
+                    "SELECT synced_at FROM xsup_data ORDER BY id DESC LIMIT 1"
+                ).fetchone()
+            _xts = (_xsynced["synced_at"] or "")[:16] if _xsynced else "never"
+            yield event(
+                "  →",
+                "OK" if _xt > 0 else "WARN",
+                f"{_xt} open XSUPs · {_xp1} P1 · {_xp2} P2 · {_xmatched} matched to Solstice accounts · last sync {_xts}",
+                "green" if _xt > 0 else "amber",
+            )
+        except Exception as e:
+            yield event(
+                "  →", "WARN", f"xsup_data not yet populated: {str(e)[:60]}", "amber"
+            )
+        await asyncio.sleep(0.1)
+
+        # Step 5: Data Quality
         yield event("Data Quality", "CHECK", "Verifying DC CSE Tracker")
         try:
             with get_db() as _dqconn:
@@ -1840,7 +1970,13 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
                        b.last_edited_by, b.last_edited_date,
                        b.current_project_status,
                        b.m1_details, b.m3_details, b.m5_details,
-                       a.account_id
+                       a.account_id,
+                       b.m0_complete, b.m1_complete, b.m1_planned,
+                       b.m2_complete, b.m2_planned, b.m3_planned,
+                       b.m4_complete, b.m4_planned,
+                       b.m5_complete, b.m5_planned,
+                       b.m6_complete, b.m7_complete, b.m7_planned,
+                       b.m8_planned, b.m9_planned, b.m9_actual
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != ''
                   AND b.signal IN ('blocked','at_risk')
@@ -2360,6 +2496,113 @@ async def api_events(request: Request):
             await asyncio.sleep(30)
 
     return StreamingResponse(gen(), media_type="text/event-stream")
+
+
+@app.get("/api/xsup-data")
+def api_xsup_data(theatre: str = "", priority: str = ""):
+    """Per-account XSUP summary — open XSUPs grouped by account, filterable by theatre/priority."""
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            rows = conn.execute(
+                """
+                SELECT x.account_name, x.account_id, x.case_theatre,
+                       x.xsup_number, x.xsup_priority, x.xsup_status,
+                       x.case_status, x.summary, x.component, x.notes,
+                       a.active_cse, a.sales_region,
+                       COALESCE(a.account_theatre, x.case_theatre, '') as account_theatre
+                FROM xsup_data x
+                LEFT JOIN accounts a ON a.account_id = x.account_id
+                WHERE (? = '' OR UPPER(COALESCE(a.account_theatre, x.case_theatre, ''))=UPPER(?))
+                  AND (? = '' OR x.xsup_priority = ?)
+                ORDER BY x.xsup_priority, x.account_name
+                """,
+                (theatre, theatre, priority, priority),
+            ).fetchall()
+
+        # Group by account
+        from collections import defaultdict
+
+        by_account: dict = {}
+        for r in rows:
+            d = dict(r)
+            key = d["account_name"]
+            if key not in by_account:
+                by_account[key] = {
+                    "account_name": key,
+                    "account_id": d["account_id"],
+                    "active_cse": d["active_cse"] or "",
+                    "sales_region": d["sales_region"] or "",
+                    "account_theatre": d["account_theatre"] or "",
+                    "xsups": [],
+                    "p1": 0,
+                    "p2": 0,
+                    "p3": 0,
+                    "p4": 0,
+                }
+            by_account[key]["xsups"].append(
+                {
+                    "xsup_number": d["xsup_number"],
+                    "xsup_priority": d["xsup_priority"],
+                    "xsup_status": d["xsup_status"],
+                    "case_status": d["case_status"],
+                    "summary": d["summary"],
+                    "component": d["component"],
+                    "notes": d["notes"],
+                }
+            )
+            p = (d["xsup_priority"] or "").lower()
+            if p in ("p1", "p2", "p3", "p4"):
+                by_account[key][p] += 1
+
+        # Build set of XSUP numbers referenced in tech_blocker notes
+        import re as _re
+
+        _xpat = _re.compile(r"XSUP-\d+", _re.IGNORECASE)
+        with get_db() as conn2:
+            _tech_notes = conn2.execute(
+                """
+                SELECT b.upgrade_notes, b.health_notes, b.status_detail,
+                       b.m1_details, b.m3_details, b.m5_details
+                FROM blocked_data b
+                WHERE b.subtype = 'tech_blocker'
+                """
+            ).fetchall()
+        _tech_xsup_refs: set = set()
+        for _tn in _tech_notes:
+            _combined = " ".join(filter(None, [_tn[i] or "" for i in range(6)]))
+            _tech_xsup_refs.update(_xpat.findall(_combined))
+
+        # Tag each account if any of its XSUPs appear in tech_blocker notes
+        for acc in by_account.values():
+            acc["also_tech_blocker"] = any(
+                x["xsup_number"] in _tech_xsup_refs for x in acc["xsups"]
+            )
+            acc["tech_blocker_xsups"] = [
+                x["xsup_number"]
+                for x in acc["xsups"]
+                if x["xsup_number"] in _tech_xsup_refs
+            ]
+
+        accounts = sorted(
+            by_account.values(),
+            key=lambda x: (-x["p1"], -x["p2"], -len(x["xsups"])),
+        )
+        total = sum(len(a["xsups"]) for a in accounts)
+        return {"accounts": accounts, "total": total, "synced_at": _xsup_synced_at()}
+    except Exception as e:
+        return {"error": str(e), "accounts": [], "total": 0}
+
+
+def _xsup_synced_at() -> str:
+    try:
+        with get_db() as conn:
+            r = conn.execute(
+                "SELECT synced_at FROM xsup_data ORDER BY id DESC LIMIT 1"
+            ).fetchone()
+            return r["synced_at"] if r else ""
+    except Exception:
+        return ""
 
 
 @app.get("/api/wins")

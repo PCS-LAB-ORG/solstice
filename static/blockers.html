@@ -61,9 +61,13 @@
 .ef-val.empty{color:var(--muted);font-style:italic}
 .tags-row{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}
 
-/* Milestone mini-bar */
-.ms-pip{width:18px;height:4px;border-radius:2px}
-.ms-lbl{font-size:7px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+/* Milestone grid */
+.ms-grid{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.ms-cell{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px}
+.ms-pip{width:24px;height:5px;border-radius:3px}
+.ms-lbl{font-size:7px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+.ms-date{font-size:6.5px;color:var(--muted);font-family:var(--mono);white-space:nowrap;margin-top:1px}
+.reason-line{font-size:8px;color:var(--text-2);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;margin-top:2px;font-style:italic}
 
 /* Empty state */
 .empty-state{padding:2.5rem;text-align:center;color:var(--muted);font-size:10px}
@@ -121,6 +125,8 @@ var TYPES = [
   {key:'customer_delay',   color:'#f97316', bg:'rgba(249,115,22,.10)',  label:'Customer Delay',    desc:'Customer pushing to delay — capacity, readiness or preference'},
   {key:'core_rep_blocking',color:'#f59e0b', bg:'rgba(245,158,11,.12)',  label:'Rep Blocking',      desc:'Account team asked CSE to hold'},
   {key:'tech_blocker',     color:'#8b5cf6', bg:'rgba(139,92,246,.12)',  label:'Technical Blocker', desc:'CoE / product gap / provisioning blocking progress'},
+  {key:'xsup_p1',          color:'#e11d48', bg:'rgba(225,29,72,.12)',   label:'XSUP P1',           desc:'P1 open TAC XSUPs — highest severity product issues', xsup:true, xpri:'P1'},
+  {key:'xsup_p2',          color:'#c026d3', bg:'rgba(192,38,211,.10)',  label:'XSUP P2',           desc:'P2 open TAC XSUPs — tracked product issues affecting upgrade', xsup:true, xpri:'P2'},
   {key:'active_deal',      color:'#3b82f6', bg:'rgba(59,130,246,.12)',  label:'Active Deal',       desc:'XSIAM or other deal in flight'},
   {key:'legal_blocker',    color:'#64748b', bg:'rgba(100,116,139,.10)', label:'Legal Blocker',     desc:'Legal reason blocking customer outreach or upgrade'},
   {key:'other',            color:'#94a3b8', bg:'rgba(148,163,184,.12)', label:'Other',             desc:'Uncategorised blockers'},
@@ -233,8 +239,48 @@ function load() {
         .then(function(r){return r.json();})
         .then(function(m1){ _m1Loading=false; _data.m1_plan=_normM1(m1); render(); })
         .catch(function(){ _m1Loading=false; });
+
+      // Load XSUP P1 + P2 async
+      fetch('/api/xsup-data?theatre='+encodeURIComponent(_theatre))
+        .then(function(r){return r.json();})
+        .then(function(xd){
+          _data.xsup_p1 = _normXsup(xd.accounts||[], 'P1');
+          _data.xsup_p2 = _normXsup(xd.accounts||[], 'P2');
+          render();
+        })
+        .catch(function(){});
     })
     .catch(_showErr);
+}
+
+function _normXsup(accounts, priority) {
+  return accounts
+    .filter(function(a){ return a[priority.toLowerCase()] > 0; })
+    .map(function(a){
+      var xsups = a.xsups.filter(function(x){ return x.xsup_priority === priority; });
+      var statusSummary = xsups.map(function(x){ return x.xsup_number+' ('+x.xsup_status+')'; }).join(', ');
+      var topSummary = xsups.length ? xsups[0].summary : '';
+      return {
+        account_id:   a.account_id||'',
+        customer_name:a.account_name,
+        active_cse:   a.active_cse||'',
+        sales_region: a.account_theatre||'',
+        signal:       priority==='P1' ? 'blocked' : 'at_risk',
+        dc_progress:  '',
+        churn_risk:   '',
+        cc_rep: '', cc_dsm: '',
+        status_detail: topSummary,
+        health_notes:  statusSummary,
+        upgrade_notes: xsups.map(function(x){ return x.xsup_number+': '+x.summary; }).join('\n'),
+        subtype: 'xsup_'+priority.toLowerCase(),
+        // xsup-specific
+        _xsup_count:        xsups.length,
+        _xsup_items:        xsups,
+        _xsup_pri:          priority,
+        also_tech_blocker:  a.also_tech_blocker||false,
+        tech_blocker_xsups: a.tech_blocker_xsups||[],
+      };
+    });
 }
 
 function _rebuildDropdowns(d, currentCse) {
@@ -302,12 +348,14 @@ function render() {
     });
 
     // Rows HTML
-    var rowsHtml = '<div class="thdr"><span></span><span>Account / CSE</span><span>Rep / DSM</span><span>DC · Risk</span><span>Notes</span></div>';
+    var rowsHtml = type.xsup
+      ? '<div class="thdr"><span></span><span>Account / CSE</span><span>Priority</span><span>Status</span><span>Summary</span></div>'
+      : '<div class="thdr"><span></span><span>Account / CSE</span><span>Rep / DSM</span><span>DC · Risk</span><span>Notes</span></div>';
     regOrder.forEach(function(reg) {
       rowsHtml += '<div class="reg-hdr"><span class="reg-name">'+E(reg)+'</span><span class="reg-cnt">'+byReg[reg].length+'</span></div>';
       byReg[reg].forEach(function(a, i) {
         var rowKey = type.key + '_' + reg + '_' + i;
-        rowsHtml += _accountRowHtml(a, rowKey, type);
+        rowsHtml += type.xsup ? _xsupRowHtml(a, rowKey, type) : _accountRowHtml(a, rowKey, type);
       });
     });
 
@@ -359,6 +407,7 @@ function _accountRowHtml(a, rowKey, type) {
     : '<div style="font-size:8px;color:var(--muted);padding:2px 0">No DSM</div>';
 
   var notesText = (_usable(a.upgrade_notes) || _usable(a.health_notes) || _usable(a.status_detail) || '—').substring(0, 180);
+  var reasonText = _usable(a.status_detail) || '';
 
   var churnHtml = '';
   if (a.churn_risk && a.churn_risk !== '-') {
@@ -371,6 +420,7 @@ function _accountRowHtml(a, rowKey, type) {
     + '<div class="ac">'
       + '<div class="aname">'+E(a.customer_name || '—')+'</div>'
       + '<div class="asub">'+E(a.active_cse || '—')+' &middot; '+E(a.sales_region || '—')+'</div>'
+      + (reasonText ? '<div class="reason-line">'+E(reasonText)+'</div>' : '')
     + '</div>'
     + '<div class="ac">'+repHtml+dsmHtml+'</div>'
     + '<div class="ac">'
@@ -387,29 +437,101 @@ function _accountRowHtml(a, rowKey, type) {
     + '</div>';
 }
 
+// ── XSUP row + expand panel ─────────────────────────────────────────────────
+var PRI_COLORS = {P1:'#e11d48', P2:'#c026d3', P3:'#64748b', P4:'#94a3b8'};
+
+function _xsupRowHtml(a, rowKey, type) {
+  var priColor = PRI_COLORS[a._xsup_pri] || '#94a3b8';
+  var topSummary = (a.status_detail || '').substring(0, 160);
+  var tbMarker = a.also_tech_blocker
+    ? '<span title="Also referenced in Technical Blocker notes: '+(a.tech_blocker_xsups||[]).join(', ')+'" style="font-size:7px;padding:1px 6px;border-radius:3px;background:#8b5cf620;color:#8b5cf6;border:1px solid #8b5cf644;font-weight:700;cursor:default">⚙ Tech Blocker</span>'
+    : '';
+  var statusPills = (a._xsup_items||[]).map(function(x){
+    var isTb = (a.tech_blocker_xsups||[]).indexOf(x.xsup_number) >= 0;
+    var pip = isTb ? '⚙ ' : '';
+    return '<span title="'+(isTb?'Referenced in Tech Blocker notes':'')+'" style="font-size:7.5px;padding:1px 5px;border-radius:3px;background:'+priColor+'18;color:'+priColor+';border:1px solid '+(isTb?'#8b5cf6':priColor+'44')+';white-space:nowrap">'+pip+E(x.xsup_number)+'</span>';
+  }).join(' ');
+
+  return '<div class="arow" id="row-'+rowKey+'" onclick="toggleRow(\''+rowKey+'\')">'
+    + '<div class="ac"><span class="sig-dot" style="background:'+priColor+'"></span></div>'
+    + '<div class="ac">'
+      + '<div class="aname">'+E(a.customer_name||'—')+(tbMarker ? ' '+tbMarker : '')+'</div>'
+      + '<div class="asub">'+E(a.active_cse||'—')+' &middot; '+E(a.sales_region||'—')+'</div>'
+      + '<div style="margin-top:3px;display:flex;gap:3px;flex-wrap:wrap">'+statusPills+'</div>'
+    + '</div>'
+    + '<div class="ac">'
+      + '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:'+priColor+'18;color:'+priColor+'">'+E(a._xsup_pri)+'</span>'
+      + '<div style="font-size:8px;color:var(--muted);margin-top:4px">'+E((a._xsup_items&&a._xsup_items[0]&&a._xsup_items[0].xsup_status)||'—')+'</div>'
+    + '</div>'
+    + '<div class="ac"></div>'
+    + '<div class="ac"><div class="notes-short">'+E(topSummary)+'</div></div>'
+    + '</div>'
+    + '<div class="expand-panel" id="exp-'+rowKey+'">'
+    + _xsupExpandHtml(a)
+    + '</div>';
+}
+
+function _xsupExpandHtml(a) {
+  var priColor = PRI_COLORS[a._xsup_pri] || '#94a3b8';
+  var rows = (a._xsup_items||[]).map(function(x){
+    return '<tr>'
+      + '<td style="padding:4px 8px;font-size:8.5px;font-family:var(--mono);white-space:nowrap;color:'+priColor+'">'+E(x.xsup_number)+'</td>'
+      + '<td style="padding:4px 8px;font-size:8px;color:var(--muted);white-space:nowrap">'+E(x.xsup_status)+'</td>'
+      + '<td style="padding:4px 8px;font-size:8px;color:var(--muted)">'+E(x.component||'—')+'</td>'
+      + '<td style="padding:4px 8px;font-size:8.5px;color:var(--text-2);line-height:1.4">'+E((x.summary||'').substring(0,200))+'</td>'
+      + '</tr>';
+  }).join('');
+  return '<table style="width:100%;border-collapse:collapse">'
+    + '<thead><tr style="background:var(--surface-2)">'
+      + '<th style="padding:4px 8px;font-size:7.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;font-weight:700">XSUP</th>'
+      + '<th style="padding:4px 8px;font-size:7.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;font-weight:700">Status</th>'
+      + '<th style="padding:4px 8px;font-size:7.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;font-weight:700">Component</th>'
+      + '<th style="padding:4px 8px;font-size:7.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;font-weight:700">Summary</th>'
+    + '</tr></thead>'
+    + '<tbody>'+rows+'</tbody>'
+    + '</table>';
+}
+
 // ── Expand panel content ────────────────────────────────────────────────────
 function _expandPanelHtml(a) {
   var dcColor  = DC_COLORS[a.dc_progress] || '#94a3b8';
 
-  // Milestone mini-bar: M3, M8, M9
-  var msPips = [
-    {lbl:'M3', done: a.m3_complete},
-    {lbl:'M8', done: a.m8_started},
-    {lbl:'M9', done: a.m9_complete}
-  ].map(function(m) {
-    var c = m.done ? '#10b981' : '#e2e8f0';
-    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
-      + '<div class="ms-pip" style="background:'+c+'"></div>'
-      + '<span class="ms-lbl">'+m.lbl+'</span>'
+  // Full M0-M9 milestone grid: completed (green) + planned dates
+  function _fmtDate(s) {
+    if (!s || s === 'None' || s === '0') return '';
+    var m = (s+'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return m[1]+'/'+m[2]+'/'+m[3].slice(2);
+    m = (s+'').match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[2]+'/'+m[3]+'/'+m[1].slice(2);
+    return '';
+  }
+  var msSpec = [
+    {lbl:'M0', done: a.m0_complete, plan: null},
+    {lbl:'M1', done: a.m1_complete, plan: _fmtDate(a.m1_planned)},
+    {lbl:'M2', done: a.m2_complete, plan: _fmtDate(a.m2_planned)},
+    {lbl:'M3', done: a.m3_complete, plan: _fmtDate(a.m3_planned)},
+    {lbl:'M4', done: a.m4_complete, plan: _fmtDate(a.m4_planned)},
+    {lbl:'M5', done: a.m5_complete, plan: _fmtDate(a.m5_planned)},
+    {lbl:'M6', done: a.m6_complete, plan: null},
+    {lbl:'M7', done: a.m7_complete, plan: _fmtDate(a.m7_planned)},
+    {lbl:'M8', done: a.m8_started,  plan: _fmtDate(a.m8_planned)},
+    {lbl:'M9', done: a.m9_complete, plan: _fmtDate(a.m9_planned)},
+  ];
+  var msPips = '<div class="ms-grid">' + msSpec.map(function(m) {
+    var pipColor = m.done ? '#10b981' : (m.plan ? '#f59e0b22' : '#e2e8f0');
+    var pipBorder = m.done ? 'none' : (m.plan ? '1px dashed #f59e0b' : 'none');
+    var lblColor  = m.done ? '#10b981' : (m.plan ? '#f59e0b' : 'var(--muted)');
+    return '<div class="ms-cell">'
+      + '<div class="ms-pip" style="background:'+pipColor+';border:'+pipBorder+'"></div>'
+      + '<span class="ms-lbl" style="color:'+lblColor+'">'+m.lbl+(m.done ? ' ✓' : '')+'</span>'
+      + (m.plan && !m.done ? '<span class="ms-date">'+m.plan+'</span>' : '')
       + '</div>';
-  }).join('<div style="width:8px;height:4px;display:flex;align-items:center;margin-bottom:10px"><div style="flex:1;height:1px;background:var(--border)"></div></div>');
+  }).join('') + '</div>';
 
   // Tags
   var tags = [];
   if (a.signal) tags.push('<span class="badge '+(a.signal==='blocked'?'badge-red':a.signal==='at_risk'?'badge-amber':'badge-green')+'">'+E(a.signal)+'</span>');
-  if (a.m3_complete) tags.push('<span class="badge badge-green">M3 &#10003;</span>');
-  if (a.m8_started)  tags.push('<span class="badge badge-green">M8 started</span>');
-  if (a.cohort)      tags.push('<span class="badge badge-gray">'+E(a.cohort)+'</span>');
+  if (a.cohort) tags.push('<span class="badge badge-gray">'+E(a.cohort)+'</span>');
 
   var sdText  = a.status_detail  || '';
   var hnText  = a.health_notes   || '';
@@ -461,9 +583,9 @@ function _expandPanelHtml(a) {
       + '<div class="ef-label">Project Status</div>'
       + '<div class="ef-val">'+E(cpsText)+'</div>'
     + '</div>' : '')
-    + '<div>'
-      + '<div class="ef-label">Milestones</div>'
-      + '<div style="display:flex;gap:4px;align-items:flex-end;margin-top:2px">'+msPips+'</div>'
+    + '<div style="grid-column:1/-1">'
+      + '<div class="ef-label">Milestones <span style="font-weight:400;color:var(--muted)">— green=done · amber dashed=planned</span></div>'
+      + msPips
       + mdetHtml
     + '</div>'
     + '</div>'

@@ -223,6 +223,27 @@ def init_db(path: Path = DB_PATH) -> None:
             logged_at  TEXT DEFAULT (datetime('now'))
         );
 
+        -- XSUP data from TAC Open XSUPs tracker
+        CREATE TABLE IF NOT EXISTS xsup_data (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_name    TEXT NOT NULL,
+            account_id      TEXT,
+            case_number     TEXT,
+            case_status     TEXT,
+            case_theatre    TEXT,
+            xsup_number     TEXT,
+            xsup_priority   TEXT,
+            xsup_status     TEXT,
+            summary         TEXT,
+            component       TEXT,
+            notes           TEXT,
+            synced_at       TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_xsup_account   ON xsup_data(account_name);
+        CREATE INDEX IF NOT EXISTS idx_xsup_priority  ON xsup_data(xsup_priority);
+        CREATE INDEX IF NOT EXISTS idx_xsup_status    ON xsup_data(xsup_status);
+        CREATE INDEX IF NOT EXISTS idx_xsup_acct_id   ON xsup_data(account_id);
+
         -- Indexes for common queries
         CREATE INDEX IF NOT EXISTS idx_accounts_status      ON accounts(status);
         CREATE INDEX IF NOT EXISTS idx_accounts_theatre     ON accounts(account_theatre);
@@ -247,7 +268,29 @@ def _migrate_schema(path: Path = DB_PATH) -> None:
                 "ALTER TABLE blocked_data ADD COLUMN m6_complete INTEGER DEFAULT 0"
             )
         except sqlite3.OperationalError:
-            pass  # already exists
+            pass
+        # xsup_data table — added 2026-05-11
+        conn.executescript("""
+        CREATE TABLE IF NOT EXISTS xsup_data (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_name    TEXT NOT NULL,
+            account_id      TEXT,
+            case_number     TEXT,
+            case_status     TEXT,
+            case_theatre    TEXT,
+            xsup_number     TEXT,
+            xsup_priority   TEXT,
+            xsup_status     TEXT,
+            summary         TEXT,
+            component       TEXT,
+            notes           TEXT,
+            synced_at       TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_xsup_account   ON xsup_data(account_name);
+        CREATE INDEX IF NOT EXISTS idx_xsup_priority  ON xsup_data(xsup_priority);
+        CREATE INDEX IF NOT EXISTS idx_xsup_status    ON xsup_data(xsup_status);
+        CREATE INDEX IF NOT EXISTS idx_xsup_acct_id   ON xsup_data(account_id);
+        """)
 
 
 def migrate_from_state(state_file: Path, path: Path = DB_PATH) -> dict:
