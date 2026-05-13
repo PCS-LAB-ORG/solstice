@@ -5,6 +5,9 @@ data/solstice.db-wal
 data/state.json
 data/*.csv
 
+# Outputs
+outputs/
+
 # Brainstorm sessions
 .superpowers/
 
