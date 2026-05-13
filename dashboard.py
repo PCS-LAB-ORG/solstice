@@ -2769,6 +2769,48 @@ def _xsup_synced_at() -> str:
         return ""
 
 
+@app.get("/api/coe-account")
+def api_coe_account(account_id: str = "", account_name: str = ""):
+    """COE issues + Cortex Bugs for a specific account. Used to enrich the blockers expand panel."""
+    _ensure_db()
+    try:
+        with get_db() as conn:
+            # Match by account_id first, fall back to name fuzzy match
+            if account_id:
+                issues = conn.execute(
+                    """SELECT issue_id, upgrade_blocker, technical_issue, requirements,
+                              priority, module, issue_category, status, timeline_answer, outcome
+                       FROM coe_issues WHERE account_id=? ORDER BY priority, issue_id""",
+                    (account_id,),
+                ).fetchall()
+                bugs = conn.execute(
+                    """SELECT xsup_number, xsup_priority, xsup_status,
+                              spo_dc_classification, eng_escalation_status, component, summary, notes
+                       FROM coe_bugs WHERE account_id=? ORDER BY xsup_priority, xsup_number""",
+                    (account_id,),
+                ).fetchall()
+            else:
+                issues = conn.execute(
+                    """SELECT issue_id, upgrade_blocker, technical_issue, requirements,
+                              priority, module, issue_category, status, timeline_answer, outcome
+                       FROM coe_issues WHERE LOWER(account_name)=LOWER(?) ORDER BY priority, issue_id""",
+                    (account_name,),
+                ).fetchall()
+                bugs = conn.execute(
+                    """SELECT xsup_number, xsup_priority, xsup_status,
+                              spo_dc_classification, eng_escalation_status, component, summary, notes
+                       FROM coe_bugs WHERE LOWER(account_name)=LOWER(?) ORDER BY xsup_priority, xsup_number""",
+                    (account_name,),
+                ).fetchall()
+
+        return {
+            "issues": [dict(r) for r in issues],
+            "bugs": [dict(r) for r in bugs],
+        }
+    except Exception as e:
+        return {"issues": [], "bugs": [], "error": str(e)}
+
+
 @app.get("/api/wins")
 def api_wins():
     with get_db() as conn:
