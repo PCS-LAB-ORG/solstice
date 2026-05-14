@@ -305,7 +305,6 @@ function refreshData() {
         es.close();
         loadAll();
         S.syncSummary({m9:0, blocked:0, resolved:0});
-        setTimeout(function(){console_el.style.display='none';}, 5000);
       }
     } catch(ex) {}
   };
