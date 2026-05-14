@@ -495,6 +495,14 @@ def _parse_and_store_coe(xlsx_bytes: bytes) -> tuple[int, int]:
     return (len(issue_rows), len(bug_rows))
 
 
+def _gdrive_root() -> Path:
+    """Resolve Google Drive root — works on Mac (native) and in Docker (volume mount)."""
+    docker_mount = Path("/root/gdrive")
+    if docker_mount.exists():
+        return docker_mount
+    return Path.home() / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com"
+
+
 def _download_live_from_drive() -> dict:
     """
     Download DC CSE Tracker CSV directly from Google Drive using ADC token.
@@ -508,10 +516,7 @@ def _download_live_from_drive() -> dict:
     except ImportError:
         return {"DC CSE Tracker": "⚠️ requests not installed"}
 
-    DRIVE_ROOT = (
-        Path.home()
-        / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com/My Drive/EMEA CC "
-    )
+    DRIVE_ROOT = _gdrive_root() / "My Drive/EMEA CC "
     gsheet = (
         DRIVE_ROOT
         / "DC CSE Tracker (Instant sync underlying data to upgrade tracker).gsheet"
@@ -559,8 +564,7 @@ def _download_live_from_drive() -> dict:
 
     # Download XSUP tracker (same ADC token — always alongside DC CSE Tracker)
     XSUP_GSHEET = (
-        Path.home()
-        / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com"
+        _gdrive_root()
         / "My Drive/Cortex Cloud Work/Cortex Cloud Open XSUPs with TAC.gsheet"
     )
     try:
@@ -586,8 +590,7 @@ def _download_live_from_drive() -> dict:
 
     # Download Central Technical COE Tracker (Sheet1 + Cortex Bugs)
     COE_GSHEET = (
-        Path.home()
-        / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com"
+        _gdrive_root()
         / "My Drive/Cortex Cloud Work/Central Technical COE Tracker.gsheet"
     )
     try:
@@ -1146,10 +1149,7 @@ async def api_run_full(request: Request):
         await asyncio.sleep(0.1)
 
         # Step 1: Check Drive files
-        drive_root = (
-            Path.home()
-            / "Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com/My Drive/EMEA CC "
-        )
+        drive_root = _gdrive_root() / "My Drive/EMEA CC "
         gsheet_files = list(drive_root.glob("*.gsheet")) if drive_root.exists() else []
         drive_status = (
             f"{len(gsheet_files)} .gsheet files synced"

@@ -9,6 +9,8 @@ services:
       - ./data:/app/data
       # ADC credentials for Google Drive refresh
       - ~/.config/gcloud:/root/.config/gcloud:ro
+      # Google Drive Desktop — gives container access to .gsheet files
+      - ~/Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com:/root/gdrive:ro
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
