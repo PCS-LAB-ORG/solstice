@@ -39,9 +39,9 @@
 
   <!-- Query criteria -->
   <div class="query-card">
-    <div class="query-title">ACTIVE QUERY — EMEA SCALE COHORT IN SCOPE</div>
+    <div class="query-title">ACTIVE QUERY — ALL THEATRES SCALE COHORT IN SCOPE</div>
     <div class="query-criteria">
-      <div class="qc"><span class="qc-field">theatre</span><span class="qc-op">=</span><span class="qc-val">EMEA</span></div>
+      <div class="qc"><span class="qc-field">theatre</span><span class="qc-op">=</span><span class="qc-val">All</span></div>
       <div class="qc"><span class="qc-field">customer_size_cohort_classification</span><span class="qc-op">=</span><span class="qc-val">Scale cohort</span></div>
       <div class="qc"><span class="qc-field">PC_CC_Migration_status</span><span class="qc-op">≠</span><span class="qc-val neg">Churn</span></div>
       <div class="qc"><span class="qc-field">Status Detail</span><span class="qc-op">≠</span><span class="qc-val neg">🛑 confirmed churn</span></div>
@@ -163,7 +163,7 @@ function render() {
   document.getElementById('scope-body').innerHTML = html;
 }
 
-fetch('/api/scope?theatre=EMEA')
+fetch('/api/scope?theatre=')
   .then(function(r){ return r.json(); })
   .then(function(data){
     _all = data;
