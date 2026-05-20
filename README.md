@@ -9,54 +9,41 @@ FastAPI + SQLite + vanilla JS. Docker-first. 10-page ops dashboard.
 
 ### Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed (`gcloud` in PATH)
-- ADC credentials configured: `gcloud auth application-default login`
-- [Google Drive for Desktop](https://www.google.com/drive/download/) installed and signed in with your Google Workspace account
+All standard for PANW — you almost certainly have these already:
 
-### 1. Install and configure Google Drive for Desktop
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) running
+- `gcloud` CLI installed and authenticated: `gcloud auth application-default login`
+- [Google Drive for Desktop](https://www.google.com/drive/download/) installed, signed in with your `@paloaltonetworks.com` account, and set to **Mirror Files** mode
 
-Solstice reads the DC CSE Tracker, XSUP Tracker, and COE Tracker directly from your local Google Drive mount. Without this the **Refresh Data** button will not work.
+> **Mirror Files vs Stream Files:** In Google Drive for Desktop settings → Google Drive → select **Mirror files**. This makes `.gsheet` files available locally. Stream mode won't work.
 
-1. Download and install [Google Drive for Desktop](https://www.google.com/drive/download/)
-2. Sign in with your Google Workspace account
-3. In the app settings → **Google Drive** → select **Mirror files** (not Stream) so files are available locally
-4. Wait for the initial sync to complete
-
-The Docker container mounts your Google Drive as a read-only volume — no extra config needed once Drive Desktop is running.
-
-### 2. Clone the repo
+### 1. Clone the repo
 
 ```bash
 git clone https://github.com/shpapy/solstice.git
 cd solstice
 ```
 
-### 3. Configure data sources
+### 2. Run setup
 
-Open `data/drive_config.json` and update the file IDs to match your own Google Drive files:
-
-```json
-{
-  "files": [
-    {
-      "name": "DC CSE Tracker",
-      "file_id": "<your-dc-cse-tracker-file-id>",
-      "role": "MASTER"
-    },
-    {
-      "name": "Central Technical COE Tracker",
-      "file_id": "<your-coe-tracker-file-id>",
-      "role": "coe",
-      "sheets": ["Sheet1", "Cortex Bugs"]
-    }
-  ]
-}
+```bash
+./setup.sh
 ```
 
-To find a file ID: open the Google Sheet → share → copy link → the ID is the long string between `/d/` and `/edit`.
+This auto-detects your PANW Google Drive account, writes a `.env` file, and verifies the required tracker files are accessible. Takes about 2 seconds.
 
-### 4. Start the container
+Example output:
+```
+✅ Found Google Drive account: jsmith@paloaltonetworks.com
+✅ Written .env
+✅ Found: DC CSE Tracker
+✅ Found: XSUP Tracker
+✅ Found: COE Tracker
+
+🚀 Ready. Run: docker compose up -d
+```
+
+### 3. Start the container
 
 ```bash
 docker compose up -d

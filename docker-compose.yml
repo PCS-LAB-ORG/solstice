@@ -10,7 +10,8 @@ services:
       # ADC credentials for Google Drive refresh
       - ~/.config/gcloud:/root/.config/gcloud:ro
       # Google Drive Desktop — gives container access to .gsheet files
-      - ~/Library/CloudStorage/GoogleDrive-mbanica@paloaltonetworks.com:/root/gdrive:ro
+      # GDRIVE_ACCOUNT is set by setup.sh in .env
+      - ~/Library/CloudStorage/GoogleDrive-${GDRIVE_ACCOUNT}:/root/gdrive:ro
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
