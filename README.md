@@ -1,4 +1,4 @@
-# Solstice v2.1
+# Solstice v2.4
 
 Global CC Migration monitor — EMEA, JAPAC, AMER, LATAM.
 FastAPI + SQLite + vanilla JS. Docker-first. 10-page ops dashboard.
@@ -12,20 +12,18 @@ FastAPI + SQLite + vanilla JS. Docker-first. 10-page ops dashboard.
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed (`gcloud` in PATH)
 - ADC credentials configured: `gcloud auth application-default login`
-- [Google Drive for Desktop](https://www.google.com/drive/download/) installed and signed in
+- [Google Drive for Desktop](https://www.google.com/drive/download/) installed and signed in with your Google Workspace account
 
 ### 1. Install and configure Google Drive for Desktop
 
-Solstice reads the DC CSE Tracker directly from your local Google Drive mount. Without this the **Refresh Data** button will not work.
+Solstice reads the DC CSE Tracker, XSUP Tracker, and COE Tracker directly from your local Google Drive mount. Without this the **Refresh Data** button will not work.
 
 1. Download and install [Google Drive for Desktop](https://www.google.com/drive/download/)
-2. Sign in with your Palo Alto Networks Google account
+2. Sign in with your Google Workspace account
 3. In the app settings → **Google Drive** → select **Mirror files** (not Stream) so files are available locally
 4. Wait for the initial sync to complete
-5. Find the `DC CSE Tracker` file in your local Google Drive folder and note its path — it will look like:
-   - **macOS:** `/Users/<you>/Google Drive/My Drive/...`
-   - **Windows:** `G:\My Drive\...`
-6. Open `data/drive_config.json` and confirm the file ID matches the tracker. The pipeline uses the Google Drive API (not the local path) but the local mount is required for ADC token resolution to work correctly.
+
+The Docker container mounts your Google Drive as a read-only volume — no extra config needed once Drive Desktop is running.
 
 ### 2. Clone the repo
 
@@ -34,7 +32,31 @@ git clone https://github.com/shpapy/solstice.git
 cd solstice
 ```
 
-### 3. Start the container
+### 3. Configure data sources
+
+Open `data/drive_config.json` and update the file IDs to match your own Google Drive files:
+
+```json
+{
+  "files": [
+    {
+      "name": "DC CSE Tracker",
+      "file_id": "<your-dc-cse-tracker-file-id>",
+      "role": "MASTER"
+    },
+    {
+      "name": "Central Technical COE Tracker",
+      "file_id": "<your-coe-tracker-file-id>",
+      "role": "coe",
+      "sheets": ["Sheet1", "Cortex Bugs"]
+    }
+  ]
+}
+```
+
+To find a file ID: open the Google Sheet → share → copy link → the ID is the long string between `/d/` and `/edit`.
+
+### 4. Start the container
 
 ```bash
 docker compose up -d
@@ -42,16 +64,20 @@ docker compose up -d
 
 The dashboard is now running at **http://localhost:8200/ops**
 
-### 4. Load fresh data
+> **First run:** the DB will be empty. Click **Refresh Data** on the ops page to pull fresh data.
 
-Click **Refresh Data** on any page (top-right button).
+### 5. Load fresh data
+
+Click **Refresh Data** (top-right button on any page).
 
 The pipeline will:
 1. Get an ADC token via `gcloud auth application-default print-access-token`
-2. Download the DC CSE Tracker directly from Google Drive API
-3. Parse all milestones (M0–M9), signals, subtypes across all theatres
-4. Rebuild the M1 action plan and audit history
-5. Refresh the dashboard
+2. Download the DC CSE Tracker CSV from Google Drive API
+3. Download the XSUP Tracker (xlsx) and parse open XSUPs
+4. Download the COE Tracker (xlsx) — Sheet1 (feature/blocker issues) + Cortex Bugs tab
+5. Parse all milestones (M0–M9), signals, subtypes across all theatres
+6. Rebuild the M1 action plan and audit history
+7. Refresh the dashboard
 
 > **Troubleshooting Refresh Data:** If the refresh fails with an auth error, run `gcloud auth application-default login` and restart the container with `docker compose restart`.
 
@@ -72,7 +98,7 @@ docker compose ps               # check status
 | URL | Purpose |
 |---|---|
 | [`/ops`](http://localhost:8200/ops) | Main ops: KPI counters, milestone funnel, M1 action plan, theatre comparison |
-| [`/blockers`](http://localhost:8200/blockers) | Call prep: blocked/at-risk accounts grouped by subtype (incl. M0 Not Started, M0→M1 Stuck), expanded detail panel |
+| [`/blockers`](http://localhost:8200/blockers) | Call prep: blocked/at-risk accounts grouped by subtype — expand any row to see COE issues + Cortex Bugs |
 | [`/forecast`](http://localhost:8200/forecast) | Velocity: 12-week M9 trend, 3-month targets, overdue section, confidence logic |
 | [`/daily`](http://localhost:8200/daily) | Leadership briefing: daily movements grouped by milestone type |
 | [`/audit`](http://localhost:8200/audit) | Full change history with field/theatre/sort filters |
@@ -96,11 +122,17 @@ python3 dashboard.py
 
 ---
 
-## Data sync
+## Data sources
 
-Data source: **DC CSE Tracker** (Google Drive, file ID `1Te5rQqhQZlGzpBk-ertJlizOgCKxfl-aa9t4Oj2mpSI`).
+Three Google Drive files are pulled on every **Refresh Data**:
 
-All milestone data (M0-M9), CSE assignment, signal, and subtype derive from this single source of truth. The file ID and tab configuration live in `data/drive_config.json`.
+| Source | Format | Purpose |
+|---|---|---|
+| DC CSE Tracker | CSV (gid=0) | Master account list — all milestones, CSE assignment, DC status, upgrade notes |
+| XSUP Tracker | xlsx | Open TAC XSUPs linked to accounts — P1/P2 displayed on blockers page |
+| Central Technical COE Tracker | xlsx | Feature/blocker requests (Sheet1) + Cortex Bugs per account |
+
+File IDs are configured in `data/drive_config.json`. The pipeline uses the Google Drive API with ADC credentials — no service account needed.
 
 To trigger a sync via API:
 ```bash
@@ -109,34 +141,59 @@ curl http://localhost:8200/api/run-pipeline
 
 ---
 
+## Database schema
+
+SQLite at `data/solstice.db` (volume-mounted — survives container restarts).
+
+| Table | Source | Description |
+|---|---|---|
+| `accounts` | DC CSE Tracker | One row per account — name, theatre, CSE, signal, status |
+| `blocked_data` | DC CSE Tracker | Milestone flags, subtype, upgrade/health notes, DC progress |
+| `status_history` | DC CSE Tracker | Milestone change log (diff per refresh) |
+| `ps_data` | DC CSE Tracker | PS engagement data — PSC, PM, Clarizen ID, timeline |
+| `xsup_data` | XSUP Tracker | Open XSUPs — number, priority, status, summary, component |
+| `coe_issues` | COE Tracker Sheet1 | Feature/blocker requests — issue ID, priority, module, status, timeline |
+| `coe_bugs` | COE Tracker Cortex Bugs | XSUP-linked bugs — SPO DC classification, escalation status, summary |
+| `parity_gaps` | Manual seed | 10 product parity gaps with description and roadmap ETA |
+| `parity_gap_accounts` | Manual seed | Links parity gaps to affected accounts |
+| `m1_suggestions` | Pipeline | AI-generated M1 action plan per account |
+| `ai_enrichment` | Pipeline | Enrichment metadata |
+
+Both `coe_issues` and `coe_bugs` carry an `account_id` foreign key resolved via exact + fuzzy name matching against the `accounts` table (~97% match rate for issues, ~68% for bugs — remaining unmatched are internal/test accounts or customers outside the tracked cohort).
+
+---
+
 ## Architecture
 
 ```
 dashboard.py          FastAPI entry point — all routes + API endpoints
 Dockerfile            python:3.13-slim + gcloud CLI
-docker-compose.yml    port 8200, data/ volume, ADC credentials mount
+docker-compose.yml    port 8200, data/ volume, ADC + Google Drive mounts
 agent/
-  db.py               SQLite schema + upsert operations (journal_mode=DELETE for Docker compat)
+  db.py               SQLite schema + upsert operations
   dc_parser.py        DC CSE Tracker CSV parser — all theatres, M0-M9, signal/subtype
   differ.py           Audit diff engine (field-level change detection)
   validator.py        Salesforce ID validation + theatre filter
 static/
-  solstice.css        Design system tokens + shared components (bsec/shdr/sbody/arow)
+  solstice.css        Design system tokens + shared components
   solstice.js         Shared JS — nav, search, account modal, S.toggleSec, SLA countdown
   v2.html             /ops
-  blockers.html       /blockers  (M0 Not Started + M0→M1 Stuck sections at top)
+  blockers.html       /blockers
   forecast.html       /forecast
   daily.html          /daily
   audit.html          /audit
-  cse.html            /cse       (M8 in-flight count per CSE)
+  cse.html            /cse
   weekly.html         /weekly
   scope.html          /scope
   wins.html           /wins
 data/
-  solstice.db         SQLite — all account state, milestone history, audit log (volume-mounted)
-  dc_cse_tracker.csv  Last downloaded DC CSV (volume-mounted)
-  drive_config.json   Google Drive file IDs and tab config
+  solstice.db         SQLite — all account state, milestone history, audit log (gitignored)
+  drive_config.json   Google Drive file IDs and tab config (gitignored)
 ```
+
+> `data/` is gitignored — no live data is committed to the repo.
+
+---
 
 ## Design system
 
@@ -146,8 +203,9 @@ All pages share `static/solstice.js` via `window.S` and `static/solstice.css`:
 |---|---|
 | `.bsec` / `.shdr` / `.sbody` | Collapsible section — collapsed by default |
 | `.reg-hdr` | Sub-group header inside a section |
-| `.arow` / `.aname` | Account row — clickable, opens detail modal |
-| `.move` | Movement card (daily page) |
+| `.arow` / `.aname` | Account row — clickable, opens expand panel |
+| `.expand-panel` | Inline detail panel — milestones, COE issues, Cortex Bugs |
+| `.coe-section` | COE enrichment block inside expand panel |
 
 | JS function | Usage |
 |---|---|
@@ -157,17 +215,17 @@ All pages share `static/solstice.js` via `window.S` and `static/solstice.css`:
 | `S.syncSummary(events)` | Dismissible toast after pipeline refresh |
 | `S.exportCSV(rows, fn)` | Client-side CSV download |
 
-## SLA thresholds (current)
+---
 
-Defined in `static/solstice.js` — `S.slaCountdown()` and `S.blockerAge()`:
+## SLA thresholds
 
-| Phase | Current SLA | Amber | Red |
+Defined in `static/solstice.js`:
+
+| Phase | SLA | Amber | Red |
 |---|:-:|:-:|:-:|
 | M3 → M8 | 14d | — | > 14d |
 | M8 → M9 | 28d | — | > 28d |
 | Blocker age | — | > 7d | > 21d |
-
-> Data analysis (Apr 2026, n=201 M3→M8, n=35 M8→M9) suggests raising to 30d / 45d / 30d respectively. To update, edit the `used > N` and `limit:N` values in `slaCountdown` and `days<=N` in `blockerAge`.
 
 ---
 
@@ -176,17 +234,17 @@ Defined in `static/solstice.js` — `S.slaCountdown()` and `S.blockerAge()`:
 ### Day-to-day
 
 1. Open **http://localhost:8200/ops** — check KPI counters and M1 action plan
-2. Click **Refresh Data** to pull latest from Google Drive (takes ~10s)
+2. Click **Refresh Data** to pull latest from Google Drive (~15s)
 3. Use **global search** (top-right) to jump to any account
-4. Click any account row to open the detail modal (milestones, SLA badge, call prep, history)
+4. Click any account row on the blockers page to see milestones, COE issues, and Cortex Bugs inline
 
-### Key pages for each role
+### Key pages by role
 
 | Role | Go to |
 |---|---|
 | CSE / DSM daily check | `/blockers` → filter by theatre |
 | Leadership update | `/daily` or `/weekly` |
-| M8 upgrade tracking | `/cse` → see M8 in-flight per CSE |
+| M8 upgrade tracking | `/cse` → M8 in-flight per CSE |
 | Theatre wins overview | `/wins` |
 | Full account list | `/scope` |
 | Change audit | `/audit` |
@@ -198,7 +256,6 @@ Every page has theatre pills: **All / EMEA / JAPAC / AMER / LATAM**. Add `?theat
 ### If the app shows a disk I/O error
 
 ```bash
-# On the host (not inside the container):
 sqlite3 data/solstice.db "PRAGMA wal_checkpoint(TRUNCATE);"
 rm -f data/solstice.db-wal data/solstice.db-shm
 docker compose restart
@@ -216,9 +273,6 @@ docker compose up -d
 ## Tests
 
 ```bash
-# Python — run inside container or locally
 python3 -m pytest tests/ -q
-
-# JavaScript pure functions
 node tests/js/test_pure_fns.js
 ```
