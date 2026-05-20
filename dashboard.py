@@ -2987,8 +2987,8 @@ def dashboard_scope():
 
 
 @app.get("/api/scope")
-def api_scope(theatre: str = "EMEA"):
-    """EMEA scale cohort in-scope accounts — not churned, M9 not complete."""
+def api_scope(theatre: str = ""):
+    """Scale cohort in-scope accounts — not churned, M9 not complete. Empty theatre = all."""
     _ensure_db()
     try:
         with get_db() as conn:
@@ -3009,13 +3009,13 @@ def api_scope(theatre: str = "EMEA"):
                 FROM blocked_data b
                 JOIN accounts a ON a.account_id = b.account_id
                 WHERE b.cohort = 'Scale cohort'
-                  AND UPPER(b.account_theatre) = UPPER(?)
+                  AND (? = '' OR UPPER(b.account_theatre) = UPPER(?))
                   AND (a.status IS NULL OR a.status != 'Churning/Churned')
                   AND (b.status_detail IS NULL OR b.status_detail NOT LIKE '%decided to churn%')
                   AND (b.m9_complete IS NULL OR b.m9_complete != 1)
-                ORDER BY a.active_cse, a.customer_name
+                ORDER BY b.account_theatre, a.active_cse, a.customer_name
                 """,
-                (theatre,),
+                (theatre, theatre),
             ).fetchall()
         return [dict(r) for r in rows]
     except Exception as e:
