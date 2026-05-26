@@ -1138,26 +1138,34 @@ async def api_run_full(request: Request):
     """Stream the full pipeline cycle with debug output."""
 
     async def stream():
-        import os, json as _j
+        import os, json as _j, time as _time
         from datetime import datetime, timezone
 
-        def event(step, status, detail="", color="teal"):
-            ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
-            return f"data: {_j.dumps({'ts': ts, 'step': step, 'status': status, 'detail': detail, 'color': color})}\n\n"
+        _pipeline_start = _time.monotonic()
 
-        yield event("Pipeline", "STARTING", "Full cycle initiated")
+        def event(step, status, detail="", color="teal"):
+            ts = datetime.now().strftime("%H:%M:%S")
+            elapsed = _time.monotonic() - _pipeline_start
+            return f"data: {_j.dumps({'ts': ts, 'elapsed': round(elapsed, 1), 'step': step, 'status': status, 'detail': detail, 'color': color})}\n\n"
+
+        def step_event(step, status, detail="", color="teal"):
+            """Same as event but marks a top-level step for elapsed anchoring."""
+            return event(step, status, detail, color)
+
+        yield event("Pipeline", "STARTING", "Full cycle initiated", "teal")
         await asyncio.sleep(0.1)
 
-        # Step 1: Check Drive files
+        # ── Step 1: Drive mount check ─────────────────────────────────────
+        _t = _time.monotonic()
         drive_root = _gdrive_root() / "My Drive/EMEA CC "
         gsheet_files = list(drive_root.glob("*.gsheet")) if drive_root.exists() else []
         drive_status = (
-            f"{len(gsheet_files)} .gsheet files synced"
+            f"{len(gsheet_files)} .gsheet files found in Drive mount"
             if gsheet_files
-            else "Not mounted — open Google Drive Desktop"
+            else "⚠️ Drive not mounted — open Google Drive Desktop"
         )
         yield event(
-            "Google Drive",
+            "1/5 Drive Mount",
             "OK" if gsheet_files else "WARN",
             drive_status,
             "blue" if gsheet_files else "amber",
@@ -1165,110 +1173,171 @@ async def api_run_full(request: Request):
         for gf in gsheet_files:
             try:
                 mtime = os.stat(gf).st_mtime
-                from datetime import datetime as dt
+                from datetime import datetime as _dt
 
-                mt = dt.fromtimestamp(mtime).strftime("%d %b %H:%M")
-                yield event("  →", "FILE", f"{gf.name[:40]} · {mt}", "muted")
+                age_h = (_time.time() - mtime) / 3600
+                age_str = (
+                    f"{age_h:.0f}h ago" if age_h < 48 else f"{age_h / 24:.0f}d ago"
+                )
+                mt = _dt.fromtimestamp(mtime).strftime("%d %b %H:%M")
+                flag = " ⚠️ stale" if age_h > 24 else ""
+                yield event(
+                    "  →",
+                    "FILE",
+                    f"{gf.name[:45]} · synced {mt} ({age_str}){flag}",
+                    "muted",
+                )
             except:
                 pass
+        yield event(
+            "  →", "TIMING", f"Drive check: {_time.monotonic() - _t:.1f}s", "muted"
+        )
         await asyncio.sleep(0.1)
 
-        # Step 2: Check CSV files
+        # ── Step 2: Download all sources ──────────────────────────────────
+        _t = _time.monotonic()
         data_dir = Path(__file__).parent / "data"
-        csvs = {"PS Tracker": data_dir / "ps_tracker.csv"}
         yield event(
-            "Google Drive",
+            "2/5 Downloading",
             "DOWNLOADING",
-            "Pulling DC CSE Tracker via ADC token from local Drive mount",
+            "Pulling DC CSE Tracker · XSUP Tracker · COE Tracker from Drive API",
         )
         dl_results = _download_live_from_drive()
+        _dl_ok = 0
+        _dl_warn = 0
         for _name, _msg in dl_results.items():
-            _color = "green" if "✅" in _msg else "amber"
-            yield event(
-                "  →", "OK" if "✅" in _msg else "WARN", f"{_name}: {_msg}", _color
-            )
+            _ok = "✅" in _msg
+            _color = "green" if _ok else "amber"
+            yield event("  →", "OK" if _ok else "WARN", f"{_name}: {_msg}", _color)
+            if _ok:
+                _dl_ok += 1
+            else:
+                _dl_warn += 1
+        _dl_elapsed = _time.monotonic() - _t
+        _dl_summary = (
+            f"{_dl_ok}/{_dl_ok + _dl_warn} sources downloaded · {_dl_elapsed:.1f}s"
+        )
+        yield event("  →", "TIMING", _dl_summary, "green" if _dl_warn == 0 else "amber")
         await asyncio.sleep(0.2)
 
-        # Step 3: DC CSE Tracker (master — milestones, CSE, diff audit)
+        # ── Step 3: Parse DC CSE Tracker ─────────────────────────────────
+        _t = _time.monotonic()
         yield event(
-            "DC CSE Tracker",
+            "3/5 DC CSE Tracker",
             "LOADING",
-            "Master source — CSE assignments, all milestones (M0-M9), audit diff",
+            "Parsing milestones M0–M9 · CSE assignments · audit diff across all theatres",
         )
         try:
             dc = _run_dc_pipeline(data_dir, data_dir / "state.json")
+            _match_pct = round(100 * dc["matched"] / dc["total"]) if dc["total"] else 0
             yield event(
                 "  →",
                 "OK",
-                f"{dc['matched']}/{dc['total']} accounts matched · {dc['audit_logged']} milestone changes · M1 rebuilt ({dc.get('m1_rebuilt', 0)}) · history backfilled ({dc.get('history_backfilled', 0)})",
-                "green",
+                f"{dc['matched']}/{dc['total']} accounts matched ({_match_pct}%) · "
+                f"{dc['audit_logged']} milestone changes · "
+                f"M1 rebuilt: {dc.get('m1_rebuilt', 0)} · "
+                f"history backfilled: {dc.get('history_backfilled', 0)}",
+                "green" if _match_pct >= 95 else "amber",
             )
             yield event(
-                "  →",
-                "MILESTONES",
-                "✅ M0–M9 100% synced from DC CSV across all accounts — zero stale data",
-                "green",
+                "  →", "TIMING", f"DC parse: {_time.monotonic() - _t:.1f}s", "muted"
             )
         except Exception as e:
-            yield event("  →", "ERROR", str(e)[:80], "red")
+            yield event("  →", "ERROR", f"DC pipeline failed: {str(e)[:100]}", "red")
         await asyncio.sleep(0.1)
 
-        # Step 4: XSUP Tracker
-        yield event("XSUP Tracker", "CHECK", "Verifying Open XSUPs data in DB")
+        # ── Step 4: Verify XSUP + COE in DB ─────────────────────────────
+        _t = _time.monotonic()
+        yield event(
+            "4/5 DB Verification",
+            "CHECK",
+            "Confirming XSUP Tracker · COE Tracker · Data Quality",
+        )
         try:
-            with get_db() as _xconn:
-                _xt = _xconn.execute("SELECT COUNT(*) FROM xsup_data").fetchone()[0]
-                _xp1 = _xconn.execute(
+            with get_db() as _vc:
+                # XSUP
+                _xt = _vc.execute("SELECT COUNT(*) FROM xsup_data").fetchone()[0]
+                _xp1 = _vc.execute(
                     "SELECT COUNT(*) FROM xsup_data WHERE xsup_priority='P1'"
                 ).fetchone()[0]
-                _xp2 = _xconn.execute(
+                _xp2 = _vc.execute(
                     "SELECT COUNT(*) FROM xsup_data WHERE xsup_priority='P2'"
                 ).fetchone()[0]
-                _xmatched = _xconn.execute(
+                _xm = _vc.execute(
                     "SELECT COUNT(*) FROM xsup_data WHERE account_id IS NOT NULL"
                 ).fetchone()[0]
-                _xsynced = _xconn.execute(
+                _xsync = _vc.execute(
                     "SELECT synced_at FROM xsup_data ORDER BY id DESC LIMIT 1"
                 ).fetchone()
-            _xts = (_xsynced["synced_at"] or "")[:16] if _xsynced else "never"
-            yield event(
-                "  →",
-                "OK" if _xt > 0 else "WARN",
-                f"{_xt} open XSUPs · {_xp1} P1 · {_xp2} P2 · {_xmatched} matched to Solstice accounts · last sync {_xts}",
-                "green" if _xt > 0 else "amber",
-            )
-        except Exception as e:
-            yield event(
-                "  →", "WARN", f"xsup_data not yet populated: {str(e)[:60]}", "amber"
-            )
-        await asyncio.sleep(0.1)
-
-        # Step 5: Data Quality
-        yield event("Data Quality", "CHECK", "Verifying DC CSE Tracker")
-        try:
-            with get_db() as _dqconn:
-                _n = _dqconn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
-                _no_cse = _dqconn.execute(
+                _xts = (_xsync["synced_at"] or "")[:16] if _xsync else "never"
+                _xmatch = round(100 * _xm / _xt) if _xt else 0
+                yield event(
+                    "  → XSUP",
+                    "OK" if _xt > 0 else "WARN",
+                    f"{_xt} open XSUPs · {_xp1} P1 · {_xp2} P2 · "
+                    f"{_xm}/{_xt} matched to accounts ({_xmatch}%) · synced {_xts}",
+                    "green" if _xt > 100 else "amber",
+                )
+                # COE Issues
+                _ci = _vc.execute("SELECT COUNT(*) FROM coe_issues").fetchone()[0]
+                _cim = _vc.execute(
+                    "SELECT COUNT(*) FROM coe_issues WHERE account_id IS NOT NULL"
+                ).fetchone()[0]
+                _cb = _vc.execute("SELECT COUNT(*) FROM coe_bugs").fetchone()[0]
+                _cbm = _vc.execute(
+                    "SELECT COUNT(*) FROM coe_bugs WHERE account_id IS NOT NULL"
+                ).fetchone()[0]
+                _cisync = _vc.execute(
+                    "SELECT synced_at FROM coe_issues ORDER BY rowid DESC LIMIT 1"
+                ).fetchone()
+                _cts = (_cisync["synced_at"] or "")[:16] if _cisync else "never"
+                _cimatch = round(100 * _cim / _ci) if _ci else 0
+                _cbmatch = round(100 * _cbm / _cb) if _cb else 0
+                yield event(
+                    "  → COE Issues",
+                    "OK" if _ci > 0 else "WARN",
+                    f"{_ci} issues · {_cim}/{_ci} matched ({_cimatch}%) · synced {_cts}",
+                    "green" if _ci > 100 else "amber",
+                )
+                yield event(
+                    "  → COE Bugs",
+                    "OK" if _cb > 0 else "WARN",
+                    f"{_cb} bugs · {_cbm}/{_cb} matched ({_cbmatch}%)",
+                    "green" if _cb > 100 else "amber",
+                )
+                # Accounts + CSE coverage
+                _n = _vc.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
+                _no_cse = _vc.execute(
                     "SELECT COUNT(*) FROM accounts WHERE active_cse IS NULL OR active_cse=''"
                 ).fetchone()[0]
-                _m9 = (
-                    _dqconn.execute(
-                        "SELECT SUM(m9_complete) FROM blocked_data"
-                    ).fetchone()[0]
-                    or 0
+                _m9 = _vc.execute(
+                    "SELECT COALESCE(SUM(m9_complete),0) FROM blocked_data"
+                ).fetchone()[0]
+                _m8 = _vc.execute(
+                    "SELECT COUNT(*) FROM blocked_data WHERE m8_started=1 AND m9_complete=0"
+                ).fetchone()[0]
+                _cse_pct = round(100 * (_n - _no_cse) / _n) if _n else 0
+                yield event(
+                    "  → Accounts",
+                    "OK",
+                    f"{_n} accounts · CSE coverage {_n - _no_cse}/{_n} ({_cse_pct}%) · "
+                    f"M8 in-flight: {_m8} · M9 complete: {_m9}",
+                    "green" if _cse_pct >= 70 else "amber",
                 )
-            yield event(
-                "  →",
-                "OK",
-                f"{_n} accounts · {_no_cse} no CSE · {_m9} M9 complete",
-                "green",
-            )
         except Exception as e:
-            yield event("  →", "ERROR", str(e)[:80], "red")
+            yield event("  →", "ERROR", f"DB verify failed: {str(e)[:100]}", "red")
+        yield event(
+            "  →", "TIMING", f"DB verify: {_time.monotonic() - _t:.1f}s", "muted"
+        )
         await asyncio.sleep(0.1)
 
+        # ── Step 5: Summary ───────────────────────────────────────────────
+        _total = round(_time.monotonic() - _pipeline_start, 1)
         yield event(
-            "Pipeline", "COMPLETE", "All steps done — refreshing dashboard", "teal"
+            "5/5 Complete",
+            "DONE",
+            f"Pipeline finished in {_total}s — dashboard refreshing",
+            "teal",
         )
         yield f"data: {_j.dumps({'done': True})}\n\n"
 

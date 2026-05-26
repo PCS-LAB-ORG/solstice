@@ -290,22 +290,39 @@ function loadCSE() {
 function refreshData() {
   var console_el = document.getElementById('pipeline-console');
   console_el.style.display = 'block';
-  console_el.innerHTML = '<div style="color:#94a3b8;margin-bottom:4px">&#9654; Starting pipeline...</div>';
+  while (console_el.firstChild) console_el.removeChild(console_el.firstChild);
+
+  var colorMap = {green:'#10b981', red:'#ef4444', amber:'#f59e0b', teal:'#0ea5e9', muted:'#64748b', blue:'#3b82f6'};
+
+  function addLine(d) {
+    var line = document.createElement('div');
+    line.style.cssText = 'display:flex;gap:8px;align-items:baseline;font-size:11px;padding:1px 0;font-family:var(--mono)';
+
+    var ts = document.createElement('span');
+    ts.style.cssText = 'color:#64748b;flex-shrink:0;min-width:70px';
+    ts.textContent = (d.ts||'') + (d.elapsed != null ? ' +'+d.elapsed+'s' : '');
+
+    var step = document.createElement('span');
+    step.style.cssText = 'flex-shrink:0;min-width:145px;color:'+(colorMap[d.color]||'#e2e8f0')+';font-weight:600';
+    step.textContent = d.step || '';
+
+    var det = document.createElement('span');
+    det.style.cssText = 'color:'+(colorMap[d.color]||'#e2e8f0')+';flex:1;word-break:break-word';
+    det.textContent = d.detail || d.status || '';
+
+    line.appendChild(ts); line.appendChild(step); line.appendChild(det);
+    console_el.appendChild(line);
+    console_el.scrollTop = console_el.scrollHeight;
+  }
+
+  addLine({ts: new Date().toTimeString().slice(0,8), elapsed: 0.0, step: 'Pipeline', detail: '▶ Starting...', color: 'teal'});
+
   var es = new EventSource('/api/run-full');
   es.onmessage = function(e) {
     try {
       var d = JSON.parse(e.data);
-      var line = document.createElement('div');
-      var colorMap = {green:'#10b981', red:'#ef4444', amber:'#f59e0b', teal:'#0ea5e9', muted:'#94a3b8'};
-      line.style.color = colorMap[d.color] || '#e2e8f0';
-      line.textContent = '[' + (d.step||'') + '] ' + (d.detail||d.status||'');
-      console_el.appendChild(line);
-      console_el.scrollTop = console_el.scrollHeight;
-      if (d.status === 'done' || d.done) {
-        es.close();
-        loadAll();
-        S.syncSummary({m9:0, blocked:0, resolved:0});
-      }
+      if (d.done) { es.close(); loadAll(); S.syncSummary({m9:0, blocked:0, resolved:0}); return; }
+      addLine(d);
     } catch(ex) {}
   };
   es.onerror = function() { es.close(); };
