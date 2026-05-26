@@ -1197,17 +1197,58 @@ async def api_run_full(request: Request):
         # ── Step 2: Download all sources ──────────────────────────────────
         _t = _time.monotonic()
         data_dir = Path(__file__).parent / "data"
+
+        # Snapshot row counts BEFORE download for delta reporting
+        def _snap():
+            try:
+                with get_db() as _c:
+                    return {
+                        "xsup": _c.execute("SELECT COUNT(*) FROM xsup_data").fetchone()[
+                            0
+                        ],
+                        "coe_issues": _c.execute(
+                            "SELECT COUNT(*) FROM coe_issues"
+                        ).fetchone()[0],
+                        "coe_bugs": _c.execute(
+                            "SELECT COUNT(*) FROM coe_bugs"
+                        ).fetchone()[0],
+                        "accounts": _c.execute(
+                            "SELECT COUNT(*) FROM accounts"
+                        ).fetchone()[0],
+                    }
+            except:
+                return {"xsup": 0, "coe_issues": 0, "coe_bugs": 0, "accounts": 0}
+
+        def _delta(before, after):
+            d = after - before
+            if d > 0:
+                return f"+{d} new"
+            if d < 0:
+                return f"{d} removed"
+            return "no change"
+
+        _before = _snap()
+
         yield event(
             "2/5 Downloading",
             "DOWNLOADING",
             "Pulling DC CSE Tracker · XSUP Tracker · COE Tracker from Drive API",
         )
         dl_results = _download_live_from_drive()
+        _after = _snap()
+
         _dl_ok = 0
         _dl_warn = 0
         for _name, _msg in dl_results.items():
             _ok = "✅" in _msg
             _color = "green" if _ok else "amber"
+            if _ok:
+                if "XSUP" in _name:
+                    _msg += f"  [{_delta(_before['xsup'], _after['xsup'])}]"
+                elif "COE" in _name:
+                    _msg += f"  [issues: {_delta(_before['coe_issues'], _after['coe_issues'])} · bugs: {_delta(_before['coe_bugs'], _after['coe_bugs'])}]"
+                elif "DC CSE" in _name:
+                    _msg += f"  [accounts: {_delta(_before['accounts'], _after['accounts'])}]"
             yield event("  →", "OK" if _ok else "WARN", f"{_name}: {_msg}", _color)
             if _ok:
                 _dl_ok += 1
