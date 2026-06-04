@@ -52,5 +52,21 @@ if [ $MISSING -gt 0 ]; then
   echo "   runtime — Refresh Data may fail until sync is complete."
 fi
 
+# Install host-sync launchd job (downloads XSUP + COE xlsx every 30 min)
+PLIST_SRC="$(pwd)/scripts/com.solstice.host-sync.plist"
+PLIST_DEST="$HOME/Library/LaunchAgents/com.solstice.host-sync.plist"
+REPO_DIR="$(pwd)"
+
+# Stamp repo path into plist
+sed "s|REPO_DIR|$REPO_DIR|g" "$PLIST_SRC" > "$PLIST_DEST"
+
+# Load (or reload) the job
+launchctl unload "$PLIST_DEST" 2>/dev/null || true
+launchctl load "$PLIST_DEST"
+echo "✅ host-sync launchd job installed (runs every 30 min)"
+
+# Run immediately so xlsx files are ready before docker compose up
+echo "⏳ Downloading XSUP + COE Tracker xlsx files..."
+python3 scripts/host_sync.py
 echo ""
 echo "🚀 Ready. Run: docker compose up -d"

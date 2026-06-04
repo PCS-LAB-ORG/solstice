@@ -562,27 +562,72 @@ def _download_live_from_drive() -> dict:
     except Exception as e:
         result = {"DC CSE Tracker": f"⚠️ download failed: {e}"}
 
-    # Download XSUP tracker (same ADC token — always alongside DC CSE Tracker)
+    _in_docker = Path("/.dockerenv").exists()
+
+    def _stream_xlsx(url: str, dest: Path, label: str) -> str:
+        """Download xlsx to dest.
+        In Docker: googleusercontent.com CDN unreachable — use file pre-downloaded
+        by the Mac host via /api/host-download. Outside Docker: curl direct.
+        """
+        if _in_docker:
+            if dest.exists() and dest.stat().st_size > 0:
+                import time as _t
+
+                age_h = (_t.time() - dest.stat().st_mtime) / 3600
+                age_str = f"{age_h:.0f}h" if age_h < 48 else f"{age_h / 24:.0f}d"
+                return f"ok_cached:{age_str}"
+            return "⚠️ xlsx missing — run setup.sh or host_sync.py on Mac"
+
+        import subprocess as _sub
+
+        try:
+            r = _sub.run(
+                [
+                    "curl",
+                    "-sL",
+                    "--location-trusted",
+                    "--max-time",
+                    "150",
+                    "--connect-timeout",
+                    "15",
+                    "-H",
+                    f"Authorization: Bearer {token}",
+                    "-o",
+                    str(dest),
+                    "-w",
+                    "%{http_code}",
+                    url,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=160,
+            )
+            code = r.stdout.strip()
+            if code == "200":
+                return "ok"
+            return f"⚠️ Drive returned {code}"
+        except Exception as e:
+            return f"⚠️ download failed: {e}"
+
+    # Download XSUP tracker
     XSUP_GSHEET = (
         _gdrive_root()
         / "My Drive/Cortex Cloud Work/Cortex Cloud Open XSUPs with TAC.gsheet"
     )
     try:
         xsup_file_id = _j.loads(XSUP_GSHEET.read_text())["doc_id"]
-        xr = _req.get(
+        xsup_dest = DATA_DIR / "xsup_tracker.xlsx"
+        dl = _stream_xlsx(
             f"https://docs.google.com/spreadsheets/d/{xsup_file_id}/export?format=xlsx",
-            headers={"Authorization": f"Bearer {token}"},
-            verify=False,
-            allow_redirects=True,
-            timeout=60,
+            xsup_dest,
+            "XSUP Tracker",
         )
-        if xr.status_code == 200:
-            xsup_dest = DATA_DIR / "xsup_tracker.xlsx"
-            xsup_dest.write_bytes(xr.content)
+        if dl == "ok" or dl.startswith("ok_cached:"):
+            age = f" (cached {dl.split(':')[1]})" if dl.startswith("ok_cached:") else ""
             xsup_rows = _parse_and_store_xsup(xsup_dest)
-            result["XSUP Tracker"] = f"✅ {xsup_rows} open XSUPs synced"
+            result["XSUP Tracker"] = f"✅ {xsup_rows} open XSUPs synced{age}"
         else:
-            result["XSUP Tracker"] = f"⚠️ Drive returned {xr.status_code}"
+            result["XSUP Tracker"] = dl
     except FileNotFoundError:
         result["XSUP Tracker"] = "⚠️ .gsheet not found — Drive not mounted"
     except Exception as xe:
@@ -595,20 +640,20 @@ def _download_live_from_drive() -> dict:
     )
     try:
         coe_file_id = _j.loads(COE_GSHEET.read_text())["doc_id"]
-        cr = _req.get(
+        coe_dest = DATA_DIR / "coe_tracker.xlsx"
+        dl = _stream_xlsx(
             f"https://docs.google.com/spreadsheets/d/{coe_file_id}/export?format=xlsx",
-            headers={"Authorization": f"Bearer {token}"},
-            verify=False,
-            allow_redirects=True,
-            timeout=60,
+            coe_dest,
+            "COE Tracker",
         )
-        if cr.status_code == 200:
-            coe_counts = _parse_and_store_coe(cr.content)
+        if dl == "ok" or dl.startswith("ok_cached:"):
+            age = f" (cached {dl.split(':')[1]})" if dl.startswith("ok_cached:") else ""
+            coe_counts = _parse_and_store_coe(coe_dest.read_bytes())
             result["COE Tracker"] = (
-                f"✅ {coe_counts[0]} issues + {coe_counts[1]} bugs synced"
+                f"✅ {coe_counts[0]} issues + {coe_counts[1]} bugs synced{age}"
             )
         else:
-            result["COE Tracker"] = f"⚠️ Drive returned {cr.status_code}"
+            result["COE Tracker"] = dl
     except FileNotFoundError:
         result["COE Tracker"] = "⚠️ .gsheet not found — Drive not mounted"
     except Exception as ce:
