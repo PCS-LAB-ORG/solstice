@@ -28,8 +28,11 @@
   <table class="wtbl">
     <thead><tr>
       <th>CSE</th>
+      <th class="r">Accounts</th>
+      <th class="r">Blocked</th>
+      <th class="r">At Risk</th>
       <th class="r">M8 In Flight</th>
-      <th>Load</th>
+      <th>M8 Load</th>
     </tr></thead>
     <tbody id="tbody"></tbody>
   </table>
@@ -52,31 +55,74 @@ var pillsEl = document.getElementById('pills');
 fetch('/api/cse-workload' + (theatre ? '?theatre=' + encodeURIComponent(theatre) : ''))
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    var rows = data.filter(function(r) { return r.m8_count > 0; });
-    var total = rows.reduce(function(a, r) { return a + r.m8_count; }, 0);
-    var max = rows.reduce(function(a, r) { return Math.max(a, r.m8_count); }, 1);
+    // Show all CSEs with any accounts, sorted by total account count desc
+    var rows = data.filter(function(r) { return r.account_count > 0; });
+    rows.sort(function(a, b) { return b.account_count - a.account_count; });
+    var totalM8 = rows.reduce(function(a, r) { return a + r.m8_count; }, 0);
+    var maxM8 = rows.reduce(function(a, r) { return Math.max(a, r.m8_count); }, 1);
 
-    document.getElementById('meta').textContent = rows.length + ' CSEs · ' + total + ' M8 in flight';
+    document.getElementById('meta').textContent = rows.length + ' CSEs · ' + totalM8 + ' M8 in flight';
 
     var tbody = document.getElementById('tbody');
     rows.forEach(function(r) {
-      var pct = Math.round(r.m8_count / max * 100);
+      var pct = Math.round(r.m8_count / maxM8 * 100);
       var tr = document.createElement('tr');
 
+      // CSE name
       var td1 = document.createElement('td');
       var strong = document.createElement('strong');
       strong.textContent = r.cse;
       td1.appendChild(strong);
       tr.appendChild(td1);
 
+      // Total accounts
+      var tdAcc = document.createElement('td');
+      tdAcc.className = 'r';
+      tdAcc.textContent = r.account_count;
+      tr.appendChild(tdAcc);
+
+      // Blocked
+      var tdBlocked = document.createElement('td');
+      tdBlocked.className = 'r';
+      if (r.blocked_count > 0) {
+        var sp = document.createElement('span');
+        sp.className = 'badge badge-red';
+        sp.style.cssText = 'font-size:8px;padding:2px 6px';
+        sp.textContent = r.blocked_count;
+        tdBlocked.appendChild(sp);
+      } else {
+        tdBlocked.textContent = '—';
+        tdBlocked.style.color = 'var(--muted)';
+      }
+      tr.appendChild(tdBlocked);
+
+      // At risk
+      var tdRisk = document.createElement('td');
+      tdRisk.className = 'r';
+      if (r.at_risk_count > 0) {
+        var sp2 = document.createElement('span');
+        sp2.className = 'badge badge-amber';
+        sp2.style.cssText = 'font-size:8px;padding:2px 6px';
+        sp2.textContent = r.at_risk_count;
+        tdRisk.appendChild(sp2);
+      } else {
+        tdRisk.textContent = '—';
+        tdRisk.style.color = 'var(--muted)';
+      }
+      tr.appendChild(tdRisk);
+
+      // M8 in flight
       var td2 = document.createElement('td');
       td2.className = 'r';
       var span = document.createElement('span');
       span.className = 'n8';
-      span.textContent = r.m8_count;
+      span.style.fontSize = r.m8_count > 0 ? '1.1rem' : '.88rem';
+      span.style.color = r.m8_count > 0 ? 'var(--sky)' : 'var(--muted)';
+      span.textContent = r.m8_count || '—';
       td2.appendChild(span);
       tr.appendChild(td2);
 
+      // Load bar
       var td3 = document.createElement('td');
       var barW = document.createElement('div');
       barW.className = 'bar-w';
@@ -88,7 +134,7 @@ fetch('/api/cse-workload' + (theatre ? '?theatre=' + encodeURIComponent(theatre)
       barBg.appendChild(barF);
       var barT = document.createElement('span');
       barT.className = 'bar-t';
-      barT.textContent = r.m8_count;
+      barT.textContent = r.m8_count || '';
       barW.appendChild(barBg);
       barW.appendChild(barT);
       td3.appendChild(barW);
