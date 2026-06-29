@@ -3005,13 +3005,13 @@ def api_velocity(weeks: int = 12, theatre: str = ""):
     ]
     THEATRES = ["AMER", "EMEA", "JAPAC", "LATAM"]
 
-    today = _date.today()
+    today = _dt.now(timezone.utc).date()
     this_monday = today - timedelta(days=today.weekday())
 
     weeks = max(1, min(weeks, 104))  # cap at 2 years
 
     def _week_label(monday: _date) -> str:
-        return monday.strftime("%b %-d")
+        return monday.strftime("%b") + " " + str(monday.day)
 
     def _count_week(monday: _date, theatre_filter: str) -> dict:
         """Count milestone completions in the given Mon–Sun window."""
@@ -3052,7 +3052,7 @@ def api_velocity(weeks: int = 12, theatre: str = ""):
         this_week_by_theatre[t] = _count_week(this_monday, t)
 
     sun = this_monday + timedelta(days=6)
-    range_label = f"{this_monday.strftime('%b %-d')} – {sun.strftime('%b %-d')}"
+    range_label = f"{this_monday.strftime('%b') + ' ' + str(this_monday.day)} – {sun.strftime('%b') + ' ' + str(sun.day)}"
 
     # History — N weeks ending last Sunday
     history = []
