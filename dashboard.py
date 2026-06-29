@@ -2987,6 +2987,101 @@ def api_wins():
     return {"regions": [dict(r) for r in regions], "totals": dict(totals)}
 
 
+@app.get("/api/velocity")
+def api_velocity(weeks: int = 12, theatre: str = ""):
+    """Milestone velocity — this week summary + N-week history by region."""
+    from datetime import date as _date, timedelta, datetime as _dt, timezone
+
+    _ensure_db()
+
+    MILESTONES = [
+        "M1 Outreach",
+        "M2 Entitlements",
+        "M3 Buy-in",
+        "M4 Discovery",
+        "M5 Tech Validation",
+        "M8 Upgrade Started",
+        "M9 Upgrade Complete",
+    ]
+    THEATRES = ["AMER", "EMEA", "JAPAC", "LATAM"]
+
+    today = _date.today()
+    this_monday = today - timedelta(days=today.weekday())
+
+    weeks = max(1, min(weeks, 104))  # cap at 2 years
+
+    def _week_label(monday: _date) -> str:
+        return monday.strftime("%b %-d")
+
+    def _count_week(monday: _date, theatre_filter: str) -> dict:
+        """Count milestone completions in the given Mon–Sun window."""
+        sun = monday + timedelta(days=6)
+        mon_s = monday.isoformat()
+        sun_s = sun.isoformat() + "T23:59:59"
+        t_clause = (
+            "AND UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=UPPER(?)"
+            if theatre_filter
+            else ""
+        )
+        t_params = (theatre_filter,) if theatre_filter else ()
+        result = {}
+        with get_db() as conn:
+            for ms in MILESTONES:
+                row = conn.execute(
+                    f"""
+                    SELECT COUNT(DISTINCT sh.account_id) as cnt
+                    FROM status_history sh
+                    JOIN accounts a ON a.account_id = sh.account_id
+                    LEFT JOIN blocked_data b ON b.account_id = sh.account_id
+                    WHERE sh.field_name = ?
+                      AND sh.new_status = 'Y'
+                      AND sh.changed_at >= ?
+                      AND sh.changed_at <= ?
+                      {t_clause}
+                    """,
+                    (ms, mon_s, sun_s) + t_params,
+                ).fetchone()
+                cnt = row["cnt"] if row else 0
+                if cnt:
+                    result[ms] = cnt
+        return result
+
+    # This week — always all theatres
+    this_week_by_theatre = {}
+    for t in THEATRES:
+        this_week_by_theatre[t] = _count_week(this_monday, t)
+
+    sun = this_monday + timedelta(days=6)
+    range_label = f"{this_monday.strftime('%b %-d')} – {sun.strftime('%b %-d')}"
+
+    # History — N weeks ending last Sunday
+    history = []
+    last_monday = this_monday - timedelta(weeks=1)
+    for i in range(weeks):
+        w_monday = last_monday - timedelta(weeks=i)
+        counts = _count_week(w_monday, theatre)
+        row = {"week": _week_label(w_monday)}
+        row.update(counts)
+        history.append(row)
+
+    return {
+        "this_week": {
+            "range": range_label,
+            "by_theatre": this_week_by_theatre,
+        },
+        "history": history,
+        "updated_at": _dt.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+
+
+@app.get("/velocity", response_class=HTMLResponse)
+def page_velocity():
+    html_path = Path(__file__).parent / "static" / "velocity.html"
+    if html_path.exists():
+        return html_path.read_text()
+    return "<h1>velocity.html not found</h1>"
+
+
 @app.get("/wins", response_class=HTMLResponse)
 def dashboard_wins():
     html_path = Path(__file__).parent / "static" / "wins.html"
