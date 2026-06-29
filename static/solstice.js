@@ -299,8 +299,9 @@ var _PAGES = [
   {id:'daily',   label:'Daily',    url:'/daily'},
   {id:'audit',   label:'Audit',    url:'/audit'},
   {id:'cse',     label:'CSE',      url:'/cse'},
-  {id:'weekly',  label:'Weekly',   url:'/weekly'},
-  {id:'scope',   label:'Scope',    url:'/scope'},
+  {id:'weekly',   label:'Weekly',    url:'/weekly'},
+  {id:'velocity', label:'Velocity',  url:'/velocity'},
+  {id:'scope',    label:'Scope',     url:'/scope'},
   {id:'wins',    label:'🏆 Wins',  url:'/wins'},
 ];
 

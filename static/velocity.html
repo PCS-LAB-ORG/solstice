@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x2600;</text></svg>">
+<title>Solstice — Velocity</title>
+<link rel="stylesheet" href="/static/solstice.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+.vel-controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem}
+.vel-controls .sep{color:var(--border);padding:0 .2rem;font-size:14px;align-self:center}
+.vel-refresh{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.vel-ts{font-size:9px;color:var(--muted);font-family:var(--mono)}
+.vel-section{margin-bottom:2rem}
+.vel-section-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.vel-range{font-size:9px;color:var(--muted);font-weight:400;font-family:var(--mono)}
+.vtbl{width:100%;border-collapse:collapse}
+.vtbl th{padding:.4rem .7rem;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);font-weight:700;background:var(--surface);border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
+.vtbl th.r{text-align:right}
+.vtbl td{padding:.55rem .7rem;font-size:.85rem;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle;font-family:var(--mono)}
+.vtbl td.r{text-align:right}
+.vtbl tr:hover td{background:var(--surface-2)}
+.vtbl td.muted{color:var(--muted);font-size:.75rem}
+.m9-val{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:2px 6px;border-radius:4px;background:var(--sky-light);color:var(--sky);font-weight:700;border:1px solid var(--sky-border)}
+.m8-val{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:2px 6px;border-radius:4px;background:#fff7ed;color:#f97316;font-weight:700;border:1px solid #fed7aa}
+.empty-state{padding:2rem;text-align:center;color:var(--muted);font-size:10px}
+</style>
+</head>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
+<div class="s-main">
+
+  <div class="vel-controls">
+    <!-- Theatre pills -->
+    <span class="pill active" data-t="" onclick="setTheatre(this,'')">All</span>
+    <span class="pill" data-t="EMEA" onclick="setTheatre(this,'EMEA')">EMEA</span>
+    <span class="pill" data-t="AMER" onclick="setTheatre(this,'AMER')">AMER</span>
+    <span class="pill" data-t="JAPAC" onclick="setTheatre(this,'JAPAC')">JAPAC</span>
+    <span class="pill" data-t="LATAM" onclick="setTheatre(this,'LATAM')">LATAM</span>
+    <span class="sep">|</span>
+    <!-- Time range pills -->
+    <span class="pill" data-w="4" onclick="setWeeks(this,4)">4w</span>
+    <span class="pill active" data-w="12" onclick="setWeeks(this,12)">12w</span>
+    <span class="pill" data-w="26" onclick="setWeeks(this,26)">26w</span>
+    <span class="pill" data-w="ytd" onclick="setWeeks(this,'ytd')">YTD</span>
+    <!-- Refresh -->
+    <div class="vel-refresh">
+      <span class="vel-ts" id="vel-ts"></span>
+      <button class="pill" onclick="load()" id="vel-btn" style="border-color:var(--sky-border);color:var(--sky);background:var(--sky-light)">&#10227; Refresh Now</button>
+    </div>
+  </div>
+
+  <!-- This Week -->
+  <div class="vel-section">
+    <div class="vel-section-title">
+      This Week
+      <span class="vel-range" id="vel-range"></span>
+    </div>
+    <div id="this-week-wrap"></div>
+  </div>
+
+  <!-- Historical -->
+  <div class="vel-section">
+    <div class="vel-section-title">Historical Velocity</div>
+    <div id="history-wrap"></div>
+  </div>
+
+</div>
+<script src="/static/solstice.js?v=2"></script>
+<script>
+S.initNav('velocity');
+S.restoreCard();
+
+var E = S.esc;
+var _theatre = '';
+var _weeks = 12;
+var _loading = false;
+
+var MILESTONES = [
+  'M1 Outreach', 'M2 Entitlements', 'M3 Buy-in', 'M4 Discovery',
+  'M5 Tech Validation', 'M8 Upgrade Started', 'M9 Upgrade Complete'
+];
+var THEATRES = ['AMER', 'EMEA', 'JAPAC', 'LATAM'];
+
+function setTheatre(el, t) {
+  _theatre = t;
+  document.querySelectorAll('.vel-controls [data-t]').forEach(function(p) {
+    p.classList.toggle('active', p.dataset.t === t);
+  });
+  load();
+}
+
+function setWeeks(el, w) {
+  _weeks = w;
+  document.querySelectorAll('.vel-controls [data-w]').forEach(function(p) {
+    p.classList.toggle('active', p.dataset.w === String(w));
+  });
+  load();
+}
+
+function _weeksParam() {
+  if (_weeks === 'ytd') {
+    var now = new Date();
+    var jan1 = new Date(now.getFullYear(), 0, 1);
+    return Math.ceil((now - jan1) / (7 * 86400000)) + 1;
+  }
+  return _weeks;
+}
+
+function load() {
+  if (_loading) return;
+  _loading = true;
+  var btn = document.getElementById('vel-btn');
+  btn.textContent = '…';
+  var url = '/api/velocity?weeks=' + _weeksParam() + (_theatre ? '&theatre=' + encodeURIComponent(_theatre) : '');
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderThisWeek(data.this_week);
+      renderHistory(data.history);
+      document.getElementById('vel-ts').textContent = 'Updated ' + (data.updated_at || '').slice(0, 16).replace('T', ' ');
+    })
+    .catch(function() {
+      document.getElementById('this-week-wrap').innerHTML = '<div class="empty-state">Error loading data</div>';
+    })
+    .finally(function() {
+      _loading = false;
+      btn.textContent = '↺ Refresh Now';
+    });
+}
+
+function _cell(ms, val) {
+  if (!val) return '<td class="r muted">—</td>';
+  if (ms === 'M9 Upgrade Complete') return '<td class="r"><span class="m9-val">' + val + '</span></td>';
+  if (ms === 'M8 Upgrade Started')  return '<td class="r"><span class="m8-val">' + val + '</span></td>';
+  return '<td class="r">' + val + '</td>';
+}
+
+function renderThisWeek(tw) {
+  document.getElementById('vel-range').textContent = tw.range || '';
+  var by = tw.by_theatre || {};
+  var hasAny = false;
+  var html = '<table class="vtbl"><thead><tr><th>Milestone</th>';
+  THEATRES.forEach(function(t) { html += '<th class="r">' + t + '</th>'; });
+  html += '</tr></thead><tbody>';
+  MILESTONES.forEach(function(ms) {
+    var rowHasVal = THEATRES.some(function(t) { return (by[t] || {})[ms]; });
+    if (!rowHasVal) return;
+    hasAny = true;
+    html += '<tr><td>' + E(ms) + '</td>';
+    THEATRES.forEach(function(t) { html += _cell(ms, (by[t] || {})[ms]); });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('this-week-wrap').innerHTML = hasAny
+    ? html
+    : '<div class="empty-state">No milestone activity this week</div>';
+}
+
+function renderHistory(history) {
+  if (!history || !history.length) {
+    document.getElementById('history-wrap').innerHTML = '<div class="empty-state">No data for this period</div>';
+    return;
+  }
+  // Determine which milestones have any non-zero value
+  var activeMilestones = MILESTONES.filter(function(ms) {
+    return history.some(function(row) { return row[ms]; });
+  });
+  if (!activeMilestones.length) {
+    document.getElementById('history-wrap').innerHTML = '<div class="empty-state">No data for this period</div>';
+    return;
+  }
+  var html = '<table class="vtbl"><thead><tr><th>Milestone</th>';
+  history.forEach(function(row) { html += '<th class="r">' + E(row.week) + '</th>'; });
+  html += '</tr></thead><tbody>';
+  activeMilestones.forEach(function(ms) {
+    html += '<tr><td>' + E(ms) + '</td>';
+    history.forEach(function(row) { html += _cell(ms, row[ms]); });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('history-wrap').innerHTML = html;
+}
+
+load();
+</script>
+</body>
+</html>
