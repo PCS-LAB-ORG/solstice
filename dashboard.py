@@ -3015,9 +3015,8 @@ def api_velocity(weeks: int = 12, theatre: str = ""):
 
     def _count_week(monday: _date, theatre_filter: str) -> dict:
         """Count milestone completions in the given Mon–Sun window."""
-        sun = monday + timedelta(days=6)
         mon_s = monday.isoformat()
-        sun_s = sun.isoformat() + "T23:59:59"
+        next_monday_s = (monday + timedelta(days=7)).isoformat()
         t_clause = (
             "AND UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=UPPER(?)"
             if theatre_filter
@@ -3036,10 +3035,10 @@ def api_velocity(weeks: int = 12, theatre: str = ""):
                     WHERE sh.field_name = ?
                       AND sh.new_status = 'Y'
                       AND sh.changed_at >= ?
-                      AND sh.changed_at <= ?
+                      AND sh.changed_at < ?
                       {t_clause}
                     """,
-                    (ms, mon_s, sun_s) + t_params,
+                    (ms, mon_s, next_monday_s) + t_params,
                 ).fetchone()
                 cnt = row["cnt"] if row else 0
                 if cnt:

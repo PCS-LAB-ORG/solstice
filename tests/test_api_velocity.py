@@ -123,11 +123,92 @@ def test_history_theatre_all(db):
 
 
 def test_weeks_param_limits_history(db):
-    """history contains at most `weeks` entries."""
+    """history contains exactly `weeks` entries and excludes older data."""
+    from datetime import date, timedelta
+
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    _seed(
+        db,
+        [
+            (
+                "w1",
+                "Week1",
+                "EMEA",
+                "M8 Upgrade Started",
+                f"{(monday - timedelta(weeks=1))}T10:00:00",
+            ),
+            (
+                "w2",
+                "Week2",
+                "EMEA",
+                "M8 Upgrade Started",
+                f"{(monday - timedelta(weeks=2))}T10:00:00",
+            ),
+            (
+                "w3",
+                "Week3",
+                "EMEA",
+                "M8 Upgrade Started",
+                f"{(monday - timedelta(weeks=3))}T10:00:00",
+            ),
+            (
+                "w4",
+                "Week4",
+                "EMEA",
+                "M8 Upgrade Started",
+                f"{(monday - timedelta(weeks=4))}T10:00:00",
+            ),
+            (
+                "w5",
+                "Week5",
+                "EMEA",
+                "M8 Upgrade Started",
+                f"{(monday - timedelta(weeks=5))}T10:00:00",
+            ),
+            (
+                "w6",
+                "Week6",
+                "EMEA",
+                "M8 Upgrade Started",
+                f"{(monday - timedelta(weeks=6))}T10:00:00",
+            ),
+        ],
+    )
     with _client(db) as c:
         r = c.get("/api/velocity?weeks=4")
     data = r.json()
-    assert len(data["history"]) <= 4
+    assert len(data["history"]) == 4
+    # weeks=4 means 4 most recent complete weeks; week 5 and 6 should be absent
+    week_labels = [row["week"] for row in data["history"]]
+    oldest_expected = (
+        (monday - timedelta(weeks=4)).strftime("%b")
+        + " "
+        + str((monday - timedelta(weeks=4)).day)
+    )
+    oldest_excluded = (
+        (monday - timedelta(weeks=5)).strftime("%b")
+        + " "
+        + str((monday - timedelta(weeks=5)).day)
+    )
+    assert oldest_expected in week_labels
+    assert oldest_excluded not in week_labels
+
+
+def test_weeks_clamped_at_max(db):
+    """weeks param is capped at 104."""
+    with _client(db) as c:
+        r = c.get("/api/velocity?weeks=200")
+    data = r.json()
+    assert len(data["history"]) <= 104
+
+
+def test_weeks_minimum_one(db):
+    """weeks=0 is treated as weeks=1."""
+    with _client(db) as c:
+        r = c.get("/api/velocity?weeks=0")
+    data = r.json()
+    assert len(data["history"]) == 1
 
 
 def test_response_shape(db):
