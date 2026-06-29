@@ -3,6 +3,8 @@ Parser for the "Detailed Account List" sheet (gid=0) of the DC CSE Tracker.
 Handles both UTF-16 tab-delimited (manual Drive export) and UTF-8 CSV (auto export).
 """
 
+from __future__ import annotations
+
 import csv
 import hashlib
 import json
