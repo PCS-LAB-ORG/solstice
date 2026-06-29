@@ -24,6 +24,8 @@
 .m9-val{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:2px 6px;border-radius:4px;background:var(--sky-light);color:var(--sky);font-weight:700;border:1px solid var(--sky-border)}
 .m8-val{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:2px 6px;border-radius:4px;background:#fff7ed;color:#f97316;font-weight:700;border:1px solid #fed7aa}
 .empty-state{padding:2rem;text-align:center;color:var(--muted);font-size:10px}
+.vel-kpi-row{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.vel-kpi-row .kpi-card{flex:1;min-width:120px}
 </style>
 </head>
 <body>
@@ -48,6 +50,14 @@
       <span class="vel-ts" id="vel-ts"></span>
       <button class="pill" onclick="load()" id="vel-btn" style="border-color:var(--sky-border);color:var(--sky);background:var(--sky-light)">&#10227; Refresh Now</button>
     </div>
+  </div>
+
+  <!-- KPI Banner -->
+  <div class="vel-kpi-row" id="vel-kpi">
+    <div class="kpi-card sky"><div class="kpi-label">M9 Complete</div><div class="kpi-number" id="kpi-m9">—</div><div class="kpi-delta delta-neu">This week</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">M8 Started</div><div class="kpi-number" id="kpi-m8">—</div><div class="kpi-delta delta-neu">This week</div></div>
+    <div class="kpi-card green"><div class="kpi-label">M5 Validated</div><div class="kpi-number" id="kpi-m5">—</div><div class="kpi-delta delta-neu">This week</div></div>
+    <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">All Milestones</div><div class="kpi-number" id="kpi-total">—</div><div class="kpi-delta delta-neu">This week total</div></div>
   </div>
 
   <!-- This Week -->
@@ -116,6 +126,7 @@ function load() {
   fetch(url)
     .then(function(r) { return r.json(); })
     .then(function(data) {
+      renderKpi(data.this_week);
       renderThisWeek(data.this_week);
       renderHistory(data.history);
       document.getElementById('vel-ts').textContent = 'Updated ' + (data.updated_at || '').slice(0, 16).replace('T', ' ');
@@ -134,6 +145,22 @@ function _cell(ms, val) {
   if (ms === 'M9 Upgrade Complete') return '<td class="r"><span class="m9-val">' + val + '</span></td>';
   if (ms === 'M8 Upgrade Started')  return '<td class="r"><span class="m8-val">' + val + '</span></td>';
   return '<td class="r">' + val + '</td>';
+}
+
+function renderKpi(tw) {
+  var by = tw.by_theatre || {};
+  var m9 = 0, m8 = 0, m5 = 0, total = 0;
+  THEATRES.forEach(function(t) {
+    var d = by[t] || {};
+    m9 += d['M9 Upgrade Complete'] || 0;
+    m8 += d['M8 Upgrade Started'] || 0;
+    m5 += d['M5 Tech Validation'] || 0;
+    MILESTONES.forEach(function(ms) { total += d[ms] || 0; });
+  });
+  document.getElementById('kpi-m9').textContent = m9 || '—';
+  document.getElementById('kpi-m8').textContent = m8 || '—';
+  document.getElementById('kpi-m5').textContent = m5 || '—';
+  document.getElementById('kpi-total').textContent = total || '—';
 }
 
 function renderThisWeek(tw) {
