@@ -48,7 +48,7 @@
     <!-- Refresh -->
     <div class="vel-refresh">
       <span class="vel-ts" id="vel-ts"></span>
-      <button class="pill" onclick="load()" id="vel-btn" style="border-color:var(--sky-border);color:var(--sky);background:var(--sky-light)">&#10227; Refresh Now</button>
+      <button class="pill" onclick="refreshData()" id="vel-btn" style="border-color:var(--sky-border);color:var(--sky);background:var(--sky-light)">&#10227; Refresh Now</button>
     </div>
   </div>
 
@@ -76,6 +76,10 @@
   </div>
 
 </div>
+
+<!-- Pipeline audit console (same as ops page) -->
+<div id="pipeline-console" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface-2);border-top:2px solid var(--sky);max-height:220px;overflow-y:auto;padding:12px 1.5rem;font-family:'JetBrains Mono',monospace;font-size:10px;z-index:100"></div>
+
 <script src="/static/solstice.js?v=3"></script>
 <script>
 S.initNav('velocity');
@@ -120,8 +124,6 @@ function _weeksParam() {
 function load() {
   if (_loading) return;
   _loading = true;
-  var btn = document.getElementById('vel-btn');
-  btn.textContent = '…';
   var url = '/api/velocity?weeks=' + _weeksParam() + (_theatre ? '&theatre=' + encodeURIComponent(_theatre) : '');
   fetch(url)
     .then(function(r) { return r.json(); })
@@ -136,8 +138,55 @@ function load() {
     })
     .finally(function() {
       _loading = false;
-      btn.textContent = '↺ Refresh Now';
     });
+}
+
+function refreshData() {
+  // Full pipeline audit (same as ops page) then reload velocity data
+  var console_el = document.getElementById('pipeline-console');
+  console_el.style.display = 'block';
+  while (console_el.firstChild) console_el.removeChild(console_el.firstChild);
+
+  var colorMap = {green:'#10b981', red:'#ef4444', amber:'#f59e0b', teal:'#0ea5e9', muted:'#64748b', blue:'#3b82f6'};
+  var btn = document.getElementById('vel-btn');
+  btn.textContent = '…';
+
+  function addLine(d) {
+    var line = document.createElement('div');
+    line.style.cssText = 'display:flex;gap:8px;align-items:baseline;font-size:11px;padding:1px 0;font-family:var(--mono)';
+    var ts = document.createElement('span');
+    ts.style.cssText = 'color:#64748b;flex-shrink:0;min-width:70px';
+    ts.textContent = (d.ts||'') + (d.elapsed != null ? ' +'+d.elapsed+'s' : '');
+    var step = document.createElement('span');
+    step.style.cssText = 'flex-shrink:0;min-width:145px;color:'+(colorMap[d.color]||'#e2e8f0')+';font-weight:600';
+    step.textContent = d.step || '';
+    var det = document.createElement('span');
+    det.style.cssText = 'color:'+(colorMap[d.color]||'#e2e8f0')+';flex:1;word-break:break-word';
+    det.textContent = d.detail || d.status || '';
+    line.appendChild(ts); line.appendChild(step); line.appendChild(det);
+    console_el.appendChild(line);
+    console_el.scrollTop = console_el.scrollHeight;
+  }
+
+  addLine({ts: new Date().toTimeString().slice(0,8), elapsed: 0.0, step: 'Pipeline', detail: '▶ Starting...', color: 'teal'});
+
+  var es = new EventSource('/api/run-full');
+  es.onmessage = function(e) {
+    try {
+      var d = JSON.parse(e.data);
+      if (d.done) {
+        es.close();
+        btn.textContent = '↺ Refresh Now';
+        load(); // reload velocity data after pipeline completes
+        return;
+      }
+      addLine(d);
+    } catch(ex) {}
+  };
+  es.onerror = function() {
+    es.close();
+    btn.textContent = '↺ Refresh Now';
+  };
 }
 
 function _cell(ms, val) {
