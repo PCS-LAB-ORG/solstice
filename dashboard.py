@@ -1200,21 +1200,32 @@ async def api_run_full(request: Request):
         yield event("Pipeline", "STARTING", "Full cycle initiated", "teal")
         await asyncio.sleep(0.1)
 
-        # ── Step 1: Drive mount check ─────────────────────────────────────
+        # ── Step 1: Data files check (written by host_sync.py into volume) ──
         _t = _time.monotonic()
-        drive_root = _gdrive_root() / "My Drive/EMEA CC "
-        gsheet_files = list(drive_root.glob("*.gsheet")) if drive_root.exists() else []
-        drive_status = (
-            f"{len(gsheet_files)} .gsheet files found in Drive mount"
-            if gsheet_files
-            else "⚠️ Drive not mounted — open Google Drive Desktop"
-        )
+        data_dir = Path(__file__).parent / "data"
+        csv_path = data_dir / "dc_cse_tracker.csv"
+        xsup_path = data_dir / "xsup_tracker.xlsx"
+        if csv_path.exists():
+            age_h = _time.monotonic() - _time.monotonic() + csv_path.stat().st_mtime
+            import time as _clock
+
+            age_min = int((_clock.time() - csv_path.stat().st_mtime) / 60)
+            drive_status = (
+                f"dc_cse_tracker.csv {csv_path.stat().st_size // 1024}KB"
+                f" · xsup_tracker {'✓' if xsup_path.exists() else '✗'}"
+                f" · last updated {age_min}m ago"
+            )
+            drive_ok = True
+        else:
+            drive_status = "⚠️ dc_cse_tracker.csv missing — run host_sync.py on Mac host"
+            drive_ok = False
         yield event(
-            "1/5 Drive Mount",
-            "OK" if gsheet_files else "WARN",
+            "1/5 Data Files",
+            "OK" if drive_ok else "WARN",
             drive_status,
-            "blue" if gsheet_files else "amber",
+            "blue" if drive_ok else "amber",
         )
+        gsheet_files = []
         for gf in gsheet_files:
             try:
                 mtime = os.stat(gf).st_mtime
