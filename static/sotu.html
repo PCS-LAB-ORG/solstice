@@ -127,7 +127,7 @@ function render(d) {
   renderKpi(d.kpi, d.stuck);
   renderStuck(d.stuck);
   renderCompletions(d.completions);
-  renderForecast(d.forecast, d.run_rate, d.run_rate_total, d.monte_carlo);
+  renderForecast(d.forecast, d.run_rate, d.run_rate_total, d.run_rate_months, d.monte_carlo);
 }
 
 function renderKpi(k, stuckList) {
@@ -222,7 +222,7 @@ function _mcBadge(val, band) {
     + E(String(val)) + '</span>';
 }
 
-function renderForecast(rows, runRate, runRateTotal, mc) {
+function renderForecast(rows, runRate, runRateTotal, runRateMonths, mc) {
   if (!rows || !rows.length) {
     document.getElementById('fcast-tbl').innerHTML = '<tbody><tr><td class="muted">No forecast data</td></tr></tbody>';
     return;
@@ -290,7 +290,7 @@ function renderForecast(rows, runRate, runRateTotal, mc) {
     + 'Imagine repeating this month 10,000 times using past results as the playbook — '
     + 'P10 is what the bad runs looked like, P50 is the middle (most likely), P90 is the great runs. '
     + '10,000 simulations smooth out the randomness so the percentile lines are stable.<br>';
-  out += '⚠ Rate = Apr–Jun trailing avg (' + E(String(runRateTotal || '?')) + '/month, by region). '
+  out += '⚠ Rate = all-time avg across ' + E(String(runRateMonths || '?')) + ' completed months (' + E(String(runRateTotal || '?')) + '/month total, split by region). '
     + 'Monte Carlo bootstrapped on ' + E(String(mn)) + ' historical months (avg ' + E(String(mm)) + '/month). '
     + 'Hover any band number for plain-English meaning.';
   out += '</div>';

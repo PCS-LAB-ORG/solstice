@@ -3146,8 +3146,7 @@ def api_sotu(theatre: str = ""):
             row["total"] = sum(row.get(t, 0) for t in THEATRES)
             forecast.append(row)
 
-        # ── Adjusted forecast — 3-month trailing run rate ────────────
-        # Pull Apr-Jun 2026 completions by theatre from status_history
+        # ── Adjusted forecast — all-time avg run rate (Jan–last full month) ──
         rate_sql = f"""
             SELECT COALESCE(a.account_theatre, b.account_theatre, 'Unknown') as theatre,
                    COUNT(*) as cnt
@@ -3156,16 +3155,27 @@ def api_sotu(theatre: str = ""):
             LEFT JOIN blocked_data b ON b.account_id = h.account_id
             WHERE h.field_name = 'M9 Upgrade Complete'
               AND h.new_status = 'Y'
-              AND h.changed_at >= '2026-04-01'
-              AND h.changed_at < '2026-07-01'
+              AND h.changed_at >= '2026-01-01'
+              AND h.changed_at < date('now','start of month')
               {hist_th_cond}
             GROUP BY theatre
         """
         rate_rows = conn.execute(rate_sql, th_params).fetchall()
         rate_by_theatre = {r[0]: r[1] for r in rate_rows if r[0] in THEATRES}
-        # Divide by 3 months, round to nearest int (floor 0)
+        # Count completed full months
+        n_rate_months = (
+            conn.execute("""
+            SELECT COUNT(DISTINCT strftime('%Y-%m', changed_at))
+            FROM status_history
+            WHERE field_name = 'M9 Upgrade Complete' AND new_status = 'Y'
+              AND changed_at >= '2026-01-01'
+              AND changed_at < date('now','start of month')
+        """).fetchone()[0]
+            or 1
+        )
         monthly_rate = {
-            t: max(1, round(rate_by_theatre.get(t, 0) / 3)) for t in THEATRES
+            t: max(1, round(rate_by_theatre.get(t, 0) / n_rate_months))
+            for t in THEATRES
         }
         total_rate = sum(monthly_rate.values())
 
@@ -3248,6 +3258,7 @@ def api_sotu(theatre: str = ""):
         "forecast": adjusted_forecast,
         "run_rate": {t: monthly_rate[t] for t in THEATRES},
         "run_rate_total": total_rate,
+        "run_rate_months": n_rate_months,
         "monte_carlo": {
             "per_month": mc_per_month,
             "year_end": mc_year_end,
