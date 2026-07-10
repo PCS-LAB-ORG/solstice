@@ -3136,6 +3136,36 @@ def api_sotu(theatre: str = ""):
             row["total"] = sum(row.get(t, 0) for t in THEATRES)
             forecast.append(row)
 
+        # ── Adjusted forecast — 3-month trailing run rate ────────────
+        # Pull Apr-Jun 2026 completions by theatre from status_history
+        rate_sql = f"""
+            SELECT COALESCE(a.account_theatre, b.account_theatre, 'Unknown') as theatre,
+                   COUNT(*) as cnt
+            FROM status_history h
+            JOIN accounts a ON a.account_id = h.account_id
+            LEFT JOIN blocked_data b ON b.account_id = h.account_id
+            WHERE h.field_name = 'M9 Upgrade Complete'
+              AND h.new_status = 'Y'
+              AND h.changed_at >= '2026-04-01'
+              AND h.changed_at < '2026-07-01'
+              {hist_th_cond}
+            GROUP BY theatre
+        """
+        rate_rows = conn.execute(rate_sql, th_params).fetchall()
+        rate_by_theatre = {r[0]: r[1] for r in rate_rows if r[0] in THEATRES}
+        # Divide by 3 months, round to nearest int (floor 0)
+        monthly_rate = {
+            t: max(1, round(rate_by_theatre.get(t, 0) / 3)) for t in THEATRES
+        }
+        total_rate = sum(monthly_rate.values())
+
+        adjusted_forecast = []
+        for row in forecast:
+            adj = {t: monthly_rate[t] for t in THEATRES}
+            adj["month"] = row["month"]
+            adj["total"] = total_rate
+            adjusted_forecast.append(adj)
+
     return {
         "kpi": {
             "in_scope": in_scope,
@@ -3146,7 +3176,9 @@ def api_sotu(theatre: str = ""):
         },
         "stuck": stuck,
         "completions": completions,
-        "forecast": forecast,
+        "forecast": adjusted_forecast,
+        "run_rate": {t: monthly_rate[t] for t in THEATRES},
+        "run_rate_total": total_rate,
     }
 
 

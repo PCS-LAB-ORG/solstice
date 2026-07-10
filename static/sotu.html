@@ -79,8 +79,9 @@
 
   <!-- Forecast -->
   <div class="sotu-section">
-    <div class="sotu-title">M9 Forecast — Planned Completions by Month &amp; Region</div>
+    <div class="sotu-title">M9 Forecast — Adjusted by Run Rate</div>
     <div style="overflow-x:auto"><table class="mtbl" id="fcast-tbl"><tbody><tr><td class="muted">Loading…</td></tr></tbody></table></div>
+    <div id="fcast-disclaimer" style="margin-top:.6rem;font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.6"></div>
   </div>
 
 </div>
@@ -124,7 +125,7 @@ function render(d) {
   renderKpi(d.kpi);
   renderStuck(d.stuck);
   renderCompletions(d.completions);
-  renderForecast(d.forecast);
+  renderForecast(d.forecast, d.run_rate, d.run_rate_total);
 }
 
 function renderKpi(k) {
@@ -187,14 +188,14 @@ function renderCompletions(rows) {
   document.getElementById('comp-tbl').innerHTML = html;
 }
 
-function renderForecast(rows) {
+function renderForecast(rows, runRate, runRateTotal) {
   if (!rows || !rows.length) {
     document.getElementById('fcast-tbl').innerHTML = '<tbody><tr><td class="muted">No forecast data</td></tr></tbody>';
     return;
   }
   var html = '<thead><tr><th>Month</th>';
   THEATRES.forEach(function(t){ html += '<th class="r">' + E(t) + '</th>'; });
-  html += '<th class="r">Total (Planned)</th></tr></thead><tbody>';
+  html += '<th class="r">Total</th></tr></thead><tbody>';
   rows.forEach(function(row) {
     html += '<tr><td>' + _monthLabel(row.month) + '</td>';
     THEATRES.forEach(function(t) {
@@ -205,6 +206,17 @@ function renderForecast(rows) {
   });
   html += '</tbody>';
   document.getElementById('fcast-tbl').innerHTML = html;
+
+  // Disclaimer
+  if (runRate && runRateTotal) {
+    var parts = THEATRES.filter(function(t){ return runRate[t]; }).map(function(t){
+      return t + ' ' + runRate[t];
+    });
+    document.getElementById('fcast-disclaimer').innerHTML =
+      '⚠ Adjusted forecast — tracker planned dates are aspirational and historically over-optimistic.<br>' +
+      'Numbers above apply the Apr–Jun 2026 trailing 3-month run rate: <strong>' + E(String(runRateTotal)) + '/month</strong>' +
+      ' (' + E(parts.join(' · ')) + '). Actual results may vary.';
+  }
 }
 
 load();
