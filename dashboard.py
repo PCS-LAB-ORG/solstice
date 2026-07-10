@@ -3171,10 +3171,68 @@ def api_sotu(theatre: str = ""):
 
         adjusted_forecast = []
         for row in forecast:
+            if row["month"] > "2026-12":
+                continue
             adj = {t: monthly_rate[t] for t in THEATRES}
             adj["month"] = row["month"]
             adj["total"] = total_rate
             adjusted_forecast.append(adj)
+
+        # ── Monte Carlo percentile bands ─────────────────────────────
+        # Bootstrap from all completed months in 2026 (up to last full month)
+        import random as _random
+
+        mc_hist_rows = conn.execute("""
+            SELECT strftime('%Y-%m', changed_at) as month, COUNT(*) as cnt
+            FROM status_history
+            WHERE field_name = 'M9 Upgrade Complete' AND new_status = 'Y'
+              AND changed_at >= '2026-01-01' AND changed_at < date('now','start of month')
+            GROUP BY month ORDER BY month
+        """).fetchall()
+        mc_sample = [r[1] for r in mc_hist_rows] if mc_hist_rows else [10]
+
+        def _pct(data, p):
+            s = sorted(data)
+            k = (len(s) - 1) * p / 100
+            lo, hi = int(k), min(int(k) + 1, len(s) - 1)
+            return round(s[lo] + (s[hi] - s[lo]) * (k - lo))
+
+        _random.seed(42)
+        n_sim, n_months = 10_000, len(adjusted_forecast)
+        sims = [
+            [_random.choice(mc_sample) for _ in range(n_months)] for _ in range(n_sim)
+        ]
+
+        mc_per_month = {
+            "p10": _pct([s[0] for s in sims], 10),
+            "p30": _pct([s[0] for s in sims], 30),
+            "p50": _pct([s[0] for s in sims], 50),
+            "p70": _pct([s[0] for s in sims], 70),
+            "p90": _pct([s[0] for s in sims], 90),
+        }
+
+        # Year-end 2026: confirmed so far + Aug–Dec simulation only (skip Jul partial, skip 2027 months)
+        confirmed_ytd = conn.execute("""
+            SELECT COUNT(*) FROM status_history
+            WHERE field_name = 'M9 Upgrade Complete' AND new_status = 'Y'
+              AND changed_at >= '2026-01-01'
+        """).fetchone()[0]
+        dec26_indices = [
+            i
+            for i, row in enumerate(adjusted_forecast)
+            if row["month"] >= "2026-08" and row["month"] <= "2026-12"
+        ]
+        year_sums = [confirmed_ytd + sum(s[i] for i in dec26_indices) for s in sims]
+        mc_year_end = {
+            "confirmed": confirmed_ytd,
+            "p10": _pct(year_sums, 10),
+            "p30": _pct(year_sums, 30),
+            "p50": _pct(year_sums, 50),
+            "p70": _pct(year_sums, 70),
+            "p90": _pct(year_sums, 90),
+        }
+        mc_sample_mean = round(sum(mc_sample) / len(mc_sample), 1)
+        mc_sample_n = len(mc_sample)
 
     return {
         "kpi": {
@@ -3190,6 +3248,12 @@ def api_sotu(theatre: str = ""):
         "forecast": adjusted_forecast,
         "run_rate": {t: monthly_rate[t] for t in THEATRES},
         "run_rate_total": total_rate,
+        "monte_carlo": {
+            "per_month": mc_per_month,
+            "year_end": mc_year_end,
+            "sample_n": mc_sample_n,
+            "sample_mean": mc_sample_mean,
+        },
     }
 
 

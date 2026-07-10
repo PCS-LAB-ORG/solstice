@@ -127,7 +127,7 @@ function render(d) {
   renderKpi(d.kpi, d.stuck);
   renderStuck(d.stuck);
   renderCompletions(d.completions);
-  renderForecast(d.forecast, d.run_rate, d.run_rate_total);
+  renderForecast(d.forecast, d.run_rate, d.run_rate_total, d.monte_carlo);
 }
 
 function renderKpi(k, stuckList) {
@@ -207,34 +207,80 @@ function renderCompletions(rows) {
   document.getElementById('comp-tbl').innerHTML = html;
 }
 
-function renderForecast(rows, runRate, runRateTotal) {
+var MC_BANDS = [
+  {key:'p10', label:'P10', bg:'#fee2e2', color:'#b91c1c'},
+  {key:'p30', label:'P30', bg:'#ffedd5', color:'#c2410c'},
+  {key:'p50', label:'P50', bg:'#fef9c3', color:'#854d0e'},
+  {key:'p70', label:'P70', bg:'#dbeafe', color:'#1d4ed8'},
+  {key:'p90', label:'P90', bg:'#dcfce7', color:'#15803d'},
+];
+
+function _mcBadge(val, band) {
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;'
+    + 'min-width:26px;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--mono);'
+    + 'background:' + band.bg + ';color:' + band.color + '">'
+    + E(String(val)) + '</span>';
+}
+
+function renderForecast(rows, runRate, runRateTotal, mc) {
   if (!rows || !rows.length) {
     document.getElementById('fcast-tbl').innerHTML = '<tbody><tr><td class="muted">No forecast data</td></tr></tbody>';
     return;
   }
+  var pm = mc && mc.per_month ? mc.per_month : null;
+
   var html = '<thead><tr><th>Month</th>';
   THEATRES.forEach(function(t){ html += '<th class="r">' + E(t) + '</th>'; });
-  html += '<th class="r">Total</th></tr></thead><tbody>';
+  html += '<th class="r" style="border-left:2px solid var(--border)">Rate</th>';
+  if (pm) {
+    MC_BANDS.forEach(function(b){
+      html += '<th class="r" style="color:' + b.color + ';font-size:8px">' + b.label + '</th>';
+    });
+  }
+  html += '</tr></thead><tbody>';
+
   rows.forEach(function(row) {
     html += '<tr><td>' + _monthLabel(row.month) + '</td>';
     THEATRES.forEach(function(t) {
       var v = row[t] || 0;
       html += '<td class="r">' + (v ? '<span class="fcast-badge">' + E(String(v)) + '</span>' : '<span class="muted">—</span>') + '</td>';
     });
-    html += '<td class="r total-cell">' + E(String(row.total || 0)) + '</td></tr>';
+    html += '<td class="r total-cell" style="border-left:2px solid var(--border)">' + E(String(row.total || 0)) + '</td>';
+    if (pm) {
+      MC_BANDS.forEach(function(b){
+        html += '<td class="r">' + _mcBadge(pm[b.key], b) + '</td>';
+      });
+    }
+    html += '</tr>';
   });
   html += '</tbody>';
   document.getElementById('fcast-tbl').innerHTML = html;
 
-  // Disclaimer
-  if (runRate && runRateTotal) {
-    var parts = THEATRES.filter(function(t){ return runRate[t]; }).map(function(t){
-      return t + ' ' + runRate[t];
+  // Year-end summary row
+  var ye = mc && mc.year_end ? mc.year_end : null;
+  if (ye) {
+    var yeHtml = '<div style="margin-top:.5rem;font-size:9px;font-family:var(--mono);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">'
+      + '<span style="color:var(--muted)">Year-end 2026:</span>';
+    MC_BANDS.forEach(function(b){
+      yeHtml += '<span style="background:' + b.bg + ';color:' + b.color
+        + ';padding:2px 7px;border-radius:3px;font-weight:700">'
+        + b.label + ' ' + ye[b.key] + '</span>';
     });
-    document.getElementById('fcast-disclaimer').innerHTML =
-      '⚠ Adjusted forecast — tracker planned dates are aspirational and historically over-optimistic.<br>' +
-      'Numbers above apply the Apr–Jun 2026 trailing 3-month run rate: <strong>' + E(String(runRateTotal)) + '/month</strong>' +
-      ' (' + E(parts.join(' · ')) + '). Actual results may vary.';
+    yeHtml += '</div>';
+    document.getElementById('fcast-disclaimer').innerHTML = yeHtml;
+  }
+
+  // 1-liner math comment
+  var note = document.getElementById('fcast-disclaimer');
+  var mn = mc && mc.sample_n ? mc.sample_n : '?';
+  var mm = mc && mc.sample_mean ? mc.sample_mean : '?';
+  var p50ye = ye ? ye.p50 : '?';
+  var p90ye = ye ? ye.p90 : '?';
+  if (note) {
+    note.innerHTML += '<div style="margin-top:.4rem;font-size:9px;color:var(--muted);font-family:var(--mono)">'
+      + '⚠ Rate = Apr–Jun trailing avg (' + E(String(runRateTotal || '?')) + '/month). '
+      + 'Bands = 10k Monte Carlo bootstrap on ' + E(String(mn)) + ' historical months (mean ' + E(String(mm)) + '/month). '
+      + 'Year-end P50=' + E(String(p50ye)) + ' · P90=' + E(String(p90ye)) + ' · ≥160 at ~87% confidence.</div>';
   }
 }
 
