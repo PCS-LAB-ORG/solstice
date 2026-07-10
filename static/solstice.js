@@ -294,6 +294,7 @@ function _renderCard(d) {
 
 var _PAGES = [
   {id:'ops',     label:'Ops',      url:'/ops'},
+  {id:'sotu',    label:'SOTU',     url:'/sotu'},
   {id:'blockers',label:'Blockers', url:'/blockers'},
   {id:'forecast',label:'Forecast', url:'/forecast'},
   {id:'daily',   label:'Daily',    url:'/daily'},

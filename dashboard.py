@@ -2987,6 +2987,169 @@ def api_wins():
     return {"regions": [dict(r) for r in regions], "totals": dict(totals)}
 
 
+@app.get("/api/sotu")
+def api_sotu(theatre: str = ""):
+    """State of the Union exec dashboard data."""
+    from datetime import datetime as _dt
+
+    _ensure_db()
+    THEATRES = ["AMER", "EMEA", "JAPAC", "LATAM"]
+    SUBTYPE_LABELS = {
+        "customer_delay": "Customer Delay",
+        "tech_blocker": "Tech Blocker",
+        "core_rep_blocking": "Core Rep Blocking",
+        "no_contact": "No Contact",
+        "active_deal": "Active Deal",
+        "legal_blocker": "Legal Blocker",
+    }
+    th_filter = theatre.upper() if theatre else ""
+
+    with get_db() as conn:
+        # ── KPI banner ──────────────────────────────────────────────
+        def _kpi_count(where_extra: str, params: list) -> int:
+            base = "SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE 1=1"
+            if th_filter:
+                base += " AND UPPER(COALESCE(b.account_theatre,'')) = ?"
+                params = [th_filter] + params
+            row = conn.execute(
+                base + (" AND " + where_extra if where_extra else ""), params
+            ).fetchone()
+            return row[0] if row else 0
+
+        th_cond = "AND UPPER(COALESCE(b.account_theatre,'')) = ?" if th_filter else ""
+        th_params = [th_filter] if th_filter else []
+
+        in_scope = _kpi_count("", [])
+        m9_complete = _kpi_count("b.m9_complete = 1", [])
+        m8_inflight = _kpi_count("b.m8_started = 1 AND b.m9_complete = 0", [])
+        churn = _kpi_count("b.subtype = 'churn'", [])
+        not_started = _kpi_count(
+            "b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype != 'churn'", []
+        )
+
+        # ── Stuck reasons ────────────────────────────────────────────
+        stuck_sql = f"""
+            SELECT b.subtype, b.account_theatre, COUNT(*) as cnt
+            FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.m9_complete = 0
+              AND b.subtype != '' AND b.subtype != 'churn'
+              {th_cond}
+            GROUP BY b.subtype, b.account_theatre
+            ORDER BY b.subtype, b.account_theatre
+        """
+        stuck_rows = conn.execute(stuck_sql, th_params).fetchall()
+
+        stuck_by_type: dict = {}
+        for subtype, theatre_val, cnt in stuck_rows:
+            if subtype not in stuck_by_type:
+                stuck_by_type[subtype] = {
+                    "subtype": subtype,
+                    "label": SUBTYPE_LABELS.get(subtype, subtype),
+                    "total": 0,
+                    "by_theatre": {},
+                }
+            stuck_by_type[subtype]["total"] += cnt
+            stuck_by_type[subtype]["by_theatre"][theatre_val or "Unknown"] = cnt
+
+        subtype_order = [
+            "customer_delay",
+            "tech_blocker",
+            "core_rep_blocking",
+            "no_contact",
+            "active_deal",
+            "legal_blocker",
+        ]
+        stuck = [stuck_by_type[k] for k in subtype_order if k in stuck_by_type]
+        # Append any unexpected subtypes at end
+        for k, v in stuck_by_type.items():
+            if k not in subtype_order:
+                stuck.append(v)
+
+        # ── Historical completions (status_history) ──────────────────
+        hist_th_cond = (
+            "AND UPPER(COALESCE(b.account_theatre,'')) = ?" if th_filter else ""
+        )
+        hist_sql = f"""
+            SELECT strftime('%Y-%m', h.changed_at) as month,
+                   COALESCE(a.account_theatre, b.account_theatre, 'Unknown') as theatre,
+                   COUNT(*) as cnt
+            FROM status_history h
+            JOIN accounts a ON a.account_id = h.account_id
+            LEFT JOIN blocked_data b ON b.account_id = h.account_id
+            WHERE h.field_name = 'M9 Upgrade Complete'
+              AND h.new_status = 'Y'
+              AND h.changed_at >= '2026-01-01'
+              {hist_th_cond}
+            GROUP BY month, theatre
+            ORDER BY month, theatre
+        """
+        hist_rows = conn.execute(hist_sql, th_params).fetchall()
+
+        comp_by_month: dict = {}
+        for month, theatre_val, cnt in hist_rows:
+            if month not in comp_by_month:
+                comp_by_month[month] = {t: 0 for t in THEATRES}
+                comp_by_month[month]["month"] = month
+            if theatre_val in THEATRES:
+                comp_by_month[month][theatre_val] = cnt
+
+        completions = []
+        for month in sorted(comp_by_month.keys()):
+            row = comp_by_month[month]
+            row["total"] = sum(row.get(t, 0) for t in THEATRES)
+            completions.append(row)
+
+        # ── Forecast (m9_planned, non-churn, non-complete) ───────────
+        fcast_th_cond = (
+            "AND UPPER(COALESCE(b.account_theatre,'')) = ?" if th_filter else ""
+        )
+        fcast_sql = f"""
+            SELECT b.m9_planned, b.account_theatre
+            FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.m9_complete = 0
+              AND b.subtype != 'churn'
+              AND b.m9_planned IS NOT NULL AND b.m9_planned != ''
+              {fcast_th_cond}
+        """
+        fcast_rows = conn.execute(fcast_sql, th_params).fetchall()
+
+        fcast_by_month: dict = {}
+        for m9p, theatre_val in fcast_rows:
+            try:
+                d = _dt.strptime(str(m9p).strip(), "%m/%d/%Y")
+                ym = d.strftime("%Y-%m")
+                if ym < "2026-07":
+                    continue
+                if ym not in fcast_by_month:
+                    fcast_by_month[ym] = {t: 0 for t in THEATRES}
+                    fcast_by_month[ym]["month"] = ym
+                if (theatre_val or "") in THEATRES:
+                    fcast_by_month[ym][theatre_val] = (
+                        fcast_by_month[ym].get(theatre_val, 0) + 1
+                    )
+            except (ValueError, TypeError):
+                pass
+
+        forecast = []
+        for month in sorted(fcast_by_month.keys())[:8]:
+            row = fcast_by_month[month]
+            row["total"] = sum(row.get(t, 0) for t in THEATRES)
+            forecast.append(row)
+
+    return {
+        "kpi": {
+            "in_scope": in_scope,
+            "m9_complete": m9_complete,
+            "m8_inflight": m8_inflight,
+            "not_started": not_started,
+            "churn": churn,
+        },
+        "stuck": stuck,
+        "completions": completions,
+        "forecast": forecast,
+    }
+
+
 @app.get("/api/velocity")
 def api_velocity(weeks: int = 12, theatre: str = ""):
     """Milestone velocity — this week summary + N-week history by region."""
@@ -3139,6 +3302,14 @@ def page_audit():
     if html_path.exists():
         return html_path.read_text()
     return "<h1>audit page not found</h1>"
+
+
+@app.get("/sotu", response_class=HTMLResponse)
+def page_sotu():
+    html_path = Path(__file__).parent / "static" / "sotu.html"
+    if html_path.exists():
+        return html_path.read_text()
+    return "<h1>sotu.html not found</h1>"
 
 
 @app.get("/cse", response_class=HTMLResponse)

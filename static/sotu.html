@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x1F4CA;</text></svg>">
+<title>Solstice — SOTU</title>
+<link rel="stylesheet" href="/static/solstice.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+.sotu-controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1.5rem}
+.sotu-section{margin-bottom:2.5rem}
+.sotu-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.8rem}
+
+/* KPI banner */
+.sotu-kpi{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem}
+.sotu-kpi .kpi-card{flex:1;min-width:140px}
+
+/* Stuck reason grid */
+.stuck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem}
+.stuck-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem}
+.stuck-card.customer_delay{border-left:4px solid #f97316}
+.stuck-card.tech_blocker{border-left:4px solid #ef4444}
+.stuck-card.core_rep_blocking{border-left:4px solid #8b5cf6}
+.stuck-card.no_contact{border-left:4px solid #64748b}
+.stuck-card.active_deal{border-left:4px solid #0ea5e9}
+.stuck-card.legal_blocker{border-left:4px solid #f59e0b}
+.stuck-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);margin-bottom:.35rem}
+.stuck-num{font-size:2.4rem;font-weight:800;line-height:1;margin-bottom:.6rem;color:var(--text)}
+.stuck-breakdown{display:flex;flex-wrap:wrap;gap:.3rem}
+.stuck-th{font-size:8px;font-family:var(--mono);background:var(--surface-2);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--muted)}
+.stuck-th span{color:var(--text);font-weight:700}
+
+/* Monthly tables */
+.mtbl{width:100%;border-collapse:collapse}
+.mtbl th{padding:.4rem .7rem;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono);font-weight:700;background:var(--surface);border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
+.mtbl th.r,.mtbl td.r{text-align:right}
+.mtbl td{padding:.5rem .7rem;font-size:.85rem;border-bottom:1px solid var(--border-soft);color:var(--text);font-family:var(--mono)}
+.mtbl tr:hover td{background:var(--surface-2)}
+.mtbl td.muted{color:var(--muted)}
+.total-cell{font-weight:700;color:var(--sky)}
+.fcast-badge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding:2px 7px;border-radius:4px;background:var(--sky-light);color:var(--sky);font-weight:700;border:1px solid var(--sky-border)}
+.hist-badge{display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:2px 6px;border-radius:4px;background:#d1fae5;color:#065f46;font-weight:700;border:1px solid #6ee7b7}
+.partial-tag{font-size:7px;color:var(--muted);font-family:var(--mono);margin-left:.25rem;vertical-align:middle}
+</style>
+</head>
+<body>
+<nav id="s-nav" class="s-nav"></nav>
+<div class="s-main">
+
+  <!-- Theatre filter -->
+  <div class="sotu-controls">
+    <span class="pill active" data-t="" onclick="setTheatre(this,'')">All</span>
+    <span class="pill" data-t="EMEA" onclick="setTheatre(this,'EMEA')">EMEA</span>
+    <span class="pill" data-t="AMER" onclick="setTheatre(this,'AMER')">AMER</span>
+    <span class="pill" data-t="JAPAC" onclick="setTheatre(this,'JAPAC')">JAPAC</span>
+    <span class="pill" data-t="LATAM" onclick="setTheatre(this,'LATAM')">LATAM</span>
+  </div>
+
+  <!-- KPI Banner -->
+  <div class="sotu-kpi" id="sotu-kpi">
+    <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">In Scope</div><div class="kpi-number" id="kpi-scope">—</div><div class="kpi-delta delta-neu">Scale cohort</div></div>
+    <div class="kpi-card green"><div class="kpi-label">M9 Complete</div><div class="kpi-number" id="kpi-m9">—</div><div class="kpi-delta delta-pos">Migrations done</div></div>
+    <div class="kpi-card sky"><div class="kpi-label">M8 In-flight</div><div class="kpi-number" id="kpi-m8">—</div><div class="kpi-delta delta-neu">Upgrade started</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Not Started</div><div class="kpi-number" id="kpi-ns">—</div><div class="kpi-delta delta-neu">No M8 yet</div></div>
+    <div class="kpi-card red"><div class="kpi-label">Churn</div><div class="kpi-number" id="kpi-churn">—</div><div class="kpi-delta delta-neg">Confirmed churn</div></div>
+  </div>
+
+  <!-- Stuck Reasons -->
+  <div class="sotu-section">
+    <div class="sotu-title">Stuck Reasons — Accounts Not Yet M9 (Non-Churn)</div>
+    <div class="stuck-grid" id="stuck-grid"></div>
+  </div>
+
+  <!-- Historical completions -->
+  <div class="sotu-section">
+    <div class="sotu-title">M9 Completions — 2026 by Month &amp; Region</div>
+    <div style="overflow-x:auto"><table class="mtbl" id="comp-tbl"><tbody><tr><td class="muted">Loading…</td></tr></tbody></table></div>
+  </div>
+
+  <!-- Forecast -->
+  <div class="sotu-section">
+    <div class="sotu-title">M9 Forecast — Planned Completions by Month &amp; Region</div>
+    <div style="overflow-x:auto"><table class="mtbl" id="fcast-tbl"><tbody><tr><td class="muted">Loading…</td></tr></tbody></table></div>
+  </div>
+
+</div>
+
+<script src="/static/solstice.js?v=4"></script>
+<script>
+S.initNav('sotu');
+S.restoreCard();
+
+var E = S.esc;
+var _theatre = '';
+var THEATRES = ['AMER','EMEA','JAPAC','LATAM'];
+
+var STUCK_META = {
+  customer_delay:   {label:'Customer Delay',   color:'#f97316'},
+  tech_blocker:     {label:'Tech Blocker',      color:'#ef4444'},
+  core_rep_blocking:{label:'Core Rep Blocking', color:'#8b5cf6'},
+  no_contact:       {label:'No Contact',        color:'#64748b'},
+  active_deal:      {label:'Active Deal',       color:'#0ea5e9'},
+  legal_blocker:    {label:'Legal Blocker',     color:'#f59e0b'},
+};
+
+function setTheatre(el, t) {
+  _theatre = t;
+  document.querySelectorAll('.sotu-controls [data-t]').forEach(function(p) {
+    p.classList.toggle('active', p.dataset.t === t);
+  });
+  load();
+}
+
+function load() {
+  var url = '/api/sotu' + (_theatre ? '?theatre=' + encodeURIComponent(_theatre) : '');
+  fetch(url).then(function(r){ return r.json(); }).then(render).catch(function() {
+    document.getElementById('stuck-grid').innerHTML = '<div style="color:var(--muted);font-size:10px">Error loading data</div>';
+    document.getElementById('comp-tbl').innerHTML = '<tbody><tr><td class="muted">Error loading data</td></tr></tbody>';
+    document.getElementById('fcast-tbl').innerHTML = '<tbody><tr><td class="muted">Error loading data</td></tr></tbody>';
+  });
+}
+
+function render(d) {
+  renderKpi(d.kpi);
+  renderStuck(d.stuck);
+  renderCompletions(d.completions);
+  renderForecast(d.forecast);
+}
+
+function renderKpi(k) {
+  document.getElementById('kpi-scope').textContent  = (k.in_scope  || 0).toLocaleString();
+  document.getElementById('kpi-m9').textContent     = (k.m9_complete || 0).toLocaleString();
+  document.getElementById('kpi-m8').textContent     = (k.m8_inflight || 0).toLocaleString();
+  document.getElementById('kpi-ns').textContent     = (k.not_started || 0).toLocaleString();
+  document.getElementById('kpi-churn').textContent  = (k.churn || 0).toLocaleString();
+}
+
+function renderStuck(stuck) {
+  if (!stuck || !stuck.length) {
+    document.getElementById('stuck-grid').innerHTML = '<div style="color:var(--muted);font-size:10px">No blocked accounts</div>';
+    return;
+  }
+  var html = '';
+  stuck.forEach(function(s) {
+    var meta = STUCK_META[s.subtype] || {label: s.label || s.subtype};
+    html += '<div class="stuck-card ' + E(s.subtype) + '">';
+    html += '<div class="stuck-label">' + E(meta.label || s.label) + '</div>';
+    html += '<div class="stuck-num">' + E(String(s.total || 0)) + '</div>';
+    html += '<div class="stuck-breakdown">';
+    var by = s.by_theatre || {};
+    THEATRES.forEach(function(t) {
+      var v = by[t];
+      if (v) {
+        html += '<span class="stuck-th">' + E(t) + ' <span>' + E(String(v)) + '</span></span>';
+      }
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('stuck-grid').innerHTML = html;
+}
+
+function _monthLabel(ym) {
+  var parts = ym.split('-');
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+  return d.toLocaleString('default', {month:'short'}) + ' ' + parts[0].slice(2);
+}
+
+function renderCompletions(rows) {
+  if (!rows || !rows.length) {
+    document.getElementById('comp-tbl').innerHTML = '<tbody><tr><td class="muted">No data</td></tr></tbody>';
+    return;
+  }
+  var thisMonth = new Date().toISOString().slice(0,7);
+  var html = '<thead><tr><th>Month</th>';
+  THEATRES.forEach(function(t){ html += '<th class="r">' + E(t) + '</th>'; });
+  html += '<th class="r">Total</th></tr></thead><tbody>';
+  rows.forEach(function(row) {
+    var isPartial = row.month === thisMonth;
+    html += '<tr><td>' + _monthLabel(row.month) + (isPartial ? '<span class="partial-tag">partial</span>' : '') + '</td>';
+    THEATRES.forEach(function(t) {
+      var v = row[t] || 0;
+      html += '<td class="r">' + (v ? '<span class="hist-badge">' + E(String(v)) + '</span>' : '<span class="muted">—</span>') + '</td>';
+    });
+    html += '<td class="r total-cell">' + E(String(row.total || 0)) + '</td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('comp-tbl').innerHTML = html;
+}
+
+function renderForecast(rows) {
+  if (!rows || !rows.length) {
+    document.getElementById('fcast-tbl').innerHTML = '<tbody><tr><td class="muted">No forecast data</td></tr></tbody>';
+    return;
+  }
+  var html = '<thead><tr><th>Month</th>';
+  THEATRES.forEach(function(t){ html += '<th class="r">' + E(t) + '</th>'; });
+  html += '<th class="r">Total (Planned)</th></tr></thead><tbody>';
+  rows.forEach(function(row) {
+    html += '<tr><td>' + _monthLabel(row.month) + '</td>';
+    THEATRES.forEach(function(t) {
+      var v = row[t] || 0;
+      html += '<td class="r">' + (v ? '<span class="fcast-badge">' + E(String(v)) + '</span>' : '<span class="muted">—</span>') + '</td>';
+    });
+    html += '<td class="r total-cell">' + E(String(row.total || 0)) + '</td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('fcast-tbl').innerHTML = html;
+}
+
+load();
+</script>
+</body>
+</html>
