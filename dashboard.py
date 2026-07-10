@@ -2996,7 +2996,7 @@ def api_sotu(theatre: str = ""):
     with get_db() as conn:
         # ── KPI banner ──────────────────────────────────────────────
         def _kpi_count(where_extra: str, params: list) -> int:
-            base = "SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE b.cohort != ''"
+            base = "SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE b.cohort = 'Scale cohort'"
             if th_filter:
                 base += " AND UPPER(COALESCE(b.account_theatre,'')) = ?"
                 params = [th_filter] + params
@@ -3034,7 +3034,7 @@ def api_sotu(theatre: str = ""):
         stuck_sql = f"""
             SELECT b.subtype, b.account_theatre, COUNT(*) as cnt
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.cohort != ''
+            WHERE b.cohort = 'Scale cohort'
               AND b.m9_complete = 0
               AND b.m8_started = 0
               AND b.subtype != '' AND b.subtype != 'churn'
@@ -3084,7 +3084,7 @@ def api_sotu(theatre: str = ""):
             WHERE h.field_name = 'M9 Upgrade Complete'
               AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
-              AND b.cohort != ''
+              AND b.cohort = 'Scale cohort'
               {hist_th_cond}
             GROUP BY month, theatre
             ORDER BY month, theatre
@@ -3112,7 +3112,7 @@ def api_sotu(theatre: str = ""):
         fcast_sql = f"""
             SELECT b.m9_planned, b.account_theatre
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.cohort != ''
+            WHERE b.cohort = 'Scale cohort'
               AND b.m9_complete = 0
               AND b.subtype != 'churn'
               AND b.m9_planned IS NOT NULL AND b.m9_planned != ''
@@ -3154,7 +3154,7 @@ def api_sotu(theatre: str = ""):
               AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
               AND h.changed_at < date('now','start of month')
-              AND b.cohort != ''
+              AND b.cohort = 'Scale cohort'
               {hist_th_cond}
             GROUP BY theatre
         """
@@ -3170,7 +3170,7 @@ def api_sotu(theatre: str = ""):
             WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
               AND h.changed_at < date('now','start of month')
-              AND b.cohort != ''
+              AND b.cohort = 'Scale cohort'
         """).fetchone()[0]
             or 1
         )
