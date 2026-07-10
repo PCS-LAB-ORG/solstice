@@ -1002,7 +1002,7 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
               AND LOWER(a.customer_name) NOT IN (
                 SELECT LOWER(a2.customer_name)
                 FROM accounts a2 JOIN blocked_data b2 ON a2.account_id=b2.account_id
-                WHERE b2.m1_complete=1
+                WHERE b2.m1_complete=1 AND b2.cohort='Scale cohort'
               )
             ORDER BY a.sales_region,a.customer_name""").fetchall()
         _mdb.execute("DELETE FROM m1_suggestions")
@@ -1408,10 +1408,10 @@ async def api_run_full(request: Request):
                     "SELECT COUNT(*) FROM accounts WHERE active_cse IS NULL OR active_cse=''"
                 ).fetchone()[0]
                 _m9 = _vc.execute(
-                    "SELECT COALESCE(SUM(m9_complete),0) FROM blocked_data"
+                    "SELECT COALESCE(SUM(m9_complete),0) FROM blocked_data WHERE cohort='Scale cohort'"
                 ).fetchone()[0]
                 _m8 = _vc.execute(
-                    "SELECT COUNT(*) FROM blocked_data WHERE m8_started=1 AND m9_complete=0"
+                    "SELECT COUNT(*) FROM blocked_data WHERE m8_started=1 AND m9_complete=0 AND cohort='Scale cohort'"
                 ).fetchone()[0]
                 _cse_pct = round(100 * (_n - _no_cse) / _n) if _n else 0
                 yield event(
@@ -1454,6 +1454,7 @@ def _load_m9_schedule() -> list:
                        b.m9_planned, b.m8_started, b.m9_complete
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE b.m3_complete=1 AND b.m9_planned!='' AND b.m9_complete=0
+                  AND b.cohort='Scale cohort'
                 ORDER BY b.m9_planned, a.customer_name
             """).fetchall()
         result = []
@@ -1611,6 +1612,7 @@ def _load_milestones(theatre: str = "") -> list:
                        COALESCE(a.account_theatre, b.account_theatre, 'EMEA') as account_theatre
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != ''
+                  AND b.cohort='Scale cohort'
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA')) = UPPER(?))
                 ORDER BY b.signal, a.customer_name
             """,
@@ -1695,6 +1697,7 @@ def _load_completed(theatre: str = "") -> list:
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE b.m9_complete=1
+                  AND b.cohort='Scale cohort'
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY b.m9_actual DESC, b.m9_planned DESC
             """,
@@ -1924,6 +1927,7 @@ def api_health_summary():
                     JOIN accounts a ON a.account_id=b.account_id
                     WHERE UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=?
                       AND a.customer_name!=''
+                      AND b.cohort='Scale cohort'
                 """,
                     (theatre,),
                 ).fetchall()
@@ -1997,6 +2001,7 @@ def api_cse_workload(theatre: str = ""):
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.active_cse!='' AND a.customer_name!=''
+                  AND b.cohort='Scale cohort'
                   AND (? = '' OR UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=UPPER(?))
                 GROUP BY a.active_cse, b.m9_complete, b.m9_actual
                 ORDER BY a.active_cse
@@ -2218,6 +2223,7 @@ def api_compare():
                     JOIN accounts a ON a.account_id=b.account_id
                     WHERE UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=?
                       AND a.customer_name!=''
+                      AND b.cohort='Scale cohort'
                 """,
                     (theatre,),
                 ).fetchall()
@@ -2445,7 +2451,8 @@ def api_forecast(theatre: str = ""):
                     """
                     SELECT b.m9_complete, b.m9_actual, b.m8_started, b.m8_actual
                     FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
-                    WHERE (? = '' OR UPPER(COALESCE(b.account_theatre,a.account_theatre,'EMEA'))=UPPER(?))
+                    WHERE b.cohort='Scale cohort'
+                      AND (? = '' OR UPPER(COALESCE(b.account_theatre,a.account_theatre,'EMEA'))=UPPER(?))
                 """,
                     (theatre, theatre),
                 ).fetchall()
@@ -2937,6 +2944,7 @@ def api_xsup_data(theatre: str = "", priority: str = ""):
                        b.m1_details, b.m3_details, b.m5_details
                 FROM blocked_data b
                 WHERE b.subtype = 'tech_blocker'
+                  AND b.cohort='Scale cohort'
                 """
             ).fetchall()
         _tech_xsup_refs: set = set()
@@ -3319,6 +3327,7 @@ def api_velocity(weeks: int = 12, theatre: str = ""):
                       AND sh.new_status = 'Y'
                       AND sh.changed_at >= ?
                       AND sh.changed_at < ?
+                      AND b.cohort='Scale cohort'
                       {t_clause}
                     """,
                     (ms, mon_s, next_monday_s) + t_params,
@@ -3480,7 +3489,7 @@ def api_pc_cc_accounts():
             db_row = conn.execute(
                 "SELECT a.active_cse FROM accounts a "
                 "JOIN blocked_data b ON a.account_id=b.account_id "
-                "WHERE LOWER(a.account_id)=?",
+                "WHERE LOWER(a.account_id)=? AND b.cohort='Scale cohort'",
                 (sid,),
             ).fetchone()
 
@@ -3595,6 +3604,7 @@ def api_daily_brief(date: str = "", theatre: str = ""):
                 LEFT JOIN blocked_data b ON b.account_id=sh.account_id
                 WHERE sh.changed_at >= ? AND sh.changed_at < ?
                   AND sh.source IN ('pipeline','backfill')
+                  AND (sh.account_id='unmatched_dc' OR b.cohort='Scale cohort')
                   AND (? = ''
                        OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?)
                        OR (sh.account_id='unmatched_dc' AND (
@@ -3668,6 +3678,7 @@ def api_daily_brief(date: str = "", theatre: str = ""):
                            SUM(b.m3_complete) m3, COUNT(*) accounts
                     FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
                     WHERE UPPER(COALESCE(a.account_theatre,'EMEA'))=?
+                      AND b.cohort='Scale cohort'
                 """,
                     (t,),
                 ).fetchone()
@@ -3686,7 +3697,8 @@ def api_daily_brief(date: str = "", theatre: str = ""):
                   SUM(b.m3_complete) m3, SUM(b.m5_complete) m5,
                   COUNT(*) accounts
                 FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
-                WHERE (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
+                WHERE b.cohort='Scale cohort'
+                  AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
             """,
                 (theatre, theatre),
             ).fetchone()
