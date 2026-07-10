@@ -3021,17 +3021,27 @@ def api_sotu(theatre: str = ""):
 
         in_scope = _kpi_count("", [])
         m9_complete = _kpi_count("b.m9_complete = 1", [])
-        m8_inflight = _kpi_count("b.m8_started = 1 AND b.m9_complete = 0", [])
-        churn = _kpi_count("b.subtype = 'churn'", [])
-        not_started = _kpi_count(
-            "b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype != 'churn'", []
+        # Exclude churn from m8_inflight so KPIs are mutually exclusive
+        m8_inflight = _kpi_count(
+            "b.m8_started = 1 AND b.m9_complete = 0 AND b.subtype != 'churn'", []
+        )
+        churn = _kpi_count("b.subtype = 'churn' AND b.m9_complete = 0", [])
+        # Stuck: has a blocker subtype, not yet in M8, not churn, not done
+        stuck_total = _kpi_count(
+            "b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype != '' AND b.subtype != 'churn'",
+            [],
+        )
+        # Progressing: no subtype, no M8, not churn, not done (unblocked, pre-M8)
+        progressing = _kpi_count(
+            "b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype = ''", []
         )
 
-        # ── Stuck reasons ────────────────────────────────────────────
+        # ── Stuck reasons (m8_started=0 only — accounts not yet in flight) ───
         stuck_sql = f"""
             SELECT b.subtype, b.account_theatre, COUNT(*) as cnt
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
             WHERE b.m9_complete = 0
+              AND b.m8_started = 0
               AND b.subtype != '' AND b.subtype != 'churn'
               {th_cond}
             GROUP BY b.subtype, b.account_theatre
@@ -3171,8 +3181,9 @@ def api_sotu(theatre: str = ""):
             "in_scope": in_scope,
             "m9_complete": m9_complete,
             "m8_inflight": m8_inflight,
-            "not_started": not_started,
             "churn": churn,
+            "stuck_total": stuck_total,
+            "progressing": progressing,
         },
         "stuck": stuck,
         "completions": completions,

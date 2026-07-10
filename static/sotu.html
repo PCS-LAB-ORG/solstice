@@ -56,18 +56,20 @@
     <span class="pill" data-t="LATAM" onclick="setTheatre(this,'LATAM')">LATAM</span>
   </div>
 
-  <!-- KPI Banner -->
+  <!-- KPI Banner — all 6 cards sum to In Scope -->
   <div class="sotu-kpi" id="sotu-kpi">
-    <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">In Scope</div><div class="kpi-number" id="kpi-scope">—</div><div class="kpi-delta delta-neu">Scale cohort</div></div>
+    <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">In Scope</div><div class="kpi-number" id="kpi-scope">—</div><div class="kpi-delta delta-neu">All accounts</div></div>
     <div class="kpi-card green"><div class="kpi-label">M9 Complete</div><div class="kpi-number" id="kpi-m9">—</div><div class="kpi-delta delta-pos">Migrations done</div></div>
     <div class="kpi-card sky"><div class="kpi-label">M8 In-flight</div><div class="kpi-number" id="kpi-m8">—</div><div class="kpi-delta delta-neu">Upgrade started</div></div>
-    <div class="kpi-card amber"><div class="kpi-label">Not Started</div><div class="kpi-number" id="kpi-ns">—</div><div class="kpi-delta delta-neu">No M8 yet</div></div>
+    <div class="kpi-card" style="background:#fef3c7;border:1px solid #fcd34d"><div class="kpi-label" style="color:#92400e">Stuck (pre-M8)</div><div class="kpi-number" id="kpi-stuck" style="color:#b45309">—</div><div class="kpi-delta" style="color:#92400e">Has blocker, not started</div></div>
+    <div class="kpi-card" style="background:#f0fdf4;border:1px solid #86efac"><div class="kpi-label" style="color:#166534">Progressing</div><div class="kpi-number" id="kpi-prog" style="color:#15803d">—</div><div class="kpi-delta" style="color:#166534">No blocker, pre-M8</div></div>
     <div class="kpi-card red"><div class="kpi-label">Churn</div><div class="kpi-number" id="kpi-churn">—</div><div class="kpi-delta delta-neg">Confirmed churn</div></div>
   </div>
+  <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:-.75rem;margin-bottom:1.5rem" id="kpi-sum-check"></div>
 
-  <!-- Stuck Reasons -->
+  <!-- Stuck Reasons — accounts with blocker subtype, not yet in M8 -->
   <div class="sotu-section">
-    <div class="sotu-title">Stuck Reasons — Accounts Not Yet M9 (Non-Churn)</div>
+    <div class="sotu-title">Stuck Reasons — Pre-M8 Accounts by Blocker Type</div>
     <div class="stuck-grid" id="stuck-grid"></div>
   </div>
 
@@ -129,11 +131,24 @@ function render(d) {
 }
 
 function renderKpi(k) {
-  document.getElementById('kpi-scope').textContent  = (k.in_scope  || 0).toLocaleString();
-  document.getElementById('kpi-m9').textContent     = (k.m9_complete || 0).toLocaleString();
-  document.getElementById('kpi-m8').textContent     = (k.m8_inflight || 0).toLocaleString();
-  document.getElementById('kpi-ns').textContent     = (k.not_started || 0).toLocaleString();
-  document.getElementById('kpi-churn').textContent  = (k.churn || 0).toLocaleString();
+  var m9    = k.m9_complete  || 0;
+  var m8    = k.m8_inflight  || 0;
+  var stuck = k.stuck_total  || 0;
+  var prog  = k.progressing  || 0;
+  var churn = k.churn        || 0;
+  var scope = k.in_scope     || 0;
+  document.getElementById('kpi-scope').textContent = scope.toLocaleString();
+  document.getElementById('kpi-m9').textContent    = m9.toLocaleString();
+  document.getElementById('kpi-m8').textContent    = m8.toLocaleString();
+  document.getElementById('kpi-stuck').textContent = stuck.toLocaleString();
+  document.getElementById('kpi-prog').textContent  = prog.toLocaleString();
+  document.getElementById('kpi-churn').textContent = churn.toLocaleString();
+  var sum = m9 + m8 + stuck + prog + churn;
+  var ok  = sum === scope;
+  document.getElementById('kpi-sum-check').innerHTML =
+    (ok ? '✓' : '⚠') + ' ' + m9 + ' done + ' + m8 + ' in-flight + ' + stuck +
+    ' stuck + ' + prog + ' progressing + ' + churn + ' churn = <strong>' + sum +
+    '</strong>' + (ok ? ' ✓ matches in scope' : ' ≠ ' + scope + ' — mismatch!');
 }
 
 function renderStuck(stuck) {
