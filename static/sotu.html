@@ -61,7 +61,7 @@
     <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">In Scope</div><div class="kpi-number" id="kpi-scope">—</div><div class="kpi-delta delta-neu">All accounts</div></div>
     <div class="kpi-card green"><div class="kpi-label">M9 Complete</div><div class="kpi-number" id="kpi-m9">—</div><div class="kpi-delta delta-pos">Migrations done</div></div>
     <div class="kpi-card sky"><div class="kpi-label">M8 In-flight</div><div class="kpi-number" id="kpi-m8">—</div><div class="kpi-delta delta-neu">Upgrade started</div></div>
-    <div class="kpi-card" style="background:#fef3c7;border:1px solid #fcd34d"><div class="kpi-label" style="color:#92400e">Stuck (pre-M8)</div><div class="kpi-number" id="kpi-stuck" style="color:#b45309">—</div><div class="kpi-delta" style="color:#92400e">Has blocker, not started</div></div>
+    <div class="kpi-card" style="background:#fef3c7;border:1px solid #fcd34d"><div class="kpi-label" style="color:#92400e">Stuck (pre-M8)</div><div class="kpi-number" id="kpi-stuck" style="color:#b45309">—</div><div id="kpi-stuck-breakdown" style="font-size:8px;color:#92400e;font-family:var(--mono);line-height:1.7;margin-top:.2rem"></div></div>
     <div class="kpi-card" style="background:#f0fdf4;border:1px solid #86efac"><div class="kpi-label" style="color:#166534">Progressing</div><div class="kpi-number" id="kpi-prog" style="color:#15803d">—</div><div class="kpi-delta" style="color:#166534">No blocker, pre-M8</div></div>
     <div class="kpi-card red"><div class="kpi-label">Churn</div><div class="kpi-number" id="kpi-churn">—</div><div class="kpi-delta delta-neg">Confirmed churn</div></div>
   </div>
@@ -124,13 +124,13 @@ function load() {
 }
 
 function render(d) {
-  renderKpi(d.kpi);
+  renderKpi(d.kpi, d.stuck);
   renderStuck(d.stuck);
   renderCompletions(d.completions);
   renderForecast(d.forecast, d.run_rate, d.run_rate_total);
 }
 
-function renderKpi(k) {
+function renderKpi(k, stuckList) {
   var m9    = k.m9_complete  || 0;
   var m8    = k.m8_inflight  || 0;
   var stuck = k.stuck_total  || 0;
@@ -143,12 +143,16 @@ function renderKpi(k) {
   document.getElementById('kpi-stuck').textContent = stuck.toLocaleString();
   document.getElementById('kpi-prog').textContent  = prog.toLocaleString();
   document.getElementById('kpi-churn').textContent = churn.toLocaleString();
+  if (stuckList && stuckList.length) {
+    document.getElementById('kpi-stuck-breakdown').innerHTML =
+      stuckList.map(function(s){ return E(s.label) + ' ' + s.total; }).join('<br>');
+  }
   var sum = m9 + m8 + stuck + prog + churn;
   var ok  = sum === scope;
   document.getElementById('kpi-sum-check').innerHTML =
     (ok ? '✓' : '⚠') + ' ' + m9 + ' done + ' + m8 + ' in-flight + ' + stuck +
-    ' stuck + ' + prog + ' progressing + ' + churn + ' churn = <strong>' + sum +
-    '</strong>' + (ok ? ' ✓ matches in scope' : ' ≠ ' + scope + ' — mismatch!');
+    ' stuck + ' + prog + ' progressing + ' + churn + ' churn = ' + sum +
+    (ok ? ' ✓ matches in scope' : ' ≠ ' + scope + ' — mismatch!');
 }
 
 function renderStuck(stuck) {
