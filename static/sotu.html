@@ -208,16 +208,16 @@ function renderCompletions(rows) {
 }
 
 var MC_BANDS = [
-  {key:'p10', label:'P10', bg:'#fee2e2', color:'#b91c1c'},
-  {key:'p30', label:'P30', bg:'#ffedd5', color:'#c2410c'},
-  {key:'p50', label:'P50', bg:'#fef9c3', color:'#854d0e'},
-  {key:'p70', label:'P70', bg:'#dbeafe', color:'#1d4ed8'},
-  {key:'p90', label:'P90', bg:'#dcfce7', color:'#15803d'},
+  {key:'p10', label:'P10', title:'Bad month — only 10% of months were worse', bg:'#fee2e2', color:'#b91c1c'},
+  {key:'p30', label:'P30', title:'Below average — 30% of months were worse',  bg:'#ffedd5', color:'#c2410c'},
+  {key:'p50', label:'P50', title:'Typical month — coin flip, half above half below', bg:'#fef9c3', color:'#854d0e'},
+  {key:'p70', label:'P70', title:'Good month — only 30% of months were better', bg:'#dbeafe', color:'#1d4ed8'},
+  {key:'p90', label:'P90', title:'Great month — only 10% of months were better', bg:'#dcfce7', color:'#15803d'},
 ];
 
 function _mcBadge(val, band) {
-  return '<span style="display:inline-flex;align-items:center;justify-content:center;'
-    + 'min-width:26px;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--mono);'
+  return '<span title="' + E(band.title) + '" style="display:inline-flex;align-items:center;justify-content:center;'
+    + 'min-width:26px;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--mono);cursor:default;'
     + 'background:' + band.bg + ';color:' + band.color + '">'
     + E(String(val)) + '</span>';
 }
@@ -233,11 +233,19 @@ function renderForecast(rows, runRate, runRateTotal, mc) {
   THEATRES.forEach(function(t){ html += '<th class="r">' + E(t) + '</th>'; });
   html += '<th class="r" style="border-left:2px solid var(--border)">Rate</th>';
   if (pm) {
-    MC_BANDS.forEach(function(b){
-      html += '<th class="r" style="color:' + b.color + ';font-size:8px">' + b.label + '</th>';
-    });
+    html += '<th class="r" colspan="5" style="font-size:8px;color:var(--muted);border-left:1px solid var(--border-soft);letter-spacing:.04em">'
+      + 'MONTE CARLO RANGE — hover each number for meaning</th>';
   }
-  html += '</tr></thead><tbody>';
+  html += '</tr>';
+  if (pm) {
+    html += '<tr style="background:var(--surface-2)">'
+      + '<th colspan="6" style="padding:.2rem .7rem;font-size:8px;color:var(--muted);font-family:var(--mono)">← by region (trailing avg)</th>';
+    MC_BANDS.forEach(function(b){
+      html += '<th class="r" title="' + E(b.title) + '" style="padding:.2rem .4rem;color:' + b.color + ';font-size:8px;cursor:default">' + b.label + '</th>';
+    });
+    html += '</tr>';
+  }
+  html += '</thead><tbody>';
 
   rows.forEach(function(row) {
     html += '<tr><td>' + _monthLabel(row.month) + '</td>';
@@ -258,30 +266,36 @@ function renderForecast(rows, runRate, runRateTotal, mc) {
 
   // Year-end summary row
   var ye = mc && mc.year_end ? mc.year_end : null;
+  var mn = mc && mc.sample_n ? mc.sample_n : 6;
+  var mm = mc && mc.sample_mean ? mc.sample_mean : '?';
+  var note = document.getElementById('fcast-disclaimer');
+  if (!note) return;
+
+  // Year-end cumulative band
+  var out = '';
   if (ye) {
-    var yeHtml = '<div style="margin-top:.5rem;font-size:9px;font-family:var(--mono);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">'
-      + '<span style="color:var(--muted)">Year-end 2026:</span>';
+    out += '<div style="margin-top:.5rem;font-size:9px;font-family:var(--mono);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">'
+      + '<span style="color:var(--muted)">Year-end 2026 total:</span>';
     MC_BANDS.forEach(function(b){
-      yeHtml += '<span style="background:' + b.bg + ';color:' + b.color
-        + ';padding:2px 7px;border-radius:3px;font-weight:700">'
+      out += '<span title="' + E(b.title) + '" style="background:' + b.bg + ';color:' + b.color
+        + ';padding:2px 8px;border-radius:3px;font-weight:700;cursor:default">'
         + b.label + ' ' + ye[b.key] + '</span>';
     });
-    yeHtml += '</div>';
-    document.getElementById('fcast-disclaimer').innerHTML = yeHtml;
+    out += '</div>';
   }
 
-  // 1-liner math comment
-  var note = document.getElementById('fcast-disclaimer');
-  var mn = mc && mc.sample_n ? mc.sample_n : '?';
-  var mm = mc && mc.sample_mean ? mc.sample_mean : '?';
-  var p50ye = ye ? ye.p50 : '?';
-  var p90ye = ye ? ye.p90 : '?';
-  if (note) {
-    note.innerHTML += '<div style="margin-top:.4rem;font-size:9px;color:var(--muted);font-family:var(--mono)">'
-      + '⚠ Rate = Apr–Jun trailing avg (' + E(String(runRateTotal || '?')) + '/month). '
-      + 'Bands = 10k Monte Carlo bootstrap on ' + E(String(mn)) + ' historical months (mean ' + E(String(mm)) + '/month). '
-      + 'Year-end P50=' + E(String(p50ye)) + ' · P90=' + E(String(p90ye)) + ' · ≥160 at ~87% confidence.</div>';
-  }
+  // Plain-English legend
+  out += '<div style="margin-top:.5rem;font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.7">';
+  out += '<strong style="color:var(--text)">P = percentile.</strong> '
+    + 'Imagine repeating this month 10,000 times using past results as the playbook — '
+    + 'P10 is what the bad runs looked like, P50 is the middle (most likely), P90 is the great runs. '
+    + '10,000 simulations smooth out the randomness so the percentile lines are stable.<br>';
+  out += '⚠ Rate = Apr–Jun trailing avg (' + E(String(runRateTotal || '?')) + '/month, by region). '
+    + 'Monte Carlo bootstrapped on ' + E(String(mn)) + ' historical months (avg ' + E(String(mm)) + '/month). '
+    + 'Hover any band number for plain-English meaning.';
+  out += '</div>';
+
+  note.innerHTML = out;
 }
 
 load();
