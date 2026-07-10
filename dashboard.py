@@ -2965,28 +2965,6 @@ def _xsup_synced_at() -> str:
         return ""
 
 
-@app.get("/api/wins")
-def api_wins():
-    with get_db() as conn:
-        regions = conn.execute("""
-            SELECT account_theatre as region,
-                   COUNT(*) as total,
-                   SUM(m9_complete) as m9,
-                   SUM(m8_started) as m8,
-                   SUM(m7_complete) as m7,
-                   SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort != ''
-            GROUP BY account_theatre ORDER BY m9 DESC, m8 DESC
-        """).fetchall()
-        totals = conn.execute("""
-            SELECT COUNT(*) as total, SUM(m9_complete) as m9,
-                   SUM(m8_started) as m8, SUM(m7_complete) as m7,
-                   SUM(m9_complete=1 AND m9_planned != '' AND m9_actual < m9_planned) as beat_plan
-            FROM blocked_data WHERE cohort != ''
-        """).fetchone()
-    return {"regions": [dict(r) for r in regions], "totals": dict(totals)}
-
-
 @app.get("/api/sotu")
 def api_sotu(theatre: str = ""):
     """State of the Union exec dashboard data."""
@@ -3007,7 +2985,7 @@ def api_sotu(theatre: str = ""):
     with get_db() as conn:
         # ── KPI banner ──────────────────────────────────────────────
         def _kpi_count(where_extra: str, params: list) -> int:
-            base = "SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE 1=1"
+            base = "SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE b.cohort != ''"
             if th_filter:
                 base += " AND UPPER(COALESCE(b.account_theatre,'')) = ?"
                 params = [th_filter] + params
@@ -3020,7 +2998,12 @@ def api_sotu(theatre: str = ""):
         th_params = [th_filter] if th_filter else []
 
         in_scope = _kpi_count("", [])
+        # M9 from blocked_data (same source as wins page) — consistent count
         m9_complete = _kpi_count("b.m9_complete = 1", [])
+        beat_plan = _kpi_count(
+            "b.m9_complete = 1 AND b.m9_planned != '' AND b.m9_actual < b.m9_planned",
+            [],
+        )
         # Exclude churn from m8_inflight so KPIs are mutually exclusive
         m8_inflight = _kpi_count(
             "b.m8_started = 1 AND b.m9_complete = 0 AND b.subtype != 'churn'", []
@@ -3040,7 +3023,8 @@ def api_sotu(theatre: str = ""):
         stuck_sql = f"""
             SELECT b.subtype, b.account_theatre, COUNT(*) as cnt
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.m9_complete = 0
+            WHERE b.cohort != ''
+              AND b.m9_complete = 0
               AND b.m8_started = 0
               AND b.subtype != '' AND b.subtype != 'churn'
               {th_cond}
@@ -3089,6 +3073,7 @@ def api_sotu(theatre: str = ""):
             WHERE h.field_name = 'M9 Upgrade Complete'
               AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
+              AND b.cohort != ''
               {hist_th_cond}
             GROUP BY month, theatre
             ORDER BY month, theatre
@@ -3116,7 +3101,8 @@ def api_sotu(theatre: str = ""):
         fcast_sql = f"""
             SELECT b.m9_planned, b.account_theatre
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.m9_complete = 0
+            WHERE b.cohort != ''
+              AND b.m9_complete = 0
               AND b.subtype != 'churn'
               AND b.m9_planned IS NOT NULL AND b.m9_planned != ''
               {fcast_th_cond}
@@ -3157,6 +3143,7 @@ def api_sotu(theatre: str = ""):
               AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
               AND h.changed_at < date('now','start of month')
+              AND b.cohort != ''
               {hist_th_cond}
             GROUP BY theatre
         """
@@ -3165,11 +3152,14 @@ def api_sotu(theatre: str = ""):
         # Count completed full months
         n_rate_months = (
             conn.execute("""
-            SELECT COUNT(DISTINCT strftime('%Y-%m', changed_at))
-            FROM status_history
-            WHERE field_name = 'M9 Upgrade Complete' AND new_status = 'Y'
-              AND changed_at >= '2026-01-01'
-              AND changed_at < date('now','start of month')
+            SELECT COUNT(DISTINCT strftime('%Y-%m', h.changed_at))
+            FROM status_history h
+            JOIN accounts a ON a.account_id = h.account_id
+            LEFT JOIN blocked_data b ON b.account_id = h.account_id
+            WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
+              AND h.changed_at >= '2026-01-01'
+              AND h.changed_at < date('now','start of month')
+              AND b.cohort != ''
         """).fetchone()[0]
             or 1
         )
@@ -3248,6 +3238,7 @@ def api_sotu(theatre: str = ""):
         "kpi": {
             "in_scope": in_scope,
             "m9_complete": m9_complete,
+            "beat_plan": beat_plan,
             "m8_inflight": m8_inflight,
             "churn": churn,
             "stuck_total": stuck_total,
@@ -3360,14 +3351,6 @@ def page_velocity():
     if html_path.exists():
         return html_path.read_text()
     return "<h1>velocity.html not found</h1>"
-
-
-@app.get("/wins", response_class=HTMLResponse)
-def dashboard_wins():
-    html_path = Path(__file__).parent / "static" / "wins.html"
-    if html_path.exists():
-        return html_path.read_text()
-    return "<h1>wins.html not found</h1>"
 
 
 @app.get("/", response_class=HTMLResponse)

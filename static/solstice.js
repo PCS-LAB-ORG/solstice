@@ -303,7 +303,6 @@ var _PAGES = [
   {id:'weekly',   label:'Weekly',    url:'/weekly'},
   {id:'velocity', label:'Velocity',  url:'/velocity'},
   {id:'scope',    label:'Scope',     url:'/scope'},
-  {id:'wins',    label:'🏆 Wins',  url:'/wins'},
 ];
 
 S.initNav = function(activePage) {

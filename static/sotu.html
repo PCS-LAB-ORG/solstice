@@ -56,11 +56,11 @@
     <span class="pill" data-t="LATAM" onclick="setTheatre(this,'LATAM')">LATAM</span>
   </div>
 
-  <!-- KPI Banner — all 6 cards sum to In Scope -->
+  <!-- KPI Banner — additive cards sum to In Scope; Beat Plan is a sub-stat of M9 -->
   <div class="sotu-kpi" id="sotu-kpi">
-    <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">In Scope</div><div class="kpi-number" id="kpi-scope">—</div><div class="kpi-delta delta-neu">All accounts</div></div>
-    <div class="kpi-card green"><div class="kpi-label">M9 Complete</div><div class="kpi-number" id="kpi-m9">—</div><div class="kpi-delta delta-pos">Migrations done</div></div>
-    <div class="kpi-card sky"><div class="kpi-label">M8 In-flight</div><div class="kpi-number" id="kpi-m8">—</div><div class="kpi-delta delta-neu">Upgrade started</div></div>
+    <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">In Scope</div><div class="kpi-number" id="kpi-scope">—</div><div class="kpi-delta delta-neu">All cohorts</div></div>
+    <div class="kpi-card green"><div class="kpi-label">M9 Complete</div><div class="kpi-number" id="kpi-m9">—</div><div class="kpi-delta delta-pos" id="kpi-beat-sub">Migrations done</div></div>
+    <div class="kpi-card sky"><div class="kpi-label">M8 In-flight</div><div class="kpi-number" id="kpi-m8">—</div><div class="kpi-delta delta-neu">Upgrade started, not done</div></div>
     <div class="kpi-card" style="background:#fef3c7;border:1px solid #fcd34d"><div class="kpi-label" style="color:#92400e">Stuck (pre-M8)</div><div class="kpi-number" id="kpi-stuck" style="color:#b45309">—</div><div id="kpi-stuck-breakdown" style="font-size:8px;color:#92400e;font-family:var(--mono);line-height:1.7;margin-top:.2rem"></div></div>
     <div class="kpi-card" style="background:#f0fdf4;border:1px solid #86efac"><div class="kpi-label" style="color:#166534">Progressing</div><div class="kpi-number" id="kpi-prog" style="color:#15803d">—</div><div class="kpi-delta" style="color:#166534">No blocker, pre-M8</div></div>
     <div class="kpi-card red"><div class="kpi-label">Churn</div><div class="kpi-number" id="kpi-churn">—</div><div class="kpi-delta delta-neg">Confirmed churn</div></div>
@@ -143,6 +143,8 @@ function renderKpi(k, stuckList) {
   document.getElementById('kpi-stuck').textContent = stuck.toLocaleString();
   document.getElementById('kpi-prog').textContent  = prog.toLocaleString();
   document.getElementById('kpi-churn').textContent = churn.toLocaleString();
+  var beat = k.beat_plan || 0;
+  document.getElementById('kpi-beat-sub').textContent = beat + ' beat plan date';
   if (stuckList && stuckList.length) {
     document.getElementById('kpi-stuck-breakdown').innerHTML =
       stuckList.map(function(s){ return E(s.label) + ' ' + s.total; }).join('<br>');
