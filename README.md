@@ -1,7 +1,7 @@
-# Solstice v2.4
+# Solstice v2.5
 
 Global CC Migration monitor — EMEA, JAPAC, AMER, LATAM.
-FastAPI + SQLite + vanilla JS. Docker-first. 10-page ops dashboard.
+FastAPI + SQLite + vanilla JS. Docker-first. 11-page ops dashboard.
 
 ---
 

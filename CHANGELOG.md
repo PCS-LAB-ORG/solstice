@@ -2,6 +2,23 @@
 
 ---
 
+## v2.5.0 — State of the Union exec dashboard (2026-07-10)
+
+### New
+- **`/sotu` page** — exec-facing dashboard: theatre filter pills, 5 KPI cards (M9 Done / M8 In-flight / Stuck pre-M8 / Progressing / Churn), 6 stuck-reason cards with per-theatre breakdown inline, M9 completions table (Jan–Jul 2026), M9 forecast table (Jul–Dec 2026).
+- **`/api/sotu`** — single endpoint returning KPI, stuck reasons, historical completions, adjusted forecast, and Monte Carlo percentile bands.
+- **Forecast** — flat run-rate (all-time avg across completed months, split by theatre) replaces aspirational m9_planned dates. Capped Dec 2026.
+- **Monte Carlo bands** — 10k bootstrap simulations from historical monthly actuals. P10/P30/P50/P70/P90 shown per month and as year-end cumulative. Hover tooltips: plain-English meaning per band. Year-end P50=168, P90=185.
+- **KPI sum-check** — 1-liner below banner: all 5 categories always sum to In Scope (verified live).
+- **SOTU added to nav** — position 2 after Ops, solstice.js bumped to v=4.
+
+### Fixed
+- KPI m8_inflight was double-counting 14 churn accounts (+14 phantom). Fixed to exclude churn.
+- Stuck cards showed in-flight M8 accounts (55 customer_delay, 54 tech_blocker) — now pre-M8 only.
+- Replaced aspirational m9_planned forecast with run-rate + MC bands.
+
+---
+
 ## v2.4.0 — Central Technical COE Tracker integration (2026-05-13)
 
 ### New
