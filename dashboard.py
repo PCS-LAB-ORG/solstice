@@ -3202,10 +3202,13 @@ def api_sotu(theatre: str = ""):
         import random as _random
 
         mc_hist_rows = conn.execute("""
-            SELECT strftime('%Y-%m', changed_at) as month, COUNT(*) as cnt
-            FROM status_history
-            WHERE field_name = 'M9 Upgrade Complete' AND new_status = 'Y'
-              AND changed_at >= '2026-01-01' AND changed_at < date('now','start of month')
+            SELECT strftime('%Y-%m', h.changed_at) as month, COUNT(*) as cnt
+            FROM status_history h
+            JOIN accounts a ON a.account_id = h.account_id
+            LEFT JOIN blocked_data b ON b.account_id = h.account_id
+            WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
+              AND h.changed_at >= '2026-01-01' AND h.changed_at < date('now','start of month')
+              AND b.cohort = 'Scale cohort'
             GROUP BY month ORDER BY month
         """).fetchall()
         mc_sample = [r[1] for r in mc_hist_rows] if mc_hist_rows else [10]
@@ -3230,11 +3233,14 @@ def api_sotu(theatre: str = ""):
             "p90": _pct([s[0] for s in sims], 90),
         }
 
-        # Year-end 2026: confirmed so far + Aug–Dec simulation only (skip Jul partial, skip 2027 months)
+        # Year-end 2026: confirmed so far (Scale cohort) + Aug–Dec simulation
         confirmed_ytd = conn.execute("""
-            SELECT COUNT(*) FROM status_history
-            WHERE field_name = 'M9 Upgrade Complete' AND new_status = 'Y'
-              AND changed_at >= '2026-01-01'
+            SELECT COUNT(*) FROM status_history h
+            JOIN accounts a ON a.account_id = h.account_id
+            LEFT JOIN blocked_data b ON b.account_id = h.account_id
+            WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
+              AND h.changed_at >= '2026-01-01'
+              AND b.cohort = 'Scale cohort'
         """).fetchone()[0]
         dec26_indices = [
             i
