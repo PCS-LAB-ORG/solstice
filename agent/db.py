@@ -140,7 +140,11 @@ def init_db(path: Path = DB_PATH) -> None:
             subtype             TEXT,
             milestone_category  TEXT,
             notes               TEXT,
-            merged_at           TEXT
+            merged_at           TEXT,
+            -- Unified Tracker 2.0 fields
+            cortexcloud_renewable_acv TEXT DEFAULT '',
+            pc_cc_migration_status TEXT DEFAULT '',
+            field_indicated_churn TEXT DEFAULT ''
         );
 
         -- PS engagement data (from PS tracker CSV)
@@ -260,6 +264,14 @@ def init_db(path: Path = DB_PATH) -> None:
     _migrate_schema(path)
 
 
+def wipe_account_data(conn) -> None:
+    """Wipe accounts + blocked_data only. Preserves status_history, COE, XSUP tables."""
+    conn.execute("DELETE FROM blocked_data")
+    conn.execute("DELETE FROM accounts")
+    conn.execute("DELETE FROM account_blockers")
+    conn.execute("DELETE FROM m1_suggestions")
+
+
 def _migrate_schema(path: Path = DB_PATH) -> None:
     """Apply incremental ALTER TABLE migrations for columns added after initial deploy."""
     with get_db(path) as conn:
@@ -268,6 +280,19 @@ def _migrate_schema(path: Path = DB_PATH) -> None:
                 "ALTER TABLE blocked_data ADD COLUMN m6_complete INTEGER DEFAULT 0"
             )
         except sqlite3.OperationalError:
+            pass
+        # Unified Tracker 2.0 columns — added 2026-07-21
+        try:
+            conn.execute("ALTER TABLE blocked_data ADD COLUMN cortexcloud_renewable_acv TEXT DEFAULT ''")
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE blocked_data ADD COLUMN pc_cc_migration_status TEXT DEFAULT ''")
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE blocked_data ADD COLUMN field_indicated_churn TEXT DEFAULT ''")
+        except Exception:
             pass
         # xsup_data table — added 2026-05-11
         conn.executescript("""

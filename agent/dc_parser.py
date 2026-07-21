@@ -350,3 +350,138 @@ def merge_into_state(records: list[dict], state_file: Path) -> dict:
 def load_and_merge(csv_path: Path, state_file: Path) -> dict:
     """One-shot: parse and merge."""
     return merge_into_state(parse_dc_csv(csv_path), state_file)
+
+
+def parse_unified_xlsx(xlsx_bytes: bytes, conn) -> dict:
+    """
+    Parse Unified Tracker 2.0 Combined Database tab into accounts + blocked_data.
+    Replaces parse_dc_csv as the primary data source.
+    """
+    import openpyxl
+    from io import BytesIO
+    from agent.db import wipe_account_data
+
+    wb = openpyxl.load_workbook(BytesIO(xlsx_bytes), read_only=True, data_only=True)
+    if "Combined Database" not in wb.sheetnames:
+        return {"accounts": 0, "changes": 0, "errors": ["Combined Database sheet not found"]}
+
+    ws = wb["Combined Database"]
+    rows_iter = ws.iter_rows(min_row=1)
+    raw_headers = [str(c.value or "") for c in next(rows_iter)]
+    col = {h: i for i, h in enumerate(raw_headers)}
+
+    def _get(row_vals, name, default=""):
+        i = col.get(name, -1)
+        if i < 0 or i >= len(row_vals):
+            return default
+        v = row_vals[i]
+        return str(v).strip() if v is not None else default
+
+    def _yn(val):
+        return 1 if str(val).strip().upper() == "Y" else 0
+
+    wipe_account_data(conn)
+
+    n_accounts = 0
+    n_errors = []
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    for row in ws.iter_rows(min_row=2):
+        row_vals = [c.value for c in row]
+        if not any(v for v in row_vals if v is not None):
+            continue
+
+        account_id = _get(row_vals, "pc_end_customer_account_id")
+        if not account_id:
+            continue
+
+        customer_name = _get(row_vals, "pc_account_name")
+        active_cse    = _get(row_vals, "CSE Assigned")
+        theatre       = _get(row_vals, "account_theatre")
+        sales_region  = _get(row_vals, "account_region")
+        cohort        = _get(row_vals, "customer_size_cohort_classification")
+
+        status_detail  = _get(row_vals, "Status Detail")
+        subtype        = _subtype_from_detail(status_detail)
+        signal         = _signal_from_detail(status_detail)
+
+        # If no signal from emoji, derive from DC progress
+        if not signal:
+            dc_prog = _get(row_vals, "DC Upgrade Progress Status")
+            if dc_prog in ("Yellow", "Red"):
+                signal = "at_risk"
+            else:
+                signal = "green"
+
+        try:
+            conn.execute("""
+                INSERT OR REPLACE INTO accounts
+                  (account_id, customer_name, active_cse, account_theatre, sales_region, created_at)
+                VALUES (?,?,?,?,?,?)
+            """, (account_id, customer_name, active_cse, theatre, sales_region, now_iso))
+
+            conn.execute("""
+                INSERT OR REPLACE INTO blocked_data (
+                  account_id, cohort, account_theatre, area, account_region, district,
+                  m0_complete, m1_complete, m2_complete, m3_complete, m4_complete,
+                  m5_complete, m7_complete, m8_started, m9_complete,
+                  m8_actual, m9_actual, m3_planned, m8_planned, m9_planned,
+                  upgrade_notes, health_notes, status_detail, dc_progress, churn_risk,
+                  cc_rep, cc_dsm, cortexcloud_renewable_acv, pc_cc_migration_status,
+                  owner_e2e, dc_assignment, last_edited_by, last_edited_date,
+                  current_project_status, field_indicated_churn,
+                  signal, subtype
+                ) VALUES (
+                  ?,?,?,?,?,?,
+                  ?,?,?,?,?,
+                  ?,?,?,?,
+                  ?,?,?,?,?,
+                  ?,?,?,?,?,
+                  ?,?,?,?,
+                  ?,?,?,?,
+                  ?,?,
+                  ?,?
+                )
+            """, (
+                account_id, cohort, theatre,
+                _get(row_vals, "Account_area"),
+                _get(row_vals, "account_region"),
+                _get(row_vals, "account_district"),
+                _yn(_get(row_vals, "M0:Internal Kickoff Complete")),
+                _yn(_get(row_vals, "M1:Customer Outreach Complete")),
+                _yn(_get(row_vals, "M2:Entitlements and Plan aligned with customer")),
+                _yn(_get(row_vals, "M3:EB Buy-in Meeting Complete")),
+                _yn(_get(row_vals, "M4:Discovery complete")),
+                _yn(_get(row_vals, "M5:Tech validation complete")),
+                _yn(_get(row_vals, "M7:Legal and operational upgrade readiness")),
+                _yn(_get(row_vals, "M8:Upgrade started")),
+                _yn(_get(row_vals, "M9:Upgrade complete")),
+                _get(row_vals, "Date - M8:Upgrade started"),
+                _get(row_vals, "Date - M9:Upgrade complete"),
+                _get(row_vals, "M3 Planned date"),
+                _get(row_vals, "M8 Planned date"),
+                _get(row_vals, "M9 Planned date"),
+                _get(row_vals, "Upgrade Notes"),
+                _get(row_vals, "Account Health Notes"),
+                status_detail,
+                _get(row_vals, "DC Upgrade Progress Status"),
+                _get(row_vals, "DC Indicated account churn risk"),
+                _get(row_vals, "cc_Rep (SPO)"),   # col 222 (0-indexed)
+                _get(row_vals, "DCM"),
+                _get(row_vals, "cortexcloud_renewable_acv"),
+                _get(row_vals, "PC_CC_Migration_status"),
+                _get(row_vals, "Owner: End to end upgrade"),
+                _get(row_vals, "DC assignment"),
+                _get(row_vals, "Last edited by"),
+                _get(row_vals, "Last edited date"),
+                _get(row_vals, "current_project_status"),
+                _get(row_vals, "Field indicated churn (SPO)"),
+                signal, subtype,
+            ))
+            n_accounts += 1
+        except Exception as e:
+            n_errors.append(f"{account_id}: {e}")
+
+    wb.close()
+    conn.commit()
+    return {"accounts": n_accounts, "changes": n_accounts, "errors": n_errors[:10], "error_total": len(n_errors)}
