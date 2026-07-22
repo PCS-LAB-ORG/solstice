@@ -52,6 +52,12 @@
 </div>
 <div class="s-main">
 
+  <!-- Scope note -->
+  <div style="font-size:9px;color:var(--muted);font-family:var(--mono);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.5rem .9rem;margin-bottom:1.2rem;line-height:1.8">
+    <strong style="color:var(--text)">Scope:</strong> Active PC SaaS accounts — excludes SH-only, NNL, confirmed churns, excluded from SPO, and expired contracts (pre-Aug 2025). Matches Unified Tracker 2.0 Dashboard tab 1-to-1. Use cohort pills above to filter by tier; use theatre pills to filter by region.
+  </div>
+
+
   <!-- Theatre filter -->
   <div class="sotu-controls">
     <span class="pill active" data-t="" onclick="setTheatre(this,'')">All</span>
@@ -68,53 +74,73 @@
         <div class="kpi-label">To Upgrade</div>
         <div class="kpi-number" id="kpi-scope">—</div>
         <div class="kpi-delta delta-neu" id="kpi-scope-sub">active pipeline</div>
+        <div style="font-size:7px;color:var(--muted);font-family:var(--mono);margin-top:.3rem;line-height:1.5">Active SaaS minus<br>sales-indicated churn</div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-label">M9 Complete</div>
         <div class="kpi-number" id="kpi-m9">—</div>
         <div class="kpi-delta delta-pos" id="kpi-beat-sub">—</div>
+        <div style="font-size:7px;color:#065f46;font-family:var(--mono);margin-top:.3rem;line-height:1.5">Upgrade fully done.<br>M9:Upgrade complete = Y</div>
       </div>
       <div class="kpi-card sky">
         <div class="kpi-label">M8 In-flight</div>
         <div class="kpi-number" id="kpi-m8">—</div>
         <div class="kpi-delta delta-neu">Upgrade started, not done</div>
+        <div style="font-size:7px;color:var(--muted);font-family:var(--mono);margin-top:.3rem;line-height:1.5">M8 started, M9 not done.<br>Actively upgrading now.</div>
       </div>
       <div class="kpi-card" style="background:#fef3c7;border:1px solid #fcd34d">
         <div class="kpi-label" style="color:#92400e">Stuck (pre-M8)</div>
         <div class="kpi-number" id="kpi-stuck" style="color:#b45309">—</div>
         <div id="kpi-stuck-breakdown" style="font-size:8px;color:#92400e;font-family:var(--mono);line-height:1.7;margin-top:.2rem"></div>
+        <div style="font-size:7px;color:#92400e;font-family:var(--mono);margin-top:.3rem;line-height:1.5">Has a recorded reason why<br>upgrade hasn't started.</div>
       </div>
       <div class="kpi-card" style="background:#f0fdf4;border:1px solid #86efac">
         <div class="kpi-label" style="color:#166534">Progressing</div>
         <div class="kpi-number" id="kpi-prog" style="color:#15803d">—</div>
         <div class="kpi-delta" style="color:#166534">No blocker, pre-M8</div>
+        <div style="font-size:7px;color:#166534;font-family:var(--mono);margin-top:.3rem;line-height:1.5">No blocker logged yet.<br>Not in upgrade, not stuck.</div>
       </div>
     </div>
     <!-- Field-indicated churn callout -->
-    <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:8px;padding:.75rem 1rem;min-width:120px;text-align:center;flex-shrink:0">
+    <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:8px;padding:.75rem 1rem;min-width:130px;text-align:center;flex-shrink:0">
       <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#991b1b;font-family:var(--mono);margin-bottom:.25rem">Field Churn</div>
       <div style="font-size:2rem;font-weight:800;color:#dc2626;line-height:1" id="kpi-churn">—</div>
-      <div style="font-size:8px;color:#991b1b;font-family:var(--mono);margin-top:.25rem">sales indicated</div>
-      <div style="font-size:8px;color:#991b1b;font-family:var(--mono);margin-top:.15rem" id="kpi-active-saas"></div>
+      <div style="font-size:7px;color:#991b1b;font-family:var(--mono);margin-top:.3rem;line-height:1.6">Sales team flagged these<br>as likely to churn.<br>Excluded from "To Upgrade"<br>but still tracked here.</div>
+      <div style="font-size:8px;color:#991b1b;font-family:var(--mono);margin-top:.25rem" id="kpi-active-saas"></div>
     </div>
   </div>
   <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:1.5rem" id="kpi-sum-check"></div>
 
-  <!-- Stuck Reasons — accounts with blocker subtype, not yet in M8 -->
+  <!-- Stuck Reasons -->
   <div class="sotu-section">
     <div class="sotu-title">Stuck Reasons — Pre-M8 Accounts by Blocker Type</div>
+    <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:.7rem;line-height:1.7">
+      Accounts that haven't started M8 yet and have a logged reason why. Each card = a blocker category from the DC tracker.
+      Numbers show how many accounts in each theatre are waiting on that type of blocker.
+      These are a subset of "Stuck (pre-M8)" above.
+    </div>
     <div class="stuck-grid" id="stuck-grid"></div>
   </div>
 
   <!-- Historical completions -->
   <div class="sotu-section">
     <div class="sotu-title">M9 Completions — 2026 by Month &amp; Region</div>
+    <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:.6rem;line-height:1.7">
+      Actual M9 upgrades completed each month, sourced from the <em>Date - M9:Upgrade complete</em> field in the Unified Tracker.
+      Same filters as KPIs above. Partial current month labeled.
+    </div>
     <div style="overflow-x:auto"><table class="mtbl" id="comp-tbl"><tbody><tr><td class="muted">Loading…</td></tr></tbody></table></div>
   </div>
 
   <!-- Forecast -->
   <div class="sotu-section">
-    <div class="sotu-title">M9 Forecast — Adjusted by Run Rate</div>
+    <div class="sotu-title">M9 Forecast — Run Rate + Monte Carlo Confidence Bands</div>
+    <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:.6rem;line-height:1.8">
+      <strong style="color:var(--text)">Rate column</strong> = average monthly completions since Jan 2026, split by region — applied flat to each future month.<br>
+      <strong style="color:var(--text)">P10–P90 bands</strong> = Monte Carlo: 10,000 simulations randomly sampling from the actual monthly history to show the realistic spread.
+      P10 = a bad month (only 10% of months were worse). P50 = most likely. P90 = a great month (only 10% were better).<br>
+      <strong style="color:var(--text)">Year-end row</strong> = cumulative P50 total done by Dec 2026 and remaining pipeline.
+    </div>
     <div style="overflow-x:auto"><table class="mtbl" id="fcast-tbl"><tbody><tr><td class="muted">Loading…</td></tr></tbody></table></div>
     <div id="fcast-disclaimer" style="margin-top:.6rem;font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.6"></div>
   </div>
