@@ -2736,6 +2736,19 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         progressing   = _ms_count("b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype = ''")
         churn         = indicated_churn  # rename for template compatibility
 
+        # Confirmed churn since FY26 start (PC_CC_Migration_status='Churn', contract > 2025-07-31)
+        # Excludes SH Only, NNL — these are accounts the business has written off
+        confirmed_churn_sql = f"""
+            SELECT COUNT(*) FROM blocked_data b
+            JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.pc_cc_migration_status = 'Churn'
+              AND b.pc_saas_vs_sh != 'SH Only'
+              AND b.last_contract_end_date > '2025-07-31'
+              {_cohort_sql()}
+              {th_cond}
+        """
+        confirmed_churn = conn.execute(confirmed_churn_sql, [cohort, cohort] + th_params).fetchone()[0]
+
         # ── Stuck reasons (pre-M8, to-upgrade population) ───────────
         stuck_sql = f"""
             SELECT b.subtype, b.account_theatre, COUNT(*) as cnt
@@ -2972,7 +2985,8 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             "beat_plan": beat_plan,
             "m8_inflight": m8_inflight,        # in-flight (started, not done)
             "pre_m8": pre_m8,                  # not yet in M8, not done
-            "churn": churn,                    # = indicated_churn (for UI compat)
+            "churn": churn,                    # = indicated_churn (sales flagged, still active)
+            "confirmed_churn": confirmed_churn, # PC_CC_Migration_status=Churn, fully written off
             "stuck_total": stuck_total,
             "progressing": progressing,
         },

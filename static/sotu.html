@@ -101,12 +101,21 @@
         <div style="font-size:7px;color:#166534;font-family:var(--mono);margin-top:.3rem;line-height:1.5">No blocker logged yet.<br>Not in upgrade, not stuck.</div>
       </div>
     </div>
-    <!-- Field-indicated churn callout -->
-    <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:8px;padding:.75rem 1rem;min-width:130px;text-align:center;flex-shrink:0">
-      <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#991b1b;font-family:var(--mono);margin-bottom:.25rem">Field Churn</div>
-      <div style="font-size:2rem;font-weight:800;color:#dc2626;line-height:1" id="kpi-churn">—</div>
-      <div style="font-size:7px;color:#991b1b;font-family:var(--mono);margin-top:.3rem;line-height:1.6">Sales team flagged these<br>as likely to churn.<br>Excluded from "To Upgrade"<br>but still tracked here.</div>
-      <div style="font-size:8px;color:#991b1b;font-family:var(--mono);margin-top:.25rem" id="kpi-active-saas"></div>
+    <!-- Churn callouts — two types -->
+    <div style="display:flex;flex-direction:column;gap:.5rem;flex-shrink:0">
+      <!-- Indicated churn -->
+      <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:8px;padding:.6rem .9rem;min-width:145px;text-align:center">
+        <div style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c2410c;font-family:var(--mono);margin-bottom:.2rem">Indicated Churn</div>
+        <div style="font-size:1.6rem;font-weight:800;color:#ea580c;line-height:1" id="kpi-churn">—</div>
+        <div style="font-size:7px;color:#c2410c;font-family:var(--mono);margin-top:.3rem;line-height:1.5">Sales flagged as likely churn.<br>Still active — could recover.<br>Excluded from "To Upgrade".</div>
+        <div style="font-size:7px;color:#c2410c;font-family:var(--mono);margin-top:.15rem" id="kpi-active-saas"></div>
+      </div>
+      <!-- Confirmed churn -->
+      <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:8px;padding:.6rem .9rem;min-width:145px;text-align:center">
+        <div style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#991b1b;font-family:var(--mono);margin-bottom:.2rem">Confirmed Churn</div>
+        <div style="font-size:1.6rem;font-weight:800;color:#dc2626;line-height:1" id="kpi-confirmed-churn">—</div>
+        <div style="font-size:7px;color:#991b1b;font-family:var(--mono);margin-top:.3rem;line-height:1.5">PC_CC_Migration_status=Churn.<br>Written off. Not counted<br>in any pipeline metric.</div>
+      </div>
     </div>
   </div>
   <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:1.5rem" id="kpi-sum-check"></div>
@@ -205,8 +214,9 @@ function renderKpi(k, stuckList) {
   document.getElementById('kpi-m8').textContent         = m8.toLocaleString();
   document.getElementById('kpi-stuck').textContent      = stuck.toLocaleString();
   document.getElementById('kpi-prog').textContent       = prog.toLocaleString();
-  document.getElementById('kpi-churn').textContent      = fchurn.toLocaleString();
-  document.getElementById('kpi-active-saas').textContent = active_saas.toLocaleString() + ' active SaaS';
+  document.getElementById('kpi-churn').textContent           = fchurn.toLocaleString();
+  document.getElementById('kpi-confirmed-churn').textContent = (k.confirmed_churn || 0).toLocaleString();
+  document.getElementById('kpi-active-saas').textContent     = active_saas.toLocaleString() + ' active SaaS';
   var beat = k.beat_plan || 0;
   document.getElementById('kpi-beat-sub').textContent   = beat + ' beat plan date';
   if (stuckList && stuckList.length) {
