@@ -2941,7 +2941,7 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             return round(s[lo] + (s[hi] - s[lo]) * (k - lo))
 
         _random.seed(42)
-        n_sim, n_months = 10_000, len(adjusted_forecast)
+        n_sim, n_months = 10_000, max(1, len(adjusted_forecast))
         sims = [
             [_random.choice(mc_sample) for _ in range(n_months)] for _ in range(n_sim)
         ]
