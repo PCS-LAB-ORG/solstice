@@ -1392,10 +1392,10 @@ def _load_completed(theatre: str = "", cohort: str = "") -> list:
 
 def _load_dq() -> list:
     _ensure_db()
-    """Data quality issues — DC CSE Tracker is source of truth."""
+    """Data quality issues — Unified Tracker 2.0 is source of truth."""
     try:
         with get_db() as conn:
-            # Source of truth: DB (populated from DC tracker)
+            # Source of truth: DB (populated from Unified Tracker 2.0)
             rows = conn.execute("""
                 SELECT a.account_id, a.customer_name, a.active_cse, a.status,
                        a.email_sent, b.dc_progress, b.m1_complete
@@ -1466,12 +1466,12 @@ def _load_audit_log(theatre: str = "") -> list:
                   CASE WHEN sh.account_id='unmatched_dc' THEN 'N' ELSE sh.old_status END as old_status,
                   CASE WHEN sh.account_id='unmatched_dc' THEN 'Y' ELSE sh.new_status END as new_status,
                   sh.changed_at, sh.source,
-                  COALESCE(sh.file_source, 'DC CSE Tracker') as file_source,
+                  COALESCE(sh.file_source, 'Unified Tracker 2.0') as file_source,
                   COALESCE(sh.field_name, 'status') as field_name
                 FROM status_history sh
                 LEFT JOIN accounts a ON a.account_id = sh.account_id
                 WHERE sh.source IN ('pipeline','backfill')
-                  AND sh.file_source = 'DC CSE Tracker'
+                  AND sh.file_source = 'Unified Tracker 2.0'
                   AND (? = ''
                        OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?)
                        OR (sh.account_id='unmatched_dc' AND (
