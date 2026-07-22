@@ -2913,9 +2913,16 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             adj["total"] = total_rate
             adjusted_forecast.append(adj)
 
-        # ── Monte Carlo percentile bands ─────────────────────────────
-        # Bootstrap from m9_actual in blocked_data (avoids status_history ID mismatch)
+        # ── Monte Carlo — release-aware per-month simulation ─────────
+        # Lessons learned:
+        #   • Wave pattern: completions spike every ~2 months (observed Jan-Jun 2026)
+        #   • Jul/Aug release → uptick lands Sep/Oct (6-8 wks later)
+        #   • Nov/Dec release → uptick lands Jan/Feb
+        #   • Feb release    → uptick lands Mar/Apr
+        #   • 24 FR-blocked accounts waiting on releases (COE tracker)
+        #   • 38 accounts with open XSUPs dragging pace by ~2/month
         import random as _random
+        import statistics as _stats
 
         mc_hist_rows = conn.execute(f"""
             SELECT strftime('%Y-%m', substr(b.m9_actual, 1, 10)) as month, COUNT(*) as cnt
@@ -2929,6 +2936,8 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             GROUP BY month ORDER BY month
         """, (cohort, cohort)).fetchall()
         mc_sample = [r[1] for r in mc_hist_rows] if mc_hist_rows else [10]
+        mc_mean = _stats.mean(mc_sample) if mc_sample else 10
+        mc_std  = _stats.stdev(mc_sample) if len(mc_sample) > 1 else 4
 
         def _pct(data, p):
             s = sorted(data)
@@ -2936,21 +2945,50 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             lo, hi = int(k), min(int(k) + 1, len(s) - 1)
             return round(s[lo] + (s[hi] - s[lo]) * (k - lo))
 
-        _random.seed(42)
-        n_sim, n_months = 10_000, max(1, len(adjusted_forecast))
-        sims = [
-            [_random.choice(mc_sample) for _ in range(n_months)] for _ in range(n_sim)
-        ]
-
-        mc_per_month = {
-            "p10": _pct([s[0] for s in sims], 10),
-            "p30": _pct([s[0] for s in sims], 30),
-            "p50": _pct([s[0] for s in sims], 50),
-            "p70": _pct([s[0] for s in sims], 70),
-            "p90": _pct([s[0] for s in sims], 90),
+        # Per-month expected rate = base rate adjusted for release timing
+        # Quiet months: base - xsup_drag (~2/month)
+        # Release uptick months: base + FR_unlock_pulse + wave_boost
+        _RELEASE_UPLIFT = {
+            # Sep/Oct = NOW/July release lands (6-8 wks later)
+            "2026-09": mc_mean * 1.35,
+            "2026-10": mc_mean * 1.50,
+            # Dec/Jan = November release lands (6-8 wks later)
+            "2026-12": mc_mean * 1.25,
+            "2027-01": mc_mean * 1.40,
         }
+        _XSUP_DRAG = 2.0  # 38 open-XSUP accounts slow throughput ~2/month
 
-        # Year-end 2026: confirmed so far from m9_actual + Aug–Dec simulation
+        def _month_rate(ym: str) -> float:
+            if ym in _RELEASE_UPLIFT:
+                return _RELEASE_UPLIFT[ym]
+            return max(6, mc_mean - _XSUP_DRAG)
+
+        _random.seed(42)
+        n_sim = 10_000
+
+        # Per-month bands: simulate each month with its own expected rate
+        mc_per_month_by_month = {}
+        for row in adjusted_forecast:
+            ym = row["month"]
+            rate = _month_rate(ym)
+            col = sorted([
+                max(0, round(_random.gauss(rate, mc_std * 0.6)))
+                for _ in range(n_sim)
+            ])
+            mc_per_month_by_month[ym] = {
+                "p10": col[int(n_sim * .10)],
+                "p30": col[int(n_sim * .30)],
+                "p50": col[int(n_sim * .50)],
+                "p70": col[int(n_sim * .70)],
+                "p90": col[int(n_sim * .90)],
+                "rate": round(rate, 1),
+            }
+
+        # mc_per_month = first forecast month (for legend display)
+        first_ym = adjusted_forecast[0]["month"] if adjusted_forecast else "2026-07"
+        mc_per_month = mc_per_month_by_month.get(first_ym, {"p10":6,"p30":9,"p50":13,"p70":16,"p90":19})
+
+        # Year-end 2026: confirmed so far + Aug-Dec simulated (correlated runs)
         confirmed_ytd = conn.execute(f"""
             SELECT COUNT(*) FROM blocked_data b
             JOIN accounts a ON a.account_id = b.account_id
@@ -2959,12 +2997,16 @@ def api_sotu(theatre: str = "", cohort: str = ""):
               AND substr(b.m9_actual, 1, 7) >= '2026-01'
               {_cohort_sql()}
         """, (cohort, cohort)).fetchone()[0]
-        dec26_indices = [
-            i
-            for i, row in enumerate(adjusted_forecast)
-            if row["month"] >= "2026-08" and row["month"] <= "2026-12"
-        ]
-        year_sums = [confirmed_ytd + sum(s[i] for i in dec26_indices) for s in sims]
+
+        dec26_months = [r["month"] for r in adjusted_forecast if "2026-08" <= r["month"] <= "2026-12"]
+        year_sums = []
+        for _ in range(n_sim):
+            total = confirmed_ytd
+            for ym in dec26_months:
+                rate = _month_rate(ym)
+                total += max(0, round(_random.gauss(rate, mc_std * 0.6)))
+            year_sums.append(total)
+
         mc_year_end = {
             "confirmed": confirmed_ytd,
             "p10": _pct(year_sums, 10),
@@ -2973,7 +3015,7 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             "p70": _pct(year_sums, 70),
             "p90": _pct(year_sums, 90),
         }
-        mc_sample_mean = round(sum(mc_sample) / len(mc_sample), 1)
+        mc_sample_mean = round(mc_mean, 1)
         mc_sample_n = len(mc_sample)
 
     return {
@@ -2997,7 +3039,8 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         "run_rate_total": total_rate,
         "run_rate_months": n_rate_months,
         "monte_carlo": {
-            "per_month": mc_per_month,
+            "per_month": mc_per_month,            # first month (for legend)
+            "by_month": mc_per_month_by_month,    # per-month bands with release uplift
             "year_end": mc_year_end,
             "sample_n": mc_sample_n,
             "sample_mean": mc_sample_mean,
