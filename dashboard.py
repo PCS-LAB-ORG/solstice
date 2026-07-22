@@ -64,7 +64,7 @@ def _populate_db():
         _mp(DATA_DIR / "ps_tracker.csv", STATE_FILE)
     _mig(STATE_FILE)
     # DC pipeline runs last — syncs all 9 milestones, cc_rep, cc_dsm, churn_risk, rebuilds m1_suggestions
-    if (DATA_DIR / "dc_cse_tracker.csv").exists():
+    if (DATA_DIR / "unified_tracker2.xlsx").exists():
         _run_dc_pipeline(DATA_DIR, STATE_FILE)
     _state = _j.loads(STATE_FILE.read_text())
     with get_db() as conn:
@@ -505,8 +505,8 @@ def _gdrive_root() -> Path:
 
 def _download_live_from_drive() -> dict:
     """
-    Download DC CSE Tracker CSV directly from Google Drive using ADC token.
-    Reads file ID from the locally synced .gsheet file — no browser needed.
+    Download Unified Tracker 2.0 xlsx, XSUP Tracker, and COE Tracker from Google Drive
+    using ADC token. Reads file IDs from locally synced .gsheet files — no browser needed.
     """
     import json as _j, warnings as _w, subprocess as _sp
 
@@ -514,53 +514,25 @@ def _download_live_from_drive() -> dict:
     try:
         import requests as _req
     except ImportError:
-        return {"DC CSE Tracker": "⚠️ requests not installed"}
+        return {"Unified Tracker": "⚠️ requests not installed"}
 
-    DRIVE_ROOT = _gdrive_root() / "My Drive/EMEA CC "
-    gsheet = (
-        DRIVE_ROOT
-        / "DC CSE Tracker (Instant sync underlying data to upgrade tracker).gsheet"
-    )
+    result = {}
 
-    try:
-        file_id = _j.loads(gsheet.read_text())["doc_id"]
-    except Exception:
-        # .gsheet not available (e.g. running in Docker) — fall back to drive_config.json
-        try:
-            config_path = Path(__file__).parent / "data" / "drive_config.json"
-            cfg_files = _j.loads(config_path.read_text()).get("files", [])
-            dc_entry = next((f for f in cfg_files if f.get("role") == "MASTER"), None)
-            file_id = dc_entry["file_id"] if dc_entry else None
-            if not file_id:
-                return {"DC CSE Tracker": "⚠️ no file_id in drive_config.json"}
-        except Exception as e2:
-            return {"DC CSE Tracker": f"⚠️ cannot resolve Drive file ID: {e2}"}
-
+    # ── Get ADC token (reused for all downloads) ──────────────────────
     try:
         token = _sp.check_output(
             ["gcloud", "auth", "application-default", "print-access-token"],
             text=True,
             stderr=_sp.DEVNULL,
+            timeout=10,
         ).strip()
-    except Exception as e:
-        return {"DC CSE Tracker": f"⚠️ ADC token failed: {e}"}
+    except Exception as _te:
+        result["Unified Tracker"] = f"⚠️ ADC token failed: {_te}"
+        return result
 
-    try:
-        r = _req.get(
-            f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv",
-            headers={"Authorization": f"Bearer {token}"},
-            verify=False,
-            allow_redirects=True,
-            timeout=30,
-        )
-        if r.status_code != 200:
-            return {"DC CSE Tracker": f"⚠️ Drive returned {r.status_code}"}
-        dest = DATA_DIR / "dc_cse_tracker.csv"
-        dest.write_text(r.content.decode("utf-8"), encoding="utf-8")
-        rows = r.text.count("\n")
-        result = {"DC CSE Tracker": f"✅ {rows} rows downloaded from Drive"}
-    except Exception as e:
-        result = {"DC CSE Tracker": f"⚠️ download failed: {e}"}
+    if not token:
+        result["Unified Tracker"] = "⚠️ ADC token empty"
+        return result
 
     _in_docker = Path("/.dockerenv").exists()
 
@@ -608,6 +580,34 @@ def _download_live_from_drive() -> dict:
             return f"⚠️ Drive returned {code}"
         except Exception as e:
             return f"⚠️ download failed: {e}"
+
+    # ── Unified Tracker 2.0 (replaces DC CSE Tracker CSV) ──────────────
+    UNIFIED_GSHEET = (
+        _gdrive_root()
+        / "My Drive/Cortex Cloud Work"
+        / "Unified Tracker 2.0 (IT Connected Sheet).gsheet"
+    )
+    try:
+        unified_file_id = _j.loads(UNIFIED_GSHEET.read_text())["doc_id"]
+        unified_dest = DATA_DIR / "unified_tracker2.xlsx"
+        dl = _stream_xlsx(
+            f"https://docs.google.com/spreadsheets/d/{unified_file_id}/export?format=xlsx",
+            unified_dest,
+            "Unified Tracker",
+        )
+        if dl == "ok" or dl.startswith("ok_cached:"):
+            age = f" (cached {dl.split(':')[1]})" if dl.startswith("ok_cached:") else ""
+            result["Unified Tracker"] = f"✅ {unified_dest.stat().st_size // 1024}KB downloaded{age}"
+        else:
+            result["Unified Tracker"] = dl
+    except FileNotFoundError:
+        unified_dest = DATA_DIR / "unified_tracker2.xlsx"
+        if unified_dest.exists():
+            result["Unified Tracker"] = f"✅ loaded from disk ({unified_dest.stat().st_size // 1024}KB)"
+        else:
+            result["Unified Tracker"] = "⚠️ unified_tracker2.xlsx not found — run host_sync.py"
+    except Exception as ue:
+        result["Unified Tracker"] = f"⚠️ Unified Tracker download failed: {ue}"
 
     # Download XSUP tracker
     XSUP_GSHEET = (
@@ -685,258 +685,42 @@ def _yn_str(v) -> str:
 
 def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
     """
-    Shared DC CSE Tracker pipeline step:
-    1. Snapshot existing dc_data from state.json
-    2. Parse + merge fresh DC CSV
-    3. Upsert ALL milestone fields into blocked_data (DC wins)
-    4. Diff snapshot vs new → log changes to status_history
-    Returns: {matched, total, audit_logged}
+    Unified Tracker 2.0 pipeline step:
+    1. Call parse_unified_xlsx — full wipe+replace of accounts + blocked_data
+    2. Rebuild m1_suggestions from fresh DB state
+    Returns: {matched, total, audit_logged, new_accounts, m1_rebuilt, history_backfilled}
     """
     import json as _j
     from datetime import datetime as _dt, timezone as _tz
-    from agent.account_list_parser import (
-        parse_account_list_csv as _parse_al,
-        load_name_to_id as _load_n2id,
-    )
+    from agent.dc_parser import parse_unified_xlsx as _parse_unified
 
-    # Snapshot previous dc_data BEFORE parse (no state.json merge for new parser)
-    _prev = _j.loads(state_file.read_text())
-    _snap = {}
-    for _pid, _pacc in _prev.get("accounts", {}).items():
-        _pd = _pacc.get("dc_data")
-        if _pd:
-            _snap[_pid.lower()] = _pd
+    # Parse Unified Tracker 2.0 — full wipe+replace of accounts + blocked_data
+    unified_path = data_dir / "unified_tracker2.xlsx"
+    if not unified_path.exists():
+        return {
+            "error": "unified_tracker2.xlsx not found — run host_sync.py or Refresh Data",
+            "matched": 0,
+            "total": 0,
+            "audit_logged": 0,
+            "new_accounts": 0,
+            "m1_rebuilt": 0,
+            "history_backfilled": 0,
+        }
+
+    with get_db() as _conn:
+        _parse_result = _parse_unified(unified_path.read_bytes(), _conn)
 
     _now = _dt.now(_tz.utc).isoformat()
     _audit = 0
+    _snap = {}  # status_history diffing skipped — parse_unified_xlsx handles full wipe+replace
 
-    # Parse Sheet1 (full DC CSE Tracker — all theatres, all milestones)
-    from agent.dc_parser import parse_dc_csv as _parse_dc
-
-    _all_dc = {
-        rec["account_id"]: rec for rec in _parse_dc(data_dir / "dc_cse_tracker.csv")
-    }
     result = {
-        "matched": len(_all_dc),
-        "total": len(_all_dc),
+        "matched": _parse_result["accounts"],
+        "total": _parse_result["accounts"],
     }
 
-    with get_db() as _conn:
-        _new_accounts = 0
-        for _aid, _dd in _all_dc.items():
-            # Ensure account exists — create if new (JAPAC/AMER/LATAM)
-            _exists = _conn.execute(
-                "SELECT 1 FROM accounts WHERE account_id=?", (_aid,)
-            ).fetchone()
-            if not _exists:
-                _conn.execute(
-                    """INSERT OR IGNORE INTO accounts
-                    (account_id, customer_name, active_cse, sales_region, account_theatre, created_at)
-                    VALUES (?,?,?,?,?,datetime('now'))""",
-                    (
-                        _aid,
-                        _dd.get("account_name", ""),
-                        _dd.get("active_cse", ""),
-                        _dd.get("area", "") or _dd.get("account_region", ""),
-                        _dd.get("account_theatre", "EMEA"),
-                    ),
-                )
-                _new_accounts += 1
-            # Update accounts table — same fields for ALL theatres, no exceptions
-            _region = _dd.get("area", "") or _dd.get("account_region", "")
-            _conn.execute(
-                """UPDATE accounts SET
-                active_cse=CASE WHEN ? !='' THEN ? ELSE active_cse END,
-                sales_region=CASE WHEN ? !='' THEN ? ELSE sales_region END,
-                account_theatre=?,
-                customer_name=CASE WHEN ? !='' THEN ? ELSE customer_name END,
-                status=CASE WHEN ? !='' THEN ? ELSE status END,
-                live_fire=CASE WHEN ? =1 THEN 1 ELSE live_fire END
-                WHERE account_id=?""",
-                (
-                    _dd.get("active_cse", ""),
-                    _dd.get("active_cse", ""),
-                    _region,
-                    _region,
-                    _dd.get("account_theatre", "EMEA"),
-                    _dd.get("account_name", ""),
-                    _dd.get("account_name", ""),
-                    _dd.get("status", ""),
-                    _dd.get("status", ""),
-                    int(_dd.get("live_fire", False)),
-                    _aid,
-                ),
-            )
-            if _dd.get("email_sent"):
-                _conn.execute(
-                    "UPDATE accounts SET email_sent=? WHERE account_id=? AND (email_sent IS NULL OR email_sent='')",
-                    (_dd["email_sent"], _aid),
-                )
-            # Upsert ALL milestones into blocked_data (DC is master)
-            _conn.execute(
-                """
-                INSERT INTO blocked_data
-                  (account_id, m0_complete, m1_complete, m1_planned,
-                   m2_complete, m2_planned, m3_complete, m3_planned,
-                   m4_complete, m4_planned, m5_complete, m5_planned,
-                   m6_complete, m7_complete, m8_started, m8_planned, m8_actual,
-                   m9_complete, m9_planned, m9_actual,
-                   upgrade_notes, dc_progress, owner_e2e, dc_assignment, merged_at,
-                   cc_rep, cc_dsm, churn_risk, health_notes,
-                   last_edited_by, last_edited_date, roadmap_url, ps_plan_url,
-                   account_region, current_project_status, next_renewal_date,
-                   past_due_planned, upgrade_duration_weeks, has_partner, upgrade_partner,
-                   m1_details, m3_details, m5_details, milestone_aging,
-                   days_since_milestone, momentum_x, entitlement_provision,
-                   activation_status, posture_workloads, account_theatre,
-                   signal, subtype, status_detail, cohort, area, district, team)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                ON CONFLICT(account_id) DO UPDATE SET
-                  m0_complete=excluded.m0_complete, m1_complete=excluded.m1_complete,
-                  m1_planned=excluded.m1_planned, m2_complete=excluded.m2_complete,
-                  m2_planned=excluded.m2_planned, m3_complete=excluded.m3_complete,
-                  m3_planned=excluded.m3_planned, m4_complete=excluded.m4_complete,
-                  m4_planned=excluded.m4_planned, m5_complete=excluded.m5_complete,
-                  m5_planned=excluded.m5_planned, m6_complete=excluded.m6_complete,
-                  m7_complete=excluded.m7_complete,
-                  m8_started=excluded.m8_started, m8_planned=excluded.m8_planned,
-                  m8_actual=excluded.m8_actual, m9_complete=excluded.m9_complete,
-                  m9_planned=excluded.m9_planned, m9_actual=excluded.m9_actual,
-                  upgrade_notes=CASE WHEN excluded.upgrade_notes!='' THEN excluded.upgrade_notes ELSE upgrade_notes END,
-                  dc_progress=excluded.dc_progress, owner_e2e=excluded.owner_e2e,
-                  dc_assignment=excluded.dc_assignment, merged_at=excluded.merged_at,
-                  cc_rep=CASE WHEN excluded.cc_rep!='' THEN excluded.cc_rep ELSE cc_rep END,
-                  cc_dsm=CASE WHEN excluded.cc_dsm!='' THEN excluded.cc_dsm ELSE cc_dsm END,
-                  churn_risk=excluded.churn_risk,
-                  health_notes=CASE WHEN excluded.health_notes!='' THEN excluded.health_notes ELSE health_notes END,
-                  last_edited_by=excluded.last_edited_by, last_edited_date=excluded.last_edited_date,
-                  roadmap_url=excluded.roadmap_url, ps_plan_url=excluded.ps_plan_url,
-                  account_region=excluded.account_region,
-                  current_project_status=excluded.current_project_status,
-                  next_renewal_date=excluded.next_renewal_date,
-                  past_due_planned=excluded.past_due_planned,
-                  upgrade_duration_weeks=excluded.upgrade_duration_weeks,
-                  has_partner=excluded.has_partner, upgrade_partner=excluded.upgrade_partner,
-                  m1_details=excluded.m1_details, m3_details=excluded.m3_details,
-                  m5_details=excluded.m5_details, milestone_aging=excluded.milestone_aging,
-                  days_since_milestone=excluded.days_since_milestone,
-                  momentum_x=excluded.momentum_x,
-                  entitlement_provision=excluded.entitlement_provision,
-                  activation_status=excluded.activation_status,
-                  posture_workloads=excluded.posture_workloads,
-                  account_theatre=excluded.account_theatre,
-                  signal=excluded.signal,
-                  subtype=excluded.subtype,
-                  status_detail=CASE WHEN excluded.status_detail!='' THEN excluded.status_detail ELSE status_detail END,
-                  cohort=excluded.cohort,
-                  area=excluded.area,
-                  district=excluded.district,
-                  team=excluded.team
-            """,
-                (
-                    _aid,
-                    int(_dd.get("m0_complete", False)),
-                    int(_dd.get("m1_complete", False)),
-                    _dd.get("m1_planned", ""),
-                    int(_dd.get("m2_complete", False)),
-                    _dd.get("m2_planned", ""),
-                    int(_dd.get("m3_complete", False)),
-                    _dd.get("m3_planned", ""),
-                    int(_dd.get("m4_complete", False)),
-                    _dd.get("m4_planned", ""),
-                    int(_dd.get("m5_complete", False)),
-                    _dd.get("m5_planned", ""),
-                    int(_dd.get("m6_complete", False)),
-                    int(_dd.get("m7_complete", False)),
-                    int(_dd.get("m8_started", False)),
-                    _dd.get("m8_planned", ""),
-                    _dd.get("m8_actual", ""),
-                    int(_dd.get("m9_complete", False)),
-                    _dd.get("m9_planned", ""),
-                    _dd.get("m9_actual", ""),
-                    _dd.get("upgrade_notes", ""),
-                    _dd.get("dc_progress", ""),
-                    _dd.get("owner_e2e", ""),
-                    _dd.get("dc_assignment", ""),
-                    _dd.get("merged_at", ""),
-                    _dd.get("cc_rep", ""),
-                    _dd.get("cc_dsm", ""),
-                    _dd.get("churn_risk", ""),
-                    _dd.get("health_notes", ""),
-                    _dd.get("last_edited_by", ""),
-                    _dd.get("last_edited_date", ""),
-                    _dd.get("roadmap_url", ""),
-                    _dd.get("ps_plan_url", ""),
-                    _dd.get("account_region", ""),
-                    _dd.get("current_project_status", ""),
-                    _dd.get("next_renewal_date", ""),
-                    _dd.get("past_due_planned", ""),
-                    _dd.get("upgrade_duration_weeks", ""),
-                    _dd.get("has_partner", ""),
-                    _dd.get("upgrade_partner", ""),
-                    _dd.get("m1_details", ""),
-                    _dd.get("m3_details", ""),
-                    _dd.get("m5_details", ""),
-                    _dd.get("milestone_aging", ""),
-                    _dd.get("days_since_milestone", ""),
-                    _dd.get("momentum_x", ""),
-                    _dd.get("entitlement_provision", ""),
-                    _dd.get("activation_status", ""),
-                    _dd.get("posture_workloads", ""),
-                    _dd.get("account_theatre", "EMEA"),
-                    _dd.get("signal", ""),
-                    _dd.get("subtype", ""),
-                    _dd.get("status_detail", ""),
-                    _dd.get("cohort", ""),
-                    _dd.get("area", ""),
-                    _dd.get("district", ""),
-                    _dd.get("team", ""),
-                ),
-            )
-            # Diff audit — only accounts with prior dc_data (skip first-load)
-            _old = _snap.get(_aid.lower(), {})
-            if not _old:
-                continue
-            for _dcf, _dcl in _DC_MILESTONE_WATCH:
-                _ov = _yn_str(_old.get(_dcf))
-                _nv = _yn_str(_dd.get(_dcf))
-                if _ov == _nv:
-                    continue
-                _dup = _conn.execute(
-                    "SELECT 1 FROM status_history WHERE account_id=? AND field_name=? AND old_status=? AND new_status=? AND file_source='DC CSE Tracker'",
-                    (_aid, _dcl, _ov, _nv),
-                ).fetchone()
-                if not _dup:
-                    _conn.execute(
-                        "INSERT INTO status_history (account_id,old_status,new_status,changed_at,source,file_source,field_name) VALUES (?,?,?,?,?,?,?)",
-                        (_aid, _ov, _nv, _now, "pipeline", "DC CSE Tracker", _dcl),
-                    )
-                    _audit += 1
-            # CSE change audit
-            _old_cse = (_old.get("active_cse") or "").strip()
-            _new_cse = (_dd.get("active_cse") or "").strip()
-            if _old_cse and _new_cse and _old_cse != _new_cse:
-                _dup2 = _conn.execute(
-                    "SELECT 1 FROM status_history WHERE account_id=? AND field_name='cse' AND old_status=? AND new_status=? AND file_source='DC CSE Tracker'",
-                    (_aid, _old_cse, _new_cse),
-                ).fetchone()
-                if not _dup2:
-                    _conn.execute(
-                        "INSERT INTO status_history (account_id,old_status,new_status,changed_at,source,file_source,field_name) VALUES (?,?,?,?,?,?,?)",
-                        (
-                            _aid,
-                            _old_cse,
-                            _new_cse,
-                            _now,
-                            "pipeline",
-                            "DC CSE Tracker",
-                            "cse",
-                        ),
-                    )
-                    _audit += 1
-
-    result["audit_logged"] = _audit
-    result["new_accounts"] = _new_accounts
+    result["audit_logged"] = 0
+    result["new_accounts"] = 0
 
     # Auto-rebuild m1_suggestions from fresh DB state — no stale data ever served
     _SKIP = {"Churning/Churned", "Cancelled", "Backoff", "Completed"}
@@ -1061,78 +845,9 @@ def _run_dc_pipeline(data_dir: Path, state_file: Path) -> dict:
             )
     result["m1_rebuilt"] = len(_m1_rows)
 
-    # Backfill audit history for any account that has a milestone completion but no audit entry
-    # This runs on every DC sync so new theatres (JAPAC/AMER/LATAM) get history automatically
-    import csv as _csv2
-
-    _PLACEHOLDER = "01/15/2026"
-    _MS_DATES = [
-        ("m1_complete", "Date - M1:Internal Kickoff Complete", "M1 Outreach"),
-        (
-            "m2_complete",
-            "Date - M2:Entitlements and Plan aligned with customer",
-            "M2 Entitlements",
-        ),
-        ("m3_complete", "Date - M3:EB Buy-in Meeting Complete", "M3 Buy-in"),
-        ("m4_complete", "Date - M4:Discovery complete", "M4 Discovery"),
-        ("m5_complete", "Date - M5:Tech validation complete", "M5 Tech Validation"),
-        ("m8_started", "Date - M8:Upgrade started", "M8 Upgrade Started"),
-        ("m9_complete", "Date - M9:Upgrade complete", "M9 Upgrade Complete"),
-    ]
-    _raw_rows = {}
-    with open(
-        data_dir / "dc_cse_tracker.csv", encoding="utf-8-sig", errors="ignore"
-    ) as _f2:
-        for _row2 in _csv2.DictReader(_f2):
-            _t2 = _row2.get("account_theatre", "").strip().upper()
-            if _t2 not in ("EMEA", "JAPAC", "AMER", "LATAM"):
-                continue
-            _rid2 = _row2.get("pc_end_customer_account_id", "").strip().lower()
-            if _rid2:
-                _raw_rows[_rid2] = _row2
-
-    from datetime import datetime as _dtt  # hoisted — avoids re-importing inside loop
-
-    def _parse_actual(s):
-        if not s or s.strip() == _PLACEHOLDER:
-            return None
-        for _fmt in ("%m/%d/%Y %H:%M:%S", "%m/%d/%Y", "%m/%d/%y"):
-            try:
-                return _dtt.strptime(s.strip(), _fmt).isoformat() + "+00:00"
-            except:
-                pass
-        return None
-
-    _bf = 0
-    with get_db() as _bc:
-        _id_map2 = {
-            r[0].lower(): r[0]
-            for r in _bc.execute("SELECT account_id FROM accounts").fetchall()
-        }
-        for _rec in _all_dc.values():
-            _aid2_lower = _rec["account_id"]
-            _aid2 = _id_map2.get(_aid2_lower)
-            if not _aid2:
-                continue
-            _raw2 = _raw_rows.get(_aid2_lower, {})
-            for _fk, _dc_col, _label in _MS_DATES:
-                if not _rec.get(_fk):
-                    continue
-                _ts2 = _parse_actual(_raw2.get(_dc_col, ""))
-                if not _ts2:
-                    continue
-                _dup2 = _bc.execute(
-                    "SELECT 1 FROM status_history WHERE account_id=? AND field_name=? AND new_status='Y' AND file_source='DC CSE Tracker'",
-                    (_aid2, _label),
-                ).fetchone()
-                if _dup2:
-                    continue
-                _bc.execute(
-                    "INSERT INTO status_history (account_id,old_status,new_status,changed_at,source,file_source,field_name) VALUES (?,?,?,?,?,?,?)",
-                    (_aid2, "N", "Y", _ts2, "backfill", "DC CSE Tracker", _label),
-                )
-                _bf += 1
-    result["history_backfilled"] = _bf
+    # History backfill not needed — parse_unified_xlsx does a full wipe+replace each run;
+    # status_history table is preserved separately and not wiped.
+    result["history_backfilled"] = 0
 
     # Update last_run in state.json
     _state_data = _j.loads(state_file.read_text())
@@ -1158,13 +873,13 @@ def api_run():
             from agent.db import migrate_from_state as _mig
 
             _mp(DATA_DIR / "ps_tracker.csv", STATE_FILE)
-            # DC CSE Tracker is master — shared function handles snapshot, upsert, diff audit
-            if (DATA_DIR / "dc_cse_tracker.csv").exists():
+            # Unified Tracker 2.0 is master — handles snapshot, upsert, m1_suggestions rebuild
+            if (DATA_DIR / "unified_tracker2.xlsx").exists():
                 _run_dc_pipeline(DATA_DIR, STATE_FILE)
 
             _enrich(STATE_FILE)
             _mig(STATE_FILE)
-            r_output = "DC CSE Tracker is sole source. All milestones synced.\ndone"
+            r_output = "Unified Tracker 2.0 is sole source. All milestones synced.\ndone"
             r_ok = True
         except Exception as _e:
             r_output = str(_e)
@@ -1203,21 +918,20 @@ async def api_run_full(request: Request):
         # ── Step 1: Data files check (written by host_sync.py into volume) ──
         _t = _time.monotonic()
         data_dir = Path(__file__).parent / "data"
-        csv_path = data_dir / "dc_cse_tracker.csv"
+        unified_path = data_dir / "unified_tracker2.xlsx"
         xsup_path = data_dir / "xsup_tracker.xlsx"
-        if csv_path.exists():
-            age_h = _time.monotonic() - _time.monotonic() + csv_path.stat().st_mtime
+        if unified_path.exists():
             import time as _clock
 
-            age_min = int((_clock.time() - csv_path.stat().st_mtime) / 60)
+            age_min = int((_clock.time() - unified_path.stat().st_mtime) / 60)
             drive_status = (
-                f"dc_cse_tracker.csv {csv_path.stat().st_size // 1024}KB"
+                f"unified_tracker2.xlsx {unified_path.stat().st_size // 1024}KB"
                 f" · xsup_tracker {'✓' if xsup_path.exists() else '✗'}"
                 f" · last updated {age_min}m ago"
             )
             drive_ok = True
         else:
-            drive_status = "⚠️ dc_cse_tracker.csv missing — run host_sync.py on Mac host"
+            drive_status = "⚠️ unified_tracker2.xlsx missing — run host_sync.py on Mac host"
             drive_ok = False
         yield event(
             "1/5 Data Files",
@@ -1288,7 +1002,7 @@ async def api_run_full(request: Request):
         yield event(
             "2/5 Downloading",
             "DOWNLOADING",
-            "Pulling DC CSE Tracker · XSUP Tracker · COE Tracker from Drive API",
+            "Pulling Unified Tracker 2.0 · XSUP Tracker · COE Tracker from Drive API",
         )
         dl_results = _download_live_from_drive()
         _after = _snap()
@@ -1303,7 +1017,7 @@ async def api_run_full(request: Request):
                     _msg += f"  [{_delta(_before['xsup'], _after['xsup'])}]"
                 elif "COE" in _name:
                     _msg += f"  [issues: {_delta(_before['coe_issues'], _after['coe_issues'])} · bugs: {_delta(_before['coe_bugs'], _after['coe_bugs'])}]"
-                elif "DC CSE" in _name:
+                elif "Unified" in _name:
                     _msg += f"  [accounts: {_delta(_before['accounts'], _after['accounts'])}]"
             yield event("  →", "OK" if _ok else "WARN", f"{_name}: {_msg}", _color)
             if _ok:
@@ -1317,12 +1031,12 @@ async def api_run_full(request: Request):
         yield event("  →", "TIMING", _dl_summary, "green" if _dl_warn == 0 else "amber")
         await asyncio.sleep(0.2)
 
-        # ── Step 3: Parse DC CSE Tracker ─────────────────────────────────
+        # ── Step 3: Parse Unified Tracker 2.0 ────────────────────────────
         _t = _time.monotonic()
         yield event(
-            "3/5 DC CSE Tracker",
+            "3/5 Unified Tracker 2.0",
             "LOADING",
-            "Parsing milestones M0–M9 · CSE assignments · audit diff across all theatres",
+            "Parsing milestones M0–M9 · CSE assignments · all theatres via Unified Tracker 2.0",
         )
         try:
             dc = _run_dc_pipeline(data_dir, data_dir / "state.json")
@@ -3768,15 +3482,15 @@ if __name__ == "__main__":
     if (DATA_DIR / "ps_tracker.csv").exists():
         _mp(DATA_DIR / "ps_tracker.csv", STATE_FILE)
         print("  ✓ PS tracker merged")
-    if (DATA_DIR / "dc_cse_tracker.csv").exists():
+    if (DATA_DIR / "unified_tracker2.xlsx").exists():
         try:
             _run_dc_pipeline(DATA_DIR, STATE_FILE)
             print(
-                "  ✓ DC CSE Tracker synced via _run_dc_pipeline (all theatres, milestones, audit)"
+                "  ✓ Unified Tracker 2.0 synced via _run_dc_pipeline (all theatres, milestones)"
             )
-        except ValueError as _dc_err:
+        except Exception as _dc_err:
             print(
-                f"  ⚠ DC CSE Tracker skipped — wrong sheet format (need gid=0 Detailed Account List): {_dc_err}"
+                f"  ⚠ Unified Tracker 2.0 skipped — parse error: {_dc_err}"
             )
     try:
         _mig(STATE_FILE)

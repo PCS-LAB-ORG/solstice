@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-host_sync.py — downloads XSUP Tracker and COE Tracker xlsx files to data/
+host_sync.py — downloads Unified Tracker 2.0, XSUP Tracker and COE Tracker xlsx files to data/
 Runs on the Mac host (NOT inside Docker) where googleusercontent.com CDN is reachable.
 Scheduled via launchd every 30 minutes. Also called by setup.sh on first run.
 
@@ -24,6 +24,12 @@ LOG_FILE = REPO_DIR / "data" / "host_sync.log"
 GDRIVE_WORK = Path.home() / "Library/CloudStorage"
 
 SOURCES = [
+    {
+        "name": "Unified Tracker 2.0",
+        "gsheet_path": "Cortex Cloud Work/Unified Tracker 2.0 (IT Connected Sheet).gsheet",
+        "dest": DATA_DIR / "unified_tracker2.xlsx",
+        "fmt": "xlsx",
+    },
     {
         "name": "XSUP Tracker",
         "gsheet_path": "Cortex Cloud Work/Cortex Cloud Open XSUPs with TAC.gsheet",
