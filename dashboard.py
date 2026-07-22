@@ -2905,11 +2905,12 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         total_rate = sum(monthly_rate.values())
 
         # FY27: Aug 2026 → Aug 2027 (13 months)
+        # FY27: Aug 2026 → Jul 2027 (12 months)
         _fy27_months = [
             f"{y}-{m:02d}"
             for y, m in [
                 (2026,8),(2026,9),(2026,10),(2026,11),(2026,12),
-                (2027,1),(2027,2),(2027,3),(2027,4),(2027,5),(2027,6),(2027,7),(2027,8),
+                (2027,1),(2027,2),(2027,3),(2027,4),(2027,5),(2027,6),(2027,7),
             ]
         ]
         # Pull any existing planned data; fill missing months with flat rate
@@ -2958,12 +2959,15 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         # Quiet months: base - xsup_drag (~2/month)
         # Release uptick months: base + FR_unlock_pulse + wave_boost
         _RELEASE_UPLIFT = {
-            # Sep/Oct = NOW/July release lands (6-8 wks later)
+            # Sep/Oct = Jul release lands (6-8 wks later)
             "2026-09": mc_mean * 1.35,
             "2026-10": mc_mean * 1.50,
-            # Dec/Jan = November release lands (6-8 wks later)
+            # Dec/Jan = Nov release lands (6-8 wks later)
             "2026-12": mc_mean * 1.25,
             "2027-01": mc_mean * 1.40,
+            # Mar/Apr = Feb release lands (6-8 wks later)
+            "2027-03": mc_mean * 1.25,
+            "2027-04": mc_mean * 1.40,
         }
         _XSUP_DRAG = 2.0  # 38 open-XSUP accounts slow throughput ~2/month
 
@@ -3017,7 +3021,7 @@ def api_sotu(theatre: str = "", cohort: str = ""):
 
         mc_year_end = {
             "confirmed": confirmed_ytd,
-            "label": "FY27 end (Aug 2027)",
+            "label": "FY27 end (Jul 2027)",
             "p10": _pct(fy27_sims, 10),
             "p30": _pct(fy27_sims, 30),
             "p50": _pct(fy27_sims, 50),

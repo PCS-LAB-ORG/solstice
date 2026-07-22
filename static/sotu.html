@@ -302,8 +302,8 @@ function _mcBadge(val, band) {
 }
 
 // Release uptick months — marked with ▲
-// ▲ = release uptick: Jul release → Sep/Oct · Nov release → Dec/Jan · next Jul → Sep/Oct
-var RELEASE_MONTHS = {'2026-09':1,'2026-10':1,'2026-12':1,'2027-01':1,'2027-09':1,'2027-10':1};
+// ▲ = release uptick: Jul→Sep/Oct · Nov→Dec/Jan · Feb→Mar/Apr
+var RELEASE_MONTHS = {'2026-09':1,'2026-10':1,'2026-12':1,'2027-01':1,'2027-03':1,'2027-04':1};
 
 function renderForecast(rows, runRate, runRateTotal, runRateMonths, mc) {
   if (!rows || !rows.length) {
