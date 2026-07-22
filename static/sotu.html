@@ -327,9 +327,13 @@ function renderForecast(rows, runRate, runRateTotal, runRateMonths, mc) {
     MC_BANDS.forEach(function(b){
       html += '<th class="r" title="' + E(b.title) + '" style="padding:.2rem .4rem;color:' + b.color + ';font-size:8px;cursor:default">' + b.label + '</th>';
     });
+    html += '<th class="r" style="padding:.2rem .4rem;font-size:8px;color:var(--text);border-left:1px solid var(--border-soft)">Proj. Done</th>';
     html += '</tr>';
   }
   html += '</thead><tbody>';
+
+  var confirmed = (mc && mc.year_end) ? (mc.year_end.confirmed || 0) : 0;
+  var cumulative = confirmed;
 
   rows.forEach(function(row) {
     var isRelease = RELEASE_MONTHS[row.month] ? 1 : 0;
@@ -347,8 +351,11 @@ function renderForecast(rows, runRate, runRateTotal, runRateMonths, mc) {
       MC_BANDS.forEach(function(b){
         html += '<td class="r">' + _mcBadge(pm[b.key], b) + '</td>';
       });
+      // Cumulative projected done (confirmed so far + running P50 sum)
+      cumulative += pm.p50 || 0;
+      html += '<td class="r" style="border-left:1px solid var(--border-soft);font-weight:700;font-family:var(--mono);color:var(--text)">' + cumulative + '</td>';
     } else if (byMonth) {
-      html += '<td colspan="5" class="r muted">—</td>';
+      html += '<td colspan="6" class="r muted">—</td>';
     }
     html += '</tr>';
   });
