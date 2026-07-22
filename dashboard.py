@@ -2762,20 +2762,19 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             if k not in subtype_order:
                 stuck.append(v)
 
-        # ── Historical completions (status_history) ──────────────────
+        # ── Historical completions (from m9_actual in blocked_data) ─────
         hist_th_cond = (
             "AND UPPER(COALESCE(b.account_theatre,'')) = ?" if th_filter else ""
         )
         hist_sql = f"""
-            SELECT strftime('%Y-%m', h.changed_at) as month,
-                   COALESCE(a.account_theatre, b.account_theatre, 'Unknown') as theatre,
+            SELECT strftime('%Y-%m', substr(b.m9_actual, 1, 10)) as month,
+                   COALESCE(b.account_theatre, a.account_theatre, 'Unknown') as theatre,
                    COUNT(*) as cnt
-            FROM status_history h
-            JOIN accounts a ON a.account_id = h.account_id
-            LEFT JOIN blocked_data b ON b.account_id = h.account_id
-            WHERE h.field_name = 'M9 Upgrade Complete'
-              AND h.new_status = 'Y'
-              AND h.changed_at >= '2026-01-01'
+            FROM blocked_data b
+            JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.m9_complete = 1
+              AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
+              AND substr(b.m9_actual, 1, 7) >= '2026-01'
               {_cohort_sql()}
               {hist_th_cond}
             GROUP BY month, theatre
@@ -2815,7 +2814,15 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         fcast_by_month: dict = {}
         for m9p, theatre_val in fcast_rows:
             try:
-                d = _dt.strptime(str(m9p).strip(), "%m/%d/%Y")
+                _s = str(m9p).strip()[:10]  # works for both MM/DD/YYYY and YYYY-MM-DD HH:MM:SS
+                for _fmt in ("%Y-%m-%d", "%m/%d/%Y"):
+                    try:
+                        d = _dt.strptime(_s, _fmt)
+                        break
+                    except ValueError:
+                        continue
+                else:
+                    continue
                 ym = d.strftime("%Y-%m")
                 if ym < "2026-07":
                     continue
@@ -2837,15 +2844,14 @@ def api_sotu(theatre: str = "", cohort: str = ""):
 
         # ── Adjusted forecast — all-time avg run rate (Jan–last full month) ──
         rate_sql = f"""
-            SELECT COALESCE(a.account_theatre, b.account_theatre, 'Unknown') as theatre,
+            SELECT COALESCE(b.account_theatre, a.account_theatre, 'Unknown') as theatre,
                    COUNT(*) as cnt
-            FROM status_history h
-            JOIN accounts a ON a.account_id = h.account_id
-            LEFT JOIN blocked_data b ON b.account_id = h.account_id
-            WHERE h.field_name = 'M9 Upgrade Complete'
-              AND h.new_status = 'Y'
-              AND h.changed_at >= '2026-01-01'
-              AND h.changed_at < date('now','start of month')
+            FROM blocked_data b
+            JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.m9_complete = 1
+              AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
+              AND substr(b.m9_actual, 1, 7) >= '2026-01'
+              AND substr(b.m9_actual, 1, 7) < strftime('%Y-%m', date('now', 'start of month'))
               {_cohort_sql()}
               {hist_th_cond}
             GROUP BY theatre
@@ -2855,13 +2861,13 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         # Count completed full months
         n_rate_months = (
             conn.execute(f"""
-            SELECT COUNT(DISTINCT strftime('%Y-%m', h.changed_at))
-            FROM status_history h
-            JOIN accounts a ON a.account_id = h.account_id
-            LEFT JOIN blocked_data b ON b.account_id = h.account_id
-            WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
-              AND h.changed_at >= '2026-01-01'
-              AND h.changed_at < date('now','start of month')
+            SELECT COUNT(DISTINCT strftime('%Y-%m', substr(b.m9_actual, 1, 10)))
+            FROM blocked_data b
+            JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.m9_complete = 1
+              AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
+              AND substr(b.m9_actual, 1, 7) >= '2026-01'
+              AND substr(b.m9_actual, 1, 7) < strftime('%Y-%m', date('now', 'start of month'))
               {_cohort_sql()}
         """, (cohort, cohort)).fetchone()[0]
             or 1
@@ -2882,16 +2888,17 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             adjusted_forecast.append(adj)
 
         # ── Monte Carlo percentile bands ─────────────────────────────
-        # Bootstrap from all completed months in 2026 (up to last full month)
+        # Bootstrap from m9_actual in blocked_data (avoids status_history ID mismatch)
         import random as _random
 
         mc_hist_rows = conn.execute(f"""
-            SELECT strftime('%Y-%m', h.changed_at) as month, COUNT(*) as cnt
-            FROM status_history h
-            JOIN accounts a ON a.account_id = h.account_id
-            LEFT JOIN blocked_data b ON b.account_id = h.account_id
-            WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
-              AND h.changed_at >= '2026-01-01' AND h.changed_at < date('now','start of month')
+            SELECT strftime('%Y-%m', substr(b.m9_actual, 1, 10)) as month, COUNT(*) as cnt
+            FROM blocked_data b
+            JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.m9_complete = 1
+              AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
+              AND substr(b.m9_actual, 1, 7) >= '2026-01'
+              AND substr(b.m9_actual, 1, 7) < strftime('%Y-%m', date('now', 'start of month'))
               {_cohort_sql()}
             GROUP BY month ORDER BY month
         """, (cohort, cohort)).fetchall()
@@ -2917,13 +2924,13 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             "p90": _pct([s[0] for s in sims], 90),
         }
 
-        # Year-end 2026: confirmed so far (Scale cohort) + Aug–Dec simulation
+        # Year-end 2026: confirmed so far from m9_actual + Aug–Dec simulation
         confirmed_ytd = conn.execute(f"""
-            SELECT COUNT(*) FROM status_history h
-            JOIN accounts a ON a.account_id = h.account_id
-            LEFT JOIN blocked_data b ON b.account_id = h.account_id
-            WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
-              AND h.changed_at >= '2026-01-01'
+            SELECT COUNT(*) FROM blocked_data b
+            JOIN accounts a ON a.account_id = b.account_id
+            WHERE b.m9_complete = 1
+              AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
+              AND substr(b.m9_actual, 1, 7) >= '2026-01'
               {_cohort_sql()}
         """, (cohort, cohort)).fetchone()[0]
         dec26_indices = [
