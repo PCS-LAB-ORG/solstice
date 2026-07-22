@@ -273,14 +273,17 @@ function renderCompletions(rows) {
   var html = '<thead><tr><th>Month</th>';
   THEATRES.forEach(function(t){ html += '<th class="r">' + E(t) + '</th>'; });
   html += '<th class="r">Total</th></tr></thead><tbody>';
+  var cumulative = 0;
   rows.forEach(function(row) {
     var isPartial = row.month === thisMonth;
+    cumulative += (row.total || 0);
     html += '<tr><td>' + _monthLabel(row.month) + (isPartial ? '<span class="partial-tag">partial</span>' : '') + '</td>';
     THEATRES.forEach(function(t) {
       var v = row[t] || 0;
       html += '<td class="r">' + (v ? '<span class="hist-badge">' + E(String(v)) + '</span>' : '<span class="muted">—</span>') + '</td>';
     });
-    html += '<td class="r total-cell">' + E(String(row.total || 0)) + '</td></tr>';
+    html += '<td class="r total-cell">' + cumulative + '</td>';
+    html += '</tr>';
   });
   html += '</tbody>';
   document.getElementById('comp-tbl').innerHTML = html;
