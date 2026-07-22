@@ -34,17 +34,24 @@
 </style>
 </head>
 <body>
-<nav id="s-nav" class="s-nav"></nav>
+<nav id="s-nav" class="s-nav"></nav><div id="s-cohort-bar" style="display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;">
+<span class="pill s-cohort-pill active" data-c="" onclick="S.setCohort('')" >All</span>
+<span class="pill s-cohort-pill" data-c="Scale cohort" onclick="S.setCohort('Scale cohort')" >Scale</span>
+<span class="pill s-cohort-pill" data-c="101-650 Customers" onclick="S.setCohort('101-650 Customers')" >101-650</span>
+<span class="pill s-cohort-pill" data-c="Top 100 Customers" onclick="S.setCohort('Top 100 Customers')" >Top 100</span>
+</div>
 <div id="main" class="s-main"></div>
-<script src="/static/solstice.js?v=5"></script>
+<script src="/static/solstice.js?v=6"></script>
 <script>
 S.initNav('');
+S.onCohortChange = load;
 S.restoreCard();
 
 var _all = [], _filter = '';
 
 function load() {
-  fetch('/api/pc-cc-accounts').then(function(r){return r.json();}).then(function(data) {
+  var cq = S.cohort ? '?cohort=' + encodeURIComponent(S.cohort) : '';
+  fetch('/api/pc-cc-accounts' + cq).then(function(r){return r.json();}).then(function(data) {
     _all = data;
     render();
   }).catch(function(){

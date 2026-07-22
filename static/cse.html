@@ -19,7 +19,12 @@
 </style>
 </head>
 <body>
-<nav id="s-nav" class="s-nav"></nav>
+<nav id="s-nav" class="s-nav"></nav><div id="s-cohort-bar" style="display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;">
+<span class="pill s-cohort-pill active" data-c="" onclick="S.setCohort('')" >All</span>
+<span class="pill s-cohort-pill" data-c="Scale cohort" onclick="S.setCohort('Scale cohort')" >Scale</span>
+<span class="pill s-cohort-pill" data-c="101-650 Customers" onclick="S.setCohort('101-650 Customers')" >101-650</span>
+<span class="pill s-cohort-pill" data-c="Top 100 Customers" onclick="S.setCohort('Top 100 Customers')" >Top 100</span>
+</div>
 <div class="s-main">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
     <div style="font-size:.75rem;color:var(--muted);font-family:var(--mono)" id="meta"></div>
@@ -37,9 +42,10 @@
     <tbody id="tbody"></tbody>
   </table>
 </div>
-<script src="/static/solstice.js?v=5"></script>
+<script src="/static/solstice.js?v=6"></script>
 <script>
 S.initNav('cse');
+S.onCohortChange = load;
 S.restoreCard();
 var theatre = new URLSearchParams(location.search).get('theatre') || '';
 
@@ -52,7 +58,8 @@ var pillsEl = document.getElementById('pills');
   pillsEl.appendChild(a);
 });
 
-fetch('/api/cse-workload' + (theatre ? '?theatre=' + encodeURIComponent(theatre) : ''))
+function load() {
+fetch('/api/cse-workload?' + (theatre ? 'theatre=' + encodeURIComponent(theatre) : '') + S.cohortParam())
   .then(function(r) { return r.json(); })
   .then(function(data) {
     // Show all CSEs with any accounts, sorted by total account count desc
@@ -64,6 +71,7 @@ fetch('/api/cse-workload' + (theatre ? '?theatre=' + encodeURIComponent(theatre)
     document.getElementById('meta').textContent = rows.length + ' CSEs · ' + totalM8 + ' M8 in flight';
 
     var tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
     rows.forEach(function(r) {
       var pct = Math.round(r.m8_count / maxM8 * 100);
       var tr = document.createElement('tr');
@@ -143,5 +151,7 @@ fetch('/api/cse-workload' + (theatre ? '?theatre=' + encodeURIComponent(theatre)
       tbody.appendChild(tr);
     });
   }).catch(function() {});
+}
+load();
 </script>
 </body></html>

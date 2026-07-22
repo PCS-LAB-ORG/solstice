@@ -28,7 +28,12 @@
 </style>
 </head>
 <body>
-<nav id="s-nav" class="s-nav"></nav>
+<nav id="s-nav" class="s-nav"></nav><div id="s-cohort-bar" style="display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;">
+<span class="pill s-cohort-pill active" data-c="" onclick="S.setCohort('')" >All</span>
+<span class="pill s-cohort-pill" data-c="Scale cohort" onclick="S.setCohort('Scale cohort')" >Scale</span>
+<span class="pill s-cohort-pill" data-c="101-650 Customers" onclick="S.setCohort('101-650 Customers')" >101-650</span>
+<span class="pill s-cohort-pill" data-c="Top 100 Customers" onclick="S.setCohort('Top 100 Customers')" >Top 100</span>
+</div>
 <div style="padding:.5rem 1.5rem;border-bottom:1px solid var(--border-soft);display:flex;gap:.5rem;flex-wrap:wrap;background:var(--surface)">
   <button class="pill act" data-t="" onclick="setT(this,'')">All</button>
   <button class="pill" data-t="EMEA" onclick="setT(this,'EMEA')">EMEA</button>
@@ -37,9 +42,10 @@
   <button class="pill" data-t="LATAM" onclick="setT(this,'LATAM')">LATAM</button>
 </div>
 <div id="main" class="s-main"></div>
-<script src="/static/solstice.js?v=5"></script>
+<script src="/static/solstice.js?v=6"></script>
 <script>
 S.initNav('weekly');
+S.onCohortChange = load;
 S.restoreCard();
 
 var params = new URLSearchParams(location.search);
@@ -73,7 +79,7 @@ function nextWeek() { var d = new Date(currentDate); d.setDate(d.getDate()+7); c
 function load() {
   var qp = ['date=' + currentDate];
   if (theatre) qp.push('theatre=' + encodeURIComponent(theatre));
-  fetch('/api/weekly-movements?' + qp.join('&'))
+  fetch('/api/weekly-movements?' + qp.join('&') + S.cohortParam())
     .then(function(r) { return r.json(); }).then(render).catch(function() {});
 }
 

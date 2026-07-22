@@ -61,7 +61,12 @@
 </style>
 </head>
 <body>
-<nav id="s-nav" class="s-nav"></nav>
+<nav id="s-nav" class="s-nav"></nav><div id="s-cohort-bar" style="display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;">
+<span class="pill s-cohort-pill active" data-c="" onclick="S.setCohort('')" >All</span>
+<span class="pill s-cohort-pill" data-c="Scale cohort" onclick="S.setCohort('Scale cohort')" >Scale</span>
+<span class="pill s-cohort-pill" data-c="101-650 Customers" onclick="S.setCohort('101-650 Customers')" >101-650</span>
+<span class="pill s-cohort-pill" data-c="Top 100 Customers" onclick="S.setCohort('Top 100 Customers')" >Top 100</span>
+</div>
 
 <!-- Sub-header: theatre filter pills -->
 <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:.45rem 1.5rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;position:sticky;top:44px;z-index:90">
@@ -132,9 +137,11 @@
 </div>
 </div><!-- /main -->
 
-<script src="/static/solstice.js?v=5"></script>
+<script src="/static/solstice.js?v=6"></script>
 <script>
-S.initNav('forecast'); S.restoreCard();
+S.initNav('forecast');
+S.onCohortChange = load;
+S.restoreCard();
 document.addEventListener('DOMContentLoaded',function(){
   var btn=document.getElementById('churn-toggle');
   if(btn){btn.classList.add('act');}
@@ -171,7 +178,7 @@ function fmtDate(s){
 }
 
 function load(){
-  fetch('/api/forecast?theatre='+encodeURIComponent(_t))
+  fetch('/api/forecast?theatre='+encodeURIComponent(_t)+S.cohortParam())
     .then(function(r){return r.json();})
     .then(function(d){
       _raw=d;
@@ -319,7 +326,7 @@ function renderTheatreTiles(d){
 }
 
 function loadSLA(){
-  fetch('/api/sla-breaches?theatre='+encodeURIComponent(_t))
+  fetch('/api/sla-breaches?theatre='+encodeURIComponent(_t)+S.cohortParam())
     .then(function(r){return r.json();})
     .then(function(rows){
       if(!rows||!rows.length){

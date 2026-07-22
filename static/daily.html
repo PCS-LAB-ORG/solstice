@@ -59,7 +59,12 @@
 </style>
 </head>
 <body>
-<nav id="s-nav" class="s-nav"></nav>
+<nav id="s-nav" class="s-nav"></nav><div id="s-cohort-bar" style="display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;">
+<span class="pill s-cohort-pill active" data-c="" onclick="S.setCohort('')" >All</span>
+<span class="pill s-cohort-pill" data-c="Scale cohort" onclick="S.setCohort('Scale cohort')" >Scale</span>
+<span class="pill s-cohort-pill" data-c="101-650 Customers" onclick="S.setCohort('101-650 Customers')" >101-650</span>
+<span class="pill s-cohort-pill" data-c="Top 100 Customers" onclick="S.setCohort('Top 100 Customers')" >Top 100</span>
+</div>
 
 <!-- Sub-header -->
 <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:.45rem 1.5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:44px;z-index:90">
@@ -165,9 +170,11 @@
   </div><!-- /two-col -->
 </div><!-- /main -->
 
-<script src="/static/solstice.js?v=5"></script>
+<script src="/static/solstice.js?v=6"></script>
 <script>
-S.initNav('daily'); S.restoreCard();
+S.initNav('daily');
+S.onCohortChange = load;
+S.restoreCard();
 
 var E=S.esc;
 var _curDate='', _dtheatre='';
@@ -245,7 +252,7 @@ function loadDate(date){
   _curDate=date;
   document.getElementById('disp-date').textContent=fmtDisp(date);
   document.title='Solstice Daily — '+fmtDisp(date);
-  fetch('/api/daily-brief?date='+date+'&theatre='+encodeURIComponent(_dtheatre))
+  fetch('/api/daily-brief?date='+date+'&theatre='+encodeURIComponent(_dtheatre)+S.cohortParam())
     .then(function(r){return r.json();})
     .then(render)
     .catch(function(){document.getElementById('body-upgrades').innerHTML='<div class="empty">Error loading</div>';});
@@ -354,6 +361,7 @@ function runRefresh(){
 }
 
 // Init
+function load() { loadDate(_curDate || todayStr()); }
 loadDate(todayStr());
 </script>
 </body></html>

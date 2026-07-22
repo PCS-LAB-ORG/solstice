@@ -95,7 +95,12 @@
 </style>
 </head>
 <body>
-<nav id="s-nav" class="s-nav"></nav>
+<nav id="s-nav" class="s-nav"></nav><div id="s-cohort-bar" style="display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;">
+<span class="pill s-cohort-pill active" data-c="" onclick="S.setCohort('')" >All</span>
+<span class="pill s-cohort-pill" data-c="Scale cohort" onclick="S.setCohort('Scale cohort')" >Scale</span>
+<span class="pill s-cohort-pill" data-c="101-650 Customers" onclick="S.setCohort('101-650 Customers')" >101-650</span>
+<span class="pill s-cohort-pill" data-c="Top 100 Customers" onclick="S.setCohort('Top 100 Customers')" >Top 100</span>
+</div>
 <div id="main" class="s-main">
 
   <!-- Filter bar -->
@@ -118,9 +123,10 @@
   <div id="sections"></div>
 </div>
 
-<script src="/static/solstice.js?v=5"></script>
+<script src="/static/solstice.js?v=6"></script>
 <script>
 S.initNav('blockers');
+S.onCohortChange = load;
 S.restoreCard();
 
 // ── State ───────────────────────────────────────────────────────────────────
@@ -218,7 +224,8 @@ function load() {
   var cse    = document.getElementById('f-cse').value;
   var url = '/api/blockers?theatre=' + encodeURIComponent(_theatre)
           + '&region=' + encodeURIComponent(region)
-          + '&cse='    + encodeURIComponent(cse);
+          + '&cse='    + encodeURIComponent(cse)
+          + S.cohortParam();
 
   // Load main blockers first — render immediately, then augment with SLA+M1
   fetch(url)
@@ -241,31 +248,31 @@ function load() {
       render();
 
       // Load M0 not started — kickoff never happened
-      fetch('/api/m0-needed?theatre='+encodeURIComponent(_theatre))
+      fetch('/api/m0-needed?theatre='+encodeURIComponent(_theatre)+S.cohortParam())
         .then(function(r){return r.json();})
         .then(function(d){ _data.m0_needed=d; render(); })
         .catch(function(){});
 
       // Load M0→M1 stuck — kickoff done, no action plan
-      fetch('/api/m0-no-m1?theatre='+encodeURIComponent(_theatre))
+      fetch('/api/m0-no-m1?theatre='+encodeURIComponent(_theatre)+S.cohortParam())
         .then(function(r){return r.json();})
         .then(function(d){ _data.m0_no_m1=d; render(); })
         .catch(function(){});
 
       // Load SLA async — update when ready
-      fetch('/api/sla-breaches?theatre='+encodeURIComponent(_theatre))
+      fetch('/api/sla-breaches?theatre='+encodeURIComponent(_theatre)+S.cohortParam())
         .then(function(r){return r.json();})
         .then(function(sla){ _data.sla_breach=_normSla(sla); render(); })
         .catch(function(){});
 
       // Load M1 async — may be slow due to LLM; show hourglass until done
-      fetch('/api/m1-suggestions?theatre='+encodeURIComponent(_theatre))
+      fetch('/api/m1-suggestions?theatre='+encodeURIComponent(_theatre)+S.cohortParam())
         .then(function(r){return r.json();})
         .then(function(m1){ _m1Loading=false; _data.m1_plan=_normM1(m1); render(); })
         .catch(function(){ _m1Loading=false; });
 
       // Load XSUP P1 + P2 async
-      fetch('/api/xsup-data?theatre='+encodeURIComponent(_theatre))
+      fetch('/api/xsup-data?theatre='+encodeURIComponent(_theatre)+S.cohortParam())
         .then(function(r){return r.json();})
         .then(function(xd){
           _data.xsup_p1 = _normXsup(xd.accounts||[], 'P1');

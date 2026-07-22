@@ -37,7 +37,12 @@ select.fsel:focus{outline:none;border-color:var(--sky)}
 </style>
 </head>
 <body>
-<nav id="s-nav" class="s-nav"></nav>
+<nav id="s-nav" class="s-nav"></nav><div id="s-cohort-bar" style="display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;">
+<span class="pill s-cohort-pill active" data-c="" onclick="S.setCohort('')" >All</span>
+<span class="pill s-cohort-pill" data-c="Scale cohort" onclick="S.setCohort('Scale cohort')" >Scale</span>
+<span class="pill s-cohort-pill" data-c="101-650 Customers" onclick="S.setCohort('101-650 Customers')" >101-650</span>
+<span class="pill s-cohort-pill" data-c="Top 100 Customers" onclick="S.setCohort('Top 100 Customers')" >Top 100</span>
+</div>
 
 <div id="main" class="s-main">
 
@@ -76,9 +81,11 @@ select.fsel:focus{outline:none;border-color:var(--sky)}
 
 </div>
 
-<script src="/static/solstice.js?v=5"></script>
+<script src="/static/solstice.js?v=6"></script>
 <script>
-S.initNav('audit'); S.restoreCard();
+S.initNav('audit');
+S.onCohortChange = load;
+S.restoreCard();
 
 var E=S.esc;
 var _rows=[];
@@ -94,7 +101,7 @@ var TH_C={'EMEA':'#0ea5e9','AMER':'#3b82f6','JAPAC':'#a78bfa','LATAM':'#f59e0b'}
 function loadAudit(){
   var theatre=document.getElementById('f-theatre').value;
   document.getElementById('timeline').innerHTML='<div class="empty">Loading…</div>';
-  fetch('/api/audit-log?theatre='+encodeURIComponent(theatre))
+  fetch('/api/audit-log?theatre='+encodeURIComponent(theatre)+S.cohortParam())
     .then(function(r){return r.json();})
     .then(function(rows){
       _rows=rows;
@@ -225,6 +232,7 @@ function exportAudit(){
   S.exportCSV(rows, 'solstice-audit.csv');
 }
 
+function load() { loadAudit(); }
 loadAudit();
 </script>
 </body></html>

@@ -290,6 +290,40 @@ function _renderCard(d) {
   document.body.appendChild(modal);
 }
 
+// ── Global Cohort State ───────────────────────────────────────────────────────
+S.cohort = localStorage.getItem('s_cohort') || '';
+S.onCohortChange = function() {};   // pages override this
+
+S.setCohort = function(val) {
+  S.cohort = val;
+  localStorage.setItem('s_cohort', val);
+  // Update active pill
+  document.querySelectorAll('.s-cohort-pill').forEach(function(p) {
+    p.classList.toggle('active', p.dataset.c === val);
+  });
+  S.onCohortChange();
+};
+
+S.cohortParam = function() {
+  return S.cohort ? '&cohort=' + encodeURIComponent(S.cohort) : '';
+};
+
+S.initCohortBar = function() {
+  var bar = document.getElementById('s-cohort-bar');
+  if (!bar) return;
+  var cohorts = [
+    {v: '',                   label: 'All'},
+    {v: 'Scale cohort',       label: 'Scale'},
+    {v: '101-650 Customers',  label: '101-650'},
+    {v: 'Top 100 Customers',  label: 'Top 100'},
+  ];
+  bar.innerHTML = cohorts.map(function(c) {
+    var active = S.cohort === c.v ? ' active' : '';
+    return '<span class="pill s-cohort-pill' + active + '" data-c="' + S.esc(c.v) +
+           '" onclick="S.setCohort(\'' + S.esc(c.v) + '\')">' + S.esc(c.label) + '</span>';
+  }).join('');
+};
+
 // ── Nav + Health Bar ──────────────────────────────────────────────────────────
 
 var _PAGES = [
@@ -338,6 +372,16 @@ S.initNav = function(activePage) {
 
   _refreshHealth();
   setInterval(_refreshHealth, 5*60*1000);
+
+  // Inject cohort bar below nav
+  var existingBar = document.getElementById('s-cohort-bar');
+  if (!existingBar) {
+    var cohortBar = document.createElement('div');
+    cohortBar.id = 's-cohort-bar';
+    cohortBar.style.cssText = 'display:flex;gap:.4rem;padding:.35rem 1.5rem;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;';
+    document.body.insertBefore(cohortBar, document.body.querySelector('.s-main'));
+  }
+  S.initCohortBar();
 };
 
 function _refreshHealth() {
