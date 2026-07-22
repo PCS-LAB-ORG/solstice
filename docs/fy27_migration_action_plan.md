@@ -1,1495 +1,1078 @@
 # CC Migration Action Plan — FY27
-*Generated 2026-07-22 | Source: Unified Tracker 2.0 | Scale cohort, active pipeline*
-**Goal:** 400-500 completions by Jul 2027 (current: 98 done, 1,227 remaining)
+*Generated 2026-07-22 | Source: Unified Tracker 2.0 + Blockers page | Scale cohort*
+
+**Goal:** 400-500 completions by Jul 2027 | **Current:** 65 done (Scale cohort) | **Remaining:** 1,227
+
+> Categories and counts match the Blockers page exactly (signal=blocked/at_risk, m9=0, Scale cohort).
 
 ---
-## 1. Blocked for Outreach — M1 Not Started (170 accounts)
-**Action:** CSE or CC Rep must initiate first contact. No outreach made yet.
 
-| Account | Theatre | ARR | CSE | CC Rep | DSM | Action |
+## Summary
+
+| # | Category | Count | Who Fixes It |
+|---|---|---|---|
+| 1 | Churn Risk | 187 | DSM/RVP |
+| 2 | No Contact | 115 | CSE + CC Rep |
+| 3 | Customer Delay | 151 | CSE + DSM |
+| 4 | Rep Blocking | 121 | DSM/RVP direct |
+| 5 | Technical Blocker | 100 | CSE + TAC/Engineering |
+| 6 | Active Deal | 13 | CC Rep |
+| 7 | Legal Blocker | 3 | CSE + Legal |
+| 8 | XSUP P1 (open) | 2 | Engineering — P1 escalation, immediate |
+| 9 | XSUP P2 (open) | 339 | TAC/Engineering — track weekly |
+
+---
+
+## 1. Churn Risk (187 accounts)
+
+**Action:** DSM/RVP: Review churn signal, assess recovery path or accept churn. Block renewal if at risk.
+
+| Account | Theatre | ARR | CSE | CC Rep | DSM | Notes |
 |---|---|---|---|---|---|---|
-| Medidata Solutions Worldwide | AMER | $808K | — | — | — | Initiate M1 outreach |
-| Western Governors University | AMER | $441K | Dele Adewumi | Ezekiel (Zeke) Janicello | Adrienne Levi | Initiate M1 outreach |
-| Enbridge Inc | AMER | $32K | — | — | — | Initiate M1 outreach |
-| RingCentral | AMER | $27K | — | — | — | Initiate M1 outreach |
-| Fed-Tulip38 | AMER | $2.4M | Kishwar Firdaus | Mark Gibbons | Brendan Cox | Initiate M1 outreach |
-| Eastdil Secured | AMER | $18K | Standard | — | — | Initiate M1 outreach |
-| Fed-Poppy31 | AMER | $139K | — | — | — | Initiate M1 outreach |
-| OpenText | AMER | $1.4M | — | — | — | Initiate M1 outreach |
-| Proquire Plus Inc (Accenture) | AMER | — | — | — | — | Initiate M1 outreach |
-| Malam - Team Ltd | EMEA | $98K | Chinmoy Roy | Barak Shrefler | — | Initiate M1 outreach |
-| Olympic Channel Services S.l. | EMEA | $96K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Initiate M1 outreach |
-| Mtn (zambia) Limited | EMEA | $10K | Pushkar Kakkar | Kurt D. Ogle | — | Initiate M1 outreach |
-| Mtn Cameroon | EMEA | $9K | Pushkar Kakkar | - | — | Initiate M1 outreach |
-| Mutua Madrilena | EMEA | $92K | Mikhail Bakhmetiev | Alvaro Del Pozo Gozalez | — | Initiate M1 outreach |
-| Mtn South Sudan Limited | EMEA | $9K | Pushkar Kakkar | - | — | Initiate M1 outreach |
-| Onespan | EMEA | $9K | Pushkar Kakkar | - | — | Initiate M1 outreach |
-| Akeyless Security Ltd | EMEA | $9K | Mathieu Dalbes | - | — | Initiate M1 outreach |
-| ZUCCHETTI SPA | EMEA | $8K | Vaishnavi Mishra | — | — | Initiate M1 outreach |
-| Ethio Telecom | EMEA | $79K | Chinmoy Roy | — | — | Initiate M1 outreach |
-| Solvinity | EMEA | $78K | Jonathan Brox | - | — | Initiate M1 outreach |
-| World Duty Free Group Sociedad Anonima. | EMEA | $75K | Vaishnavi Mishra | Luis Ruiz Calleja | — | Initiate M1 outreach |
-| Direct Line Insurance Group Plc | EMEA | $75K | Tunde Adenugba | Christopher (Chris) Dixon | — | Initiate M1 outreach |
-| WOBI INSURANCE AGENCY LTD | EMEA | $7K | Vaishnavi Mishra | - | — | Initiate M1 outreach |
-| Roma Capitale – Dipartimento Cybersecurity e Sicurezza Urban | EMEA | $7K | Mikhail Bakhmetiev | Vito Sodano | — | Initiate M1 outreach |
-| Dovalue Spa | EMEA | $68K | Mathieu Dalbes | - | — | Initiate M1 outreach |
-| MTN South Africa | EMEA | $66K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | Initiate M1 outreach |
-| Prezero Iberia Sl. | EMEA | $7K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Initiate M1 outreach |
-| IDEMIA | EMEA | $65K | — | — | — | Initiate M1 outreach |
-| Playtika | EMEA | $634K | — | Amatzia Ben Zimra | — | Initiate M1 outreach |
-| European External Action Service (EEAS) | EMEA | $63K | Jonathan Brox | David Van Damme | — | Initiate M1 outreach |
-| Oddity | EMEA | $61K | Mikhail Bakhmetiev | Amatzia Ben Zimra | — | Initiate M1 outreach |
-| EUROPEAN SPACE AGENCY | EMEA | $58K | Chinmoy Roy | Jaime Querol | — | Initiate M1 outreach |
-| Zopa Bank Limited. | EMEA | $57K | Chinmoy Roy | Kieran John (Kieran) Woodward Brown | — | Initiate M1 outreach |
-| Deep Instinct | EMEA | $53K | Mathieu Dalbes | Amatzia Ben Zimra | — | Initiate M1 outreach |
-| Barclays PLC | EMEA | $515K | — | Christopher (Chris) Dixon | — | Initiate M1 outreach |
-| Telefonica, S.A. | EMEA | $5K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Initiate M1 outreach |
-| ADFORM LITHUANIA UAB | EMEA | $50K | Chinmoy Roy | Henri Nuottonen | — | Initiate M1 outreach |
-| Tupras | EMEA | $5K | Tunde Adenugba | Burc Berksoy | — | Initiate M1 outreach |
-| FERRARI | EMEA | $47K | Mikhail Bakhmetiev | — | — | Initiate M1 outreach |
-| AENA | EMEA | $40K | Mathieu Dalbes | Jaime Querol | — | Initiate M1 outreach |
-| Wealth Dynamics Limited | EMEA | $40K | Chinmoy Roy | - | — | Initiate M1 outreach |
-| Agencia de Transformación Digital de Castilla la Mancha | EMEA | $39K | — | Mario Garrido Izquierdo | — | Initiate M1 outreach |
-| Mtn Congo S.a | EMEA | $4K | Pushkar Kakkar | - | — | Initiate M1 outreach |
-| SpotIT BVBA | EMEA | $4K | Jonathan Brox | - | — | Initiate M1 outreach |
-| First Abu Dhabi Bank (FAB) | EMEA | $370K | — | Ahmed Khatib | — | Initiate M1 outreach |
-| Wipro Limited (UK) (MSSP) | EMEA | $36K | Chinmoy Roy | Alice Victoria Lowe | — | Initiate M1 outreach |
-| Telefonica Global Solutions | EMEA | $4K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Initiate M1 outreach |
-| Migros | EMEA | $34K | Tunde Adenugba | Burc Berksoy | — | Initiate M1 outreach |
-| Kashxa Limited | EMEA | $34K | Chinmoy Roy | Carlo Daniele | — | Initiate M1 outreach |
-| Deko Pay | EMEA | $33K | Tunde Adenugba | Kieran John (Kieran) Woodward Brown | — | Initiate M1 outreach |
-| Abu Dhabi Investment Council | EMEA | $31K | Zoheb Sarwar | — | — | Initiate M1 outreach |
-| BANK OF JERUSALEM LTD. | EMEA | $30K | Mathieu Dalbes | Gil Pery | — | Initiate M1 outreach |
-| Nfq Advisory, Solutions, Outsourcing | EMEA | $29K | Vaishnavi Mishra | - | — | Initiate M1 outreach |
-| Telefonica Cybersecurity & Cloud Tech Sl. | EMEA | $28K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Initiate M1 outreach |
-| ON2IT Netherlands | EMEA | $28K | Chinmoy Roy | Remco L. van Trigt | — | Initiate M1 outreach |
-| Enaire | EMEA | $26K | Mathieu Dalbes | Jaime Querol | — | Initiate M1 outreach |
-| KPMG LLP (UK) | EMEA | $26K | — | — | — | Initiate M1 outreach |
-| Grunenthal Financial Services, Unipessoal, Lda | EMEA | $26K | Pushkar Kakkar | Pedro Jorge Pinho (Pedro) Francisco | — | Initiate M1 outreach |
-| Idf / Mamram | EMEA | $249K | — | — | — | Initiate M1 outreach |
-| Alpha Bank | EMEA | $24K | Mathieu Dalbes | Carlo Daniele | — | Initiate M1 outreach |
-| Travelgate Sl. | EMEA | $21K | Mikhail Bakhmetiev | - | — | Initiate M1 outreach |
-| Sophos Limited | EMEA | $20K | — | — | — | Initiate M1 outreach |
-| Swedbank Ab | EMEA | $204K | — | Jonathan P. Agerius | — | Initiate M1 outreach |
-| SETUR SERVIS TURISTIK A S | EMEA | $20K | Tunde Adenugba | Burc Berksoy | — | Initiate M1 outreach |
-| Empark Aparcamientos Y Servicios Sa | EMEA | $20K | Mathieu Dalbes | Javier A. Rodriguez | — | Initiate M1 outreach |
-| Mtn Ghana | EMEA | $19K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | Initiate M1 outreach |
-| Assuta Medical Center | EMEA | $18K | Mathieu Dalbes | Barak Shrefler | — | Initiate M1 outreach |
-| Varonis Systems Ltd | EMEA | $175K | — | Gil Pery | — | Initiate M1 outreach |
-| Appro Onboarding Solutions FZ-LLC | EMEA | $17K | Chinmoy Roy | Selin Gulen (Selin) de Groot | — | Initiate M1 outreach |
-| Odaseva Technologies | EMEA | $17K | Mikhail Bahkmetiev | — | — | Initiate M1 outreach |
-| ON2IT Netherlands | EMEA | $17K | Chinmoy Roy | Remco L. van Trigt | — | Initiate M1 outreach |
-| Totem France | EMEA | $16K | Mikhail Bahkmetiev | Nicolas Avila Jimenez | — | Initiate M1 outreach |
-| MTN Cote D'Ivoire | EMEA | $16K | Pushkar Kakkar | - | — | Initiate M1 outreach |
-| Universita' Degli Studi Di Milano - Bicocca | EMEA | $16K | Vaishnavi Mishra | Vito Sodano | — | Initiate M1 outreach |
-| Facilities Management And Maintenance Company W.l.l | EMEA | $16K | Mathieu Dalbes | Selin Gulen (Selin) de Groot | — | Initiate M1 outreach |
-| Deloitte LLP (UK-MSSP) | EMEA | $15K | Tunde Adenugba | - | — | Initiate M1 outreach |
-| IAG Transform | EMEA | $15K | Tunde Adenugba | William J. (Will) Mardling | — | Initiate M1 outreach |
-| Kaczmarski Inkasso Malgorzata Kaczmarski | EMEA | $15K | Tunde Adenugba | Robert Madej | — | Initiate M1 outreach |
-| RENFE | EMEA | $15K | Mikhail Bakhmetiev | Mario Garrido Izquierdo | — | Initiate M1 outreach |
-| Flow Traders | EMEA | $148K | Jonathan Brox | Barbera Gerritdina (Barbera) Menten | — | Initiate M1 outreach |
-| BROADRIDGE FINANCIAL SOLUTIONS LTD | EMEA | $15K | Tunde Adenugba | - | — | Initiate M1 outreach |
-| Icex España Exportacion E Inversiones Epemp | EMEA | $15K | — | Jaime Querol | — | Initiate M1 outreach |
-| Dream Finance Ou | EMEA | $144K | — | Henri Nuottonen | — | Initiate M1 outreach |
-| Mtn Benin | EMEA | $14K | Pushkar Kakkar | - | — | Initiate M1 outreach |
-| Topkapi Danismanlik | EMEA | $14K | Tunde Adenugba | Burc Berksoy | — | Initiate M1 outreach |
-| Defensor del Pueblo | EMEA | $13K | Mathieu Dalbes | Mario Garrido Izquierdo | — | Initiate M1 outreach |
-| Abu Dhabi Investment Authority (ADIA) | EMEA | $132K | — | Ahmed Khatib | — | Initiate M1 outreach |
-| Distribuidores Automaticos De Bebidas Y Alimentos Sa | EMEA | $13K | Mathieu Dalbes | Javier A. Rodriguez | — | Initiate M1 outreach |
-| M&G plc | EMEA | $127K | — | Toby James (Toby) Piggott | — | Initiate M1 outreach |
-| Sol Melia | EMEA | $126K | — | Javier A. Rodriguez | — | Initiate M1 outreach |
-| Quidax technologies | EMEA | $12K | Tunde Adenugba | Kurt D. Ogle | — | Initiate M1 outreach |
-| ORANGE CYBERDEFENSE BELGIUM NV | EMEA | $12K | Jonathan Brox | - | — | Initiate M1 outreach |
-| ISRAIR AIRLINES & TOURISM LTD. | EMEA | $12K | Chinmoy Roy | Gil Pery | — | Initiate M1 outreach |
-| MTN Eswatini | EMEA | $12K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | Initiate M1 outreach |
-| Integrated Finance | EMEA | $12K | Chinmoy Roy | - | — | Initiate M1 outreach |
-| Mtn (u) Ltd | EMEA | $12K | Pushkar Kakkar | - | — | Initiate M1 outreach |
-| Sodastream Israel Ltd | EMEA | $11K | Mikhail Bakhmetiev | - | — | Initiate M1 outreach |
-| Pricewaterhousecoopers Services Limited | EMEA | $11K | Chinmoy Roy | - | — | Initiate M1 outreach |
-| Mtn Nigeria Communications Ltd. | EMEA | $112K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | Initiate M1 outreach |
-| Papaya Gaming Ltd | EMEA | $112K | Mikhail Bakhmetiev | Gil Pery | — | Initiate M1 outreach |
-| Tesco Plc | EMEA | $107K | PS | Christopher (Chris) Dixon | — | Initiate M1 outreach |
-| LC WAIKIKI MAGAZACILIK HIZMETLERI TICARET A S | EMEA | $103K | Tunde Adenugba | Burc Berksoy | — | Initiate M1 outreach |
-| SABA APARCAMIENTOS, SA | EMEA | $10K | Mikhail Bakhmetiev | - | — | Initiate M1 outreach |
-| HERMES FUND MANAGERS LTD | EMEA | $10K | Tunde Adenugba | - | — | Initiate M1 outreach |
-| Poltrona Frau Spa | EMEA | $10K | Mikhail Bakhmetiev | Carlo Daniele | — | Initiate M1 outreach |
-| Truelayer Limited | EMEA | — | Chinmoy Roy | Kieran John (Kieran) Woodward Brown | — | Initiate M1 outreach |
-| Blue Insurance Limited | JAPAC | $10K | — | — | — | Initiate M1 outreach |
-| Department of Lands (DOL) | JAPAC | $9K | — | — | — | Initiate M1 outreach |
-| Poonawalla Fincorp Ltd | JAPAC | $94K | Somesh Patil | - | — | Initiate M1 outreach |
-| Colgate-Palmolive (China) Co.,Ltd | JAPAC | $9K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| SK Broadband Co., Ltd. | JAPAC | $91K | Shijin Varghese | Raymond Park | — | Initiate M1 outreach |
-| Prosperity and Growth Commercial Joint Stock Bank (PGBank) | JAPAC | $9K | — | — | — | Initiate M1 outreach |
-| Metlife China | JAPAC | $8K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Cordis (shanghai) Medical Devices Co., Ltd. | JAPAC | $8K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Bank of Thailand | JAPAC | $76K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | Initiate M1 outreach |
-| Ci&t China, Inc. | JAPAC | $7K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Manulife-Sinochem (China) | JAPAC | $74K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Optus Systems Pty Ltd | JAPAC | $738K | — | — | — | Initiate M1 outreach |
-| GOLDMAN SACHS (BEIJING) ENTERPRISE MANAGEMENT CO. LTD | JAPAC | $7K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Techcom Insurance | JAPAC | $7K | — | — | — | Initiate M1 outreach |
-| Airbus (china) Enterprises Management And Services Co.,ltd. | JAPAC | $7K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Kasikorn X Company Limited | JAPAC | $7K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | Initiate M1 outreach |
-| Australian Investment Exchange Limited | JAPAC | $62K | Akanchha singh | Kevin Dinh | — | Initiate M1 outreach |
-| Orient Commercial Joint Stock Bank | JAPAC | $6K | — | — | — | Initiate M1 outreach |
-| Boehringer Ingelheim (china) Investment Co., Ltd. | JAPAC | $51K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Chanel (china) Co., Ltd. | JAPAC | $49K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| National Payment Corporation of Vietnam (NAPAS) | JAPAC | $5K | Nikhil Ahuja | — | — | Initiate M1 outreach |
-| IQVIA | JAPAC | $47K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| ICICI Prudential Asset Management Company Limuted | JAPAC | $45K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | Initiate M1 outreach |
-| Paytm Payments Bank Limited | JAPAC | $4K | Akash Singh | Chetan Sharma | — | Initiate M1 outreach |
-| Richemont Commercial Co, Ltd. | JAPAC | $43K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Rategain IT Solutions Pvt Ltd | JAPAC | $43K | — | Biswas K. Sedai | Risun Antony | Initiate M1 outreach |
-| Deloitte China | JAPAC | $42K | — | — | — | Initiate M1 outreach |
-| Capitaland China Holdings Pte Ltd | JAPAC | $39K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Monetary Authority of Singapore | JAPAC | $377K | — | — | — | Initiate M1 outreach |
-| ICICI SECURITIES LIMITED | JAPAC | $37K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | Initiate M1 outreach |
-| AIA Life Insurance Co., Ltd. | JAPAC | $35K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Sanofi (china) Investment Co., Ltd. Shanghai Branch | JAPAC | $3K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Abbott Laboratories Trading (shanghai) Co., Ltd. | JAPAC | $30K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Gea Process Engineering China Limited. | JAPAC | $26K | — | — | — | Initiate M1 outreach |
-| Omowei Automotive Systems (Shanghai) Co., Ltd. | JAPAC | $23K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| VS Management (Shanghai) Company Limited | JAPAC | $22K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Dh Business Services (shanghai) Co., Ltd. | JAPAC | $22K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Dalian Dhl Group Co., Ltd. | JAPAC | $21K | — | — | — | Initiate M1 outreach |
-| Ayudhya Capital Services Company Limited | JAPAC | $20K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | Initiate M1 outreach |
-| HDFC ASSET MANAGEMENT COMPANY LIMITED | JAPAC | $19K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | Initiate M1 outreach |
-| MAX HEALTHCARE INSTITUTE LIMITED | JAPAC | $19K | Somesh Patil | - | — | Initiate M1 outreach |
-| IKEA (China) Investment Co., Ltd. | JAPAC | $18K | — | — | — | Initiate M1 outreach |
-| Pricewaterhousecoopers China Holding Limited | JAPAC | $178K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Coca Cola (China) Investment Co., Ltd. | JAPAC | $16K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Hilton Enterprise Management (shanghai) Co., Ltd. | JAPAC | $156K | Sophie Wang | Kai Wang | Peter Fan | Initiate M1 outreach |
-| Scania Production (china) Co. Ltd. | JAPAC | $15K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Gallagher Insurance Brokers (Beijing) Limited | JAPAC | $14K | — | — | — | Initiate M1 outreach |
-| CATHAY UNITED BANK CO., LTD. | JAPAC | $14K | Shijin Varghese | Yiting (Jeremy) Hsu | — | Initiate M1 outreach |
-| Tyson (Shanghai) Enterprise Management Co., Ltd | JAPAC | $14K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Mahindra First Choice Services Limited | JAPAC | $14K | Somesh Patil | - | — | Initiate M1 outreach |
-| Hdfc Bank Limited | JAPAC | $1.4M | — | Saurabh Umeshchandra (Saurabh) Sah | Risun Antony | Initiate M1 outreach |
-| Mahindra Holidays & Resorts India Limited | JAPAC | $14K | Somesh Patil | - | — | Initiate M1 outreach |
-| L'Oreal China Co., Ltd. | JAPAC | $134K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Viatris Healthcare Inc. China | JAPAC | $12K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| Softbank Corp. | JAPAC | $120K | — | - | Toshihiko Muroi | Initiate M1 outreach |
-| JBCC CORPORATION(Partner) | JAPAC | $12K | — | — | — | Initiate M1 outreach |
-| Accenture (China) Co., Ltd. | JAPAC | $1K | Sophie Wang | Kai Wang | — | Initiate M1 outreach |
-| JBCC CORPORATION(Partner) | JAPAC | $11K | — | — | — | Initiate M1 outreach |
-| PTT Digital Solutions Company Limited | JAPAC | $112K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | Initiate M1 outreach |
-| Ptt Oil And Retail Business Public Company Limited | JAPAC | $106K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | Initiate M1 outreach |
-| Thales India Private Limited | JAPAC | $106K | — | - | — | Initiate M1 outreach |
-| Telefonica Mexico | LATAM | $7K | — | — | — | Initiate M1 outreach |
-| Telefonica Moviles Chile S.A. | LATAM | $12K | — | — | — | Initiate M1 outreach |
-| Banco de Chile | LATAM | $118K | — | — | — | Initiate M1 outreach |
+| Brentwood Bank | AMER | $8K | Churning/Churned | Jason E. Harris | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Duke University Health System, Inc. | AMER | $85K | PS-led upgrade | Cassandra (Casey) Bunn | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Moody's Corporation | AMER | $825K | PS-led upgrade | Konstantin M. (Mike) Rutledge | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| East West Bank | AMER | $81K | Churning/Churned | Benjamin (Ben) Maxwell | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Nelnet, Inc. | AMER | $75K | Churning/Churned | James (Jim) Barry | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Eaton Corporation | AMER | $700K | PS-led upgrade | Timothy (Tim) Vanecek | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Guardant Health, Inc. | AMER | $7K | Churning/Churned | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| MRO Corp | AMER | $65K | Churning/Churned | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Orlando Health | AMER | $65K | CS-led upgrade | Harold S. (Hal) Overman IV | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Rentokil North America, Inc. | AMER | $62K | Churning/Churned | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Rady Children's Health | AMER | $6K | Churning/Churned | Jack Estep | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| CIBC - Canadian Imperial Bank of Commerce | AMER | $56K | Churning/Churned | Gordon (Gord) Griffiths | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| PUBLISHERS CLEARING HOUSE LLC | AMER | $55K | Churning/Churned | Brett Robertson | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Southwire Company | AMER | $49K | Churning/Churned | Clarence H. (Trey) Kitchens III | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Launch Consulting Group | AMER | $47K | Churning/Churned | Matt Milton | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Canadian Payments Association | AMER | $42K | Churning/Churned | Dilan Kapadia | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Penumbra, Inc. | AMER | $37K | Churning/Churned | Michael A. (Tres) Zaglool | Kevin Albright | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Proquire Plus Inc | AMER | $3.5M | PS-led upgrade | Timothy T. (Tim) Karnezis | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| CAREWISE HEALTH INC | AMER | $30K | Churning/Churned | Nathan Villa | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| CSG International (NE) | AMER | $24K | Akintayo Akinbade | James (Jim) Barry | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Telus Corporation | AMER | $22K | Churning/Churned | Brendan Rose | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| PAREXEL International Corporation | AMER | $22K | Churning/Churned | Marc Makowski | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Mlmic Insurance Company | AMER | $19K | Churning/Churned | James (Jim) Barry | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Bluescope Buildings North America, Inc. | AMER | $17K | Churning/Churned | James (Jim) Barry | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Knife River Corporation | AMER | $17K | Churning/Churned | James (Jim) Barry | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Palo Alto Networks (TEST ACCT) | AMER | $2K | Standard | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Dsw Inc. | AMER | $17K | PS-led upgrade | Jon Halar | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Conagra Brands, Inc | AMER | $16K | Churning/Churned | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Extended Stay America | AMER | $14K | Churning/Churned | Kenneth (Reid) Wallace | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Cloudticity | AMER | $106K | PS-led upgrade | John W. Diaz | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Pembina Pipeline | AMER | $102K | Churning/Churned | Todd E. Bellman | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| NIO | AMER | — | PS-led upgrade | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Deque Systems Inc. | AMER | — | Churning/Churned | Nathan Villa | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ares Corporation | AMER | — | Churning/Churned | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Baxter Healthcare Corporation | AMER | — | PS-led upgrade | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Certified Languages | AMER | — | Churning/Churned | John W. Diaz | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| SEI Investments Company (MSSP) | AMER | — | Churning/Churned | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Dot Foods, Inc. | AMER | — | Churning/Churned | James (Jim) Barry | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Harbor Freight Tools | AMER | — | Churning/Churned | Matthew (Matt) Freeland | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Healthjoy | AMER | — | Churning/Churned | Addison Rutz | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| York School, The | AMER | — | Churning/Churned | Dilan Kapadia | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Safety National Casualty Corp | AMER | — | Churning/Churned | James (Jim) Barry | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Dimensional Fund Advisors | AMER | — | Churning/Churned | Clint Kiemsteadt | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| BMC Software, Inc. | AMER | — | Churning/Churned | Clint Kiemsteadt | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| BigID Inc. | AMER | — | Churning/Churned | Ambika Venkat | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Zynga | AMER | — | Churning/Churned | Robert J. (Rob) Martin | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Old Dominion University | AMER | — | Churning/Churned | Kevin Sullivan | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Navient Solutions, LLC | AMER | — | Churning/Churned | Andrew (Andy) Koch | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Scribd Inc. | AMER | — | Churning/Churned | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Sophos Inc. | AMER | — | Churning/Churned | Taylor P. Blue | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Fed-Marigold15 | AMER | — | Churning/Churned | Nathan Villa | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Altarum Institute | AMER | — | Churning/Churned | Addison Rutz | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Sallie Mae Corporation HQ | AMER | — | PS-led upgrade | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| BJC Healthcare | AMER | — | Churning/Churned | Kelly G. Reynolds | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| ORNL Federal Credit Union | AMER | — | Churning/Churned | Geoffrey (Craig) Manahan | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Skyflow | AMER | — | Churning/Churned | John W. Diaz | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Schmidt Ocean Institute | AMER | — | Churning/Churned | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Genesys Cloud Services, Inc. | AMER | — | Churning/Churned | Michael A. (Tres) Zaglool | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Fed-Tulip46 | AMER | — | Churning/Churned | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Atlantic Health System | AMER | — | Churning/Churned | Harrison Beck | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Candlestick Capital Llc | AMER | — | Churning/Churned | Nathan Villa | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Council For Affordable Quality Healthcare, Inc. | AMER | — | John Leon | Nathan Villa | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Billtrust | AMER | — | CS-led upgrade | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| WINWHOLESALE INC. | AMER | — | Churning/Churned | Jon Halar | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Oscar Management Corporation | AMER | — | PS-led upgrade | Thomas (Tom) O'Brien | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Supreme Council for Defence | EMEA | $9K | Jonathan Brox | Mohamad Aldawsari | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Hot Card Ltd | EMEA | $8K | Pushkar Kakkar | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| MOD Specials | EMEA | $77K | Chinmoy Roy | Barak Shrefler | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Europcar International | EMEA | $69K | Mathieu Dalbes | Nicolas Olivier Denis (Nicolas) Belorgey | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| GALEC | EMEA | $66K | Mikhail Bakhmetiev | Matthieu Guillaume Pierre-Marie (Matthieu) Jarrige | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Tryg A/S | EMEA | $65K | Zoheb Sarwar | Amir Peter (Amir) Comae | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| FRANCE TELEVISIONS | EMEA | $6K | Mathieu Dalbes | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Carrefour | EMEA | $40K | Mathieu Dalbes | Vanessa De Los Angeles (Vanessa) Fort | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| EUROBIC | EMEA | $28K | Mathieu Dalbes | Pedro Jorge Pinho (Pedro) Francisco | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Schroders plc | EMEA | $19K | Chinmoy Roy | Toby James (Toby) Piggott | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Legal & General Retirement | EMEA | $16K | Chinmoy Roy | Christopher (Chris) Dixon | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Eiffage SA | EMEA | $15K | Mathieu Dalbes | Nabila Ayadi | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| OP Osuuskunta | EMEA | $15K | Vaishnavi Mishra | Alex Ahlberg | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Solvd GmbH | EMEA | $15K | Jonathan Brox | Christine Noweski | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ibi Trust Management | EMEA | $14K | Pushkar Kakkar | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| ITRS Group Ltd | EMEA | $12K | Chinmoy Roy | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Repsol Sa. | EMEA | $1.1M | Mikhail Bakhmetiev | Luis Ruiz Calleja | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| StoneX Financial Ltd | EMEA | $10K | Chinmoy Roy | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Sociedad General de Aguas de Barcelona dba AGBAR | EMEA | — | Vaishnavi Mishra | Javier A. Rodriguez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Zafran Security Ltd | EMEA | — | Vaishnavi Mishra | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Stena Metall AB | EMEA | — | — | Jonathan P. Agerius | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ninety One | EMEA | — | Tunde Adenugba | Kurt D. Ogle | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Radisson Hospitality Belgium | EMEA | — | Jonathan Brox | Sandra Julia F (Sandra) Artoos | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Teads France | EMEA | — | Mikhail Bahkmetiev | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Apria R.S.A | EMEA | — | Mathieu Dalbes | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Lapse Ltd | EMEA | — | Chinmoy Roy | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Mercedes-Benz Group AG | EMEA | — | — | Christine Noweski | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Viajes Soltour (Grupo Pinero) | EMEA | — | Vaishnavi Mishra | Javier A. Rodriguez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Elecnor | EMEA | — | Mathieu Dalbes | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Hapic Ltd | EMEA | — | Pushkar Kakkar | Carlo Daniele | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Nagomi Security Ltd. | EMEA | — | Tunde Adenugba | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Better Payment Germany GmbH | EMEA | — | Jonathan Brox | Christine Noweski | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Offshore Norge | EMEA | — | Vaishnavi Mishra | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| A.P. Moller - Maersk A/S (APMM) | EMEA | — | It's managed by PS | Amir Peter (Amir) Comae | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Abu Dhabi Commercial Bank | EMEA | — | Chinmoy Roy | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Contguard Ltd | EMEA | — | Mathieu Dalbes | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| OneFamily | EMEA | — | Chinmoy Roy | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ictbit Solutions Ltd | EMEA | — | Pushkar Kakkar | Barak Shrefler | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| DWS INVESTMENTS UK LIMITED | EMEA | — | Tunde Adenugba | Christopher (Chris) Dixon | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| British Airways | EMEA | — | Tunde Adenugba | William J. (Will) Mardling | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Rigspolitiet | EMEA | — | — | Henrik Kirkeskov Nielsen | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Scuola Normale Superiore Di Pisa | EMEA | — | Pushkar Kakkar | Vito Sodano | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| QATAR PETROCHEMICAL COMPANY (QAPCO) Q.S.C. | EMEA | — | Chinmoy Roy | Wissam El Charif | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Maz | EMEA | — | Chinmoy Roy | Alvaro Del Pozo Gozalez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Iglu.com Limited | EMEA | — | Pushkar Kakkar | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Vorboss Limited | EMEA | — | Chinmoy Roy | Paul Austin (Paul) Clark | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Riksrevisjonen | EMEA | — | Vaishnavi Mishra | Robert Oxholm Oersnes | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Velux A/S | EMEA | — | Tunde Adenugba | Amir Peter (Amir) Comae | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Orange SA | EMEA | — | Mikhail Bahkmetiev | Nicolas Avila Jimenez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ministerio de Defensa | EMEA | — | Chinmoy Roy | Mario Garrido Izquierdo | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Disney | EMEA | — | Mathieu Dalbes | Mathilde Simone Louise Josephine (Mathilde) Jaouen | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| TSUZUKI DENKI CO.,LTD. | JAPAC | $10K | Tetsushi Shimada | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| SCB TECH X Co., Ltd. | JAPAC | $91K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Essen Vision Software Pvt Ltd | JAPAC | $8K | Akash Singh | — | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Juspay Technologies Private Limited | JAPAC | $71K | Akash Singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Synapxe Pte Ltd | JAPAC | $71K | Nikhil Ahuja | Su Yong Tay | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Moengage India Private Limited | JAPAC | $48K | Akash Singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| National Center for High-Performance Computing | JAPAC | $33K | Shijin Varghese | Lance Lin | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| University Of Sydney | JAPAC | $32K | Akanchha singh | Benjamin (Ben) Hargreaves | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| RAKUTEN SECURITIES,INC. | JAPAC | $29K | Tetsushi Shimada | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Edelweiss Private Wealth | JAPAC | $25K | Akash Singh | Chetan Sharma | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| NATIONAL PHARMACIES AUSTRALIA PTY LTD | JAPAC | $21K | Akanchha singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Hanwha Life | JAPAC | $21K | Shijin Varghese | Raymond Park | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Innolux Corporation | JAPAC | $21K | Shijin Varghese | Yiting (Jeremy) Hsu | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| PT Gudang Garam Tbk | JAPAC | $19K | Nikhil Ahuja | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Bank Negara Indonesia (Persero), Pt Tbk | JAPAC | $17K | Nikhil Ahuja | Royston Kiang Hwee (Royston) Chng | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Capri Global Capital Limited | JAPAC | $17K | Akash Singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Infotimes Corporation | JAPAC | $17K | Shijin Varghese | Lance Lin | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Rakuten Symphony Singapore Pte. Ltd. | JAPAC | $16K | Nikhil Ahuja | - | — | 🛑 Tech validation completed: tech validation completed  |
+| KGI bank | JAPAC | $16K | Shijin Varghese | Yiting (Jeremy) Hsu | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| SOP Limited | JAPAC | $14K | Shijin Varghese | Lance Lin | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Foxconn Interconnect Technology Limited Taiwan Branch (cayma | JAPAC | $12K | Shijin Varghese | Yiting (Jeremy) Hsu | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Leena Ai India Private Limited | JAPAC | $11K | Somesh Patil | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ahnlab, Inc. | JAPAC | $11K | Shijin Varghese | Raymond Park | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| The Dairy Farm Company Limited | JAPAC | — | Shijin Varghese | Kai Wang | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| quantiphi | JAPAC | — | Akash Singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Angle Auto Finance Pty Ltd | JAPAC | — | Akanchha singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Commonwealth Superannuation Corporation | JAPAC | — | Akanchha singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Tower New Zealand | JAPAC | — | Akanchha singh | Benjamin (Ben) Hargreaves | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| MFEC Public Company Limited | JAPAC | — | Nikhil Ahuja | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ricoh Asia Pacific Operations Limited | JAPAC | — | Shijin Varghese | Kai Wang | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| The Secretariat Of The Prime Minister | JAPAC | — | Nikhil Ahuja | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Modern Lion | JAPAC | — | Shijin Varghese | Raymond Park | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| J.score Co., Ltd | JAPAC | — | Tetsushi Shimada | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Public Television Service Foundation | JAPAC | — | Shijin Varghese | Lance Lin | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Japan Broadcasting Corporation | JAPAC | — | Tetsushi Shimada | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Sembcorp | JAPAC | — | Nikhil Ahuja | Peak Yoke (Christina) Yap | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Hyundai Autoever | JAPAC | — | Shijin Varghese | Raymond Park | Edward Sin | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Australasian Performing Right Association Limited (APRA) AMC | JAPAC | — | Akanchha singh | Kevin Dinh | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Shenzhen Shaoyixia Technology Co., Ltd. | JAPAC | — | Sophie Wang | Kai Wang | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| The Department Of The Prime Minister And Cabinet | JAPAC | — | Akanchha singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Komatsu Ltd. | JAPAC | — | Tetsushi Shimada | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| South East Travel Service Co., Ltd. | JAPAC | — | Shijin Varghese | Lance Lin | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Maruti Suzuki India Limited | JAPAC | — | Akash Singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| CJ Olive Networks | JAPAC | — | Shijin Varghese | Raymond Park | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| BELLE ASIA COMPANY LIMITED | JAPAC | — | Nikhil Ahuja | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| TAIWAN EXTERNAL TRADE DEVELOPMENT COUNCIL | JAPAC | — | Shijin Varghese | Lance Lin | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| AMUTUS CORPORATION | JAPAC | — | Tetsushi Shimada | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Australian Unity Group Services Pty Ltd | JAPAC | — | Akanchha singh | Bradford D. Ellis | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Asian Paints Limited | JAPAC | — | Akash Singh | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| National Cyber Security Agency (NCSA) | JAPAC | — | Nikhil Ahuja | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Nextlink Technology Co., Ltd. | JAPAC | — | Shijin Varghese | Yiting (Jeremy) Hsu | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Canon Korea Inc. | JAPAC | — | Shijin Varghese | Raymond Park | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Lee Kum Kee International Holdings Limited | JAPAC | — | Shijin Varghese | Kai Wang | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Ingram Micro Hong Kong (holding) Limited | JAPAC | — | Shijin Varghese | Kai Wang | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| NATIONAL STOCK EXCHANGE OF INDIA LIMITED | JAPAC | — | Akash Singh | Chetan Sharma | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Palsys Digital Technology Corporation | JAPAC | — | Shijin Varghese | Lance Lin | Peter Fan | 🛑 NGS Sales and Core team confirmed customer has decide |
+| JJNET International Co., Ltd. | JAPAC | — | Shijin Varghese | Lance Lin | Peter Fan | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Korea Credit Data Co., Ltd. | JAPAC | — | Shijin Varghese | Raymond Park | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Centria - Grupo Breca | LATAM | $69K | Alberto Garcia | Marcos Vieyra Feldman | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| BANCO DE GALICIA Y BUENOS AIRES S.A. | LATAM | $64K | Alberto Garcia | Marcos Vieyra Feldman | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Banco Estado | LATAM | $197K | Alberto Garcia | Marcos Vieyra Feldman | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| PwC Strategy& Do Brasil Consultoria Empresarial Ltda | LATAM | $14K | Ariel Nin | - | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Sbf Comercio De Produtos Esportivos Ltda. | LATAM | $117K | Alberto Garcia | Ana Paula (Ana) Huanay Ramirez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Atg Americas Trading Group S A | LATAM | $11K | Ariel Nin | Ana Paula (Ana) Huanay Ramirez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Man Latin America Industria E Comercio De Veiculos Ltda. | LATAM | $11K | Ariel Nin | Ana Paula (Ana) Huanay Ramirez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Banco Pichincha | LATAM | — | Gabriel Tello | Marcos Vieyra Feldman | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Promocion y Operacion, S.A. de C.V. | LATAM | — | Gabriel Tello | Alberto Rodriguez Guevara | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Centro De Servicios Compartidos Af, S.a. De C.v. | LATAM | — | Ariel Nin | Alberto Rodriguez Guevara | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Icatu Seguros S/A. | LATAM | — | Ayesha Yege | Ana Paula (Ana) Huanay Ramirez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| Volkswagen Do Brasil Industria De Veiculos Automotores Ltda | LATAM | — | Phelipe Avila | Ana Paula (Ana) Huanay Ramirez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
+| AEGEA SANEAMENTO E PARTICIPACOES S.A. | LATAM | — | Alberto Garcia | Ana Paula (Ana) Huanay Ramirez | — | 🛑 NGS Sales and Core team confirmed customer has decide |
 
-## 2. Non-Responsive — Outreach Made, No Meeting (217 accounts)
-**Action:** Escalate to DSM/RVP. Try alternative contacts. Check for org changes.
+## 2. No Contact (115 accounts)
 
-| Account | Theatre | ARR | CSE | CC Rep | DSM | Status |
+**Action:** CSE + CC Rep: Try alternate contacts, LinkedIn, exec introduction. Escalate to DSM after 2 failed attempts.
+
+| Account | Theatre | ARR | CSE | CC Rep | DSM | Notes |
 |---|---|---|---|---|---|---|
-| Root.io | AMER | $10K | Pranav Jha | Nathan Villa | — | blocked |
-| Ceribell, Inc. | AMER | $10K | Standard | John W. Diaz | — | at_risk |
-| Equinix, Inc. | AMER | $956K | Oluranti Omotayo | Hana Smith | Kevin Albright | green |
-| Solace Corporation | AMER | $9K | Oluranti Omotayo | Patrick O'Byrne | — | blocked |
-| Nference, Inc. | AMER | $92K | Prashanth M V | Taylor P. Blue | — | at_risk |
-| The Gap Inc | AMER | $909K | Mike Labadie | George Sanchez | Kevin Albright | green |
-| Fisher Investments | AMER | $9K | CS-led upgrade | — | — | at_risk |
-| Fed- Marigold2 | AMER | $85K | Rusty Otto | Evan W. Burnes | — | at_risk |
-| Finicity | AMER | $845K | Mike Labadie | Marc Levitt | Richard Gardner | green |
-| Georgia Department of Labor | AMER | $83K | Kishwar Firdaus | Aaron Frazier | — | green |
-| NATIONAL RESILIENCE | AMER | $83K | Dele Adewumi | — | — | green |
-| Privacera | AMER | $8K | Terrell Carter | John W. Diaz | — | at_risk |
-| San Diego Gas & Electric (SDGE) | AMER | $80K | Manish Kabra | — | Adrienne Levi | at_risk |
-| Chargie Llc | AMER | $8K | Andrew Curran | John W. Diaz | — | green |
-| Mayo Foundation For Medical Education And Research | AMER | $765K | Muhammad Rehan | Maxwell (Max) Sawochka | — | green |
-| Iterable Inc | AMER | $739K | Kashan Naqvi / Yash Boravelli | — | Kevin Albright | blocked |
-| Fed-Orchid | AMER | $722K | Priyank Patel | Matthew (Matt) Fierce | Francois Guillaume | green |
-| Fed-Tulip15 | AMER | $68K | Tomi Fajulugbe | Kenneth (Reid) Wallace | — | green |
-| Universal Electronics Inc. | AMER | $66K | Prateek Pawar | - | — | at_risk |
-| Procore Technologies, Inc. | AMER | $655K | RD Singh | Matthew (Matt) Freeland | — | green |
-| University of California at Berkeley | AMER | $61K | Kishwar Firdaus | - | — | at_risk |
-| Crest Data Systems | AMER | $6K | Dele Adewumi | - | — | at_risk |
-| Grainchain, Inc. | AMER | $59K | Kishwar Firdaus | Ibrahim Limoun | — | at_risk |
-| Stitch Fix, Inc. | AMER | $589K | Ivani Aviles | Michael A. (Tres) Zaglool | Kevin Albright | green |
-| Samaritan's Purse | AMER | $58K | Koki Hara | Jason E. Harris | — | blocked |
-| Wipro, Ltd. (RESELLER) | AMER | $56K | John Leon | Ryan Kells | — | at_risk |
-| Loudoun County | AMER | $56K | Dele Adewumi | Timothy (Tim) O'Brien | — | green |
-| Mastercard Incorporated | AMER | $5.3M | Chad Cazzato | Marc Levitt | Richard Gardner | green |
-| Entytle, Inc. | AMER | $5K | Standard | Ibrahim Limoun | — | at_risk |
-| National Geographic Society Inc | AMER | $51K | Prateek Pawar | Jason E. Harris | — | green |
-| Vitalant | AMER | $5K | Pranav Jha | — | — | at_risk |
-| Teradata Corporation | AMER | $486K | Manish Kabra | Kyle Larson | Adrienne Levi | green |
-| Psiquantum, Corp. | AMER | $48K | Standard | — | — | green |
-| Futures Industry Association | AMER | $47K | Pranav Jha | Nathan Villa | — | at_risk |
-| Townebank | AMER | $47K | John Leon | Nathan Villa | — | green |
-| Csl Behring L.L.C. | AMER | $459K | Oluranti Omotayo | Vanessa Brunke | John Yandziak | green |
-| NCC Media | AMER | $45K | Tomi Fajulugbe | Ryan Kells | John Yandziak | green |
-| Wipro, Ltd. (RESELLER) | AMER | $45K | John Leon | Richard Hannaford | — | at_risk |
-| Fed-Jasmine1 | AMER | $439K | RD Singh | Matthew (Matt) Freeland | Adrienne Levi | green |
-| Tower Hill Insurance Group | AMER | $44K | John Leon | Chad Liggon | — | at_risk |
-| Raymond James Financial, Inc. | AMER | $44K | Brandon Bradshaw | - | — | green |
-| Integris Health, Inc. | AMER | $43K | Kashan Naqvi | Kelly G. Reynolds | Metrri Jain - DCM | green |
-| W. R. Berkley Corporation (Berkley Technologies) | AMER | $42K | omoniyi Jabaru | - | — | blocked |
-| IBM - System Integrator (NAM) | AMER | $38K | CS-led upgrade | - | — | at_risk |
-| Wings Financial Credit Union | AMER | $37K | John Leon | Daniel (Danny) Burke | — | at_risk |
-| Fed-Tulip8 | AMER | $353K | Carlos Martins Jr. | Matthew (Matt) Fierce | Francois Guillaume | at_risk |
-| Deloitte LLP | AMER | $350K | Chad Cazzato | Christopher (Chris) Flynn | John Yandziak | green |
-| Zact, Inc. | AMER | $34K | Andrew Curran | John W. Diaz | — | at_risk |
-| Nvidia Corporation | AMER | $3.4M | Rusty Otto | Ben Castro | Kevin Albright | green |
-| Vonage Holdings Corp | AMER | $3.3M | RD Singh | Dene Bugianesi | John Yandziak | green |
-| Zt Systems | AMER | $33K | Manish Kabra | Kenneth Hillman | Kevin Albright | green |
-| Environmental Systems Research Institute, Inc. (ESRI) | AMER | $326K | Oluranti Omotayo | Matthew (Matt) Freeland | Adrienne Levi | green |
-| Gulf States Toyota, Inc. | AMER | $32K | Chad Cazzato | Clint Kiemsteadt | — | at_risk |
-| First Tech Federal Credit Union | AMER | $32K | Sriram Choudary Nimmagadda | — | — | at_risk |
-| Yardi Systems, Inc. | AMER | $316K | Manish Kabra | Matthew (Matt) Freeland | Adrienne Levi - DCM | green |
-| Fed-Lilly3 | AMER | $308K | Richard Vega | - | Francois Guillaume | green |
-| Billy Graham Evangelistic Association | AMER | $29K | Prateek Pawar | Jason E. Harris | — | at_risk |
-| Laboratory Corporation of America Holdings | AMER | $286K | Tomi Fajulugbe | - | — | green |
-| Arkema Inc. | AMER | $28K | CS-led upgrade | - | — | at_risk |
-| Fiant.io | AMER | $27K | Priyank Patel | John W. Diaz | — | at_risk |
-| Jabil Circuit, Inc. | AMER | $263K | Srikanth Makineni | - | — | at_risk |
-| Sunrise Banks | AMER | $26K | John Leon | Daniel (Danny) Burke | — | at_risk |
-| Merit Network | AMER | $25K | Prateek Pawar | Andrew Woolley | — | at_risk |
-| Blackhawk Network, Inc. | AMER | $249K | Kashan Naqvi | Hana Smith | Kevin Albright | green |
-| Laureate Education, Inc. | AMER | $233K | Richard Vega | Timothy (Tim) O'Brien | — | green |
-| Western & Southern Life Insurance Company | AMER | $23K | Kenneth Lopez | Jon Halar | — | green |
-| AQR Capital Management, LLC | AMER | $226K | Sriram Choudary Nimmagadda | Michael Whitney | John Yandziak | green |
-| Fed-Sunflower15 | AMER | $223K | Manish Kabra | Matthew (Matt) Freeland | Adrienne Levi | green |
-| AAA NCNU CLUB | AMER | $22K | Daniel Reyes | — | Kevin Albright | blocked |
-| Corefour Inc | AMER | $22K | Ivani Aviles | Christopher Lee | — | at_risk |
-| HashiCorp, Inc. | AMER | $22K | Standard | — | — | at_risk |
-| Omnicell | AMER | $216K | Avery King | — | Kevin Albright | green |
-| Canadian National Railway Company | AMER | $202K | Kashan Naqvi | Josiane Lemay | Chris Harris | green |
-| Fed-POPPY5 | AMER | $20K | Ivani Aviles | Todd Trickel | — | at_risk |
-| Costa Farms, Llc | AMER | $19K | Srikanth Makineni | Jennifer H. Matos | — | green |
-| US DOE - Office of Scientific and Technical Information | AMER | $19K | Carlos Martins Jr. | Justin Razmic | — | at_risk |
-| Cordis US Corp. | AMER | $19K | Tomi Fajulugbe | Clarence H. (Trey) Kitchens III | — | green |
-| Ochsner Health System | AMER | $19K | Kashan Naqvi | Kelly G. Reynolds | Metrri Jain - DCM | green |
-| 3-Gis, LLC | AMER | $18K | Kishwar Firdaus | Ibrahim Limoun | — | at_risk |
-| Fed-Sunflower16 | AMER | $180K | Carlos Martins Jr. | Chong H. Yi | Francois Guillaume | green |
-| Domino Data Lab, Inc. | AMER | $18K | N/A | Walter Cortez | Kevin Albright | green |
-| Aerovironment | AMER | $17K | Kashan Naqvi | Matthew (Matt) Freeland | — | at_risk |
-| The Fresh Market, Inc. | AMER | $16K | Tomi Fajulugbe | Kenneth (Reid) Wallace | — | at_risk |
-| New Era Technology | AMER | $16K | Miguel Lopez-Henriquez | - | — | at_risk |
-| Bed Bath and Beyond | AMER | $16K | PS-led upgrade | - | — | at_risk |
-| Lanvera Ltd | AMER | $15K | Priyank Patel | Ibrahim Limoun | — | at_risk |
-| Los Angeles Unified School District | AMER | $148K | Prateek Pawar | Branden Coles | Adrienne Levi | green |
-| Enact | AMER | $146K | Shashank Chandramohan | David E. Harrison | — | green |
-| Apex Companies, Llc | AMER | $14K | Andrew Curran | Nathan Villa | — | at_risk |
-| Hitachi Digital Services LLC | AMER | $14K | Dele Adewumi | David Yazell | — | at_risk |
-| Workllama Inc | AMER | $14K | Standard | Ibrahim Limoun | — | green |
-| AccuWeather | AMER | $138K | N/A | Jason E. Harris | — | at_risk |
-| AECOM Corporation | AMER | $135K | RD Singh | Barnaby Crahan | Adrienne Levi | green |
-| Kaiser Permanente | AMER | $1.3M | Sriram Choudary Nimmagadda | Jack Estep | Metrri Jain | green |
-| Hitachi Digital Services LLC | AMER | $13K | Dele Adewumi | - | — | green |
-| DYCOM INDUSTRIES, INC. | AMER | $132K | Tomi Fajulugbe | Clarence H. (Trey) Kitchens III | — | green |
-| Transcarent | AMER | $13K | John Leon | John W. Diaz | — | at_risk |
-| PayIt | AMER | $128K | Pranav Jha | Addison Rutz | — | at_risk |
-| Onity Group Inc. | AMER | $126K | Srikanth Makineni | Clarence H. (Trey) Kitchens III | — | green |
-| Fed-Tulip | AMER | $1.3M | N/A | Chong H. Yi | Tom Welsh | green |
-| Conseil Des Ecoles Catholiques De Langue Francaise Du Centre | AMER | $12K | Churning/Churned | Dilan Kapadia | — | at_risk |
-| Tetrate.io, Inc. | AMER | $12K | Carlos Martins Jr. | John W. Diaz | — | at_risk |
-| Iron Mountain Incorporated | AMER | $1.2M | Srikanth Makineni | Evan W. Burnes | Brendan Cox | green |
-| ThinkReservations | AMER | $12K | Pranav Jha | John W. Diaz | — | at_risk |
-| Cambia Health Solutions, Inc | AMER | $118K | Ivani Aviles | - | — | green |
-| Clearcaptions Llc | AMER | $115K | Kishwar Firdaus | — | — | blocked |
-| Honeywell International Inc. | AMER | $1.1M | Shashank Chandramohan | Brian C. Stearns | Richard Gardner | green |
-| Liminex, Inc. dba GoGuardian | AMER | $108K | Dele Adewumi | John W. Diaz | — | green |
-| Fed-Tulip45 | AMER | $11K | Manish Kabra | - | — | green |
-| Blue Cycle Llc | AMER | $11K | CS-led upgrade | - | — | at_risk |
-| AE Business Solutions | AMER | $11K | CS-led upgrade | - | — | at_risk |
-| Sentinel Technologies, Inc. | AMER | $11K | CS-led upgrade | - | — | at_risk |
-| Emptor | AMER | $11K | Priyank Patel | Nathan Villa | — | green |
-| Atrium Health | AMER | — | PS-led upgrade | Cassandra (Casey) Bunn | — | green |
-| Hackensack Meridian Health | AMER | — | CS-led upgrade | Harrison Beck | — | at_risk |
-| Viajes De Autor Sl. | EMEA | $10K | Vaishnavi Mishra | - | — | at_risk |
-| KUWAIT PETROLEUM ITALIA SPA | EMEA | $98K | PS | — | — | green |
-| FAAC SPA | EMEA | $10K | Mathieu Dalbes | — | — | at_risk |
-| Trendyol | EMEA | $955K | — | Burc Berksoy | Ibrahim Eskiocak | green |
-| SOGEI Spa per Ministero Economia e Finanze | EMEA | $95K | Mikhail Bakhmetiev | Vito Sodano | — | green |
-| Europa Worldwide Logistics Ltd | EMEA | $9K | Mikhail Bakhmetiev | Kieran John (Kieran) Woodward Brown | — | green |
-| Telefonica de Espana SA (customer) | EMEA | $78K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | green |
-| Valeo SA | EMEA | $75K | Mikhail Bahkmetiev | Nicolas Olivier Denis (Nicolas) Belorgey | — | green |
-| eProcess International | EMEA | $74K | Jonathan Brox | Kiran Premnath (Kiran) Ishwarlaal | — | green |
-| GLOBALIA | EMEA | $70K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | blocked |
-| Tnuva | EMEA | $67K | — | Gil Pery | — | green |
-| Federation Internationale de Football Association (FIFA) | EMEA | $64K | Jonathan Brox | Lukas Mettler | — | green |
-| Meest Express Trade House Limited Liability Company | EMEA | $60K | Jonathan Brox | Lukas Eliz | — | green |
-| LUX MED SP ZOO | EMEA | $55K | Tunde Adenugba | Robert Madej | — | green |
-| Deutsche Post IT Services GmbH | EMEA | $510K | — | Marco Schopp | — | green |
-| Hi Bob Ltd | EMEA | $46K | — | Amatzia Ben Zimra | — | green |
-| Caixabank, S.A. | EMEA | $432K | — | Alvaro Del Pozo Gozalez | — | green |
-| Yapi Kredi Bank | EMEA | $38K | — | Burc Berksoy | — | green |
-| International Olympic Committee (IOC) | EMEA | $38K | John Leon | Daniela Boes | — | at_risk |
-| Telefonica Global | EMEA | $4K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | green |
-| CACEIS Spain | EMEA | $35K | Vaishnavi Mishra | Alvaro Del Pozo Gozalez | — | green |
-| Seguros Santalucia | EMEA | $33K | Mikhail Bakhmetiev | Alvaro Del Pozo Gozalez | — | green |
-| Abu Dhabi National Oil Company (ADNOC) | EMEA | $298K | — | Ahmed Khatib | — | green |
-| Scm Biogroup | EMEA | $29K | Zoheb Sarwar | Frank Fabien (Frank) Epinette | — | blocked |
-| UNIVERSITA' COMMERCIALE LUIGI BOCCONI | EMEA | $29K | Mathieu Dalbes | Vito Sodano | — | green |
-| Gestamp | EMEA | $28K | Chinmoy Roy | Luis Ruiz Calleja | — | green |
-| Eni S.p.A. | EMEA | $254K | — | Andrea Rossini | — | at_risk |
-| PRAEMIA REIM | EMEA | $25K | Tunde Adenugba | — | — | green |
-| EDP Global | EMEA | $228K | — | Pedro Jorge Pinho (Pedro) Francisco | — | at_risk |
-| PEPCO POLAND SP Z O O | EMEA | $22K | Mikhail Bakhmetiev | Robert Madej | — | green |
-| Kahoot! As | EMEA | $179K | — | Robert Oxholm Oersnes | — | green |
-| PKO BP S.A. | EMEA | $172K | — | Robert Madej | — | green |
-| IBM UK - International Business Machines | EMEA | $17K | Tunde Adenugba | Zachary James Corner (Zach) Rieker | — | green |
-| BPI FRANCE | EMEA | $158K | — | Antoine Jean Marie Joseph (Antoine) Cantin | — | at_risk |
-| Harel Insurance Investments & Financial Services Ltd | EMEA | $157K | — | Barak Shrefler | — | at_risk |
-| MENORA MIVTACHIM INSURANCE LTD | EMEA | $15K | Chinmoy Roy | Gil Pery | — | green |
-| Qatar Fertilizers | EMEA | $15K | Zoheb Sarwar | Wissam El Charif | — | green |
-| Network International Llc | EMEA | $138K | — | Selin Gulen (Selin) de Groot | — | green |
-| Dansk Erhverv | EMEA | $13K | Jonathan Brox | - | — | green |
-| Compugen Ltd. | EMEA | $13K | Mathieu Dalbes | - | — | at_risk |
-| SARA ASSICURAZIONI SPA ASSICURATRICE UFFICIALE DELL'AUTOMOBI | EMEA | $11K | Mikhail Bakhmetiev | — | — | green |
-| Kapital Bank OJSC | EMEA | $101K | — | Maksim (Maxim) Prakhov | — | green |
-| Toyota Systems Co., Ltd. | JAPAC | $9K | Tetsushi Shimada | - | — | green |
-| Fano Labs Limited | JAPAC | $9K | Shijin Varghese | Kai Wang | — | at_risk |
-| Privado AI | JAPAC | $9K | Somesh Patil | - | — | at_risk |
-| IdealRoute Consulting Inc. | JAPAC | $9K | Tetsushi Shimada | - | — | green |
-| Net One Systems (Reseller) | JAPAC | $89K | Tetsushi Shimada | - | — | green |
-| JBCC HOLDINGS INC. | JAPAC | $87K | Tetsushi Shimada | - | — | green |
-| ASAHI INTECC CO., LTD. | JAPAC | $9K | Tetsushi Shimada | - | — | green |
-| Kore.ai Software India Private Limited | JAPAC | $76K | Somesh Patil | - | — | at_risk |
-| GovTech Tokyo General Inc. Association | JAPAC | $73K | Tetsushi Shimada | - | — | green |
-| Australian Digital Health Agency | JAPAC | $727K | — | - | Dominic Caputo | green |
-| TCLife | JAPAC | $7K | Nikhil Ahuja | - | — | at_risk |
-| Daiwa Institute Of Research Ltd. | JAPAC | $71K | Tetsushi Shimada | - | — | green |
-| Cactus Communications Private Limited | JAPAC | $70K | Somesh Patil | - | — | at_risk |
-| Mazda Motor Corporation | JAPAC | $62K | Tetsushi Shimada | - | — | green |
-| Daiwa Institute Of Research Ltd. | JAPAC | $59K | Akira Uenoyama | - | — | green |
-| Edgeverve Systems Limited | JAPAC | $6K | Akash Singh | Meghana Kaul | — | at_risk |
-| Department of Defence (Centralised Processing) | JAPAC | $40K | — | - | Dominic Caputo | blocked |
-| Jr West It Solutions Company | JAPAC | $37K | Tetsushi Shimada | - | — | green |
-| Kotak Securities Limited | JAPAC | $36K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | blocked |
-| Credit Saison Co., Ltd. | JAPAC | $31K | Tetsushi Shimada | - | — | green |
-| Global Logistics System | JAPAC | $30K | Shijin Varghese | Kai Wang | — | at_risk |
-| APOLLO TYRES LIMITED | JAPAC | $30K | Somesh Patil | - | — | blocked |
-| SHIFT SECURITY Inc.(Partner) | JAPAC | $25K | Tetsushi Shimada | - | — | green |
-| Kotak Mahindra Life Insurance Company Limited | JAPAC | $22K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | blocked |
-| Imagius Japan K.k. | JAPAC | $22K | Tetsushi Shimada | - | — | green |
-| Hong Kong Express Airways Limited | JAPAC | $21K | Shijin Varghese | Kai Wang | — | at_risk |
-| FINANCIAL SOFTWARE AND SYSTEMS PRIVATE LIMITED | JAPAC | $20K | Somesh Patil | - | — | at_risk |
-| Flexera Software Pty Limited | JAPAC | $2.0M | — | - | Dominic Caputo | green |
-| Henderson Real Estate Agency Limited | JAPAC | $20K | Shijin Varghese | Kai Wang | — | green |
-| Bajaj Housing Finance Ltd | JAPAC | $18K | Somesh Patil | - | — | blocked |
-| Construction Industry Council | JAPAC | $17K | Shijin Varghese | Kai Wang | — | green |
-| Yile Technology Co., Ltd. | JAPAC | $17K | Shijin Varghese | Lance Lin | — | green |
-| Global Security Experts K.K. | JAPAC | $16K | Tetsushi Shimada | - | — | green |
-| Flipkart Internet Private Limited | JAPAC | $159K | — | Meghana Kaul | Risun Antony | green |
-| DTS CORPORATION | JAPAC | $16K | Tetsushi Shimada | - | — | green |
-| Hph Corporate Services Limited | JAPAC | $15K | Shijin Varghese | Kai Wang | — | at_risk |
-| Vocational Training Council (VTC) | JAPAC | $15K | Shijin Varghese | Kai Wang | — | at_risk |
-| SONY LIFE INSURANCE CO.,LTD. | JAPAC | $15K | Tetsushi Shimada | - | — | green |
-| Throughtek Co., Ltd | JAPAC | $15K | Shijin Varghese | Lance Lin | — | at_risk |
-| Formosa Energy Management Corporation | JAPAC | $14K | Shijin Varghese | Lance Lin | — | green |
-| THE ASHIKAGA BANK, LTD. | JAPAC | $14K | Tetsushi Shimada | - | — | green |
-| Fukuoka Financial Group, Inc. | JAPAC | $127K | — | - | Toshihiko Muroi | green |
-| NRI SecureTechnologies, Ltd. | JAPAC | $126K | Tetsushi Shimada | - | — | green |
-| Aichi Prefecture | JAPAC | $12K | Tetsushi Shimada | - | — | green |
-| Net One Systems (Reseller) | JAPAC | $12K | Tetsushi Shimada | - | — | green |
-| THE KIYO BANK, LTD., | JAPAC | $12K | Tetsushi Shimada | - | — | green |
-| Timee, Inc. | JAPAC | $12K | Tetsushi Shimada | - | — | green |
-| NIPPON LIFE INSURANCE COMPANY | JAPAC | $12K | Tetsushi Shimada | - | — | green |
-| ORIX BANK CORPORATION | JAPAC | $12K | Tetsushi Shimada | - | — | green |
-| Acceldata Technology Private Limited | JAPAC | $12K | Somesh Patil | - | — | at_risk |
-| Sun Hung Kai Real Estate Agency Limited | JAPAC | $12K | Shijin Varghese | Kai Wang | — | green |
-| NTT DOCOMO SOLUTIONS, Inc. | JAPAC | $11K | Tetsushi Shimada | - | — | green |
-| GLEN EIRA CITY COUNCIL | JAPAC | $11K | Akanchha singh | Kevin Dinh | — | green |
-| NHK | JAPAC | $108K | Tetsushi Shimada | - | — | green |
-| Japan Digital Design K.K. | JAPAC | $11K | Tetsushi Shimada | - | — | green |
-| Mitsui Chemicals, Inc. | JAPAC | $102K | Tetsushi Shimada | - | — | green |
-| Johnson Electric Industrial Manufactory, Limited | JAPAC | $10K | Shijin Varghese | Kai Wang | — | green |
-| Global Payments Asia-pacific (hong Kong) Limited Taiwan Bran | JAPAC | — | Shijin Varghese | Lance Lin | — | green |
-| Shinko Electric Industries Co., Ltd. | JAPAC | — | — | - | Toshihiko Muroi | green |
-| SecureSoft Corporation S.A.C. | LATAM | $5K | Andre Inforzato | - | — | at_risk |
+| Root.io | AMER | $10K | Pranav Jha | Nathan Villa | — | 🛑 Customer outreach made: customer refusing to meet |
+| Ceribell, Inc. | AMER | $10K | Standard | John W. Diaz | — | 👎 Customer outreach made: no response, escalating outre |
+| Solace Corporation | AMER | $9K | Oluranti Omotayo | Patrick O'Byrne | — | 🛑 Customer outreach made: customer refusing to meet |
+| Nference, Inc. | AMER | $92K | Prashanth M V | Taylor P. Blue | — | 👎 Customer outreach made: no response, escalating outre |
+| Fisher Investments | AMER | $9K | CS-led upgrade | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Privacera | AMER | $8K | Terrell Carter | John W. Diaz | — | 👎 Customer outreach made: no response, escalating outre |
+| IBM - System Integrator (NAM) | AMER | $7K | CS-led upgrade | — | — | 👎 Customer outreach made: no response, escalating outre |
+| University of California at Berkeley | AMER | $61K | Kishwar Firdaus | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Crest Data Systems | AMER | $6K | Dele Adewumi | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Grainchain, Inc. | AMER | $59K | Kishwar Firdaus | Ibrahim Limoun | — | 👎 Customer outreach made: no response, escalating outre |
+| Samaritan's Purse | AMER | $58K | Koki Hara | Jason E. Harris | — | 🛑 Customer outreach made: customer refusing to meet |
+| Wipro, Ltd. (RESELLER) | AMER | $56K | John Leon | Ryan Kells | — | 👎 Customer outreach made: no response, escalating outre |
+| Entytle, Inc. | AMER | $5K | Standard | Ibrahim Limoun | — | 👎 Customer outreach made: no response, escalating outre |
+| Vitalant | AMER | $5K | Pranav Jha | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Futures Industry Association | AMER | $47K | Pranav Jha | Nathan Villa | — | 👎 Customer outreach made: no response, escalating outre |
+| Wipro, Ltd. (RESELLER) | AMER | $45K | John Leon | Richard Hannaford | — | 👎 Customer outreach made: no response, escalating outre |
+| Tower Hill Insurance Group | AMER | $44K | John Leon | Chad Liggon | — | 👎 Customer outreach made: no response, escalating outre |
+| W. R. Berkley Corporation (Berkley Technologies) | AMER | $42K | omoniyi Jabaru | - | — | 🛑 Customer outreach made: customer refusing to meet |
+| IBM - System Integrator (NAM) | AMER | $38K | CS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Wings Financial Credit Union | AMER | $37K | John Leon | Daniel (Danny) Burke | — | 👎 Customer outreach made: no response, escalating outre |
+| Zact, Inc. | AMER | $34K | Andrew Curran | John W. Diaz | — | 👎 Customer outreach made: no response, escalating outre |
+| Gulf States Toyota, Inc. | AMER | $32K | Chad Cazzato | Clint Kiemsteadt | — | 👎 Customer outreach made: no response, escalating outre |
+| First Tech Federal Credit Union | AMER | $32K | Sriram Choudary Nimmagadda | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Enbridge Inc | AMER | $32K | — | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Billy Graham Evangelistic Association | AMER | $29K | Prateek Pawar | Jason E. Harris | — | 👎 Customer outreach made: no response, escalating outre |
+| Arkema Inc. | AMER | $28K | CS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Fiant.io | AMER | $27K | Priyank Patel | John W. Diaz | — | 👎 Customer outreach made: no response, escalating outre |
+| Sunrise Banks | AMER | $26K | John Leon | Daniel (Danny) Burke | — | 👎 Customer outreach made: no response, escalating outre |
+| Merit Network | AMER | $25K | Prateek Pawar | Andrew Woolley | — | 👎 Customer outreach made: no response, escalating outre |
+| AAA NCNU CLUB | AMER | $22K | Daniel Reyes | — | Kevin Albright | 🛑 Customer outreach made: customer refusing to meet |
+| Corefour Inc | AMER | $22K | Ivani Aviles | Christopher Lee | — | 👎 Customer outreach made: no response, escalating outre |
+| HashiCorp, Inc. | AMER | $22K | Standard | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Fed-POPPY5 | AMER | $20K | Ivani Aviles | Todd Trickel | — | 👎 Customer outreach made: no response, escalating outre |
+| US DOE - Office of Scientific and Technical Information | AMER | $19K | Carlos Martins Jr. | Justin Razmic | — | 👎 Customer outreach made: no response, escalating outre |
+| 3-Gis, LLC | AMER | $18K | Kishwar Firdaus | Ibrahim Limoun | — | 👎 Customer outreach made: no response, escalating outre |
+| Aerovironment | AMER | $17K | Kashan Naqvi | Matthew (Matt) Freeland | — | 👎 Customer outreach made: no response, escalating outre |
+| The Fresh Market, Inc. | AMER | $16K | Tomi Fajulugbe | Kenneth (Reid) Wallace | — | 👎 Customer outreach made: no response, escalating outre |
+| New Era Technology | AMER | $16K | Miguel Lopez-Henriquez | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Bed Bath and Beyond | AMER | $16K | PS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Lanvera Ltd | AMER | $15K | Priyank Patel | Ibrahim Limoun | — | 👎 Customer outreach made: no response, escalating outre |
+| Apex Companies, Llc | AMER | $14K | Andrew Curran | Nathan Villa | — | 👎 Customer outreach made: no response, escalating outre |
+| Hitachi Digital Services LLC | AMER | $14K | Dele Adewumi | David Yazell | — | 👎 Customer outreach made: no response, escalating outre |
+| Transcarent | AMER | $13K | John Leon | John W. Diaz | — | 👎 Customer outreach made: no response, escalating outre |
+| Conseil Des Ecoles Catholiques De Langue Francaise Du Centre | AMER | $12K | Churning/Churned | Dilan Kapadia | — | 👎 Customer outreach made: no response, escalating outre |
+| Tetrate.io, Inc. | AMER | $12K | Carlos Martins Jr. | John W. Diaz | — | 👎 Customer outreach made: no response, escalating outre |
+| ThinkReservations | AMER | $12K | Pranav Jha | John W. Diaz | — | 👎 Customer outreach made: no response, escalating outre |
+| Clearcaptions Llc | AMER | $115K | Kishwar Firdaus | — | — | 🛑 Customer outreach made: customer refusing to meet |
+| Blue Cycle Llc | AMER | $11K | CS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| AE Business Solutions | AMER | $11K | CS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Sentinel Technologies, Inc. | AMER | $11K | CS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| IBM - System Integrator (NAM) | AMER | $1 | CS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Envista Holdings Corporation | AMER | — | Priyank Patel | — | — | 👎 Customer outreach made: no response, escalating outre |
+| O'Melveny & Myers LLP | AMER | — | Prateek Pawar | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Q2ebanking | AMER | — | CS-led upgrade | Clint Kiemsteadt | — | 👎 Customer outreach made: no response, escalating outre |
+| Progentrix | AMER | — | Priyank Patel | Ibrahim Limoun | — | 👎 Customer outreach made: no response, escalating outre |
+| Fed-Sunflower30 | AMER | — | Kishwar Firdaus | Nathan Villa | — | 👎 Customer outreach made: no response, escalating outre |
+| Altair Engineering Inc. | AMER | — | Wikenson Lejulus | - | — | 👎 Customer outreach made: no response, escalating outre |
+| IBM - System Integrator (NAM) | AMER | — | CS-led upgrade | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Allison Transmission Holdings, Inc. | AMER | — | Joel Jean-Claude | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Matrixx Software, Inc. | AMER | — | John Leon | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Vetty | AMER | — | Pranav Jha | Nathan Villa | — | 👎 Customer outreach made: no response, escalating outre |
+| Insight (HQ) (RESELLER) | AMER | — | Andrew Curran | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Hackensack Meridian Health | AMER | — | CS-led upgrade | Harrison Beck | — | 👎 Customer outreach made: no response, escalating outre |
+| MASIMO CORPORATION | AMER | — | CS-led upgrade | Kyle Larson | — | 👎 Customer outreach made: no response, escalating outre |
+| Gitlab Inc. | AMER | — | PS-led upgrade | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Viajes De Autor Sl. | EMEA | $10K | Vaishnavi Mishra | - | — | 👎 Customer outreach made: no response, escalating outre |
+| FAAC SPA | EMEA | $10K | Mathieu Dalbes | — | — | 👎 Customer outreach made: no response, escalating outre |
+| Onespan | EMEA | $9K | Pushkar Kakkar | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| WOBI INSURANCE AGENCY LTD | EMEA | $7K | Vaishnavi Mishra | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| GLOBALIA | EMEA | $70K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | 🛑 Customer outreach made: customer refusing to meet |
+| Tupras | EMEA | $5K | Tunde Adenugba | Burc Berksoy | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| AENA | EMEA | $40K | Mathieu Dalbes | Jaime Querol | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| International Olympic Committee (IOC) | EMEA | $38K | John Leon | Daniela Boes | — | 👎 Customer outreach made: no response, escalating outre |
+| Wipro Limited (UK) (MSSP) | EMEA | $36K | Chinmoy Roy | Alice Victoria Lowe | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Migros | EMEA | $34K | Tunde Adenugba | Burc Berksoy | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Deko Pay | EMEA | $33K | Tunde Adenugba | Kieran John (Kieran) Woodward Brown | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Nfq Advisory, Solutions, Outsourcing | EMEA | $29K | Vaishnavi Mishra | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Scm Biogroup | EMEA | $29K | Zoheb Sarwar | Frank Fabien (Frank) Epinette | — | 🛑 Customer outreach made: customer refusing to meet |
+| ON2IT Netherlands | EMEA | $28K | Chinmoy Roy | Remco L. van Trigt | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Travelgate Sl. | EMEA | $21K | Mikhail Bakhmetiev | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| ON2IT Netherlands | EMEA | $17K | Chinmoy Roy | Remco L. van Trigt | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| IAG Transform | EMEA | $15K | Tunde Adenugba | William J. (Will) Mardling | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| RENFE | EMEA | $15K | Mikhail Bakhmetiev | Mario Garrido Izquierdo | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Topkapi Danismanlik | EMEA | $14K | Tunde Adenugba | Burc Berksoy | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Compugen Ltd. | EMEA | $13K | Mathieu Dalbes | - | — | 👎 Customer outreach made: no response, escalating outre |
+| ORANGE CYBERDEFENSE BELGIUM NV | EMEA | $12K | Jonathan Brox | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Sodastream Israel Ltd | EMEA | $11K | Mikhail Bakhmetiev | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Deloitte Italy SpA | EMEA | — | Mathieu Dalbes | Carlo Daniele | — | 👎 Customer outreach made: no response, escalating outre |
+| Hera Spa | EMEA | — | Pushkar Kakkar | Andrea Rossini | — | 🛑 Customer outreach made: customer refusing to meet |
+| UNIVERSAE | EMEA | — | Vaishnavi Mishra | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| IAG Cargo | EMEA | — | Tunde Adenugba | William J. (Will) Mardling | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Centarix Biotech Ltd | EMEA | — | Mathieu Dalbes | - | — | 🛑 Customer outreach made: customer refusing to meet |
+| BREWIN DOLPHIN LIMITED | EMEA | — | Tunde Adenugba | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Cellforce Group Gmbh | EMEA | — | Jonathan Brox | Marco Schopp | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Finncap Ltd | EMEA | — | Tunde Adenugba | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Poonawalla Fincorp Ltd | JAPAC | $94K | Somesh Patil | - | — | 🛑 Blocked from internal kick-off: Not able to contact o |
+| Fano Labs Limited | JAPAC | $9K | Shijin Varghese | Kai Wang | — | 👎 Customer outreach made: no response, escalating outre |
+| Privado AI | JAPAC | $9K | Somesh Patil | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Kore.ai Software India Private Limited | JAPAC | $76K | Somesh Patil | - | — | 👎 Customer outreach made: no response, escalating outre |
+| TCLife | JAPAC | $7K | Nikhil Ahuja | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Cactus Communications Private Limited | JAPAC | $70K | Somesh Patil | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Edgeverve Systems Limited | JAPAC | $6K | Akash Singh | Meghana Kaul | — | 👎 Customer outreach made: no response, escalating outre |
+| Kotak Securities Limited | JAPAC | $36K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | 🛑 Customer outreach made: customer refusing to meet |
+| Global Logistics System | JAPAC | $30K | Shijin Varghese | Kai Wang | — | 👎 Customer outreach made: no response, escalating outre |
+| APOLLO TYRES LIMITED | JAPAC | $30K | Somesh Patil | - | — | 🛑 Customer outreach made: customer refusing to meet |
+| Kotak Mahindra Life Insurance Company Limited | JAPAC | $22K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | 🛑 Customer outreach made: customer refusing to meet |
+| Hong Kong Express Airways Limited | JAPAC | $21K | Shijin Varghese | Kai Wang | — | 👎 Customer outreach made: no response, escalating outre |
+| FINANCIAL SOFTWARE AND SYSTEMS PRIVATE LIMITED | JAPAC | $20K | Somesh Patil | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Bajaj Housing Finance Ltd | JAPAC | $18K | Somesh Patil | - | — | 🛑 Customer outreach made: customer refusing to meet |
+| Hph Corporate Services Limited | JAPAC | $15K | Shijin Varghese | Kai Wang | — | 👎 Customer outreach made: no response, escalating outre |
+| Vocational Training Council (VTC) | JAPAC | $15K | Shijin Varghese | Kai Wang | — | 👎 Customer outreach made: no response, escalating outre |
+| Throughtek Co., Ltd | JAPAC | $15K | Shijin Varghese | Lance Lin | — | 👎 Customer outreach made: no response, escalating outre |
+| Acceldata Technology Private Limited | JAPAC | $12K | Somesh Patil | - | — | 👎 Customer outreach made: no response, escalating outre |
+| Nirmata Technologies India Private Limited | JAPAC | — | Akash Singh | - | — | 👎 Customer outreach made: no response, escalating outre |
+| SecureSoft Corporation S.A.C. | LATAM | $5K | Andre Inforzato | - | — | 👎 Customer outreach made: no response, escalating outre |
 
-## 3. Technical Blockers — XSUP / Bug Blocking Upgrade (81 accounts)
-**Action:** Engineering/TAC must resolve open XSUPs. CSE to track and push closure.
+## 3. Customer Delay (151 accounts)
 
-| Account | Theatre | ARR | CSE | DC Progress | Notes (first 60 chars) |
+**Action:** CSE + DSM: Identify specific delay reason. Set hard re-engagement date tied to renewal or exec pressure.
+
+| Account | Theatre | ARR | CSE | CC Rep | DSM | Notes |
+|---|---|---|---|---|---|---|
+| Engie Services U.S. Inc. | AMER | $10K | Standard | Anthony Lewis | — | 👎 Customer meeting completed: customer pushes to delay  |
+| TOPCON POSITIONING SYSTEMS, INC. | AMER | $97K | Sriram Choudary Nimmagadda | — | Kevin Albright | 👎 Customer meeting completed: customer pushes to delay  |
+| The Simons Foundation Inc | AMER | $96K | Sugathri Tumiki | Emma Tufts | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Portland General Electric | AMER | $91K | Manish Kabra | — | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Richard Fleischman & Associates Inc. | AMER | $9K | Standard | Anthony Lewis | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Precisely Software Incorporated | AMER | $89K | PS-led upgrade | David Yazell | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Gravie, Inc. | AMER | $81K | Pranav Jha | Daniel (Danny) Burke | — | 👎 Tech validation completed: tech validation won but cu |
+| Federal Home Loan Bank of Chicago | AMER | $76K | Brandon Bradshaw | Kathleen (Katie) Clark | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Best Buy Co., Inc. | AMER | $733K | PS-led upgrade | Matthew (Matt) Hoyland | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Canada Border Services Agency | AMER | $70K | Ivani Aviles | Patrick O'Byrne | — | 👎 Customer meeting completed: customer pushes to delay  |
+| British Columbia Investment Management Corporation | AMER | $70K | Kashan Naqvi | David (Dave) Jones | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Gore Mutual Insurance Company | AMER | $64K | Avery King | Sameer Patel | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Unity Technologies SF | AMER | $63K | Daniel Reyes | — | Kevin Albright | 👎 Customer meeting completed: customer pushes to delay  |
+| Turnpike Commission, PA | AMER | $63K | Dele Adewumi | Timothy (Tim) O'Brien | — | 👎 Tech validation completed: tech validation won but cu |
+| Ashurst Perkins Coie US LLP | AMER | $54K | Manish Kabra | Jennifer Cecil | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Allina Health System | AMER | $49K | Kashan Naqvi | Maxwell (Max) Sawochka | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| The Ascot Group Ltd | AMER | $41K | Brandon Bradshaw | Marc Makowski | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Roivant Sciences, Inc. | AMER | $41K | Oluranti Omotayo | Thomas (Tom) O'Brien | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Cytokinetics, Inc. | AMER | $40K | Priyank Patel | — | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Cipherhealth Inc. | AMER | $40K | Pranav Jha | Brett Robertson | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| First Canadian Title Company Limited | AMER | $39K | Kashan Naqvi | Gordon (Gord) Griffiths | — | 👎 Customer meeting completed: customer pushes to delay  |
+| BGC Partners | AMER | $384K | PS-led upgrade | — | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| FSY Florida | AMER | $38K | Pranav Jha | Chad Liggon | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Glacier Bancorp | AMER | $35K | RD Singh | Jennifer Cecil | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Corus Entertainment Inc | AMER | $34K | Manish Kabra | Sameer Patel | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Libretto.io | AMER | $34K | Dele Adewumi | John W. Diaz | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Michael & Susan Dell Foundation | AMER | $33K | Standard | Anthony Lewis | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Arcus Biosciences, Inc. | AMER | $30K | Wikenson Lejulus | — | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Wakefern Food Corp. | AMER | $30K | Nik Perez | — | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| H. Lee Moffitt Cancer Center & Research Institute | AMER | $3K | Ayesha Yege | Harold S. (Hal) Overman IV | — | 👎 Customer meeting completed: customer pushes to delay  |
+| eVisit, Inc. | AMER | $29K | Pranav Jha | John W. Diaz | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Fed-Tulip21 | AMER | $25K | Brandon Bradshaw | David Yazell | — | 👎 Customer meeting completed: customer pushes to delay  |
+| NYU Langone Health | AMER | $233K | PS-led upgrade | Harrison Beck | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Fed-Tulip19 | AMER | $20K | RD Singh | Matthew (Matt) Freeland | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Aspida Holdings Ltd. | AMER | $19K | Wikenson Lejulus | Nathan Villa | — | 👎 Customer meeting completed: customer pushes to delay  |
+| University of Texas Health Science Center At Houston | AMER | $19K | Pranav Jha | Montie K. (Kirk) Kelton | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| American Institutes for Research | AMER | $18K | Pranav Jha | Jason E. Harris | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Versana | AMER | $18K | Priyank Patel | Nathan Villa | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Westlake Chemical Corporation | AMER | $17K | Tomi Fajulugbe | Clint Kiemsteadt | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Charter Communications, Inc. | AMER | $171K | CS-led upgrade | — | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Muriel Siebert & Co., Inc. | AMER | $16K | Carlos Martins Jr. | John W. Diaz | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Perforce Software | AMER | $16K | Standard | Daniel (Danny) Burke | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Memorial Hermann Health System | AMER | $15K | Oluranti Omotayo | Kelly G. Reynolds | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Herschend Entertainment Company, Llc | AMER | $13K | Andrew Curran | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Great Gray Trust Company, Llc | AMER | $12K | Kishwar Firdaus | Addison Rutz | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Arvest Bank | AMER | $107K | Tomi Fajulugbe | James (Jim) Barry | — | 👎 Customer meeting completed: customer pushes to delay  |
+| MRC Global Inc. | AMER | $106K | Shashank Chandramohan | Clint Kiemsteadt | — | 👎 Tech validation completed: tech validation won but cu |
+| Seagate Technology LLC | AMER | $104K | Daniel Reyes | — | Kevin Albright | 👎 Customer meeting completed: customer pushes to delay  |
+| Northwestern University | AMER | — | Priyank Patel | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| BECU | AMER | — | PS-led upgrade | Jennifer Cecil | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Cameo | AMER | — | Dele Adewumi | Addison Rutz | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Idera, Inc. | AMER | — | Kashan Naqvi | - | — | 👎 Tech validation completed: tech validation won but cu |
+| Members 1st Federal Credit Union | AMER | — | Miguel Lopez-Henriquez | Jason E. Harris | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Trinidad/Benham Corp. | AMER | — | Meral Abu-jaser | Matt Milton | — | 👎 Tech validation completed: tech validation won but cu |
+| ING BANK SLASKI S A | EMEA | $90K | Jonathan Brox | Robert Madej | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Abanca | EMEA | $80K | Jonathan Brox | Alvaro Del Pozo Gozalez | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Theta Ray Ltd | EMEA | $47K | Zoheb Sarwar | - | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| H. Lundbeck A/S | EMEA | $38K | Pushkar Kakkar | Henrik Kirkeskov Nielsen | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Finanz Informatik Technologie Service GmbH & Co. KG | EMEA | $32K | Jonathan Brox | Klaus Philip (Philip) Stapleford | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Banco Ctt, S.a. | EMEA | $31K | Mathieu Dalbes | Pedro Jorge Pinho (Pedro) Francisco | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Credit Agricole Cariparma Spa | EMEA | $26K | Mathieu Dalbes | Andrea Rossini | — | 👎 Customer meeting completed: customer pushes to delay  |
+| BANQUE EDEL SNC | EMEA | $25K | Mathieu Dalbes | Matthieu Guillaume Pierre-Marie (Matthieu) Jarrige | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Capita Plc | EMEA | $24K | Tunde Adenugba | Zachary James Corner (Zach) Rieker | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Unibeam Ltd | EMEA | $24K | Vaishnavi Mishra | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Universita' Degli Studi Di Milano - Bicocca | EMEA | $16K | Vaishnavi Mishra | Vito Sodano | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Splio | EMEA | $14K | Mikhail Bahkmetiev | — | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Bank Millennium S.A. | EMEA | $138K | Jonathan Brox | Robert Madej | — | 👎 Customer meeting completed: customer pushes to delay  |
+| JC Decaux | EMEA | $13K | Tunde Adenugba | Adeline Valerie (Adeline) Fontaine | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| First Bank Of Nigeria Limited | EMEA | $111K | Tunde Adenugba | Kiran Premnath (Kiran) Ishwarlaal | — | 👎 Tech validation completed: tech validation won but cu |
+| MBANK S A | EMEA | $109K | Tunde Adenugba | Robert Madej | — | 👎 Customer meeting completed: customer pushes to delay  |
+| First City Monument Bank Limited. | EMEA | — | Mikhail Bakhmetiev | Kiran Premnath (Kiran) Ishwarlaal | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Cloud Factory Business Service | EMEA | — | Mathieu Dalbes | Frank Fabien (Frank) Epinette | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| CLP Power Hong Kong Limited | JAPAC | $98K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Bajaj Finserv Asset Management Ltd | JAPAC | $10K | Somesh Patil | - | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| KPMG Services Pte. Ltd. | JAPAC | $93K | Nikhil Ahuja | - | — | 👎 Tech validation completed: tech validation won but cu |
+| LAC Co., Ltd. | JAPAC | $89K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Shinsegae Express Bus Terminal | JAPAC | $9K | Shijin Varghese | Raymond Park | — | 👎 Customer meeting completed: customer pushes to delay  |
+| E-mart Inc. | JAPAC | $84K | Shijin Varghese | Raymond Park | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Lina Life | JAPAC | $83K | Shijin Varghese | Raymond Park | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Capitaland Limited | JAPAC | $69K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| National Heavy Vehicle Regulator | JAPAC | $65K | Akanchha singh | Kevin Dinh | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Lendingkart Technologies Private Limited | JAPAC | $64K | Somesh Patil | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Aboitiz Power Corporation | JAPAC | $62K | Nikhil Ahuja | Kat Garcia | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Kakao Bank | JAPAC | $61K | Shijin Varghese | Raymond Park | — | 👎 Tech validation completed: tech validation won but cu |
+| LAC Co., Ltd. | JAPAC | $61K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| DIGITAL TREASURES CENTER PTE. LTD. | JAPAC | $59K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| HID Global | JAPAC | $58K | Akash Singh | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Open Financial Technologies Private Limited | JAPAC | $54K | Somesh Patil | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Hdfc Pension Management Company Limited | JAPAC | $5K | Akash Singh | Saurabh Umeshchandra (Saurabh) Sah | — | 👎 Customer meeting completed: customer pushes to delay  |
+| TrueMove H Universal Communication Co.,LTD | JAPAC | $51K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Meridian Energy Limited | JAPAC | $51K | Akanchha singh | Benjamin (Ben) Hargreaves | — | 👎 Tech validation completed: tech validation won but cu |
+| Ho Chi Minh City Development Joint Stock Commercial Bank | JAPAC | $51K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Rbl Bank Limited | JAPAC | $50K | Akash Singh | Chetan Sharma | — | 👎 Tech validation completed: tech validation won but cu |
+| Pt. Asuransi Jiwa Ifg | JAPAC | $47K | Nikhil Ahuja | - | — | 👎 Tech validation completed: tech validation won but cu |
+| Walker Chandiok & Company Llp | JAPAC | $43K | Akash Singh | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Sony Pictures Networks India Private Limited | JAPAC | $41K | Somesh Patil | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LAC Co., Ltd. | JAPAC | $34K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LAC Co., Ltd. | JAPAC | $30K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| ASPEN MEDICAL PTY LIMITED | JAPAC | $29K | Akanchha singh | Kevin Dinh | — | 👎 Customer meeting completed: customer pushes to delay  |
+| YF Life Insurance International Ltd. | JAPAC | $27K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: customer pushes to delay  |
+| JOINT STOCK COMMERCIAL BANK FOR FOREIGN TRADE OF VIETNAM (Vi | JAPAC | $27K | Nikhil Ahuja | — | — | 👎 Customer meeting completed: customer pushes to delay  |
+| MAS Holdings Private Limited | JAPAC | $24K | Somesh Patil | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Daiwa Capital Markets Hong Kong Limited | JAPAC | $23K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LIBRARY COUNCIL OF NSW | JAPAC | $22K | Akanchha singh | Benjamin (Ben) Hargreaves | — | 👎 Customer meeting completed: customer pushes to delay  |
+| The Movember Group Pty Limited | JAPAC | $20K | Akanchha singh | - | — | 👎 Tech validation completed: tech validation won but cu |
+| National Healthcare Systems Company Limited | JAPAC | $20K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LOTTE FINANCE CO.,LTD | JAPAC | $20K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Alliance Construction Materials Limited | JAPAC | $20K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Airport Authority | JAPAC | $16K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Thai Oil Public Company Limited | JAPAC | $15K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Customer meeting completed: customer pushes to delay  |
+| HKUST - Hong Kong University of Science and Technology | JAPAC | $14K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Reserve Bank of Australia | JAPAC | $141K | Akanchha singh | Benjamin (Ben) Hargreaves | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Bombay Stock Exchange Limited | JAPAC | $14K | Akash Singh | Chetan Sharma | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Innoways Limited | JAPAC | $12K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| FE Credit - VPBank Finance Company Limited | JAPAC | $11K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| LeeHanNS Corp. | JAPAC | $11K | Shijin Varghese | Raymond Park | — | 👎 Tech validation completed: tech validation won but cu |
+| Transition Systems and Networks (Thailand) Co., Ltd. | JAPAC | $11K | Nikhil Ahuja | - | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Shinsegae E&C | JAPAC | — | Shijin Varghese | Raymond Park | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Boost Berhad | JAPAC | — | Nikhil Ahuja | Su Yong Tay | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Vps Securities | JAPAC | — | Nikhil Ahuja | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Upl Limited | JAPAC | — | Somesh Patil | Biswas K. Sedai | Risun Antony | 👎 Customer meeting completed: customer pushes to delay  |
+| Suramericana S A | LATAM | $94K | Alberto Garcia | - | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Alau Tecnologia S.a.u. | LATAM | $87K | David Antolinez | Marcos Vieyra Feldman | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Banco Monex, S.A., Institucion de Banca Multiple, Monex Grup | LATAM | $78K | Gabriel Tello | Alberto Rodriguez Guevara | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Banco del Bajio | LATAM | $73K | Alberto Garcia | Ariana Arrieta | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Telefonica Colombia | LATAM | $7K | Andre Inforzato | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Jugos Del Valle, S.a.p.i. De C.v. | LATAM | $60K | Alberto Garcia | Ariana Arrieta | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Latam Airlines Group S.a. | LATAM | $583K | Phelipe Avila | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Ransa Comercial S.a. | LATAM | $5K | Alberto Garcia | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Simpar S/a | LATAM | $50K | Phelipe Avila | Ana Paula (Ana) Huanay Ramirez | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Veloe | LATAM | $46K | Phelipe Avila | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Puntos Colombia S A S | LATAM | $44K | Gabriel Tello | — | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| PwC Strategy& Do Brasil Consultoria Empresarial Ltda | LATAM | $43K | Andre Inforzato | — | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Tribunal de Justica do Parana (TJPR) | LATAM | $40K | Gabriel Tello | Sebastiao Felipe Miranda | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Compartamos Financiera S.a. | LATAM | $39K | Gabriel Tello | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+| La Araucana | LATAM | $39K | Gabriel Tello | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Smu S.a. | LATAM | $36K | Miguel Lopez | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Unimed Seguros Saude S/A | LATAM | $29K | David Antolinez | Ana Paula (Ana) Huanay Ramirez | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Aerovias de Mexico, S.A. de C.V. | LATAM | $27K | Alberto Garcia | Ariana Arrieta | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Femsa Comercio, S.A. de C.V | LATAM | $26K | Ariel Nin | Alberto Rodriguez Guevara | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Promigas S A E S P | LATAM | $21K | Alberto Garcia | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| SOC COMERCIAL FARMACEUTICA SA | LATAM | $20K | Alberto Garcia | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Rimac Seguros Y Reaseguros | LATAM | $16K | Ariel Nin | Marcos Vieyra Feldman | — | 🛑 Upgrade in progress: upgrade paused by the customer |
+| Banco de la Nacion del Peru | LATAM | $12K | Ariel Nin | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Alelo TLT | LATAM | $111K | Andre Inforzato | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Netdata Cybersecurity Colombia | LATAM | — | Alberto Garcia | - | — | 👎 Customer meeting completed: customer pushes to delay  |
+| Qualys | LATAM | — | David Antolinez | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: customer pushes to delay  |
+
+## 4. Rep Blocking (121 accounts)
+
+**Action:** DSM/RVP direct: Core rep is blocking. Escalate to CC RVP + PANW leadership. This should not be accepted.
+
+| Account | Theatre | ARR | CSE | CC Rep | DSM | Notes |
+|---|---|---|---|---|---|---|
+| Primed Management Consulting Services, Inc. | AMER | $10K | Meral Abu-jaser | — | — | 👎 Customer meeting completed: account team decided to d |
+| St. Luke's University Health Network | AMER | $94K | Sugathri Tumiki | Harrison Beck | — | 👎 Customer meeting completed: account team decided to d |
+| Artisan Partners Limited Partnership | AMER | $76K | Mike Labadie | - | — | 👎 Customer meeting completed: account team decided to d |
+| Capspecialty, Inc. | AMER | $56K | — | — | — | 👎 Customer meeting completed: account team decided to d |
+| Kimley Horn and Associates | AMER | $52K | CS-led upgrade | Kenneth (Reid) Wallace | — | 👎 Customer meeting completed: account team decided to d |
+| Navan, Inc | AMER | $32K | Andrew Curran | — | — | 👎 Customer meeting completed: account team decided to d |
+| Honeywell International Inc. | AMER | $179K | PS-led upgrade | Brian C. Stearns | — | 👎 Customer meeting completed: account team decided to d |
+| Pen-air Federal Credit Union (inc) | AMER | $13K | Andrew Curran | - | — | 👎 Customer meeting completed: account team decided to d |
+| Bloom Energy Corporation | AMER | — | Yash Boravelli | — | — | 👎 Customer meeting completed: account team decided to d |
+| Malam - Team Ltd | EMEA | $98K | Chinmoy Roy | Barak Shrefler | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Olympic Channel Services S.l. | EMEA | $96K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Mtn (zambia) Limited | EMEA | $10K | Pushkar Kakkar | Kurt D. Ogle | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Mtn Cameroon | EMEA | $9K | Pushkar Kakkar | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Mtn South Sudan Limited | EMEA | $9K | Pushkar Kakkar | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| ZUCCHETTI SPA | EMEA | $8K | Vaishnavi Mishra | — | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Ethio Telecom | EMEA | $79K | Chinmoy Roy | — | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| World Duty Free Group Sociedad Anonima. | EMEA | $75K | Vaishnavi Mishra | Luis Ruiz Calleja | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Direct Line Insurance Group Plc | EMEA | $75K | Tunde Adenugba | Christopher (Chris) Dixon | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| MTN South Africa | EMEA | $66K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Prezero Iberia Sl. | EMEA | $7K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| European External Action Service (EEAS) | EMEA | $63K | Jonathan Brox | David Van Damme | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Oddity | EMEA | $61K | Mikhail Bakhmetiev | Amatzia Ben Zimra | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| EUROPEAN SPACE AGENCY | EMEA | $58K | Chinmoy Roy | Jaime Querol | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Zopa Bank Limited. | EMEA | $57K | Chinmoy Roy | Kieran John (Kieran) Woodward Brown | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Saipem Spa | EMEA | $56K | Mikhail Bakhmetiev | Andrea Rossini | — | 👎 Customer meeting completed: account team decided to d |
+| Deep Instinct | EMEA | $53K | Mathieu Dalbes | Amatzia Ben Zimra | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Telefonica, S.A. | EMEA | $5K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | 👎 Blocked from customer outreach: technical reason (sub |
+| ADFORM LITHUANIA UAB | EMEA | $50K | Chinmoy Roy | Henri Nuottonen | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| FERRARI | EMEA | $47K | Mikhail Bakhmetiev | — | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Wealth Dynamics Limited | EMEA | $40K | Chinmoy Roy | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Mtn Congo S.a | EMEA | $4K | Pushkar Kakkar | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Telefonica Global Solutions | EMEA | $4K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Kashxa Limited | EMEA | $34K | Chinmoy Roy | Carlo Daniele | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Telefonica Cybersecurity & Cloud Tech Sl. | EMEA | $28K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Enaire | EMEA | $26K | Mathieu Dalbes | Jaime Querol | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Grunenthal Financial Services, Unipessoal, Lda | EMEA | $26K | Pushkar Kakkar | Pedro Jorge Pinho (Pedro) Francisco | — | 👎 Blocked from customer outreach: technical reason (sub |
+| SETUR SERVIS TURISTIK A S | EMEA | $20K | Tunde Adenugba | Burc Berksoy | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Empark Aparcamientos Y Servicios Sa | EMEA | $20K | Mathieu Dalbes | Javier A. Rodriguez | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Mtn Ghana | EMEA | $19K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Assuta Medical Center | EMEA | $18K | Mathieu Dalbes | Barak Shrefler | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Appro Onboarding Solutions FZ-LLC | EMEA | $17K | Chinmoy Roy | Selin Gulen (Selin) de Groot | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Odaseva Technologies | EMEA | $17K | Mikhail Bahkmetiev | — | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Totem France | EMEA | $16K | Mikhail Bahkmetiev | Nicolas Avila Jimenez | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| MTN Cote D'Ivoire | EMEA | $16K | Pushkar Kakkar | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Facilities Management And Maintenance Company W.l.l | EMEA | $16K | Mathieu Dalbes | Selin Gulen (Selin) de Groot | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Deloitte LLP (UK-MSSP) | EMEA | $15K | Tunde Adenugba | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Kaczmarski Inkasso Malgorzata Kaczmarski | EMEA | $15K | Tunde Adenugba | Robert Madej | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| BROADRIDGE FINANCIAL SOLUTIONS LTD | EMEA | $15K | Tunde Adenugba | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Mtn Benin | EMEA | $14K | Pushkar Kakkar | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Distribuidores Automaticos De Bebidas Y Alimentos Sa | EMEA | $13K | Mathieu Dalbes | Javier A. Rodriguez | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Quidax technologies | EMEA | $12K | Tunde Adenugba | Kurt D. Ogle | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| ISRAIR AIRLINES & TOURISM LTD. | EMEA | $12K | Chinmoy Roy | Gil Pery | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| MTN Eswatini | EMEA | $12K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Integrated Finance | EMEA | $12K | Chinmoy Roy | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Mtn (u) Ltd | EMEA | $12K | Pushkar Kakkar | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Pricewaterhousecoopers Services Limited | EMEA | $11K | Chinmoy Roy | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Mtn Nigeria Communications Ltd. | EMEA | $112K | Pushkar Kakkar | Kiran Premnath (Kiran) Ishwarlaal | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Papaya Gaming Ltd | EMEA | $112K | Mikhail Bakhmetiev | Gil Pery | — | 👎 Blocked from customer outreach: technical reason (sub |
+| LC WAIKIKI MAGAZACILIK HIZMETLERI TICARET A S | EMEA | $103K | Tunde Adenugba | Burc Berksoy | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| HERMES FUND MANAGERS LTD | EMEA | $10K | Tunde Adenugba | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Poltrona Frau Spa | EMEA | $10K | Mikhail Bakhmetiev | Carlo Daniele | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Norce Norwegian Research Centre As | EMEA | — | Mikhail Bakhmetiev | Robert Oxholm Oersnes | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Thredd | EMEA | — | Chinmoy Roy | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Truelayer Limited | EMEA | — | Chinmoy Roy | Kieran John (Kieran) Woodward Brown | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Primarybid Limited | EMEA | — | Chinmoy Roy | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Manchester Metropolitan University | EMEA | — | Chinmoy Roy | Cameron M. Nicol | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Scaltel gmbh & co. kg | EMEA | — | Jonathan Brox | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Blue Insurance Limited | JAPAC | $10K | — | — | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Colgate-Palmolive (China) Co.,Ltd | JAPAC | $9K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| SK Broadband Co., Ltd. | JAPAC | $91K | Shijin Varghese | Raymond Park | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Adani Capital Private Limited | JAPAC | $9K | Akash Singh | Harsh k. Malkan | — | 👎 Customer meeting completed: account team decided to d |
+| Metlife China | JAPAC | $8K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Cordis (shanghai) Medical Devices Co., Ltd. | JAPAC | $8K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Bank of Thailand | JAPAC | $76K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Shinsegae | JAPAC | $75K | Shijin Varghese | Raymond Park | — | 👎 Customer meeting completed: account team decided to d |
+| Ci&t China, Inc. | JAPAC | $7K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Manulife-Sinochem (China) | JAPAC | $74K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| GOLDMAN SACHS (BEIJING) ENTERPRISE MANAGEMENT CO. LTD | JAPAC | $7K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| An Binh Commercial Joint Stock Bank | JAPAC | $7K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: account team decided to d |
+| Airbus (china) Enterprises Management And Services Co.,ltd. | JAPAC | $7K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Kasikorn X Company Limited | JAPAC | $7K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| PT Bank Hibank Indonesia | JAPAC | $67K | Nikhil Ahuja | Royston Kiang Hwee (Royston) Chng | — | 👎 Customer meeting completed: account team decided to d |
+| Boehringer Ingelheim (china) Investment Co., Ltd. | JAPAC | $51K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Chanel (china) Co., Ltd. | JAPAC | $49K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| National Payment Corporation of Vietnam (NAPAS) | JAPAC | $5K | Nikhil Ahuja | — | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| IQVIA | JAPAC | $47K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| ICICI Prudential Asset Management Company Limuted | JAPAC | $45K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Paytm Payments Bank Limited | JAPAC | $4K | Akash Singh | Chetan Sharma | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Epsilon Carbon Pvt Ltd | JAPAC | $4K | Akash Singh | - | — | 👎 Customer meeting completed: account team decided to d |
+| Richemont Commercial Co, Ltd. | JAPAC | $43K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Capitaland China Holdings Pte Ltd | JAPAC | $39K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| ICICI SECURITIES LIMITED | JAPAC | $37K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| AIA Life Insurance Co., Ltd. | JAPAC | $35K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Citiustech Healthcare | JAPAC | $35K | Akash Singh | Biswas K. Sedai | — | 👎 Customer meeting completed: account team decided to d |
+| Sanofi (china) Investment Co., Ltd. Shanghai Branch | JAPAC | $3K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Bangkok Bank Public Company Limited | JAPAC | $32K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Customer meeting completed: account team decided to d |
+| Abbott Laboratories Trading (shanghai) Co., Ltd. | JAPAC | $30K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| GREATER BANK | JAPAC | $28K | Akanchha singh | Benjamin (Ben) Hargreaves | — | 👎 Customer meeting completed: account team decided to d |
+| Wesang | JAPAC | $23K | Shijin Varghese | Raymond Park | — | 👎 Customer meeting completed: account team decided to d |
+| Omowei Automotive Systems (Shanghai) Co., Ltd. | JAPAC | $23K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| VS Management (Shanghai) Company Limited | JAPAC | $22K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Dh Business Services (shanghai) Co., Ltd. | JAPAC | $22K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Ayudhya Capital Services Company Limited | JAPAC | $20K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| MAX HEALTHCARE INSTITUTE LIMITED | JAPAC | $19K | Somesh Patil | - | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Pricewaterhousecoopers China Holding Limited | JAPAC | $178K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Coca Cola (China) Investment Co., Ltd. | JAPAC | $16K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Scania Production (china) Co. Ltd. | JAPAC | $15K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| CATHAY UNITED BANK CO., LTD. | JAPAC | $14K | Shijin Varghese | Yiting (Jeremy) Hsu | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Tyson (Shanghai) Enterprise Management Co., Ltd | JAPAC | $14K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| L'Oreal China Co., Ltd. | JAPAC | $134K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Vietnam Prosperity Joint Stock Commercial Bank | JAPAC | $131K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: account team decided to d |
+| Viatris Healthcare Inc. China | JAPAC | $12K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Accenture (China) Co., Ltd. | JAPAC | $1K | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| PTT Digital Solutions Company Limited | JAPAC | $112K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Ptt Oil And Retail Business Public Company Limited | JAPAC | $106K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Mobileware Technologies Private Limited | JAPAC | — | Somesh Patil | - | — | 👎 Customer meeting completed: account team decided to d |
+| Melaleuca (china) Wellness Products Co. Ltd. | JAPAC | — | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| Digital China Cloud Technology Limited | JAPAC | — | Sophie Wang | Kai Wang | — | 👎 Blocked from customer outreach: technical reason (sub |
+| BEC WORLD PUBLIC COMPANY LIMITED | JAPAC | — | Nikhil Ahuja | - | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| New World Corporate Service Limited | JAPAC | — | Shijin Varghese | Kai Wang | — | 👎 Blocked from customer outreach: core rep is blocking  |
+| Drogarias Dpsp S/a | LATAM | — | Alberto Garcia | Sebastiao Felipe Miranda | — | 👎 Customer meeting completed: account team decided to d |
+
+## 5. Technical Blocker (100 accounts)
+
+**Action:** CSE + TAC/Engineering: Identify specific XSUP/bug. Escalate to SPO DC. Weekly tracking required.
+
+| Account | Theatre | ARR | CSE | CC Rep | DSM | Notes |
+|---|---|---|---|---|---|---|
+| Mizuho Americas Services LLC | AMER | $96K | Sugathri Tumiki | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Fed-Chrysanthemum2 | AMER | $9K | Brandon Bradshaw | John Storey | — | 👎 Customer meeting completed: confirmed technical block |
+| Fed-Tulip39 | AMER | $86K | Avery King | Kyle Larson | — | 👎 Customer meeting completed: confirmed technical block |
+| Assured Guaranty | AMER | $67K | Ivani Aviles | Thomas (Tom) O'Brien | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Veryon | AMER | $53K | Pranav Jha | Sameer Patel | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Fed-Marigold14 | AMER | $44K | Sugathri Tumiki | Kyle Larson | — | 👎 Customer meeting completed: confirmed technical block |
+| Fed-Sunflower27 | AMER | $40K | Dele Adewumi | Ibrahim Limoun | — | 👎 Customer meeting completed: confirmed technical block |
+| Acuity | AMER | $39K | Daniel Reyes | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Federated Wireless, Inc. | AMER | $39K | Pranav Jha | Nathan Villa | — | 👎 Customer meeting completed: confirmed technical block |
+| Nevada National Security (NNSS) | AMER | $28K | Terrell Carter | Justin Razmic | — | 👎 Customer meeting completed: confirmed technical block |
+| Fed-Tulip36 | AMER | $25K | Carlos Martins Jr. | Justin Razmic | — | 👎 Customer meeting completed: confirmed technical block |
+| Washington Health Benefit Exchange | AMER | $24K | Carlos Martins Jr. | Samuel (Sam) Flam | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Mettel, Inc. | AMER | $22K | Sriram Choudary Nimmagadda | - | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| SCAN Health Plan | AMER | $2K | Sugathri Tumiki | Matthew (Matt) Freeland | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| QTS | AMER | $200K | Mike Labadie | Clarence H. (Trey) Kitchens III | — | 👎 Customer meeting completed: confirmed technical block |
+| Carilion Health System | AMER | $20K | Oluranti Omotayo | Cassandra (Casey) Bunn | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| OrderMyGear LLC | AMER | $18K | Prateek Pawar | John W. Diaz | — | 👎 Customer meeting completed: confirmed technical block |
+| Nuvizz Inc. | AMER | $16K | Prateek Pawar | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Computer Services, Inc. | AMER | $109K | Tomi Fajulugbe | - | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Trubridge, Llc | AMER | $106K | Wikenson Lejulus | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Fed-Sunflower20 | AMER | $102K | RD Singh | Michael A. (Tres) Zaglool | Kevin Albright | 👎 Customer meeting completed: confirmed technical block |
+| Defense Innovation Unit Experimental | AMER | — | Kishwar Firdaus | Paul (Andy) Oppenheim | — | 👎 Customer meeting completed: confirmed technical block |
+| LAMINAM SPA | EMEA | $10K | Tunde Adenugba | Carlo Daniele | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| A2A S.p.A. | EMEA | $94K | — | Andrea Rossini | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Enagas | EMEA | $68K | Vaishnavi Mishra | Luis Ruiz Calleja | — | 👎 Customer meeting completed: confirmed technical block |
+| Madrileña Red De Gas Sau | EMEA | $6K | Tunde Adenugba | - | — | 👎 Customer ready to activate tenant: Issues with tenant |
+| Pasha Bank JSC | EMEA | $62K | Vaishnavi Mishra | Maksim (Maxim) Prakhov | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| HONESTICA | EMEA | $60K | Mathieu Dalbes | — | — | 👎 Customer meeting completed: confirmed technical block |
+| Aramis Group | EMEA | $53K | Chinmoy Roy | — | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Swisscom Enterprise Solutions Ag | EMEA | $51K | — | Daniela Boes | — | 👎 Customer meeting completed: confirmed technical block |
+| Telefónica Innovacion Digital S.L | EMEA | $49K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| PHOENIX Pharmahandel AG & Co KG | EMEA | $44K | Jonathan Brox | Patrick Alexander (Patrick) Wuerl | — | 👎 Customer ready to activate tenant: Issues with tenant |
+| Ceská Televize | EMEA | $40K | Jonathan Brox | Lukas Eliz | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Qatar National Bank | EMEA | $38K | Zoheb Sarwar | Wissam El Charif | — | 👎 Customer ready to activate tenant: Issues with tenant |
+| Acuity Knowledge Partners (uk) Limited | EMEA | $33K | Tunde Adenugba | Kieran John (Kieran) Woodward Brown | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| ACWA POWER HOLDING LIMITED | EMEA | $32K | Zoheb Sarwar | Mohamad Lababidi | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| ACI INFORMATICA SPA | EMEA | $28K | Chinmoy Roy | Vito Sodano | — | 👎 Customer ready to activate tenant: Issues with tenant |
+| Yseop | EMEA | $27K | Mathieu Dalbes | — | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Dogus Teknoloji | EMEA | $24K | Tunde Adenugba | Burc Berksoy | — | 👎 Customer ready to activate tenant: Issues with tenant |
+| Grands Chais de France | EMEA | $21K | Mathieu Dalbes | Just Philibert Marie (Just) Hoppenot | — | 👎 Customer meeting completed: confirmed technical block |
+| Elbit AI | EMEA | $21K | Mathieu Dalbes | Barak Shrefler | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Ecommbx Limited | EMEA | $13K | Mathieu Dalbes | Carlo Daniele | — | 👎 Customer ready to activate tenant: Issues with tenant |
+| CO-OPERATIVE BANKING GROUP LIMITED | EMEA | $113K | Tunde Adenugba | Amit Kheti | — | 👎 Customer meeting completed: confirmed technical block |
+| Bank of Georgia | EMEA | — | Jonathan Brox | Maksim (Maxim) Prakhov | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Prysmian Spa | EMEA | — | — | Andrea Rossini | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| SNUK | EMEA | — | Pushkar Kakkar | William J. (Will) Mardling | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Hyundai Commercial Inc. | JAPAC | $10K | Shijin Varghese | Raymond Park | — | 🛑 Customer meeting completed: customer refuses to proce |
+| True Money Company Limited | JAPAC | $99K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Jsw Steel Limited | JAPAC | $10K | Akash Singh | - | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Hdb Financial Services Limited | JAPAC | $9K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | 👎 Customer meeting completed: confirmed technical block |
+| ZEE ENTERTAINMENT ENTERPRISES LIMITED | JAPAC | $73K | Somesh Patil | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Ifast Corporation, Ltd. | JAPAC | $68K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: confirmed technical block |
+| NTT DOCOMO BUSINESS, Inc. | JAPAC | $58K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: confirmed technical block |
+| CIMB THAI BANK PUBLIC COMPANY LIMITED | JAPAC | $57K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | 👎 Customer meeting completed: confirmed technical block |
+| Max Life Insurance Company Limited | JAPAC | $47K | Akash Singh | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Hyundai Card/Capital | JAPAC | $45K | Shijin Varghese | Raymond Park | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Land Transport Authority | JAPAC | $43K | Nikhil Ahuja | Su Yong Tay | — | 👎 Customer meeting completed: confirmed technical block |
+| South China Morning Post Publishers Limited | JAPAC | $43K | Shijin Varghese | Kai Wang | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Hanwha General Insurance | JAPAC | $41K | — | — | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Grameenphone Ltd | JAPAC | $36K | Akash Singh | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Hero Motocorp Limited | JAPAC | $34K | Somesh Patil | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Canara HSBC OBC Life Insurance Company Ltd | JAPAC | $33K | Akash Singh | Chetan Sharma | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| NTT DATA eCommerce Solutions Sdn. Bhd. | JAPAC | $30K | Nikhil Ahuja | - | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Subaru Corporation | JAPAC | $29K | Tetsushi Shimada | - | — | 👎 Customer meeting completed: confirmed technical block |
+| John Swire & Sons (h.k.) Limited | JAPAC | $28K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: confirmed technical block |
+| JRG Management Company Limited | JAPAC | $28K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: confirmed technical block |
+| Fubon Life Insurance Co., Ltd. | JAPAC | $27K | Shijin Varghese | Yiting (Jeremy) Hsu | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| MediaTek Inc. Hsinchu (HQ) | JAPAC | $25K | Shijin Varghese | Yiting (Jeremy) Hsu | — | 👎 Customer meeting completed: confirmed technical block |
+| Samsung Securities Co., Ltd. | JAPAC | $22K | Shijin Varghese | Raymond Park | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Swire Pacific Limited | JAPAC | $21K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: confirmed technical block |
+| Cgs-cimb Securities (singapore) Pte. Ltd. | JAPAC | $19K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Epifi Technologies Private Limited | JAPAC | $18K | Akash Singh | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| KPMG INDIA PRIVATE LIMITED | JAPAC | $17K | Akash Singh | - | — | 👎 Customer meeting completed: confirmed technical block |
+| U-NEXT HOLDINGS Co.,Ltd. | JAPAC | $14K | Tetsushi Shimada | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Government Pension Fund (GPF) | JAPAC | $14K | Nikhil Ahuja | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Mobileum (india) Private Limited | JAPAC | $13K | Akash Singh | - | — | 👎 Customer meeting completed: confirmed technical block |
+| PT BANK CIMB NIAGA Tbk | JAPAC | $130K | Nikhil Ahuja | Renzy Richie | Edward Sin | 👎 Customer meeting completed: confirmed technical block |
+| Datametica Solutions Private Limited | JAPAC | $11K | Akash Singh | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Welab Bank Limited | JAPAC | $109K | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: confirmed technical block |
+| FRACTAL ANALYTICS LIMITED | JAPAC | $108K | Somesh Patil | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Goods and Service Tax Network (GSTN) | JAPAC | $11K | Akash Singh | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| The Bank of East Asia, Ltd | JAPAC | $104K | Shijin Varghese | Kai Wang | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Yintran Group Holdings Limited | JAPAC | — | Shijin Varghese | Kai Wang | — | 👎 Customer meeting completed: confirmed technical block |
+| Redeban Multicolor S.A. | LATAM | $78K | Phelipe Avila | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Banco Central De Reserva De El Salvador | LATAM | $66K | Gabriel Tello | - | — | 👎 Customer meeting completed: confirmed technical block |
+| Life Miles Corporation | LATAM | $55K | Phelipe Avila | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| BANCO DE LA REPUBLICA | LATAM | $48K | Phelipe Avila | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Excellia | LATAM | $34K | Gabriel Tello | Marcos Vieyra Feldman | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Banistmo S.a. | LATAM | $34K | Alberto Garcia | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Minsur S.a. | LATAM | $30K | David Antolinez | Marcos Vieyra Feldman | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Kushki Colombia S A S | LATAM | $16K | Ariel Nin | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Minera Exar S.a. | LATAM | $14K | Ariel Nin | Marcos Vieyra Feldman | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Sistemas Globales S.a. | LATAM | $114K | Gabriel Tello | Marcos Vieyra Feldman | — | 👎 Upgrade in progress: upgrade is behind schedule due t |
+| Ach Colombia Sa | LATAM | $111K | Alberto Garcia | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| RPE Tech | LATAM | $101K | Alberto Garcia | Ana Paula (Ana) Huanay Ramirez | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Banco Bolivariano C.a. | LATAM | $100K | Gabriel Tello | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Instituto Nacional de Estadistica e Informatica | LATAM | — | Ayesha Yege | Marcos Vieyra Feldman | — | 👎 Customer meeting completed: confirmed technical block |
+| Ins Valores Puesto De Bolsa Sociedad Anonima | LATAM | — | Ariel Nin | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Banco Agromercantil, S.A. | LATAM | — | Ariel Nin | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+| Banco Agricola S.A. | LATAM | — | Alberto Garcia | - | — | 🛑 Customer meeting completed: customer refuses to proce |
+
+## 6. Active Deal (13 accounts)
+
+**Action:** CC Rep: Coordinate migration with deal team. Set migration date as part of renewal terms.
+
+| Account | Theatre | ARR | CSE | CC Rep | DSM | Notes |
+|---|---|---|---|---|---|---|
+| Eastdil Secured | AMER | $18K | Standard | — | — | 👎 Blocked from customer outreach: active deal (Required |
+| Mutua Madrilena | EMEA | $92K | Mikhail Bakhmetiev | Alvaro Del Pozo Gozalez | — | 👎 Blocked from customer outreach: active deal (Required |
+| Akeyless Security Ltd | EMEA | $9K | Mathieu Dalbes | - | — | 👎 Blocked from customer outreach: active deal (Required |
+| Solvinity | EMEA | $78K | Jonathan Brox | - | — | 👎 Blocked from customer outreach: active deal (Required |
+| Roma Capitale – Dipartimento Cybersecurity e Sicurezza Urban | EMEA | $7K | Mikhail Bakhmetiev | Vito Sodano | — | 👎 Blocked from customer outreach: active deal (Required |
+| Dovalue Spa | EMEA | $68K | Mathieu Dalbes | - | — | 👎 Blocked from customer outreach: active deal (Required |
+| BANK OF JERUSALEM LTD. | EMEA | $30K | Mathieu Dalbes | Gil Pery | — | 👎 Blocked from customer outreach: active deal (Required |
+| Alpha Bank | EMEA | $24K | Mathieu Dalbes | Carlo Daniele | — | 👎 Blocked from customer outreach: active deal (Required |
+| Flow Traders | EMEA | $148K | Jonathan Brox | Barbera Gerritdina (Barbera) Menten | — | 👎 Blocked from customer outreach: active deal (Required |
+| Defensor del Pueblo | EMEA | $13K | Mathieu Dalbes | Mario Garrido Izquierdo | — | 👎 Blocked from customer outreach: active deal (Required |
+| SABA APARCAMIENTOS, SA | EMEA | $10K | Mikhail Bakhmetiev | - | — | 👎 Blocked from customer outreach: active deal (Required |
+| Australian Investment Exchange Limited | JAPAC | $62K | Akanchha singh | Kevin Dinh | — | 👎 Blocked from customer outreach: active deal (Required |
+| HDFC ASSET MANAGEMENT COMPANY LIMITED | JAPAC | $19K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | 👎 Blocked from customer outreach: active deal (Required |
+
+## 7. Legal Blocker (3 accounts)
+
+**Action:** CSE + Legal: Identify contract/legal issue. Loop in PANW legal team. Escalate if stalled > 30 days.
+
+| Account | Theatre | ARR | CSE | CC Rep | DSM | Notes |
+|---|---|---|---|---|---|---|
+| SpotIT BVBA | EMEA | $4K | Jonathan Brox | - | — | 👎 Blocked from customer outreach: legal reason (provide |
+| Mahindra First Choice Services Limited | JAPAC | $14K | Somesh Patil | - | — | 👎 Blocked from customer outreach: legal reason (provide |
+| Mahindra Holidays & Resorts India Limited | JAPAC | $14K | Somesh Patil | - | — | 👎 Blocked from customer outreach: legal reason (provide |
+
+## 8. XSUP P1 — Open P1 Tickets (2)
+
+**Action:** Engineering escalation immediately. P1 = migration blocker.
+
+| XSUP | Account | Theatre | ARR | Status | Summary |
 |---|---|---|---|---|---|
-| Mizuho Americas Services LLC | AMER | $96K | Sugathri Tumiki | at_risk | Release Dependency - 2.3 Customer ready to upgrade, but sort |
-| Visa Inc. | AMER | $954K | Kiran Kaukuntla | at_risk | Support for S390X Architecture |
-| Fed-Chrysanthemum2 | AMER | $9K | Brandon Bradshaw | at_risk | Release Dependency - 2.1 Customer is on a bridge contract to |
-| Fed-Tulip39 | AMER | $86K | Avery King | at_risk | FedRamp Customer. Cant proceed with upgrade as of now. |
-| The Progressive Corporation | AMER | $861K | Pranav Jha | at_risk | 6/10 (HK ) - Still no engagement from Progressive to discuss |
-| Harmonic, Inc. | AMER | $779K | Sugathri Tumiki | at_risk | Customer is using XSIAM, XDR and Prisma Cloud today. Goal is |
-| United Services Automobile Association | AMER | $776K | Oluranti Omotayo | at_risk | 6/2 likely to churn, won't move over.  Tons of product issue |
-| Halliburton Company | AMER | $628K | Tomi Fajulugbe | at_risk | 7/14 - customer is open to upgrading, but needs product pari |
-| Change Healthcare | AMER | $590K | Kenneth Lopez | at_risk | 4/14: Katie Aulenta. This is a sub under UHG and has the sam |
-| Fed-Tulip32 | AMER | $59K | Joel Jean-Claude | at_risk | 4/15 Katie A: Customer has FedRAMP requirements that gate th |
-| Zoom Video Communications, Inc. | AMER | $5.3M | Justyn Temme, Mark Clayton, Shelby Grumer, RD Singh, Muhamma | at_risk | 7/17 GS: The IL5 requirements have been approved and the doc |
-| Gilead Sciences | AMER | $521K | Kashan Naqvi/Sriram Choudary Nimmagadda | at_risk | 7/17 GS: The $0 PO has been successfully sent to Gilead and |
-| Fed-Marigold14 | AMER | $44K | Sugathri Tumiki | at_risk | Customer is still undergoing testing of all capabilities the |
-| The Guardian Life Insurance Company of America | AMER | $405K | Akintomide Akinruli | at_risk | Staying on PC until feature parity |
-| Fed-Sunflower27 | AMER | $40K | Dele Adewumi | at_risk | 05/26--This account has moved under the Select Team. SFDC sh |
-| The Goldman Sachs Group, Inc. | AMER | $3.9M | Chad Cazzato | at_risk | There is not an upgrade/migration underway.  Account team mo |
-| Acuity | AMER | $39K | Daniel Reyes | at_risk | Release Dependency - 2.2 3/3: Ravi Badana (DC): We opened a |
-| Federated Wireless, Inc. | AMER | $39K | Pranav Jha | at_risk | 05/18--This a Fedramp High Cortex Cloud oppty and probably t |
-| Fed-Lilly7 | AMER | $34K | N/A | at_risk | 4/15 Katie A: Customer has FedRAMP requirements |
-| Roku Inc. | AMER | $31K | N/A | at_risk | 7/19 - Chandra Cheruku - Cortex Cloud Demo Completed. Will r |
-| Cox Communications, Inc. | AMER | $3.0M | Kenneth Lopez | at_risk | 5/13 - (RG) - The customer has decided to stay on Prisma Clo |
-| Informatica LLC (affiliate of Salesforce Inc.) | AMER | $2.8M | RD Singh | at_risk | ------ The customer is in the process of an acquisition. The |
-| Nevada National Security (NNSS) | AMER | $28K | Terrell Carter | at_risk | Release Dependency - 2.3 Customer at a standstill due to OCI |
-| Fed-Tulip36 | AMER | $25K | Carlos Martins Jr. | at_risk | Pitching CC to customer, but customer will not be upgrading |
-| BCBSM Inc. | AMER | $242K | Nik Perez | at_risk | 6/4/26 - Customer has shared that they are not planning to d |
-| Comcast Corporation | AMER | $2.4M | Chad Cazzato | at_risk | Customer has decided to not renew as of 06/04 - They are chu |
-| Fed- Marigold1 | AMER | $2.1M | Andrew Curran | at_risk | 3/27 - Customer would like to migrate to Cortex Cloud.  We a |
-| Colgate-Palmolive Company | AMER | $20K | Mike Labadie | at_risk | In the middle of a big XSIAM deal. |
-| Broadcom Corporation | AMER | $2.0M | Sriram Choudary Nimmagadda | at_risk | 7/17 GS: the revised $0 quote reflecting the redline changes |
-| QTS | AMER | $200K | Mike Labadie | at_risk | Release Dependency - 2.3 SNOW - VR Module Required.  - Curre |
-| Prime Therapeutics LLC | AMER | $192K | omoniyi Jabaru | at_risk | 6/29.  Customer not likely to renew, haven't been able to do |
-| OrderMyGear LLC | AMER | $18K | Prateek Pawar | at_risk | 07/20 - Customer's main use case is WAAS on gke clusters. Th |
-| Nuvizz Inc. | AMER | $16K | Prateek Pawar | at_risk | Blocker - WAAS - Customer don't want to use Beta Linux based |
-| VF Services, LLC | AMER | $145K | Srikanth Makineni | at_risk | "Prisma Cloud is only solution from PANW 3 year contract exp |
-| Fed-Sunflower23 | AMER | $1.4M | Chima Onukwuru | at_risk | not kicked off by PS yet |
-| Agilon Health | AMER | $123K | Akintayo Akinbade | at_risk | 6/2 - standing up POC of cortex cloud, Response from POC wha |
-| Instinet Holdings Inc | AMER | $115K | N/A | at_risk | Yellow - XSUP-60972 - Instinet does not permit internet acce |
-| Tyson Foods, Inc. | AMER | $1.1M | Manish Kabra | at_risk | 7/20: Same status yet as on 6/26.  6/26: Internal call to di |
-| Trubridge, Llc | AMER | $106K | Wikenson Lejulus | at_risk | Release Dependency - 2.3 Technically blocked.  3/3: CN: Last |
-| Fed-Sunflower20 | AMER | $102K | RD Singh | at_risk | Release Dependency - 2.1 |
-| ADT Security Services, Inc. | AMER | $1.0M | — | at_risk | they plan to upgrade. Had to get their XSIAM on platform, co |
-| Danske Bank A/S | EMEA | $713K | — | at_risk | Account Status :  26-4-2026: Customer is still waiting on pl |
-| Old Mutual Limited | EMEA | $695K | — | at_risk | 06.05.2026 ------------------------------------------------- |
-| Enagas | EMEA | $68K | Vaishnavi Mishra | at_risk | 06/02/2026: tech blocker: custom compliance standards are re |
-| Ericsson AB | EMEA | $641K | — | at_risk | Update Date (latest update date): 26.05.2026  Account Status |
-| HONESTICA | EMEA | $60K | Mathieu Dalbes | at_risk | 09/07 :  WAAS Beta exist but it will not replace the current |
-| Swisscom Enterprise Solutions Ag | EMEA | $51K | — | at_risk | XSUP-62521: lambda functions scanning issues  XSUP-65212: EK |
-| MAPFRE S.A | EMEA | $432K | — | at_risk | Update Date (latest update date):  17.07.2026  Account Statu |
-| Grands Chais de France | EMEA | $21K | Mathieu Dalbes | at_risk | 13/03 :  Message from Just: Customer is familiar with CC, th |
-| Boehringer Ingelheim GmbH | EMEA | $170K | — | at_risk | Update Date (latest update date): 05.07.2026  Account Status |
-| Bankinter Sociedad Anonima | EMEA | $162K | — | at_risk | Update Date (latest update date):  17.07.2026  Account Statu |
-| Snam Rete Gas S.p.A. | EMEA | $152K | — | at_risk | Update Date (latest update date): 29.05.2026  Reached out to |
-| Registers Of Scotland | EMEA | $136K | — | at_risk | Update Date (latest update date):  03.07.2026  Account Statu |
-| CO-OPERATIVE BANKING GROUP LIMITED | EMEA | $113K | Tunde Adenugba | at_risk | 10/06- CS: Kick off completed today but appear to hit a road |
-| Hdb Financial Services Limited | JAPAC | $9K | Somesh Patil | at_risk | https://app.asana.com/1/11915891072957/project/1215763887144 |
-| Aia Shared Services (hong Kong) Limited | JAPAC | $703K | — | at_risk | Update Date: 01/07/2026 Manual onboarding Azure script is no |
-| Ifast Corporation, Ltd. | JAPAC | $68K | Nikhil Ahuja | at_risk | Asana Project ID: https://app.asana.com/1/11915891072957/pro |
-| NTT DOCOMO BUSINESS, Inc. | JAPAC | $58K | Tetsushi Shimada | at_risk | partner account, will be upgraded. MSSP Partner Account. |
-| CIMB THAI BANK PUBLIC COMPANY LIMITED | JAPAC | $57K | Nikhil Ahuja | at_risk | Asana Project ID: https://app.asana.com/1/11915891072957/pro |
-| Inland Revenue Authority of Singapore | JAPAC | $511K | — | at_risk | Update Date: 21/07/2026 Current State: Blocked at M5 - Techn |
-| Max Life Insurance Company Limited | JAPAC | $47K | Akash Singh | at_risk | Asana Project : https://app.asana.com/1/11915891072957/proje |
-| Land Transport Authority | JAPAC | $43K | Nikhil Ahuja | at_risk | Asana Project ID: https://app.asana.com/1/11915891072957/pro |
-| Hero Motocorp Limited | JAPAC | $34K | Somesh Patil | at_risk | https://app.asana.com/1/11915891072957/project/1215585000813 |
-| Subaru Corporation | JAPAC | $29K | Tetsushi Shimada | at_risk | The customer has begun upgrading the CSPM features. Since EK |
-| John Swire & Sons (h.k.) Limited | JAPAC | $28K | Shijin Varghese | at_risk | Asana Project ID : https://app.asana.com/1/11915891072957/pr |
-| JRG Management Company Limited | JAPAC | $28K | Shijin Varghese | at_risk | Asana Project ID : https://app.asana.com/1/11915891072957/pr |
-| Amorepacific | JAPAC | $257K | — | at_risk | *Update Date: June 5th 2026 *Current State: Blocked at Miles |
-| MediaTek Inc. Hsinchu (HQ) | JAPAC | $25K | Shijin Varghese | at_risk | 26th June:  As the Env is not yet ready for testing. Custome |
-| Swire Pacific Limited | JAPAC | $21K | Shijin Varghese | at_risk | Asana Project ID : https://app.asana.com/1/11915891072957/pr |
-| Cgs-cimb Securities (singapore) Pte. Ltd. | JAPAC | $19K | Nikhil Ahuja | at_risk | Asana Project ID: https://app.asana.com/1/11915891072957/pro |
-| KPMG INDIA PRIVATE LIMITED | JAPAC | $17K | Akash Singh | at_risk | Asana Project : https://app.asana.com/1/11915891072957/proje |
-| Au Small Finance Bank Limited | JAPAC | $151K | — | at_risk | Update Date: 10/07/2026  Current State: Blocked at M5 - Tech |
-| Government Pension Fund (GPF) | JAPAC | $14K | Nikhil Ahuja | at_risk | Asana Project ID: https://app.asana.com/1/11915891072957/pro |
-| Mobileum (india) Private Limited | JAPAC | $13K | Akash Singh | at_risk | Asana Project : https://app.asana.com/1/11915891072957/proje |
-| PT BANK CIMB NIAGA Tbk | JAPAC | $130K | Nikhil Ahuja | at_risk | Update Date:17/7/2026 Current State: waiting for the confirm |
-| Datametica Solutions Private Limited | JAPAC | $11K | Akash Singh | at_risk | Asana Project : https://app.asana.com/1/11915891072957/proje |
-| Welab Bank Limited | JAPAC | $109K | Shijin Varghese | at_risk | Asana Project id : https://app.asana.com/1/11915891072957/pr |
-| FRACTAL ANALYTICS LIMITED | JAPAC | $108K | Somesh Patil | at_risk | https://app.asana.com/1/11915891072957/project/1215525148193 |
-| Zomato Media Private Limited | JAPAC | $1.0M | Shubham Agarwal | at_risk | * Update Date: 15/07/2026  * Customer renewal by 5th August |
-| Banco Mercantil del Norte, S.A., Institucion de Banca Multip | LATAM | $83K | Alberto Garcia | at_risk | Based on the Internal FY'26 Roadmap and the latest technical |
-| Banco Central De Reserva De El Salvador | LATAM | $66K | Gabriel Tello | at_risk | — |
+| XSUP-69906 | HCL Americas | AMER | $172K | Under investigation | Technical Explanation of the CIEM Scanner |
+| XSUP-73084 | MetLife, Inc. | AMER | $2.2M | Awaiting Deployment | HCP Terraform: [ERROR] "Task result timed out" impactin |
 
-## 4. Delayed After Meeting — Customer or Rep Pushing Back (263 accounts)
-**Action:** DSM/RVP exec call. Identify renewal pressure, end-of-support dates, or incentives.
+## 9. XSUP P2 — Open P2 Tickets (339)
 
-| Account | Theatre | ARR | CSE | CC Rep | DSM | Status Detail |
+**Action:** TAC/Engineering weekly tracking. P2 = significant feature impact.
+
+| XSUP | Account | Theatre | ARR | Status | Component | Summary |
 |---|---|---|---|---|---|---|
-| Primed Management Consulting Services, Inc. | AMER | $10K | Meral Abu-jaser | — | — | at_risk |
-| Engie Services U.S. Inc. | AMER | $10K | Standard | Anthony Lewis | — | at_risk |
-| TOPCON POSITIONING SYSTEMS, INC. | AMER | $97K | Sriram Choudary Nimmagadda | — | Kevin Albright | at_risk |
-| St. Luke's University Health Network | AMER | $94K | Sugathri Tumiki | Harrison Beck | — | at_risk |
-| UnitedHealth Group | AMER | $9.4M | Kenneth Lopez | - | Brian Buquoi | at_risk |
-| CoverMyMeds | AMER | $930K | Not Engaged | Ryan Hoag | Kevin Love | at_risk |
-| Portland General Electric | AMER | $91K | Manish Kabra | — | — | at_risk |
-| Workday | AMER | $9.0M | RD Singh | Michael Solomon | Kevin Albright | at_risk |
-| Richard Fleischman & Associates Inc. | AMER | $9K | Standard | Anthony Lewis | — | at_risk |
-| Fed- Marigold4 | AMER | $893K | Andrew Curran | Justin Razmic | Francois Guillaume | at_risk |
-| Gravie, Inc. | AMER | $81K | Pranav Jha | Daniel (Danny) Burke | — | at_risk |
-| Kohl's Corporation | AMER | $779K | Tomi Fajulugbe | Robert (Rob) Hesslink | Brian Buquoi - DCM | at_risk |
-| Federal Home Loan Bank of Chicago | AMER | $76K | Brandon Bradshaw | Kathleen (Katie) Clark | — | at_risk |
-| Artisan Partners Limited Partnership | AMER | $76K | Mike Labadie | - | — | at_risk |
-| Corebridge Financial, Inc. | AMER | $752K | Kenneth Lopez | Jeffrey A. (Jeff) Mow | — | at_risk |
-| Best Buy Co., Inc. | AMER | $733K | PS-led upgrade | Matthew (Matt) Hoyland | — | at_risk |
-| Canada Border Services Agency | AMER | $70K | Ivani Aviles | Patrick O'Byrne | — | at_risk |
-| Enterprise Fleet Management Inc. | AMER | $7K | Srikanth Makineni | Scott Stumbo | — | at_risk |
-| Unity Technologies SF | AMER | $63K | Daniel Reyes | — | Kevin Albright | at_risk |
-| Turnpike Commission, PA | AMER | $63K | Dele Adewumi | Timothy (Tim) O'Brien | — | at_risk |
-| Rocket Mortgage | AMER | $620K | Kenneth Lopez | Gregory (Greg) Herman | — | at_risk |
-| New York City Office of Technology & Innovation (OTI) - Infr | AMER | $614K | Kishwar Firdaus | Vadim Bogdanov | — | at_risk |
-| UPMC | AMER | $61K | Sriram Choudary Nimmagadda | Cassandra (Casey) Bunn | — | at_risk |
-| Black Duck Software, Inc. | AMER | $579K | Shashank Chandramohan | George Sanchez | Kevin Albright | at_risk |
-| Greendot Online | AMER | $57K | Muhammad Rehan | Matthew (Matt) Freeland | Adrienne Levi | at_risk |
-| Capspecialty, Inc. | AMER | $56K | — | — | — | at_risk |
-| Ashurst Perkins Coie US LLP | AMER | $54K | Manish Kabra | Jennifer Cecil | — | at_risk |
-| Blue Cross Blue Shield Association (HQ) | AMER | $536K | Manish Kabra | Travis Graybeal | — | at_risk |
-| Kimley Horn and Associates | AMER | $52K | CS-led upgrade | Kenneth (Reid) Wallace | — | at_risk |
-| Score Media and Gaming Inc. | AMER | $509K | Sriram Choudary Nimmagadda | Richard Hannaford | Chris Harris | at_risk |
-| Worley Parsons Limited | AMER | $503K | Tomi Fajulugbe | Carl Smith | Kevin Love- DCM | at_risk |
-| CGI Technologies and Solutions Inc. | AMER | $473K | Ivani Aviles | Josiane Lemay | Chris Harris | at_risk |
-| Rakuten Usa, Inc. | AMER | $426K | Kishwar Firdaus | — | — | at_risk |
-| The Ascot Group Ltd | AMER | $41K | Brandon Bradshaw | Marc Makowski | — | at_risk |
-| Roivant Sciences, Inc. | AMER | $41K | Oluranti Omotayo | Thomas (Tom) O'Brien | — | at_risk |
-| Robert Half Inc. | AMER | $412K | Manish Kabra | Hana Smith | Kevin Albright | at_risk |
-| Fed-Tulip44 | AMER | $411K | N/A | Joshua Marsh | — | at_risk |
-| Cytokinetics, Inc. | AMER | $40K | Priyank Patel | — | — | at_risk |
-| First Canadian Title Company Limited | AMER | $39K | Kashan Naqvi | Gordon (Gord) Griffiths | — | at_risk |
-| The Pokemon Company International Inc | AMER | $386K | Richard Vega | Matt Milton | — | at_risk |
-| FSY Florida | AMER | $38K | Pranav Jha | Chad Liggon | — | at_risk |
-| Securian Financial Group, Inc. | AMER | $355K | Chad Cazzato | - | — | at_risk |
-| IRB Holding Corp. | AMER | $349K | Akintomide Akinruli | Clarence H. (Trey) Kitchens III | — | at_risk |
-| Corus Entertainment Inc | AMER | $34K | Manish Kabra | Sameer Patel | — | at_risk |
-| Michael & Susan Dell Foundation | AMER | $33K | Standard | Anthony Lewis | — | at_risk |
-| Rubrik, Inc. | AMER | $324K | N/A | George Sanchez | Kevin Albright | at_risk |
-| TMX Group Inc. | AMER | $324K | Sriram Choudary Nimmagadda | Gordon (Gord) Griffiths | Chris Harris | at_risk |
-| Navan, Inc | AMER | $32K | Andrew Curran | — | — | at_risk |
-| Nutrien | AMER | $314K | Manish Kabra | Todd E. Bellman | Chris Harris | at_risk |
-| Resolution Life Services (US) Inc. | AMER | $31K | N/A | Peter (Pete) Calautti | John Yandziak | at_risk |
-| Huntington Bancshares Incorporated | AMER | $298K | N/A | Brent Huccaby | — | at_risk |
-| H. Lee Moffitt Cancer Center & Research Institute | AMER | $3K | Ayesha Yege | Harold S. (Hal) Overman IV | — | at_risk |
-| PPG Industries, Inc. | AMER | $283K | — | Curtis L. (Lance) Masten | — | at_risk |
-| EBSCO PUBLISHING, INC. | AMER | $282K | Tomi Fajulugbe | Marc Makowski | — | at_risk |
-| Humana Inc. | AMER | $2.5M | Srikanth Makineni | Henry A. King Jr. | Richard Gardner | at_risk |
-| Bluecross Blueshield Of Tennessee, Inc. | AMER | $25K | Brandon Bradshaw | Cullen Schriefer | — | at_risk |
-| Fed-Tulip21 | AMER | $25K | Brandon Bradshaw | David Yazell | — | at_risk |
-| Advocate Aurora Health | AMER | $240K | Sugathri Tumiki | Cassandra (Casey) Bunn | — | at_risk |
-| State Farm Mutual Automobile Insurance Company | AMER | $2.4M | Yash Boravelli | Henry A. King Jr. | Richard Gardner | at_risk |
-| Fed-Sunflower9 | AMER | $236K | Ivani Aviles | Todd Trickel | Adrienne Levi | at_risk |
-| Providence Saint Joseph Health | AMER | $236K | Akintomide Akinruli | Maxwell (Max) Sawochka | — | at_risk |
-| NYU Langone Health | AMER | $233K | PS-led upgrade | Harrison Beck | — | at_risk |
-| Benchling, Inc. | AMER | $226K | Priyank Patel | — | — | at_risk |
-| Foundation Medicine, Inc. | AMER | $220K | Mike Labadie | Marc Makowski | — | at_risk |
-| Interac Corp | AMER | $212K | Oluranti Omotayo | Gordon (Gord) Griffiths | Chris Harris | at_risk |
-| Ameriprise Financial, Inc. | AMER | $207K | Nik Perez | Henry A. King Jr. | — | at_risk |
-| Kellanova | AMER | $199K | Tomi Fajulugbe | - | — | at_risk |
-| Liferay, Inc. | AMER | $197K | Pranav Jha | — | — | at_risk |
-| Fed-Tulip19 | AMER | $20K | RD Singh | Matthew (Matt) Freeland | — | at_risk |
-| Aspida Holdings Ltd. | AMER | $19K | Wikenson Lejulus | Nathan Villa | — | at_risk |
-| Southern Glazer's Wine & Spirits | AMER | $193K | Tomi Fajulugbe | Clarence H. (Trey) Kitchens III | — | at_risk |
-| Sas Institute Inc. | AMER | $1.9M | Kiran Kaukuntla | Kenneth (Reid) Wallace | Brendan Cox | at_risk |
-| Panasonic Avionics Corporation | AMER | $191K | Ivani Aviles | Rafael Rodriguez | Adrienne Levi | at_risk |
-| Definity Insurance Company | AMER | $189K | N/A | Lisa Toukmanian | Chris Harris | at_risk |
-| American Institutes for Research | AMER | $18K | Pranav Jha | Jason E. Harris | — | at_risk |
-| Honeywell International Inc. | AMER | $179K | PS-led upgrade | Brian C. Stearns | — | at_risk |
-| Coupa Software Incorporated | AMER | $1.8M | Sugathri Tumiki | — | Kevin Albright | at_risk |
-| Westlake Chemical Corporation | AMER | $17K | Tomi Fajulugbe | Clint Kiemsteadt | — | at_risk |
-| Charter Communications, Inc. | AMER | $171K | CS-led upgrade | — | — | at_risk |
-| Coursera, Inc. | AMER | $168K | Dele Adewumi | — | — | at_risk |
-| Teranet Inc | AMER | $166K | Kashan Naqvi | Richard Hannaford | Chris Harris | at_risk |
-| Muriel Siebert & Co., Inc. | AMER | $16K | Carlos Martins Jr. | John W. Diaz | — | at_risk |
-| Vertex Pharmaceuticals Incorporated | AMER | $159K | Ivani Aviles | Emma Foster | — | at_risk |
-| Perforce Software | AMER | $16K | Standard | Daniel (Danny) Burke | — | at_risk |
-| Bunzl Distribution USA, Inc. | AMER | $151K | Oluranti Omotayo | James (Jim) Barry | — | at_risk |
-| Fifth Third Bancorp | AMER | $146K | Daniel Reyes | Brent Huccaby | — | at_risk |
-| Salesforce.Com, Inc. | AMER | $14.5M | Chad Cazzato | Ben Castro | Kevin Albright | at_risk |
-| Ontario Health | AMER | $145K | Ivani Aviles | Dilan Kapadia | Chris Harris | at_risk |
-| Thales DIS CPL Canada, Inc | AMER | $1.4M | Kiran Kaukuntla | Brendan Rose | Chris Harris | at_risk |
-| Getty Images | AMER | $135K | Sriram Choudary Nimmagadda | Thomas (Tom) O'Brien | John Yandziak | at_risk |
-| Herschend Entertainment Company, Llc | AMER | $13K | Andrew Curran | - | — | at_risk |
-| THE CLEARING HOUSE PAYMENTS COMPANY L.L.C. | AMER | $130K | Sugathri Tumiki | Michael Whitney | — | at_risk |
-| Pen-air Federal Credit Union (inc) | AMER | $13K | Andrew Curran | - | — | at_risk |
-| One Identity LLC | AMER | $127K | Muhammad Rehan | — | Kevin Albright | at_risk |
-| Ricoh USA, LLC | AMER | $122K | Joel Jean-Claude | Patrick G. Hendrix | — | at_risk |
-| Great Gray Trust Company, Llc | AMER | $12K | Kishwar Firdaus | Addison Rutz | — | at_risk |
-| Electric Reliability Council of Texas, Inc. (ERCOT) | AMER | $112K | Shashank Chandramohan | Carl Smith | Kevin Love- DCM | at_risk |
-| Arvest Bank | AMER | $107K | Tomi Fajulugbe | James (Jim) Barry | — | at_risk |
-| MRC Global Inc. | AMER | $106K | Shashank Chandramohan | Clint Kiemsteadt | — | at_risk |
-| Medidata US - FedRAMP | AMER | $1.1M | Manish Kabra | Emma Tufts | John Yandziak | at_risk |
-| Seagate Technology LLC | AMER | $104K | Daniel Reyes | — | Kevin Albright | at_risk |
-| Take Two Interactive Software, Inc. | AMER | $1.0M | Kiran Kaukuntla | Robert J. (Rob) Martin | Brendan Cox | at_risk |
-| National Hockey League | AMER | — | Oluranti Omotayo | Michael Whitney | John Yandziak | at_risk |
-| KeyBank National Association | AMER | — | Tomi Fajulugbe | Timothy (Tim) Vanecek | Brian Buquoi | at_risk |
-| Verizon Wireless | AMER | — | Kenneth Lopez | Stanley R. (Stan) Frost III | John Yandziak | at_risk |
-| ING BANK SLASKI S A | EMEA | $90K | Jonathan Brox | Robert Madej | — | at_risk |
-| MMS Technology GmbH | EMEA | $763K | — | Michael Bloeser | — | at_risk |
-| Intesa Sanpaolo Spa | EMEA | $737K | — | — | Tristano Ermini | at_risk |
-| Ceska sporitelna a.s. | EMEA | $580K | — | Lukas Eliz | — | at_risk |
-| Saipem Spa | EMEA | $56K | Mikhail Bakhmetiev | Andrea Rossini | — | at_risk |
-| Aramis Group | EMEA | $53K | Chinmoy Roy | — | — | blocked |
-| Safran Group | EMEA | $474K | — | Vanessa De Los Angeles (Vanessa) Fort | — | blocked |
-| Digitex | EMEA | $39K | — | Luis Ruiz Calleja | — | at_risk |
-| STMicroelectronics | EMEA | $389K | Mikhail Bakhmetiev | Nicolas Avila Jimenez | — | at_risk |
-| Natixis | EMEA | $389K | — | Marc Philippe (Marc) Perret | — | at_risk |
-| H. Lundbeck A/S | EMEA | $38K | Pushkar Kakkar | Henrik Kirkeskov Nielsen | — | at_risk |
-| Sanofi S.A | EMEA | $353K | — | Nicolas Avila Jimenez | — | at_risk |
-| IVECO SPA | EMEA | $315K | — | — | — | at_risk |
-| Nedbank Group Limited | EMEA | $315K | To be hired | Frans D. De Waal | — | at_risk |
-| Credit Agricole Cariparma Spa | EMEA | $26K | Mathieu Dalbes | Andrea Rossini | — | at_risk |
-| Banco Millenniumbcp | EMEA | $256K | — | Pedro Jorge Pinho (Pedro) Francisco | — | at_risk |
-| BANQUE EDEL SNC | EMEA | $25K | Mathieu Dalbes | Matthieu Guillaume Pierre-Marie (Matthieu) Jarrige | — | at_risk |
-| Capita Plc | EMEA | $24K | Tunde Adenugba | Zachary James Corner (Zach) Rieker | — | at_risk |
-| Unibeam Ltd | EMEA | $24K | Vaishnavi Mishra | - | — | at_risk |
-| Richemont International SA | EMEA | $234K | — | Daniela Boes | — | at_risk |
-| Star Lizard Consulting Limited | EMEA | $221K | — | Alice Victoria Lowe | — | at_risk |
-| IBERDROLA, S.A. | EMEA | $218K | Tunde Adenugba | Luis Ruiz Calleja | — | at_risk |
-| Banco Sabadell SA | EMEA | $204K | — | Alvaro Del Pozo Gozalez | — | blocked |
-| Auchan Retail International | EMEA | $198K | — | Nabila Ayadi | — | at_risk |
-| Alpiq Ag | EMEA | $198K | — | Daniela Boes | — | at_risk |
-| Orsted A/S | EMEA | $169K | — | Amir Peter (Amir) Comae | — | at_risk |
-| Societe Generale | EMEA | $1.6M | — | Marc Philippe (Marc) Perret | Stephane Landie | at_risk |
-| DXC Technology - System Integrator (EMEA) | EMEA | $155K | — | Amit Kheti | — | at_risk |
-| Splio | EMEA | $14K | Mikhail Bahkmetiev | — | — | at_risk |
-| Bank Millennium S.A. | EMEA | $138K | Jonathan Brox | Robert Madej | — | at_risk |
-| Proximus | EMEA | $130K | — | David Van Damme | — | at_risk |
-| Helvetia Schweizerische Versicherungsgesellschaft AG | EMEA | $122K | No | Daniela Boes | — | at_risk |
-| Nationwide Building Society | EMEA | $1.2M | — | Christopher (Chris) Dixon | Dima Reshytnik | at_risk |
-| First Bank Of Nigeria Limited | EMEA | $111K | Tunde Adenugba | Kiran Premnath (Kiran) Ishwarlaal | — | at_risk |
-| MBANK S A | EMEA | $109K | Tunde Adenugba | Robert Madej | — | at_risk |
-| Deutsche Borse | EMEA | — | — | Klaus Philip (Philip) Stapleford | — | at_risk |
-| Hyundai Commercial Inc. | JAPAC | $10K | Shijin Varghese | Raymond Park | — | blocked |
-| True Money Company Limited | JAPAC | $99K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | blocked |
-| CLP Power Hong Kong Limited | JAPAC | $98K | Shijin Varghese | Kai Wang | — | at_risk |
-| KPMG Services Pte. Ltd. | JAPAC | $93K | Nikhil Ahuja | - | — | at_risk |
-| LAC Co., Ltd. | JAPAC | $89K | Tetsushi Shimada | - | — | at_risk |
-| Adani Capital Private Limited | JAPAC | $9K | Akash Singh | Harsh k. Malkan | — | at_risk |
-| Shinsegae Express Bus Terminal | JAPAC | $9K | Shijin Varghese | Raymond Park | — | at_risk |
-| E-mart Inc. | JAPAC | $84K | Shijin Varghese | Raymond Park | — | at_risk |
-| Icici Lombard General Insurance Company Limited | JAPAC | $84K | — | Saurabh Umeshchandra (Saurabh) Sah | — | at_risk |
-| Lina Life | JAPAC | $83K | Shijin Varghese | Raymond Park | — | at_risk |
-| Shinsegae | JAPAC | $75K | Shijin Varghese | Raymond Park | — | at_risk |
-| ZEE ENTERTAINMENT ENTERPRISES LIMITED | JAPAC | $73K | Somesh Patil | - | — | blocked |
-| Mitsubishi Ufj Financial Group, Inc. | JAPAC | $72K | — | - | Toshihiko Muroi | at_risk |
-| An Binh Commercial Joint Stock Bank | JAPAC | $7K | Nikhil Ahuja | - | — | at_risk |
-| Capitaland Limited | JAPAC | $69K | Nikhil Ahuja | - | — | at_risk |
-| Transport For NSW | JAPAC | $678K | — | Jack Haynes | Dominic Caputo | at_risk |
-| PT Bank Hibank Indonesia | JAPAC | $67K | Nikhil Ahuja | Royston Kiang Hwee (Royston) Chng | — | at_risk |
-| National Heavy Vehicle Regulator | JAPAC | $65K | Akanchha singh | Kevin Dinh | — | at_risk |
-| Lendingkart Technologies Private Limited | JAPAC | $64K | Somesh Patil | - | — | at_risk |
-| Aboitiz Power Corporation | JAPAC | $62K | Nikhil Ahuja | Kat Garcia | — | at_risk |
-| Kakao Bank | JAPAC | $61K | Shijin Varghese | Raymond Park | — | at_risk |
-| LAC Co., Ltd. | JAPAC | $61K | Tetsushi Shimada | - | — | at_risk |
-| DIGITAL TREASURES CENTER PTE. LTD. | JAPAC | $59K | Nikhil Ahuja | - | — | at_risk |
-| HID Global | JAPAC | $58K | Akash Singh | - | — | at_risk |
-| Open Financial Technologies Private Limited | JAPAC | $54K | Somesh Patil | - | — | at_risk |
-| Hdfc Pension Management Company Limited | JAPAC | $5K | Akash Singh | Saurabh Umeshchandra (Saurabh) Sah | — | at_risk |
-| TrueMove H Universal Communication Co.,LTD | JAPAC | $51K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | at_risk |
-| Meridian Energy Limited | JAPAC | $51K | Akanchha singh | Benjamin (Ben) Hargreaves | — | at_risk |
-| Ho Chi Minh City Development Joint Stock Commercial Bank | JAPAC | $51K | Nikhil Ahuja | - | — | at_risk |
-| Rbl Bank Limited | JAPAC | $50K | Akash Singh | Chetan Sharma | — | at_risk |
-| Pt. Asuransi Jiwa Ifg | JAPAC | $47K | Nikhil Ahuja | - | — | at_risk |
-| Hyundai Card/Capital | JAPAC | $45K | Shijin Varghese | Raymond Park | — | blocked |
-| Epsilon Carbon Pvt Ltd | JAPAC | $4K | Akash Singh | - | — | at_risk |
-| Walker Chandiok & Company Llp | JAPAC | $43K | Akash Singh | - | — | at_risk |
-| SERVICE NSW | JAPAC | $428K | — | Benjamin (Ben) Hargreaves | Dominic Caputo | at_risk |
-| Icici Bank Limited | JAPAC | $428K | — | Saurabh Umeshchandra (Saurabh) Sah | Risun Antony | at_risk |
-| Australia And New Zealand Banking Group Limited - Twistlock | JAPAC | $421K | — | Bradford D. Ellis | Dominic Caputo | blocked |
-| Sony Pictures Networks India Private Limited | JAPAC | $41K | Somesh Patil | - | — | at_risk |
-| Amp Limited | JAPAC | $408K | — | Benjamin (Ben) Hargreaves | Dominic Caputo | at_risk |
-| Hanwha General Insurance | JAPAC | $41K | — | — | — | blocked |
-| Taiwan Semiconductor Manufacturing Company Limited | JAPAC | $378K | — | Yiting (Jeremy) Hsu | Peter Fan | at_risk |
-| Grameenphone Ltd | JAPAC | $36K | Akash Singh | - | — | blocked |
-| Seven & I Holdings Co., Ltd. | JAPAC | $35K | — | - | Toshihiko Muroi | at_risk |
-| Citiustech Healthcare | JAPAC | $35K | Akash Singh | Biswas K. Sedai | — | at_risk |
-| Sompo Systems Inc. | JAPAC | $343K | — | - | Toshihiko Muroi | at_risk |
-| LAC Co., Ltd. | JAPAC | $34K | Tetsushi Shimada | - | — | at_risk |
-| Bangkok Bank Public Company Limited | JAPAC | $32K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | at_risk |
-| LAC Co., Ltd. | JAPAC | $30K | Tetsushi Shimada | - | — | at_risk |
-| ASPEN MEDICAL PTY LIMITED | JAPAC | $29K | Akanchha singh | Kevin Dinh | — | at_risk |
-| Bank Of Ayudhya Public Company Limited | JAPAC | $288K | — | Nattapat Kunawattanakorn | Edward Sin | at_risk |
-| GREATER BANK | JAPAC | $28K | Akanchha singh | Benjamin (Ben) Hargreaves | — | at_risk |
-| YF Life Insurance International Ltd. | JAPAC | $27K | Shijin Varghese | Kai Wang | — | at_risk |
-| JOINT STOCK COMMERCIAL BANK FOR FOREIGN TRADE OF VIETNAM (Vi | JAPAC | $27K | Nikhil Ahuja | — | — | at_risk |
-| MAS Holdings Private Limited | JAPAC | $24K | Somesh Patil | - | — | at_risk |
-| Daiwa Capital Markets Hong Kong Limited | JAPAC | $23K | Shijin Varghese | Kai Wang | — | at_risk |
-| Wesang | JAPAC | $23K | Shijin Varghese | Raymond Park | — | at_risk |
-| The Siam Commercial Bank Public Company Limited | JAPAC | $227K | — | Nattapat Kunawattanakorn | Edward Sin | blocked |
-| LIBRARY COUNCIL OF NSW | JAPAC | $22K | Akanchha singh | Benjamin (Ben) Hargreaves | — | at_risk |
-| Samsung Securities Co., Ltd. | JAPAC | $22K | Shijin Varghese | Raymond Park | — | blocked |
-| DBS Bank Ltd | JAPAC | $214K | — | Royston Kiang Hwee (Royston) Chng | Edward Sin | at_risk |
-| The Movember Group Pty Limited | JAPAC | $20K | Akanchha singh | - | — | at_risk |
-| National Healthcare Systems Company Limited | JAPAC | $20K | Nikhil Ahuja | - | — | at_risk |
-| LOTTE FINANCE CO.,LTD | JAPAC | $20K | Nikhil Ahuja | - | — | at_risk |
-| Alliance Construction Materials Limited | JAPAC | $20K | Shijin Varghese | Kai Wang | — | at_risk |
-| Department of Employment and Workplace Relations | JAPAC | $194K | — | - | Dominic Caputo | at_risk |
-| Denso Corporation | JAPAC | $184K | — | - | Toshihiko Muroi | at_risk |
-| Epifi Technologies Private Limited | JAPAC | $18K | Akash Singh | - | — | blocked |
-| Kasikornbank Public Company Limited | JAPAC | $176K | — | Nattapat Kunawattanakorn | Edward Sin | at_risk |
-| Greenstone Financial Services Pty Ltd | JAPAC | $162K | — | Benjamin (Ben) Hargreaves | Dominic Caputo | at_risk |
-| Airport Authority | JAPAC | $16K | Shijin Varghese | Kai Wang | — | at_risk |
-| Cathay Pacific Airways Limited | JAPAC | $155K | — | Kai Wang | Peter Fan | at_risk |
-| Hong Kong Economic Times Limited | JAPAC | $153K | — | Kai Wang | Peter Fan | at_risk |
-| Thai Oil Public Company Limited | JAPAC | $15K | Nikhil Ahuja | Nattapat Kunawattanakorn | — | at_risk |
-| HKUST - Hong Kong University of Science and Technology | JAPAC | $14K | Shijin Varghese | Kai Wang | — | at_risk |
-| Reserve Bank of Australia | JAPAC | $141K | Akanchha singh | Benjamin (Ben) Hargreaves | — | at_risk |
-| U-NEXT HOLDINGS Co.,Ltd. | JAPAC | $14K | Tetsushi Shimada | - | — | blocked |
-| Bombay Stock Exchange Limited | JAPAC | $14K | Akash Singh | Chetan Sharma | — | at_risk |
-| Appviewx | JAPAC | $135K | — | - | Risun Antony | blocked |
-| Australia And New Zealand Banking Group Limited | JAPAC | $1.3M | — | Bradford D. Ellis | Dominic Caputo | blocked |
-| Vietnam Prosperity Joint Stock Commercial Bank | JAPAC | $131K | Nikhil Ahuja | - | — | at_risk |
-| Innoways Limited | JAPAC | $12K | Shijin Varghese | Kai Wang | — | at_risk |
-| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | at_risk |
-| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | at_risk |
-| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | at_risk |
-| LAC Co., Ltd. | JAPAC | $12K | Tetsushi Shimada | - | — | at_risk |
-| FE Credit - VPBank Finance Company Limited | JAPAC | $11K | Nikhil Ahuja | - | — | at_risk |
-| LeeHanNS Corp. | JAPAC | $11K | Shijin Varghese | Raymond Park | — | at_risk |
-| Goods and Service Tax Network (GSTN) | JAPAC | $11K | Akash Singh | - | — | blocked |
-| Redeban Multicolor S.A. | LATAM | $78K | Phelipe Avila | - | — | blocked |
-| Banco del Bajio | LATAM | $73K | Alberto Garcia | Ariana Arrieta | — | at_risk |
-| Telefonica Colombia | LATAM | $7K | Andre Inforzato | - | — | at_risk |
-| Jugos Del Valle, S.a.p.i. De C.v. | LATAM | $60K | Alberto Garcia | Ariana Arrieta | — | at_risk |
-| Latam Airlines Group S.a. | LATAM | $583K | Phelipe Avila | Marcos Vieyra Feldman | — | at_risk |
-| Xp Investimentos Corretora De Cambio, Titulos E Valores Mobi | LATAM | $566K | Andre Inforzato | Sebastiao Felipe Miranda | Luis Castro | at_risk |
-| Life Miles Corporation | LATAM | $55K | Phelipe Avila | - | — | blocked |
-| BV Leasing Arrendamento Mercantil S/A | LATAM | $516K | Phelipe Avila | Sebastiao Felipe Miranda | Luis Castro | at_risk |
-| Ransa Comercial S.a. | LATAM | $5K | Alberto Garcia | Marcos Vieyra Feldman | — | at_risk |
-| Simpar S/a | LATAM | $50K | Phelipe Avila | Ana Paula (Ana) Huanay Ramirez | — | at_risk |
-| BANCO DE LA REPUBLICA | LATAM | $48K | Phelipe Avila | - | — | blocked |
-| Veloe | LATAM | $46K | Phelipe Avila | - | — | at_risk |
-| Stone Pagamentos S.a. | LATAM | $444K | Phelipe Avila | - | Luis Castro | at_risk |
-| Tribunal de Justica do Parana (TJPR) | LATAM | $40K | Gabriel Tello | Sebastiao Felipe Miranda | — | at_risk |
-| Compartamos Financiera S.a. | LATAM | $39K | Gabriel Tello | Marcos Vieyra Feldman | — | at_risk |
-| La Araucana | LATAM | $39K | Gabriel Tello | Marcos Vieyra Feldman | — | at_risk |
-| Smu S.a. | LATAM | $36K | Miguel Lopez | Marcos Vieyra Feldman | — | at_risk |
-| Excellia | LATAM | $34K | Gabriel Tello | Marcos Vieyra Feldman | — | blocked |
-| Banistmo S.a. | LATAM | $34K | Alberto Garcia | - | — | blocked |
-| Minsur S.a. | LATAM | $30K | David Antolinez | Marcos Vieyra Feldman | — | blocked |
-| Unimed Seguros Saude S/A | LATAM | $29K | David Antolinez | Ana Paula (Ana) Huanay Ramirez | — | at_risk |
-| Aerovias de Mexico, S.A. de C.V. | LATAM | $27K | Alberto Garcia | Ariana Arrieta | — | at_risk |
-| Femsa Comercio, S.A. de C.V | LATAM | $26K | Ariel Nin | Alberto Rodriguez Guevara | — | at_risk |
-| Elektra del Milenio, S.A. de C.V. | LATAM | $213K | Alberto Garcia | Ariana Arrieta | Luis Castro | at_risk |
-| Promigas S A E S P | LATAM | $21K | Alberto Garcia | - | — | at_risk |
-| SOC COMERCIAL FARMACEUTICA SA | LATAM | $20K | Alberto Garcia | Marcos Vieyra Feldman | — | at_risk |
-| Kushki Colombia S A S | LATAM | $16K | Ariel Nin | - | — | blocked |
-| O Boticario Franchising Ltda. | LATAM | $162K | Andre Inforzato | Ana Paula (Ana) Huanay Ramirez | Luis Castro | at_risk |
-| Cadena Comercial Oxxo, S.A. de C.V. | LATAM | $146K | Miguel Lopez | Alberto Rodriguez Guevara | Luis Castro | at_risk |
-| Banco de la Nacion del Peru | LATAM | $12K | Ariel Nin | Marcos Vieyra Feldman | — | at_risk |
-| Ach Colombia Sa | LATAM | $111K | Alberto Garcia | - | — | blocked |
-| Alelo TLT | LATAM | $111K | Andre Inforzato | - | — | at_risk |
-| RPE Tech | LATAM | $101K | Alberto Garcia | Ana Paula (Ana) Huanay Ramirez | — | blocked |
-| Banco Bolivariano C.a. | LATAM | $100K | Gabriel Tello | - | — | blocked |
-
-## 5. FR / Parity Gap Blockers — Waiting on Product (102 accounts)
-**Action:** Product team owns resolution via Jul/Nov/Feb releases. CSE to communicate timeline to customer.
-
-| Account | Theatre | ARR | CSE | CC Rep | Issues (blocker) |
-|---|---|---|---|---|---|
-| Equinix, Inc. | AMER | $956K | Oluranti Omotayo | Hana Smith | Feature Request: DSPM MIP labeling – Parity Gap: Support for |
-| Visa Inc. | AMER | $954K | Kiran Kaukuntla | Marc Levitt | Parity Gap: Registry Scanning with Agents |
-| UnitedHealth Group | AMER | $9.4M | Kenneth Lopez | - | Parity Gap: Terraform provider lacks least privilege – Parit |
-| The Gap Inc | AMER | $909K | Mike Labadie | George Sanchez | Parity Gap: The Gap requires "operational" parity fo |
-| Workday | AMER | $9.0M | RD Singh | Michael Solomon | Feature Request: Workday requires both FIPS 140-3 and IL4 |
-| Precisely Software Incorporated | AMER | $89K | PS-led upgrade | David Yazell | Feature Request: Cortex Cloud currently lacks support for |
-| Abbott Laboratories | AMER | $807K | RD Singh | - | Parity Gap: Jira Integration – Parity Gap: Splunk integratio |
-| Early Warning Services, LLC | AMER | $766K | Kashan Naqvi | Todd Trickel | Parity Gap: EKS auto-mode not supported for KSPM Con – Parit |
-| Mayo Foundation For Medical Education And Research | AMER | $765K | Muhammad Rehan | Maxwell (Max) Sawochka | Parity Gap: Customer has an alert integration in PC |
-| Deloitte Services Lp | AMER | $7.6M | Chad Cazzato | Christopher (Chris) Flynn | Parity Gap: The Azure App registration for the tenan – Parit |
-| The Chubb Corporation | AMER | $736K | Kenneth Lopez | Jeffrey A. (Jeff) Mow | Parity Gap: Currently, in Prisma/Twistlock, the Jenk |
-| Dell Inc. (Sell-to) | AMER | $6.6M | Oluranti Omotayo | Ryan Hoag | Parity Gap: Custom Compliance – Feature Request: DSPM Bulk M |
-| The Charles Schwab Corporation | AMER | $616K | Tomi Fajulugbe | Andrew W. Silver | Feature Request: Cross Account Joins – Feature Request: MinI |
-| New York City Office of Technology & Innovation (OTI) - Infr | AMER | $614K | Kishwar Firdaus | Vadim Bogdanov | Parity Gap: Entra Enterprise Application elevated ac – Featu |
-| Netsmart Technologies, Inc. | AMER | $601K | Manish Kabra | James (Jim) Barry | Parity Gap: Customer leverages RQL in Prisma Cloud d – Parit |
-| Samaritan's Purse | AMER | $58K | Koki Hara | Jason E. Harris | Parity Gap: WaaS Parity Use Cases Not Available |
-| Blue Cross Blue Shield Association (HQ) | AMER | $536K | Manish Kabra | Travis Graybeal | Feature Request: Customer currently integrates Prisma Clo |
-| Mastercard Incorporated | AMER | $5.3M | Chad Cazzato | Marc Levitt | Feature Request: Mastercard requires Tanzu support for bl – |
-| Gilead Sciences | AMER | $521K | Kashan Naqvi/Sriram Choudary Nimmagadda | George Sanchez | Parity Gap: ESM agent with complete protection – Parity Gap: |
-| Risk Management Foundation Of Harvard Medical Institutions | AMER | $41K | Andrew Curran | Taylor P. Blue | Parity Gap: Customer renewed on posture SKUs from Pr |
-| The Goldman Sachs Group, Inc. | AMER | $3.9M | Chad Cazzato | Jeffrey A. (Jeff) Mow | Feature Request: Reduce unnecessary, duplicate scans – Featu |
-| Acuity | AMER | $39K | Daniel Reyes | - | Parity Gap: Acuity is currently using PC Defenders ( |
-| Kyndryl, Inc. | AMER | $383K | Kishwar Firdaus | Christopher (Chris) Flynn | Feature Request: XDR agent for cloud is not supported on |
-| Medline Industries, Inc. | AMER | $380K | Joel Jean-Claude | — | Parity Gap: The current ref architecture document do |
-| Cox Communications, Inc. | AMER | $3.0M | Kenneth Lopez | Stanley R. (Stan) Frost III | Parity Gap: Onboarding of Cloud accounts (Least Priv – Parit |
-| Mimecast North America, Inc. | AMER | $245K | omoniyi Jabaru | Marc Makowski | Parity Gap: Can't disable out of the box network exp |
-| Davidson Kempner Capital Management LP | AMER | $24K | PS-led upgrade | Dene Bugianesi | Parity Gap: Cloud security rule does not support all |
-| Comcast Corporation | AMER | $2.4M | Chad Cazzato | Ryan Kells | Parity Gap: Ability to sync policies across all of t – Parit |
-| Memorial Sloan-Kettering Cancer Center | AMER | $223K | Sriram Choudary Nimmagadda | Harrison Beck | Parity Gap: OS Distribution and OS Release columns a – Parit |
-| Franklin Templeton Services, LLC | AMER | $212K | Kashan Naqvi | Hana Smith | Parity Gap: Bi-directional ServiceNow ticket sync fi |
-| Colgate-Palmolive Company | AMER | $20K | Mike Labadie | Robert J. (Rob) Martin | Parity Gap: Customer needs Cortex Cloud China based |
-| Broadcom Corporation | AMER | $2.0M | Sriram Choudary Nimmagadda | George Sanchez | Feature Request: Lack of runtime protection for GCP (Goog |
-| Connection | AMER | $200K | N/A | David Yazell | Parity Gap: They do not want our standard deployment |
-| American Express Company | AMER | $1.9M | — | Andrew W. Silver | Feature Request: List of Inactive GCP Service Ids filtere – |
-| Versana | AMER | $18K | Priyank Patel | Nathan Villa | Parity Gap: Lack of auto-deploy feature for agents. |
-| Bell Canada | AMER | $164K | Ivani Aviles | Brendan Rose | Parity Gap: CVE Risk Factors are categorical data, a – Parit |
-| Fidelity National Financial, Inc. | AMER | $1.6M | Srikanth Makineni | - | Parity Gap: concerns on outpost permissions/network |
-| Salesforce.Com, Inc. | AMER | $14.5M | Chad Cazzato | Ben Castro | Feature Request: SCIM Connector for Identity management – Fe |
-| BCD Travel USA LLC | AMER | $144K | Mike Labadie | Patrick G. Hendrix | Parity Gap: Agents deployment automation – Parity Gap: Qualy |
-| Flagstar Bank, N.A. | AMER | $142K | Oluranti Omotayo | - | Feature Request: Big user of DSPM and AWS RDS SQL and Ora |
-| John Hancock Financial Services, Inc. | AMER | $1.4M | Kenneth Lopez | Evan W. Burnes | Parity Gap: Agent resource requirements – Parity Gap: Custom |
-| Thales DIS CPL Canada, Inc | AMER | $1.4M | Kiran Kaukuntla | Brendan Rose | Parity Gap: Cortex Cloud Multi Tenant Support.  For |
-| Getty Images | AMER | $135K | Sriram Choudary Nimmagadda | Thomas (Tom) O'Brien | Parity Gap: Getty has a list of essential API endpoi – Parit |
-| Kaiser Permanente | AMER | $1.3M | Sriram Choudary Nimmagadda | Jack Estep | Parity Gap: Cortex CLI: CI Image scan results in the |
-| Enterprise Products Partners L.P. | AMER | $127K | Tomi Fajulugbe | Carl Smith | Parity Gap: cortexcli image scan does not support im |
-| Onity Group Inc. | AMER | $126K | Srikanth Makineni | Clarence H. (Trey) Kitchens III | Parity Gap: When viewing issues, it is not possible |
-| Iron Mountain Incorporated | AMER | $1.2M | Srikanth Makineni | Evan W. Burnes | Parity Gap: True Container Security |
-| Cambia Health Solutions, Inc | AMER | $118K | Ivani Aviles | - | Parity Gap: Bottlerocket V1.55.0 and beyond needs to |
-| Instinet Holdings Inc | AMER | $115K | N/A | Konstantin M. (Mike) Rutledge | Feature Request: Onboarding AWS Account – Feature Request: I |
-| Loblaws Inc. | AMER | — | Ivani Aviles | Gordon (Gord) Griffiths | Feature Request: ADS ability to run scheduled scans |
-| Barcelo Hotels Spain Sl | EMEA | $91K | Mathieu Dalbes | Javier A. Rodriguez | Parity Gap: Ability to "Mark Scan as Passed" on Bloc |
-| MMS Technology GmbH | EMEA | $763K | — | Michael Bloeser | Feature Request: Prisma Cloud currently ingests legacy fi |
-| Intesa Sanpaolo Spa | EMEA | $737K | — | — | Parity Gap: Lack of Pod/Container visibility in Inve – Featu |
-| Access Uk Ltd | EMEA | $678K | — | Alice Victoria Lowe | Parity Gap: Customer has a problem with deploying a |
-| Ericsson AB | EMEA | $641K | — | Richard E. Glantz | Parity Gap: Missing API to generate CSV file with is |
-| Swisscom AG (IT-Services, Internal IT) | EMEA | $596K | — | Daniela Boes | Parity Gap: OIDC Prisma Cloud Parity Feature  is not |
-| Barclays PLC | EMEA | $515K | — | Christopher (Chris) Dixon | Parity Gap: CVE Tagging – Parity Gap: CC is not RedHat certi |
-| Swisscom Enterprise Solutions Ag | EMEA | $51K | — | Daniela Boes | Parity Gap: Unsupported feature:  AKS agentless vuln – Parit |
-| MAPFRE S.A | EMEA | $432K | — | Alvaro Del Pozo Gozalez | Parity Gap: Import/export CSPM custom policies and s – Featu |
-| Caixabank, S.A. | EMEA | $432K | — | Alvaro Del Pozo Gozalez | Parity Gap: IBM Cloud support |
-| BANCA CF+ | EMEA | $42K | Jonathan Brox | Carlo Daniele | Parity Gap: File uploads protection in WAAS is not a |
-| STMicroelectronics | EMEA | $389K | Mikhail Bakhmetiev | Nicolas Avila Jimenez | Parity Gap: Databricks unsupported – Parity Gap: AZURE ANALY |
-| ACI INFORMATICA SPA | EMEA | $28K | Chinmoy Roy | Vito Sodano | Parity Gap: Missing Network Controls, Dos Protection |
-| Acciona, Sa | EMEA | $250K | — | Luis Ruiz Calleja | Feature Request: Terraform onboarding support for AWS |
-| NEOM Energy (ENOWA) | EMEA | $215K | — | Mohamad Lababidi | Parity Gap: NEOM ENOWA hNeom has a large number of O |
-| Empark Aparcamientos Y Servicios Sa | EMEA | $20K | Mathieu Dalbes | Javier A. Rodriguez | Feature Request: Docker Swarm |
-| Volkswagen Software Asset Management GmbH | EMEA | $1.8M | — | Marco Schopp | Parity Gap: Asset group limit of 1970 asset groups l |
-| Boehringer Ingelheim GmbH | EMEA | $170K | — | Marco Schopp | Feature Request: Missing integration capabilities for the |
-| Engie | EMEA | $1.6M | — | Nabila Ayadi | Parity Gap: Cortex agentless serverless scanning can – Parit |
-| BPI FRANCE | EMEA | $158K | — | Antoine Jean Marie Joseph (Antoine) Cantin | Parity Gap: Tanzu TKG is not supported. |
-| Emis Group Plc | EMEA | $157K | — | Cameron M. Nicol | Parity Gap: AWS Inspector not natively supported |
-| Thermote & Vanhalst NV | EMEA | $156K | Jonathan Brox | David Van Damme | Feature Request: Customer has to store their helm charts |
-| Snam Rete Gas S.p.A. | EMEA | $152K | — | Andrea Rossini | Feature Request: Customer currently uses Prisma Cloud Com |
-| Sol Melia | EMEA | $126K | — | Javier A. Rodriguez | Parity Gap: Agent performance |
-| Nordiska Investeringsbanken, Pohjoismaiden Investointipankki | EMEA | — | Tunde Adenugba | Alex Ahlberg | Parity Gap: Serverless runtime protection (blocker) |
-| KPMG Services Pte. Ltd. | JAPAC | $93K | Nikhil Ahuja | - | Parity Gap: The customer's global security team has |
-| Hdb Financial Services Limited | JAPAC | $9K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | Parity Gap: The HDB Account Team - rely on Manual Al |
-| Aia Shared Services (hong Kong) Limited | JAPAC | $703K | — | Kai Wang | Parity Gap: China region related CSP is not supporte – Parit |
-| Capitaland Limited | JAPAC | $69K | Nikhil Ahuja | - | Parity Gap: Support for Alibaba Cloud |
-| Kakao Bank | JAPAC | $61K | Shijin Varghese | Raymond Park | Parity Gap: Currently Cortex Cloud does not provide |
-| Inland Revenue Authority of Singapore | JAPAC | $511K | — | Su Yong Tay | Parity Gap: Unable to obtain docker compliance findi – Parit |
-| Max Life Insurance Company Limited | JAPAC | $47K | Akash Singh | - | Feature Request: Unable to scan AWS EBS GP3 volumes |
-| Infosys Limited | JAPAC | $454K | Ajay Kartik | Meghana Kaul | Parity Gap: Currently Prisma Cloud trigger Registry  – Parit |
-| Taiwan Semiconductor Manufacturing Company Limited | JAPAC | $378K | — | Yiting (Jeremy) Hsu | Parity Gap: No granulated cloud native scope option |
-| Shein Group Ltd | JAPAC | $284K | Sophie Wang | Kai Wang | Parity Gap: KSPM Connector custom local registry |
-| PT Bank Central Asia Tbk | JAPAC | $258K | — | Renzy Richie | Parity Gap: Customer Heavily using Tanzu Application – Parit |
-| One 97 Communications Limited | JAPAC | $248K | — | - | Parity Gap: The customer is unable to view asset det |
-| DBS Bank Ltd | JAPAC | $214K | — | Royston Kiang Hwee (Royston) Chng | Parity Gap: Unable to track Cloud Security Issues vi |
-| Department of Employment and Workplace Relations | JAPAC | $194K | — | - | Parity Gap: Azure - serverless scanning - using a dy – Parit |
-| Cgs-cimb Securities (singapore) Pte. Ltd. | JAPAC | $19K | Nikhil Ahuja | - | Parity Gap: Require CFT format to onboard Outpost |
-| PT Super Bank Indonesia | JAPAC | $173K | — | Renzy Richie | Feature Request: AWS Lambda ARM64 is not yet officially s – |
-| Rakuten Symphony Singapore Pte. Ltd. | JAPAC | $16K | Nikhil Ahuja | - | Feature Request: For CWP, PC meters by Defenders, which a |
-| Singapore Life Ltd | JAPAC | $153K | — | - | Parity Gap: Asset to Issue mapping is not done prope |
-| Hong Kong Economic Times Limited | JAPAC | $153K | — | Kai Wang | Parity Gap: There is no block grace period for the a |
-| Au Small Finance Bank Limited | JAPAC | $151K | — | - | Feature Request: Limited permissions error in scanning co – |
-| Government Pension Fund (GPF) | JAPAC | $14K | Nikhil Ahuja | - | Parity Gap: Support for Image Analysis Sandbox |
-| Australia And New Zealand Banking Group Limited | JAPAC | $1.3M | — | Bradford D. Ellis | Parity Gap: Cortex Cloud currently provides consider – Parit |
-| PT BANK CIMB NIAGA Tbk | JAPAC | $130K | Nikhil Ahuja | Renzy Richie | Feature Request: AWS Lambda ARM64 is not yet officially s |
-| Wesfarmers Bunnings Limited | JAPAC | $112K | Akanchha singh | Benjamin W. (Ben) Fletcher | Parity Gap: Cortex Cloud has no Azure Sentinel suppo |
-| GXS BANK PTE. LTD | JAPAC | $108K | — | Kat Garcia | Parity Gap: compliance controls and rules are limite – Parit |
-| The Bank of East Asia, Ltd | JAPAC | $104K | Shijin Varghese | Kai Wang | Parity Gap: Cortex cloud does not have Alibaba cloud |
-| Zomato Media Private Limited | JAPAC | $1.0M | Shubham Agarwal | - | Parity Gap: CSPM – Parity Gap: Basic CSPM feature need Remed |
-
-## 6. M8 In-Flight — Upgrade Started, Not Done (261 accounts)
-**Action:** CSE to drive to completion. Monitor weekly. Escalate if stalled > 30 days.
-
-| Account | Theatre | ARR | CSE | M9 Planned | DC Progress | Notes |
-|---|---|---|---|---|---|---|
-| Precisely Software Incorporated | AMER | $89K | PS-led upgrade | 🛑 Upgrade in progress: upgrade paused by the customer | Red | Upgrade on hold.  Topic/Feature: CI/CD Deploy |
-| HARTFORD FIRE INSURANCE COMPANY | AMER | $334K | Bhawna Garg | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Kickoff with PS has happened. Customer has ac |
-| NTT - State of Texas - DCS (MSSP Partner) | AMER | $759K | N/A | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | They want to move to XSIAM potentially and no |
-| Vanderbilt Health | AMER | $755K | Yash Boravelli | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | There have a been a number of TAC cases in th |
-| National Football League | AMER | $237K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | They are now in the off season and are ready |
-| Scientific Games LLC | AMER | $45K | Srikanth Makineni | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Customer is experiencing latency during repor |
-| Fed-Jasmine5 | AMER | $421K | Priyank Patel | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Customer continues to be negatively impacted |
-| Boston Consulting Group | AMER | $772K | Manish Kabra | ✅ Upgrade started, no blockers: Next steps scheduled | Green | — |
-| HealthPartners, Inc. | AMER | $297K | Yash Boravelli | 🛑 Upgrade in progress: upgrade paused by the customer | Red | CC Upgrade is blocked by numerous XSUP.  Two |
-| CSC | AMER | $107K | Oluranti Omotayo | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Current Testing Cortex Cloud. |
-| MetLife, Inc. | AMER | $2.2M | Srikanth Makineni | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Completion date is now targeted for end of Ju |
-| Georgia Institute Of Technology | AMER | $121K | Miguel Lopez-Henriquez | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 7/9 [LE]: $0 PS engaged to coordinate upgrade |
-| 84.51 Llc | AMER | $134K | Akintomide Akinruli | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/14:  currently in the process of migrating, |
-| Wind River Systems, Inc. | AMER | $148K | Mike Labadie | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | 6/2  in the middle of the migration -- escala |
-| Fontainebleau Las Vegas | AMER | $54K | Kashan Naqvi | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7-16 - Alonzo indicated he feels we will be a |
-| Wakefern Food Corp. | AMER | $30K | Nik Perez | 🛑 Upgrade in progress: upgrade paused by the customer | Red | 05/12 - They have not been showing up to the |
-| Flagstar Bank, N.A. | AMER | $142K | Oluranti Omotayo | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | Big user of DSPM and AWS RDS SQL and Oracle i |
-| CDK Global, Inc. | AMER | $539K | Ivani Aviles | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | 07/20 KK: Meeting with the customer in person |
-| Air Products And Chemicals, Inc. | AMER | $268K | Akintomide Akinruli | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/17/2026 - Customer is nearly finished with |
-| Factory Mutual Insurance Co | AMER | $245K | Tomi Fajulugbe | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | — |
-| Michaels Stores Procurement Company, Inc. | AMER | $239K | Mike Labadie | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/20 RB: Tracking to success. No major issues |
-| Allegiant Travel Company | AMER | $238K | RD Singh | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 5/15 Customer is evaluating AppSEC as part of |
-| Connection | AMER | $200K | N/A | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Customer had to push back initial migration s |
-| American Express Company | AMER | $1.9M | — | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | July 17: CIEM module has some issues, which a |
-| LINEAGE LOGISTICS HOLDINGS, LLC | AMER | $123K | RD Singh | 🛑 Upgrade in progress: upgrade paused by the customer | Yellow | 6/24/26: dolly continues to work on appsec us |
-| Dish Network Corporation | AMER | — | Manish Kabra | 🛑 Upgrade in progress: upgrade paused by the customer | Yellow | 7-17-2026 PR/MR Scanning issue in the pipelin |
-| Independence Blue Cross | AMER | $78K | Avery King | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 05/12 - IBX already using cortex cloud.   htt |
-| Allina Health System | AMER | $49K | Kashan Naqvi | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | Technical Blocker Details - Azure Tenant Onbo |
-| Risk Management Foundation Of Harvard Medical Institutions | AMER | $41K | Andrew Curran | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 07/10 -  * Customer has onboarded multiple ac |
-| BGC Partners | AMER | $384K | PS-led upgrade | 🛑 Upgrade in progress: upgrade paused by the customer | Green | 3/30 - on hold because of a known to eng bug, |
-| Franciscan Alliance, Inc. | AMER | $135K | Avery king | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | gsindel 17-Jul: Mena has returned form PTO bu |
-| Intrado Life & Safety | AMER | — | Priyank Patel | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 6/17 Customer is actively working the CC upgr |
-| Movable Ink | AMER | $156K | Prateek Pawar | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 6/26 Ambika: Customer is making good progress |
-| Willdan Group, Inc. | AMER | — | Carlos Martins Jr. | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/17 Customer is working on azure tenant onbo |
-| Ulta Salon, Cosmetics & Fragrance, Inc | AMER | $638K | RD Singh | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/14 - in the middle of their migration, now |
-| Computer Services, Inc. | AMER | $109K | Tomi Fajulugbe | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | 06/09 - To Mark as upgrade Complete - From @J |
-| Memorial Sloan-Kettering Cancer Center | AMER | $223K | Sriram Choudary Nimmagadda | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 7/17 Deepak: Control Tower feature is now ava |
-| C2FO | AMER | $79K | Prateek Pawar | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | 7/20 KK: Meeting with Taylor from C2FO tomorr |
-| University of Texas Health Science Center At Houston | AMER | $19K | Pranav Jha | 🛑 Upgrade in progress: upgrade paused by the customer | Yellow | They have received our redlines BAA to negoti |
-| Amway Corp. | AMER | $522K | Sugathri Tumiki | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | 6/15 - For the most part Amway is using CC. |
-| Crum and Forster | AMER | $178K | Sriram Choudary Nimmagadda | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | Customer is already utilizing Cortex Cloud. T |
-| Alliance Berstein L.P. | AMER | $167K | RD Singh | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Currently working through issues with Github |
-| Aaron's, Inc. | AMER | $113K | Ayesha Yege | ✅ Upgrade started, no blockers: Next steps scheduled | Green | The customer has access to the CC tenant afte |
-| Dh Business Services Llc | AMER | $1.1M | Manish Kabra | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Authentication & RBAC SSO Enforcement / CSP B |
-| Loblaws Inc. | AMER | — | Ivani Aviles | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Kowsi (DC): 7/2 open tickets:  https://jira-d |
-| Fed-Sunflower5 | AMER | $639K | Andrew Curran | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | 7/14 Fed-Sunflower5 has a product blocker aro |
-| Everbridge, Inc. | AMER | $490K | Richard Vega | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 6/25 We are currently in the negotiations pha |
-| ISO New England Inc. | AMER | $124K | Priyank Patel | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 7/17 Deepak: Change of leadership at PS side |
-| Russell Reynolds Associates, Inc. (HQ) | AMER | $116K | PS-led upgrade | ✅ Upgrade started, no blockers: Next steps scheduled | Green | PS in progress, not happy with the product |
-| Fed-Orange4 | AMER | $518K | Andrew Curran | ✅ Upgrade started, no blockers: Next steps scheduled | Red | Rackspace has lost the contract for cloud ser |
-| Franklin Templeton Services, LLC | AMER | $212K | Kashan Naqvi | 🛑 Upgrade in progress: upgrade paused by the customer | Red | 7/10/26 HS - account needs escalation due to |
-| HCL Americas | AMER | $172K | — | 2025-09-15 00:00:00 | Yellow | 7/16 [LE]: Esclations across the board. PJ an |
-| Toro Data Labs, Inc | AMER | $10K | Terrell Carter | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 06/26 - Onboarded AWS account.   6/23 Raj is |
-| The Simons Foundation Inc | AMER | $96K | Sugathri Tumiki | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | 06/29. - last session we have discussed about |
-| Assured Guaranty | AMER | $67K | Ivani Aviles | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | 06/30/26 - Customer is currently being blocke |
-| Planned Parenthood Federation of America, Inc. | AMER | $59K | PS-led upgrade | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 01-07: finally got permission for AWS onboard |
-| Wellstar Health System, Inc. | AMER | $57K | PS-led upgrade | ✅ Upgrade started, no blockers: Next steps scheduled | Green | RM - Customer has been working with PS over t |
-| Select Medical Corporation | AMER | $56K | Sriram Choudary Nimmagadda | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 05/12 - Cloud account onboarding completed. w |
-| Polaris Industries Inc. | AMER | $54K | Chad Cazzato | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 6/26/26 - Cortex Cloud has successfully been |
-| Veryon | AMER | $53K | Pranav Jha | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | 06/29 - Pranav will reachout to Austin (Custo |
-| Dallas County | AMER | $42K | Dele Adewumi | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/14/26 TS: customer ready to proceed with th |
-| Recurly, Inc. | AMER | $42K | Pranav Jha | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 6/11: Customer has started the upgrade and is |
-| Cipherhealth Inc. | AMER | $40K | Pranav Jha | 🛑 Upgrade in progress: upgrade paused by the customer | Red | 07/20 -  Kenny Adedipe <kadedipe@cipherhealth |
-| Medline Industries, Inc. | AMER | $380K | Joel Jean-Claude | 🛑 Upgrade in progress: upgrade paused by the customer | Yellow | 7/14 - pushing the migration at Medline proba |
-| Glacier Bancorp | AMER | $35K | RD Singh | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | 7/9/26 Rob Baccus - No Updates  6/22/26 Rob B |
-| Libretto.io | AMER | $34K | Dele Adewumi | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | 5/27 Chassis (Renewals): The client is curren |
-| ICU Medical | AMER | $33K | Kashan Naqvi | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 04/29 - ICU medical has been onboarded - we'v |
-| eVisit, Inc. | AMER | $29K | Pranav Jha | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | 5/18 The customer has renewed on the Cortex C |
-| iconectiv | AMER | $28K | PS-led upgrade | ✅ Upgrade started, no blockers: Next steps scheduled | Green | PC->CC Upgrade Ongoing |
-| University of Florida Health | AMER | $28K | Ivani Aviles | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Our internal InfoSec team recently completed |
-| Weil, Gotshal & Manges LLP | AMER | $27K | Yash Boravelli | ✅ Upgrade started, no blockers: Next steps scheduled | Green | The onboarding of Azure occurred on Monday 6/ |
-| Washington Health Benefit Exchange | AMER | $24K | Carlos Martins Jr. | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | Technical Blocker Details - Defender-to-XDR m |
-| Mettel, Inc. | AMER | $22K | Sriram Choudary Nimmagadda | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Internal Outreach Completed. Alignment achiev |
-| SCAN Health Plan | AMER | $2K | Sugathri Tumiki | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | 06/08- Azure onboarding is complete, awaiting |
-| Carilion Health System | AMER | $20K | Oluranti Omotayo | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | 06/08 Azure Onboarding Completed. Customer to |
-| Cornerstone Research Inc. | AMER | $19K | PS-led upgrade | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 07/17 KK: Commercial Cortex tenant seems to w |
-| Pantera Capital Management LP | AMER | $19K | Dele Adewumi | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/14 - Amit Schnitzer (DC): We've tried to en |
-| Viewpost, LLC | AMER | $19K | Prateek Pawar | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 07/14 - AWS Account Onboarded, Upgrade helper |
-| Los Angeles Capital Management and Equity Research, Inc. | AMER | $17K | Andrew Curran | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 07/17 - Ibeka is not responding to any of our |
-| Memorial Hermann Health System | AMER | $15K | Oluranti Omotayo | 🛑 Upgrade in progress: upgrade paused by the customer | Red | 03/16 - Currently using Crowdstrike - 3/16/20 |
-| 9219-1568 Quebec Inc. | AMER | — | Ayesha Yege | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Next Steps: 06/23 - Current Status: We are ru |
-| WestJet Airlines | AMER | — | Manish Kabra | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 7/17  Onboarding blockers with azure.  Manual |
-| Intact | AMER | $444K | Oluranti Omotayo | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 6/30 Onboarding and the eval is ongoing. They |
-| Baker Hughes Oilfield Operations LLC | AMER | $102K | Kiran Kaukuntla | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | 7/14 - started their upgrade, willing to rene |
-| Skillsoft Corporation | AMER | $140K | Yash Boravelli | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | 7/17 : No major update from customer, still o |
-| Tory Burch LLC | AMER | $192K | Sriram Choudary Nimmagadda | 🛑 Upgrade in progress: upgrade paused by the customer | Green | Customer has begun the migration to Cortex Cl |
-| Novant Health | AMER | $321K | Yash Boravelli | ✅ Upgrade started, no blockers: Next steps scheduled | Red | 7/20/20226 - GEW - On the call today they cal |
-| Freddie Mac | AMER | $3.0M | Mike Labadie | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | JP - 20260626 - Aprox. 280 AWS accounts have |
-| CHS Inc. | AMER | $271K | Shashank Chandramohan | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | 7/13: Customer has stated they won't be able |
-| Fidelity National Financial, Inc. | AMER | $1.6M | Srikanth Makineni | 🛑 Upgrade in progress: upgrade paused by the customer | Red | Cortex Cloud Blockers (Marko’s Email): CAS (O |
-| Zurich Financial Group AG | AMER | $1.6M | Chad Cazzato | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | 7/15 (HK) - Zurich close to moving CSPM use c |
-| White Cap Supply Holdings, LLC | AMER | $77K | Mike Labadie | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 7/14/26: Azure has been onboarded, hopefully |
-| Meijer, Inc. | AMER | $130K | Akintayo Akinbade | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 4/3 Tim Vanacek (C&C Rep) We closed Meijer la |
-| TriNet USA Inc. | AMER | $396K | Sugathri Tumiki | ✅ Upgrade started, no blockers: Next steps scheduled | Green | TriNet procurement has the $0 service quote a |
-| Brooks Running | AMER | $19K | Pranav Jha | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/14 - upgrade likely stalled, need to get wi |
-| Gore Mutual Insurance Company | AMER | $64K | Avery King | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Red | Technical Blocker Details - Azure Tenant Onbo |
-| The Chubb Corporation | AMER | $736K | Kenneth Lopez | 🛑 Upgrade in progress: upgrade paused by the customer | Red | 6/16 JM till Blocked as below.  Also will  bl |
-| Wawa, Inc. | AMER | $354K | Srikanth Makineni | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/17/2026 - Customer engagement with Palo PS |
-| Sabre GLBL Inc | AMER | $1.8M | Srikanth Makineni | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | 7/17/26 CS: Cadence calls with PS continue an |
-| British Columbia Investment Management Corporation | AMER | $70K | Kashan Naqvi | 🛑 Upgrade in progress: upgrade paused by the customer | Yellow | 7/17 We have had conversations over the past |
-| Arcus Biosciences, Inc. | AMER | $30K | Wikenson Lejulus | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Red | 05/27 - Customer wants only Terraform to depl |
-| The PNC Financial Services Group, Inc. | AMER | $138K | Mike Labadie | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | 6/2:  just closed their PC renewal - use cort |
-| Netsmart Technologies, Inc. | AMER | $601K | Manish Kabra | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | 6/29:  Actively working on their migration, u |
-| The Lubrizol Corporation | AMER | $23K | Srikanth Makineni | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | 7/20 RB: Azure devops onboarding issues fixed |
-| Cognizant Technology Solutions Corporation | AMER | $3.7M | Kenneth Lopez | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7-17-26 - Customer is making progress engagin |
-| Texas Children's Hospital | AMER | $191K | Yash Boravelli | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | 3/18 We are in process of upgrading but stall |
-| BCD Travel USA LLC | AMER | $144K | Mike Labadie | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Fargate Agents (App-Embeeded Defenders), Serv |
-| Schlumberger Technology Corporation | AMER | — | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | 6/26: Initial PS upgrade project kicked-off. |
-| Applied Materials | AMER | $421K | N/A | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 7/10/26 HS - upgrade process is going well so |
-| Cardinal Health, Inc. | AMER | $380K | Mike Labadie | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | 7/14:  Katie met onside, full discovery opene |
-| Canada Pension Plan Investment Board | AMER | $302K | Manish Kabra | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | June 15: Still waiting for blockers to be cle |
-| Versana | AMER | $18K | Priyank Patel | 🛑 Upgrade in progress: upgrade paused by the customer | Red | 7/14 Miguel Lopez-Henriquez (Scale & Optimize |
-| Abbott Laboratories | AMER | $807K | RD Singh | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | 7/17 - Waiting for Cortex Cloud 2.2 that will |
-| The Coca-Cola Company | AMER | $191K | Joel Jean-Claude | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Red | 6/30/26 Coca Cola continues to indicate churn |
-| Prysmian Spa | EMEA | — | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | The customer has zero cost PS assigned to sup |
-| Silverfort Ltd | EMEA | $149K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | [GNOY May 20]- We completed most of the cloud |
-| Admiral Group Plc | EMEA | $441K | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | Update Date (latest update date): 29.05.2026 |
-| JC Decaux | EMEA | $13K | Tunde Adenugba | 🛑 Upgrade in progress: upgrade paused by the customer | Red | We have technical issues. Escalation done and |
-| ACWA POWER HOLDING LIMITED | EMEA | $32K | Zoheb Sarwar | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | 08/07 - Onboarding for azure prod tenant comp |
-| ABU DHABI GLOBAL MARKET | EMEA | $29K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 21.05.2026 ---------------------------------- |
-| Ministry of Communications and Information Technology | EMEA | $214K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 06.05.2026 ---------------------------------- |
-| Salt Bank | EMEA | $94K | Mikhail Bakhmetiev | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date): 17.07.2026 |
-| Aptiv Global Operations Limited | EMEA | $685K | Alignment with customer in progress | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Update Date (latest update date): 24.04.2026 |
-| A&O Shearman | EMEA | $377K | — | 🛑 Upgrade in progress: upgrade paused by the customer | Red | Update Date (latest update date): 16/07/2026 |
-| Saudi Arabian Oil Co. (ARAMCO) | EMEA | $333K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 06.05.2026 ---------------------------------- |
-| NEOM Energy (ENOWA) | EMEA | $215K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 06.05.2026 ---------------------------------- |
-| Ferrovial, S.A. | EMEA | $19K | — | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | Update Date (latest update date):  17.07.2026 |
-| Israel Police | EMEA | $149K | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | [Gnoy May 20]  - The K8S connector (agent ins |
-| KiK Textilien und Non-Food GmbH | EMEA | $26K | Tunde Adenugba | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date):  10.07.2026 |
-| SUXXEED Sales for your Success GmbH | EMEA | $12K | Jonathan Brox | ✅ Upgrade started, no blockers: Next steps scheduled | Green | uncovered by NGS - should reach out to Core R |
-| CompuGroup Medical SE and Co KGaA | EMEA | $143K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date):  10.07.2026 |
-| Baring Investment Services Limited | EMEA | $366K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date):  16/07/2026 |
-| Ministerul Public | EMEA | $88K | Tunde Adenugba | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 10/06: Chase with Ewa S here: https://panw-gl |
-| Tandem Bank | EMEA | $45K | Tunde Adenugba | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update: Friday 10th April Barry Ward is now p |
-| Ministerul Justitiei | EMEA | $40K | Tunde Adenugba | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 10/06: Chase with Ewa S here: https://panw-gl |
-| Yseop | EMEA | $27K | Mathieu Dalbes | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | 16/07 : Fix planned for July release batch 4 |
-| Groupe Clarins | EMEA | $16K | Mathieu Dalbes | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 07/17 : Still some issue for ADS on Azure htt |
-| LAMINAM SPA | EMEA | $10K | Tunde Adenugba | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Jun 15th: Had a call with customer today to r |
-| Ceská Televize | EMEA | $40K | Jonathan Brox | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Update Date (latest update date): 18.7.2026 |
-| Pepkor Lifestyle | EMEA | $39K | Pushkar Kakkar | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date): 16/07/2026 |
-| Finanz Informatik Technologie Service GmbH & Co. KG | EMEA | $32K | Jonathan Brox | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | 19/03/2026: Customer has currently different |
-| National Gas Transmission Limited | EMEA | $234K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date): 20/05/2026 |
-| DELTA GALIL INDUSTRIES LTD. | EMEA | $21K | Mathieu Dalbes | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | [GNOY May 20]- We completed agent profile/pol |
-| Elbit AI | EMEA | $21K | Mathieu Dalbes | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Jun 9th: call with customer and they are havi |
-| Impresa SA | EMEA | $19K | Pushkar Kakkar | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | Update Date (latest update date): 24.04.2026 |
-| HUK-COBURG VVaG | EMEA | $73K | Jonathan Brox | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date):  10.07.2026 |
-| FQE | EMEA | $52K | — | 👎 Customer ready to activate tenant: Issues with tenant prov | Green | Update Date (latest update date): [dtor] 29.0 |
-| Madrileña Red De Gas Sau | EMEA | $6K | Tunde Adenugba | 👎 Customer ready to activate tenant: Issues with tenant prov | Green | Jluy 15th: kick off meeting happened. Some ke |
-| Maire Tecnimont Spa | EMEA | $50K | Zoheb Sarwar | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 08/07 - Ran a session to discuss the CSPM pol |
-| Aldermore Group Plc | EMEA | $93K | Tunde Adenugba | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Yellow | 15/07: Migration on going 15/06: Aldermore te |
-| Abanca | EMEA | $80K | Jonathan Brox | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | 06.05.2026: GCP Data Ingestion failed. Suppor |
-| Pasha Bank JSC | EMEA | $62K | Vaishnavi Mishra | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | They have already started working on the inte |
-| Ads Securities - Llc | EMEA | $47K | Tunde Adenugba | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Yellow | 09/07: Chased Raman for follow up session wit |
-| Belfius Bank NV | EMEA | $46K | Jonathan Brox | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | Apr 15th: Taking over this new Scale Cohort a |
-| Caixa-Enginyers | EMEA | $35K | Jonathan Brox | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | 25/02/2026: Customer activated the tenant, bu |
-| AGENCIA PARA O DESENVOLVIMENTO E COESAO, I.P. | EMEA | $34K | Mathieu Dalbes | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 29/06 : permission issues affect two subscrip |
-| Acuity Knowledge Partners (uk) Limited | EMEA | $33K | Tunde Adenugba | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | 07/07: Demo session on CIEM< DSPM and AppSec |
-| Banco Ctt, S.a. | EMEA | $31K | Mathieu Dalbes | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | 05/06 : Mail sent to the customer to have som |
-| Octopus Lab Limited | EMEA | $26K | Pushkar Kakkar | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | Update Date (latest update date):  03.07.2026 |
-| Dogus Teknoloji | EMEA | $24K | Tunde Adenugba | 👎 Customer ready to activate tenant: Issues with tenant prov | Green | 10/07: Discussion with Accounts team on Licen |
-| Politecnico di Milano | EMEA | $11K | Vaishnavi Mishra | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | Jun 11th: On May 11th customer confirmed they |
-| MARELLI SPA | EMEA | $105K | Chinmoy Roy | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | 12/06: Follow-up email send to the customer t |
-| CODERE | EMEA | — | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Update Date (latest update date): 24.04.2026 |
-| Nordiska Investeringsbanken, Pohjoismaiden Investointipankki | EMEA | — | Tunde Adenugba | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | 10/07: Discussion with internally on Customer |
-| Carrefour (Spain) | EMEA | $212K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Red | Update Date (latest update date):  17.07.2026 |
-| FS Technology | EMEA | $38K | Jonathan Brox | ✅ Upgrade started, no blockers: Next steps scheduled | Red | 23/03/2026: no update 20/04/2026: EB: Please |
-| A2A S.p.A. | EMEA | $94K | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Kick-off already complete; PS are engaged on |
-| Nuvei Ltd | EMEA | $248K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date): [dtor] 28.0 |
-| Aumovio | EMEA | $76K | — | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | Update Date (latest update date): 21.04.2026 |
-| L'Oreal | EMEA | $571K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | We have been elected as the prefered partner |
-| Air Liquide S.A. | EMEA | $520K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | ########## May 12th ########## Challenging si |
-| Telefónica Innovacion Digital S.L | EMEA | $49K | Mikhail Bakhmetiev | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | 3 July: Customer deploying firts AppSec  and |
-| Theta Ray Ltd | EMEA | $47K | Zoheb Sarwar | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | Jun 11th: We still haven't heard about the cu |
-| Engie | EMEA | $1.6M | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Update Date (latest update date): 17.06.2026 |
-| Ministry of Health | EMEA | $2K | Chinmoy Roy | ✅ Upgrade started, no blockers: Next steps scheduled | Green | [GB May 20] Customer isn't happy with the UI, |
-| Amdocs (Israel) Ltd. | EMEA | $61K | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Update Date (latest update date): 16.07.2026 |
-| Sappi Ltd | EMEA | $21K | Chinmoy Roy | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date (latest update date): 16/07/2026 |
-| Barcelo Hotels Spain Sl | EMEA | $91K | Mathieu Dalbes | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Yellow | 02/07 : challenge with required permissions f |
-| Novo Nordisk A/S | EMEA | $1.1M | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | 14/07-2026: Starting PS engagement today with |
-| Airbus 1 | EMEA | $766K | Mikhail Bakhmetiev | ✅ Upgrade started, no blockers: Next steps scheduled | Green | April 3rd: GCP perimeter is fully deployed. |
-| Mercadona | EMEA | $244K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Update Date (latest update date):  17.07.2026 |
-| Ataccama Software, s.r.o. | EMEA | $406K | — | 🛑 Upgrade in progress: upgrade paused by the customer | Red | Update Date (latest update date): 09.7.2026 |
-| Reserve Bank of New Zealand | JAPAC | $36K | Akanchha singh | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Asana id : https://app.asana.com/1/1191589107 |
-| Inmobi | JAPAC | $1.7M | — | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | Update Date: 29/06/2026  Current State Polici |
-| University of Technology, Sydney (UTS) | JAPAC | $217K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Current Status: (17/7) Request access to cust |
-| Betagro Public Company Limited | JAPAC | $18K | Nikhil Ahuja | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | Asana Project ID: https://app.asana.com/1/119 |
-| Flexr Limited | JAPAC | $14K | Akanchha singh | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | July : Reached out again to NTT partner team. |
-| Toyota Boshoku Asia Co., Ltd. | JAPAC | $10K | Nikhil Ahuja | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Asana Project ID: https://app.asana.com/1/119 |
-| Star Health And Allied Insurance Company Limited | JAPAC | $29K | — | 🛑 Upgrade in progress: upgrade paused by the customer | Red | * Update Date: 15/07/2026   * Current State: |
-| East Metropolitan Health Service | JAPAC | $36K | Akanchha singh | ✅ Upgrade started, no blockers: Next steps scheduled | Green | July : Upgrade started,Customer cancels many |
-| Access Healthcare Services Pvt Ltd | JAPAC | $24K | Somesh Patil | ✅ Upgrade started, no blockers: Next steps scheduled | Green | https://app.asana.com/1/11915891072957/projec |
-| Galactus Funware Technology Private Limited | JAPAC | $219K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date: 29/06/2026 Current State: Cortex |
-| Us Technology International Private Limited | JAPAC | $50K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026  * Current State: |
-| Newgen Software Tech. Ltd | JAPAC | $41K | Somesh Patil | ✅ Upgrade started, no blockers: Next steps scheduled | Green | https://app.asana.com/1/11915891072957/projec |
-| Paytm Money Limited | JAPAC | $69K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026  * Current State: |
-| One 97 Communications Limited | JAPAC | $248K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026  * Current State: |
-| Paytm Payments Services Limited | JAPAC | $172K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026  * Current State: |
-| Xcloud Game Co., Ltd. | JAPAC | $16K | Sophie Wang | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | 15th July:   Customer feedback is going well, |
-| Equitas Small Finance Bank Limited | JAPAC | $12K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026   * Current State: |
-| PEXA Services Pty Ltd | JAPAC | $371K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Current State: (16/7) Trying to get time with |
-| ALINTA ENERGY HOLDINGS PTY LTD | JAPAC | $156K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Current State: 15/7 Progress update call with |
-| TRANSURBAN GROUP | JAPAC | $154K | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | Current State: (10/7) Customer confirmed all |
-| The Bank of East Asia, Ltd | JAPAC | $104K | Shijin Varghese | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Asana Project id: https://app.asana.com/1/119 |
-| Darwinbox Digital Solutions Private Limited | JAPAC | $169K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date: 29/06/2026 PS Has been engaged f |
-| Dialog Telekom Plc | JAPAC | $178K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date: 01/07/2026 PS aligned. Starting |
-| Wesfarmers Bunnings Limited | JAPAC | $112K | Akanchha singh | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Current State: 30/6 Licensing changes have be |
-| Jsw Steel Limited | JAPAC | $10K | Akash Singh | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Asana Project : https://app.asana.com/1/11915 |
-| Office of National Intelligence | JAPAC | $82K | Akanchha singh | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Asana id : https://app.asana.com/1/1191589107 |
-| Infosys Limited | JAPAC | $454K | Ajay Kartik | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026  * Current State: U |
-| CJ Logistics | JAPAC | $44K | Shijin Varghese | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Asana Project id: https://app.asana.com/1/119 |
-| South China Morning Post Publishers Limited | JAPAC | $43K | Shijin Varghese | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Asana Project id : https://app.asana.com/1/11 |
-| LG Household & Health Care | JAPAC | $43K | Shijin Varghese | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Asana Project id: https://app.asana.com/1/119 |
-| NTT DATA eCommerce Solutions Sdn. Bhd. | JAPAC | $30K | Nikhil Ahuja | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Asana Project ID: https://app.asana.com/1/119 |
-| One New Zealand Group Limited | JAPAC | $160K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Current State:  (17/7) Loss review meeting he |
-| Gold Fields Limited | JAPAC | $101K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Date: 7th July Stage M8 - PS enaged and deplo |
-| Bajaj Finserv Asset Management Ltd | JAPAC | $10K | Somesh Patil | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | https://app.asana.com/1/11915891072957/projec |
-| Fubon Life Insurance Co., Ltd. | JAPAC | $27K | Shijin Varghese | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Red | Asana Project id: https://app.asana.com/1/119 |
-| Transition Systems and Networks (Thailand) Co., Ltd. | JAPAC | $11K | Nikhil Ahuja | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | Asana Project ID: https://app.asana.com/1/119 |
-| Tata Consultancy Services Limited | JAPAC | $443K | Madhu kishore | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026   * Current State: |
-| HAVELLS INDIA LIMITED | JAPAC | $22K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date: 10/07/2026  Current State: Migra |
-| Wipro Limited | JAPAC | $1.1M | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | * Update Date: 15/07/2026   * Current State: |
-| SHBank Finance Company Limited | JAPAC | $9K | Nikhil Ahuja | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Asana Project ID: https://app.asana.com/1/119 |
-| Nippon Life Insurance Australia and New Zealand Limited | JAPAC | $463K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Current State: PS team is engaged, meeting to |
-| Toyota-astra Motor, Pt | JAPAC | $36K | Nikhil Ahuja | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date: 10/7/2026 Current State: In Prog |
-| Canara HSBC OBC Life Insurance Company Ltd | JAPAC | $33K | Akash Singh | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Asana Project : https://app.asana.com/1/11915 |
-| Shiprocket | JAPAC | $48K | Somesh Patil | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | https://app.asana.com/1/11915891072957/projec |
-| Dyson Operations Pte. Ltd. | JAPAC | $413K | — | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | Update Date: 16/07/26 Current State: Customer |
-| Singapore Telecommunications Limited | JAPAC | $142K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Update Date: 16/07/2026 Current State: Migrat |
-| GXS BANK PTE. LTD | JAPAC | $108K | — | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Yellow | Update Date: 08/07/2026 Current State: Blocke |
-| Lg Uplus Corp. | JAPAC | $756K | — | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Update Date:07/10/2026 Current State: Milesto |
-| Cred-system Administracao E Processamento De Cartoes Ltda. | LATAM | $29K | Andre Inforzato | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Entitlement sizing is wrong, customer just pu |
-| Diagnosticos da America S/A. | LATAM | $217K | Andre Inforzato | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Upgrade schedule for the month of April/May |
-| Banco Bice | LATAM | $98K | Isaac Solis | ✅ Upgrade started, no blockers: Next steps scheduled | Red | — |
-| Instituto de Prevision Social | LATAM | $68K | Alberto Garcia | ✅ Upgrade started, no blockers: Next steps scheduled | Red | Given the fact that the client is a governmen |
-| Axtel, S.a.b. De C.v. | LATAM | $34K | Gabriel Tello | ✅ Upgrade started, no blockers: Next steps scheduled | Green | — |
-| Integratel Perú S.A.A. | LATAM | $24K | — | ✅ Upgrade started, no blockers: Next steps scheduled | Green | n/a |
-| Rimac Seguros Y Reaseguros | LATAM | $16K | Ariel Nin | 🛑 Upgrade in progress: upgrade paused by the customer | Green | Update conversations are currently taking pla |
-| Minera Exar S.a. | LATAM | $14K | Ariel Nin | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | Customer is going very slowly, will want to m |
-| Reybanpac Rey Banano Del Pacifico C.a. | LATAM | $8K | Andre Inforzato | ✅ Upgrade started, no blockers: Next steps scheduled | Yellow | Client would like to have feature parity befo |
-| Itau Unibanco Holding S/A. | LATAM | $817K | Phelipe Avila | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Kick off call completed on 2/11 - very large |
-| BANCO CORPBANCA COLOMBIA SA | LATAM | $57K | Gabriel Tello | ✅ Upgrade started, no blockers: Next steps scheduled | Green | — |
-| Tarjeta Naranja S.a. | LATAM | $522K | Alberto Garcia | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Yellow | — |
-| PriceShoes | LATAM | $49K | Alberto Garcia | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Technical block due to a unresolved TAC case |
-| PwC Strategy& Do Brasil Consultoria Empresarial Ltda | LATAM | $43K | Andre Inforzato | 👎 Upgrade in progress: upgrade is behind schedule due to cus | Green | 1x weekly sessions |
-| Almacenes Corona S A S | LATAM | $35K | Isaac Solis | ✅ Upgrade started, no blockers: Next steps scheduled | Red | Client has indicated that currently has other |
-| Sherwin Williams de CA | LATAM | $33K | Ariel Nin | ✅ Upgrade started, no blockers: Next steps scheduled | Red | Currently there is blocker related to GitLab |
-| Dsigner | LATAM | $16K | Alberto Garcia | ✅ Upgrade started, no blockers: Next steps scheduled | Green | — |
-| Mercado Bitcoin Servicos Digitais | LATAM | $144K | Andre Inforzato | ✅ Upgrade started, no blockers: Next steps scheduled | Green | Cortex Cloud licenses already upgraded into u |
-| Toyota Del Peru S.a. | LATAM | $10K | Isaac Solis | ✅ Upgrade started, no blockers: Next steps scheduled | Red | — |
-| Puntos Colombia S A S | LATAM | $44K | Gabriel Tello | 🛑 Upgrade in progress: upgrade paused by the customer | Green | Partner (NetData) has indicated that will do |
-| Sistemas Globales S.a. | LATAM | $114K | Gabriel Tello | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Yellow | — |
-| Alau Tecnologia S.a.u. | LATAM | $87K | David Antolinez | 🛑 Upgrade in progress: upgrade paused by the customer | Green | 2x weekly meetings planned, still learning ab |
-| Porto Seguro Seguro Saude S/A | LATAM | $786K | Phelipe Avila | 🛑 Upgrade in progress: upgrade paused by the customer | Yellow | Customer returned to test additional cases wi |
-| Banco Monex, S.A., Institucion de Banca Multiple, Monex Grup | LATAM | $78K | Gabriel Tello | 🛑 Upgrade in progress: upgrade paused by the customer | Green | — |
-| PwC Strategy& Do Brasil Consultoria Empresarial Ltda | LATAM | $43K | Gabriel Tello | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | — |
-| PwC Strategy& Do Brasil Consultoria Empresarial Ltda | LATAM | $27K | David Antolinez | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Green | — |
-| Transbank | LATAM | $158K | Gabriel Tello | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Red | — |
-| Banco Pichincha C.A. | LATAM | $318K | Gabriel Tello | 👎 Upgrade in progress: upgrade is behind schedule due to tec | Green | Nightmare client. Require constant support. U |
-| Suramericana S A | LATAM | $94K | Alberto Garcia | 🛑 Upgrade in progress: upgrade paused by the customer | Green | Partner (NetData) has indicated that will do |
-| Bancolombia S.A. | LATAM | $495K | Matias Keib | 🛑 Upgrade in progress: upgrade paused by the customer | Green | Netdata accounts |
-| Industrial And Commercial Bank Of China Argentina S.A. | LATAM | $43K | Gabriel Tello | ✅ Upgrade started, no blockers: Next steps NOT scheduled | Yellow | Renewal is in September of 2026 and the clien |
-
-## 7. Progressing — No Blocker Logged, Pre-M8 (354 accounts)
-**Action:** CSE to assess status, set M8 target date, move forward. Low-hanging fruit.
-
-| Account | Theatre | ARR | CSE | CC Rep | DSM | DC Progress |
-|---|---|---|---|---|---|---|
-| Excellus BlueCross BlueShield | AMER | $98K | Tomi Fajulugbe | - | — | Green |
-| Hilton Worldwide Holdings Inc. | AMER | $983K | Tomi Fajulugbe | Cullen Schriefer | Brian Buquoi - DCM | Green |
-| San Francisco International Airport | AMER | $97K | Kishwar Firdaus | - | — | Green |
-| Equinix, Inc. | AMER | $956K | Oluranti Omotayo | Hana Smith | Kevin Albright | Red |
-| The Gap Inc | AMER | $909K | Mike Labadie | George Sanchez | Kevin Albright | Yellow |
-| Messer Gas | AMER | $91K | Yash Boravelli | Peter (Pete) Calautti | John Yandziak | Green |
-| Edelman Financial Engines, LLC | AMER | $90K | Churning/Churned | — | — | Yellow |
-| University of California at San Francisco | AMER | $85K | Kashan Naqvi | Jack Estep | — | Green |
-| Finicity | AMER | $845K | Mike Labadie | Marc Levitt | Richard Gardner | Red |
-| Georgia Department of Labor | AMER | $83K | Kishwar Firdaus | Aaron Frazier | — | Yellow |
-| NATIONAL RESILIENCE | AMER | $83K | Dele Adewumi | — | — | Green |
-| Intrafi Network, LLC | AMER | $81K | Pranav Jha | Nathan Villa | — | Green |
-| Stony Brook Medicine | AMER | $8K | Manish Kabra | Harrison Beck | — | Green |
-| Chargie Llc | AMER | $8K | Andrew Curran | John W. Diaz | — | Yellow |
-| Early Warning Services, LLC | AMER | $766K | Kashan Naqvi | Todd Trickel | Adrienne Levi | Red |
-| Mayo Foundation For Medical Education And Research | AMER | $765K | Muhammad Rehan | Maxwell (Max) Sawochka | — | Yellow |
-| Deloitte Services Lp | AMER | $7.6M | Chad Cazzato | Christopher (Chris) Flynn | John Yandziak | Yellow |
-| Baycare Health System, Inc. | AMER | $7K | Oluranti Omotayo | Harold S. (Hal) Overman IV | — | Green |
-| Alliant Energy Corporation | AMER | $73K | Priyank Patel | - | — | Green |
-| Federal Home Loan Bank of Pittsburgh | AMER | $73K | Wikenson Lejulus | Jason E. Harris | — | Green |
-| Fed-Orchid | AMER | $722K | Priyank Patel | Matthew (Matt) Fierce | Francois Guillaume | Green |
-| OTC MARKETS GROUP INC. | AMER | $69K | Priyank Patel | Nathan Villa | — | Green |
-| Fed-Tulip15 | AMER | $68K | Tomi Fajulugbe | Kenneth (Reid) Wallace | — | Green |
-| Dell Inc. (Sell-to) | AMER | $6.6M | Oluranti Omotayo | Ryan Hoag | Kevin Love | Yellow |
-| Procore Technologies, Inc. | AMER | $655K | RD Singh | Matthew (Matt) Freeland | — | Green |
-| The Charles Schwab Corporation | AMER | $616K | Tomi Fajulugbe | Andrew W. Silver | Adrienne Levi | Green |
-| Stitch Fix, Inc. | AMER | $589K | Ivani Aviles | Michael A. (Tres) Zaglool | Kevin Albright | Green |
-| Loudoun County | AMER | $56K | Dele Adewumi | Timothy (Tim) O'Brien | — | Green |
-| Mastercard Incorporated | AMER | $5.3M | Chad Cazzato | Marc Levitt | Richard Gardner | Red |
-| Shipt, Inc. | AMER | $520K | Kiran Kaukuntla | - | — | Green |
-| Money Services, Inc. | AMER | $52K | Brandon Bradshaw | Konstantin M. (Mike) Rutledge | Brendan Cox | Green |
-| N-Power Medicine, Inc. | AMER | $52K | Kishwar Firdaus | John W. Diaz | — | Green |
-| American Family Mutual Insurance Company | AMER | $517K | Manish Kabra | Robert (Rob) Hesslink | — | Green |
-| National Geographic Society Inc | AMER | $51K | Prateek Pawar | Jason E. Harris | — | Green |
-| Universal Music Group Inc. | AMER | $492K | Manish Kabra | Rafael Rodriguez | Adrienne Levi | Green |
-| Teradata Corporation | AMER | $486K | Manish Kabra | Kyle Larson | Adrienne Levi | Yellow |
-| Psiquantum, Corp. | AMER | $48K | Standard | — | — | Yellow |
-| Townebank | AMER | $47K | John Leon | Nathan Villa | — | Red |
-| CMH Services, Inc | AMER | $46K | Kiran Kaukuntla | James (Jim) Barry | — | Yellow |
-| Csl Behring L.L.C. | AMER | $459K | Oluranti Omotayo | Vanessa Brunke | John Yandziak | Green |
-| NCC Media | AMER | $45K | Tomi Fajulugbe | Ryan Kells | John Yandziak | Green |
-| Fed-Jasmine1 | AMER | $439K | RD Singh | Matthew (Matt) Freeland | Adrienne Levi | Green |
-| Raymond James Financial, Inc. | AMER | $44K | Brandon Bradshaw | - | — | Green |
-| Secure Waste Infrastructure Corp. | AMER | $44K | Avery King | Todd E. Bellman | — | Yellow |
-| Ross Dress For Less | AMER | $43K | Sriram Choudary Nimmagadda | Hana Smith | Kevin Albright | Green |
-| Integris Health, Inc. | AMER | $43K | Kashan Naqvi | Kelly G. Reynolds | Metrri Jain - DCM | Green |
-| International Business Machines Corporation | AMER | $39K | Nik Perez | Christopher (Chris) Flynn | John Yandziak | Green |
-| State of Wisconsin Department of Corrections | AMER | $38K | Meral Abu-jaser | - | — | Green |
-| Kyndryl, Inc. | AMER | $383K | Kishwar Firdaus | Christopher (Chris) Flynn | John Yandziak | Green |
-| New York City Department of Environmental Protection (DEP) | AMER | $38K | Priyank Patel | Mark Gibbons | — | Green |
-| Ankura Consulting Group, Llc | AMER | $36K | Kishwar Firdaus | Jason E. Harris | — | Red |
-| SingleStore, Inc. | AMER | $360K | Kishwar Firdaus | John W. Diaz | — | Yellow |
-| Rockwell Automation, Incorporated | AMER | $353K | Akintomide Akinruli | Robert (Rob) Hesslink | — | Green |
-| Deloitte LLP | AMER | $350K | Chad Cazzato | Christopher (Chris) Flynn | John Yandziak | Yellow |
-| Board Of Regents Of The University Of Nebraska | AMER | $34K | Pranav Jha | Joseph (Joey) Stewart | — | Green |
-| Ally Financial Inc. | AMER | $3.4M | Kenneth Lopez | David E. Harrison | Brendan Cox | Yellow |
-| Nvidia Corporation | AMER | $3.4M | Rusty Otto | Ben Castro | Kevin Albright | Yellow |
-| Vonage Holdings Corp | AMER | $3.3M | RD Singh | Dene Bugianesi | John Yandziak | Red |
-| Zt Systems | AMER | $33K | Manish Kabra | Kenneth Hillman | Kevin Albright | — |
-| Environmental Systems Research Institute, Inc. (ESRI) | AMER | $326K | Oluranti Omotayo | Matthew (Matt) Freeland | Adrienne Levi | Green |
-| Deloitte Global Services Limited | AMER | $3.3M | Chad Cazzato | Christopher (Chris) Flynn | John Yandziak | Yellow |
-| Municipal Property Assessment Corporation | AMER | $32K | Oluranti Omotayo | Dilan Kapadia | — | Green |
-| Telus International | AMER | $317K | Kenneth Lopez | Matthew (Matt) Hoyland | — | Green |
-| Yardi Systems, Inc. | AMER | $316K | Manish Kabra | Matthew (Matt) Freeland | Adrienne Levi - DCM | Green |
-| Fed-Lilly3 | AMER | $308K | Richard Vega | - | Francois Guillaume | Yellow |
-| California Employment Development Department | AMER | $292K | Prateek Pawar | Jeffry (Jeff) Lee | — | Green |
-| Laboratory Corporation of America Holdings | AMER | $286K | Tomi Fajulugbe | - | — | Green |
-| Blackhawk Network, Inc. | AMER | $249K | Kashan Naqvi | Hana Smith | Kevin Albright | Yellow |
-| Primoris Services Corporation | AMER | $24K | Dele Adewumi | Anthony Lewis | — | Green |
-| Fed-Sunflower19 | AMER | $233K | Priyank Patel | Jeffry (Jeff) Lee | Adrienne Levi | Green |
-| Laureate Education, Inc. | AMER | $233K | Richard Vega | Timothy (Tim) O'Brien | — | Green |
-| Cenovus Energy Inc. | AMER | $232K | Avery King | Todd E. Bellman | Chris Harris | Green |
-| Western & Southern Life Insurance Company | AMER | $23K | Kenneth Lopez | Jon Halar | — | Green |
-| Primerica Financial Services, LLC | AMER | $227K | Brandon Bradshaw | Clarence H. (Trey) Kitchens III | — | Yellow |
-| AQR Capital Management, LLC | AMER | $226K | Sriram Choudary Nimmagadda | Michael Whitney | John Yandziak | Yellow |
-| Publix Super Markets, Inc. | AMER | $223K | Nik Perez | - | — | Yellow |
-| Fed-Sunflower15 | AMER | $223K | Manish Kabra | Matthew (Matt) Freeland | Adrienne Levi | Green |
-| TEXAS ROADHOUSE, INC. | AMER | $22K | Manish Kabra | - | Brendan Cox - DCM | Green |
-| Altus Group Limited | AMER | $216K | Sriram Choudary Nimmagadda | Christopher Lee | Chris Harris | Yellow |
-| KeHE Distributors, LLC | AMER | $22K | Brandon Bradshaw | Kathleen (Katie) Clark | — | Green |
-| Omnicell | AMER | $216K | Avery King | — | Kevin Albright | Green |
-| Zions Bancorp | AMER | $206K | Oluranti Omotayo | — | Metrri Jain | Red |
-| Trividia Health, Inc. | AMER | $20K | Pranav Jha | Clarence H. (Trey) Kitchens III | — | Green |
-| Canadian National Railway Company | AMER | $202K | Kashan Naqvi | Josiane Lemay | Chris Harris | Green |
-| Moneygram Payment Systems, Inc. | AMER | $195K | N/A | John Wofford | Kevin Love- DCM | Green |
-| Costa Farms, Llc | AMER | $19K | Srikanth Makineni | Jennifer H. Matos | — | Yellow |
-| Personal Capital Corporation | AMER | $189K | N/A | Todd Trickel | Adrienne Levi | Yellow |
-| Cordis US Corp. | AMER | $19K | Tomi Fajulugbe | Clarence H. (Trey) Kitchens III | — | Green |
-| Ochsner Health System | AMER | $19K | Kashan Naqvi | Kelly G. Reynolds | Metrri Jain - DCM | Green |
-| Berkshire Hathaway Energy Company | AMER | $187K | Oluranti Omotayo | - | — | Green |
-| Fed-Sunflower16 | AMER | $180K | Carlos Martins Jr. | Chong H. Yi | Francois Guillaume | Red |
-| Domino Data Lab, Inc. | AMER | $18K | N/A | Walter Cortez | Kevin Albright | Green |
-| AIR MILES Loyalty Inc | AMER | $176K | RD Singh | Gordon (Gord) Griffiths | Chris Harris | Green |
-| Mattel, Inc. | AMER | $171K | Yash Boravelli | Rafael Rodriguez | Adrienne Levi | Green |
-| Brunswick Corporation | AMER | $166K | Andrew Curran | Samantha (Sam) Bravos | — | Yellow |
-| Bell Canada | AMER | $164K | Ivani Aviles | Brendan Rose | Chris Harris | Red |
-| Kentucky Employers' Mutual Insurance Authority | AMER | $16K | Dele Adewumi | Nathan Villa | — | Red |
-| Grange Insurance | AMER | $16K | Nik Perez | Jon Halar | Brian Buquoi - DCM | Green |
-| Équité Association | AMER | $16K | Avery King | Christopher Lee | — | Green |
-| Harness Inc | AMER | $15K | Priyank Patel | John W. Diaz | — | Green |
-| PGT Industries, Inc. | AMER | $15K | Brandon Bradshaw | Patrick G. Hendrix | — | Green |
-| DXC Technology Company | AMER | $152K | Srikanth Makineni | - | — | Green |
-| Onicore.io | AMER | $15K | Meral Abu-jaser | Ibrahim Limoun | — | Green |
-| Los Angeles Unified School District | AMER | $148K | Prateek Pawar | Branden Coles | Adrienne Levi | Green |
-| Orange Theory Fitness | AMER | $147K | Kishwar Firdaus | Chad Liggon | — | Yellow |
-| Enact | AMER | $146K | Shashank Chandramohan | David E. Harrison | — | Green |
-| Rogers Communications Canada Inc | AMER | $1.5M | Oluranti Omotayo | Brendan Rose | Chris Harris | Yellow |
-| New York City Fire Department (FDNY) | AMER | $144K | Pranav Jha | Mark Gibbons | — | Green |
-| Fed-POPPY | AMER | $144K | Carlos Martins Jr. | Richard (Rick) Murray | Francois Guillaume | Green |
-| John Hancock Financial Services, Inc. | AMER | $1.4M | Kenneth Lopez | Evan W. Burnes | Chris Harris | Red |
-| Workllama Inc | AMER | $14K | Standard | Ibrahim Limoun | — | Green |
-| MARKETAXESS HOLDINGS INC. | AMER | $139K | Manish Kabra | Emma Tufts | John Yandziak | Yellow |
-| ezCater | AMER | $138K | Andrew Curran | Taylor P. Blue | — | Yellow |
-| Axway Inc. | AMER | $14K | Prateek Pawar | — | — | Green |
-| AECOM Corporation | AMER | $135K | RD Singh | Barnaby Crahan | Adrienne Levi | Green |
-| Aviatrix Systems, Inc. | AMER | $13K | Miguel Lopez-Henriquez | John W. Diaz | — | Green |
-| Legence | AMER | $13K | Akintayo Akinbade | - | — | Yellow |
-| Kaiser Permanente | AMER | $1.3M | Sriram Choudary Nimmagadda | Jack Estep | Metrri Jain | Yellow |
-| Hitachi Digital Services LLC | AMER | $13K | Dele Adewumi | - | — | Red |
-| DYCOM INDUSTRIES, INC. | AMER | $132K | Tomi Fajulugbe | Clarence H. (Trey) Kitchens III | — | Red |
-| Enterprise Products Partners L.P. | AMER | $127K | Tomi Fajulugbe | Carl Smith | Kevin Love- DCM | Green |
-| Onity Group Inc. | AMER | $126K | Srikanth Makineni | Clarence H. (Trey) Kitchens III | — | Green |
-| Fed-Tulip | AMER | $1.3M | N/A | Chong H. Yi | Tom Welsh | Red |
-| Iron Mountain Incorporated | AMER | $1.2M | Srikanth Makineni | Evan W. Burnes | Brendan Cox | Yellow |
-| North Carolina's Electric Cooperatives (NCEMC) | AMER | $12K | Mike Labadie | Kenneth (Reid) Wallace | — | Red |
-| Cambia Health Solutions, Inc | AMER | $118K | Ivani Aviles | - | — | Green |
-| Xaira Therapeutics | AMER | $118K | Kishwar Firdaus | John W. Diaz | — | Yellow |
-| Marriott International, Inc. | AMER | $1.2M | omoniyi Jabaru | Robert J. (Rob) Martin | Brendan Cox | Red |
-| Exelon Corporation | AMER | $114K | Tomi Fajulugbe | David E. Harrison | — | Green |
-| Codefresh Inc. | AMER | $11K | Prateek Pawar | John W. Diaz | — | Green |
-| Honeywell International Inc. | AMER | $1.1M | Shashank Chandramohan | Brian C. Stearns | Richard Gardner | Green |
-| Liminex, Inc. dba GoGuardian | AMER | $108K | Dele Adewumi | John W. Diaz | — | Red |
-| Fed-Tulip45 | AMER | $11K | Manish Kabra | - | — | Green |
-| Rafay Systems, Inc. | AMER | $11K | Kishwar Firdaus | John W. Diaz | — | Green |
-| Ivanti | AMER | $1.1M | Oluranti Omotayo | — | Metrri Jain | Red |
-| Emptor | AMER | $11K | Priyank Patel | Nathan Villa | — | Green |
-| University of Pittsburgh | AMER | $104K | Terrell A. Carter | Andrew Woolley | — | Red |
-| Atrium Health | AMER | — | PS-led upgrade | Cassandra (Casey) Bunn | — | Yellow |
-| Nationwide Corporation | AMER | — | Srikanth Makineni | Henry A. King Jr. | Richard Gardner | Yellow |
-| VERSPIEREN | EMEA | $10K | Mikhail Bahkmetiev | Just Philibert Marie (Just) Hoppenot | — | Green |
-| KUWAIT PETROLEUM ITALIA SPA | EMEA | $98K | PS | — | — | Green |
-| Trendyol | EMEA | $955K | — | Burc Berksoy | Ibrahim Eskiocak | Yellow |
-| Reply Spa | EMEA | $95K | Vaishnavi Mishra | Carlo Daniele | — | Green |
-| SOGEI Spa per Ministero Economia e Finanze | EMEA | $95K | Mikhail Bakhmetiev | Vito Sodano | — | Green |
-| Inizio Healthcare Limited | EMEA | $94K | — | Bradlee William (Bradlee) Boxall | — | Green |
-| Europa Worldwide Logistics Ltd | EMEA | $9K | Mikhail Bakhmetiev | Kieran John (Kieran) Woodward Brown | — | Green |
-| Softserve,  Inc. | EMEA | $83K | Jonathan Brox | Lukas Eliz | — | Yellow |
-| Nova Measuring Instruments Ltd | EMEA | $8K | — | Gil Pery | — | Green |
-| Telefonica de Espana SA (customer) | EMEA | $78K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Yellow |
-| Valeo SA | EMEA | $75K | Mikhail Bahkmetiev | Nicolas Olivier Denis (Nicolas) Belorgey | — | Yellow |
-| eProcess International | EMEA | $74K | Jonathan Brox | Kiran Premnath (Kiran) Ishwarlaal | — | Green |
-| Safaricom Limited | EMEA | $71K | Tunde Adenugba | Frans D. De Waal | — | Red |
-| Factorial HR | EMEA | $69K | Mikhail Bakhmetiev | - | — | Green |
-| Real Madrid Club De Futbol | EMEA | $68K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Yellow |
-| Access Uk Ltd | EMEA | $678K | — | Alice Victoria Lowe | — | Green |
-| Tnuva | EMEA | $67K | — | Gil Pery | — | Green |
-| Standard Bank Group Limited | EMEA | $651K | — | Frans D. De Waal | — | Green |
-| Federation Internationale de Football Association (FIFA) | EMEA | $64K | Jonathan Brox | Lukas Mettler | — | Green |
-| Meest Express Trade House Limited Liability Company | EMEA | $60K | Jonathan Brox | Lukas Eliz | — | Green |
-| Digiturk | EMEA | $59K | Jonathan Brox | Burc Berksoy | — | Green |
-| LUX MED SP ZOO | EMEA | $55K | Tunde Adenugba | Robert Madej | — | Green |
-| Deutsche Post IT Services GmbH | EMEA | $510K | — | Marco Schopp | — | Red |
-| Hi Bob Ltd | EMEA | $46K | — | Amatzia Ben Zimra | — | Yellow |
-| ST. JAMES'S PLACE UK PLC | EMEA | $44K | Chinmoy Roy | Amit Kheti | — | Green |
-| Caixabank, S.A. | EMEA | $432K | — | Alvaro Del Pozo Gozalez | — | Red |
-| BANCA CF+ | EMEA | $42K | Jonathan Brox | Carlo Daniele | — | Green |
-| MUREX SAS | EMEA | $42K | Mikhail Bahkmetiev | Just Philibert Marie (Just) Hoppenot | — | Green |
-| Whitbread | EMEA | $413K | Mikhail Bakhmetiev | - | — | Green |
-| BANCA TRANSILVANIA SA | EMEA | $41K | Jonathan Brox | Lukas Eliz | — | Yellow |
-| Atresmedia | EMEA | $39K | Mathieu Dalbes | Javier A. Rodriguez | — | Yellow |
-| Yapi Kredi Bank | EMEA | $38K | — | Burc Berksoy | — | Green |
-| Telefonica Global | EMEA | $4K | Mikhail Bakhmetiev | Javier A. Rodriguez | — | Yellow |
-| Haier Europe Trading Srl | EMEA | $37K | Vaishnavi Mishra | - | — | Yellow |
-| Fagbokforlaget Vigmostad & Bjorke AS | EMEA | $35K | Mathieu Dalbes | - | — | Yellow |
-| CACEIS Spain | EMEA | $35K | Vaishnavi Mishra | Alvaro Del Pozo Gozalez | — | Yellow |
-| Marks and Spencer Group Plc | EMEA | $346K | 100-650 cohort: Managed by PS | - | — | Yellow |
-| Ministry of Sports & Youth | EMEA | $34K | Zoheb Sarwar | Wissam El Charif | — | Yellow |
-| Credit Andorra | EMEA | $34K | Chinmoy Roy | Alvaro Del Pozo Gozalez | — | Yellow |
-| Seguros Santalucia | EMEA | $33K | Mikhail Bakhmetiev | Alvaro Del Pozo Gozalez | — | Green |
-| Conrad Electronic Se | EMEA | $326K | — | Kristian K. Haizmann | — | Green |
-| Coras Iompair Eireann | EMEA | $31K | Tunde Adenugba | - | — | Green |
-| Union of European Football Associations (UEFA) | EMEA | $312K | No | Daniela Boes | — | Green |
-| Abu Dhabi National Oil Company (ADNOC) | EMEA | $298K | — | Ahmed Khatib | — | Yellow |
-| Saretec France | EMEA | $29K | Zoheb Sarwar | Maxime Francois Alexis (Maxime) Thomas-Douix | — | Yellow |
-| UNIVERSITA' COMMERCIALE LUIGI BOCCONI | EMEA | $29K | Mathieu Dalbes | Vito Sodano | — | Yellow |
-| Gestamp | EMEA | $28K | Chinmoy Roy | Luis Ruiz Calleja | — | Red |
-| Polaris Bank Plc | EMEA | $27K | Tunde Adenugba | Kiran Premnath (Kiran) Ishwarlaal | — | Yellow |
-| LIBERTY GROUP LTD | EMEA | $267K | To be hired | Frans D. De Waal | — | Green |
-| Acciona, Sa | EMEA | $250K | — | Luis Ruiz Calleja | — | Yellow |
-| PRAEMIA REIM | EMEA | $25K | Tunde Adenugba | — | — | Green |
-| Telefonica  Germany Gmbh & Co. Ohg | EMEA | $236K | Jonathan Brox | Patrick Alexander (Patrick) Wuerl | — | Green |
-| PEPCO POLAND SP Z O O | EMEA | $22K | Mikhail Bakhmetiev | Robert Madej | — | Yellow |
-| RIGHTMOVE GROUP LTD | EMEA | $204K | — | Alice Victoria Lowe | — | Green |
-| Suez | EMEA | $190K | — | - | — | Green |
-| 4prime Sp Z O O | EMEA | $19K | Tunde Adenugba | - | — | Red |
-| Volkswagen Software Asset Management GmbH | EMEA | $1.8M | — | Marco Schopp | Adela Vacaru | Yellow |
-| Kahoot! As | EMEA | $179K | — | Robert Oxholm Oersnes | — | Green |
-| Deutsche Bank AG | EMEA | $1.8M | — | Christopher (Chris) Dixon | Patrick Bayle | Yellow |
-| PKO BP S.A. | EMEA | $172K | — | Robert Madej | — | Yellow |
-| IBM UK - International Business Machines | EMEA | $17K | Tunde Adenugba | Zachary James Corner (Zach) Rieker | — | Yellow |
-| Banco de Credito Social Cooperativo | EMEA | $161K | — | Alvaro Del Pozo Gozalez | — | Yellow |
-| Emis Group Plc | EMEA | $157K | — | Cameron M. Nicol | — | Green |
-| Bender Industries GmbH & Co. KG | EMEA | $15K | Jonathan Brox | Kristian K. Haizmann | — | Green |
-| MENORA MIVTACHIM INSURANCE LTD | EMEA | $15K | Chinmoy Roy | Gil Pery | — | Green |
-| Qatar Fertilizers | EMEA | $15K | Zoheb Sarwar | Wissam El Charif | — | Yellow |
-| Sacyr Vallehermoso, S.A. | EMEA | $15K | Vaishnavi Mishra | Luis Ruiz Calleja | — | Red |
-| Network International Llc | EMEA | $138K | — | Selin Gulen (Selin) de Groot | — | Green |
-| Dansk Erhverv | EMEA | $13K | Jonathan Brox | - | — | Yellow |
-| Generali Italia Spa | EMEA | $124K | — | — | — | Yellow |
-| Szerencsejatek  Zrt | EMEA | $118K | Jonathan Brox | — | — | Green |
-| SARA ASSICURAZIONI SPA ASSICURATRICE UFFICIALE DELL'AUTOMOBI | EMEA | $11K | Mikhail Bakhmetiev | — | — | Green |
-| Banco Bai Europa, S.a. | EMEA | $10K | Mathieu Dalbes | Pedro Jorge Pinho (Pedro) Francisco | — | Green |
-| Kapital Bank OJSC | EMEA | $101K | — | Maksim (Maxim) Prakhov | — | Green |
-| INSTITUTO DE EMPRESA, S.L.U. | EMEA | — | — | Javier A. Rodriguez | — | Yellow |
-| Continental Consulting Limited Company | JAPAC | $10K | Shijin Varghese | Yiting (Jeremy) Hsu | — | Green |
-| The Federal Bank Limited | JAPAC | $10K | Somesh Patil | Chetan Sharma | — | Green |
-| First Commercial Bank, Ltd. | JAPAC | $10K | Shijin Varghese | Lance Lin | — | Green |
-| Toyota Systems Co., Ltd. | JAPAC | $9K | Tetsushi Shimada | - | — | Yellow |
-| Bank of the Philippine Islands | JAPAC | $92K | Nikhil Ahuja | Kathleen Gay (Kat) Fonacier Garcia | — | Yellow |
-| IdealRoute Consulting Inc. | JAPAC | $9K | Tetsushi Shimada | - | — | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $90K | Tetsushi Shimada | - | — | Green |
-| Net One Systems (Reseller) | JAPAC | $89K | Tetsushi Shimada | - | — | Green |
-| JBCC HOLDINGS INC. | JAPAC | $87K | Tetsushi Shimada | - | — | Green |
-| ASAHI INTECC CO., LTD. | JAPAC | $9K | Tetsushi Shimada | - | — | Yellow |
-| Ascent Consulting Services Private Limited | JAPAC | $8K | Akash Singh | - | — | Green |
-| Ctrip Travel Information Technology Co., Ltd | JAPAC | $85K | Sophie Wang | Kai Wang | — | Yellow |
-| Lamda Computing Pvt Ltd | JAPAC | $8K | Akash Singh | - | — | Yellow |
-| Zhejiang Huanfu Technology Co., Ltd. | JAPAC | $83K | Sophie Wang | Kai Wang | — | Yellow |
-| TAKENAKA CORPORATION | JAPAC | $81K | — | - | Toshihiko Muroi | Green |
-| Melco Resorts & Entertainment Limited | JAPAC | $81K | Shijin Varghese | Kai Wang | — | Yellow |
-| Plgrim Co., Ltd. | JAPAC | $8K | Shijin Varghese | Raymond Park | — | Yellow |
-| Adani Enterprises Limited | JAPAC | $80K | — | Harsh k. Malkan | Risun Antony | Green |
-| Daikin Industries, Ltd. | JAPAC | $8K | Tetsushi Shimada | - | — | Green |
-| Net One Partners Co., Ltd. | JAPAC | $7K | — | - | Toshihiko Muroi | Green |
-| GovTech Tokyo General Inc. Association | JAPAC | $73K | Tetsushi Shimada | - | — | Green |
-| Australian Digital Health Agency | JAPAC | $727K | — | - | Dominic Caputo | Red |
-| STARHUB LTD. | JAPAC | $71K | — | Peak Yoke (Christina) Yap | Edward Sin | Yellow |
-| Daiwa Institute Of Research Ltd. | JAPAC | $71K | Tetsushi Shimada | - | — | Yellow |
-| Yamaha Motor Co., Ltd. | JAPAC | $70K | Tetsushi Shimada | - | — | Green |
-| Indian Oil Corporation Limited | JAPAC | $70K | Akash Singh | - | — | Yellow |
-| Lentra AI Pvt Ltd | JAPAC | $69K | Akash Singh | - | — | Green |
-| LOLC Holdings PLC | JAPAC | $67K | — | Biswas Sedai | Risun Antony | Green |
-| Mazda Motor Corporation | JAPAC | $62K | Tetsushi Shimada | - | — | Green |
-| Neeyamo | JAPAC | $62K | Somesh Patil | - | — | Yellow |
-| JBCC CORPORATION(Partner) | JAPAC | $61K | Tetsushi Shimada | - | — | Green |
-| Bank Of Queensland Limited | JAPAC | $588K | — | Jack Haynes | Dominic Caputo | Green |
-| Daiwa Institute Of Research Ltd. | JAPAC | $59K | Akira Uenoyama | - | — | Yellow |
-| Mitsubishi HC Capital Inc | JAPAC | $57K | Tetsushi Shimada | - | — | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $51K | Tetsushi Shimada | - | — | Green |
-| JR East Information Systems Company (JEIS) | JAPAC | $46K | Tetsushi Shimada | - | — | Green |
-| Bank Syariah Indonesia | JAPAC | $46K | — | Royston Kiang Hwee (Royston) Chng | Edward Sin | Red |
-| SUMITOMO LIFE INSURANCE COMPANY | JAPAC | $45K | Tetsushi Shimada | - | — | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $41K | Tetsushi Shimada | - | — | Green |
-| IDFC FIRST Bank Ltd | JAPAC | $396K | — | Chetan Sharma | Risun Antony | Red |
-| Techmatrix Corporation | JAPAC | $38K | — | - | Toshihiko Muroi | Green |
-| Jr West It Solutions Company | JAPAC | $37K | Tetsushi Shimada | - | — | Green |
-| Murata Manufacturing Co., Ltd. | JAPAC | $365K | Tetsushi Shimada | - | Toshihiko Muroi | Green |
-| Department for Education SA | JAPAC | $36K | Akanchha singh | - | — | Green |
-| EXL SERVICE.COM (INDIA) PRIVATE LIMITED | JAPAC | $349K | Shubham Aggarwal | Biswas K. Sedai | Risun Antony | Green |
-| AT HOME CO.,LTD. | JAPAC | $35K | Tetsushi Shimada | - | — | Green |
-| Malaysia Aviation Group Berhad | JAPAC | $330K | — | Su Yong Tay | Edward Sin | Green |
-| Verizon Australia Pty Limited | JAPAC | $31K | Akanchha Singh | Kevin Dinh | — | Green |
-| Credit Saison Co., Ltd. | JAPAC | $31K | Tetsushi Shimada | - | — | Green |
-| D2C Inc. | JAPAC | $31K | Tetsushi Shimada | - | — | Green |
-| CRISIL LIMITED | JAPAC | $304K | — | Chetan Sharma | Risun Antony | Red |
-| NEC Security, Ltd. | JAPAC | $30K | Tetsushi Shimada | - | — | Green |
-| Nec Corporation | JAPAC | $29K | Tetsushi Shimada | - | — | Green |
-| National Diet Library | JAPAC | $29K | Tetsushi Shimada | - | — | Green |
-| Ncs Pte. Ltd. | JAPAC | $29K | Nikhil Ahuja | Peak Yoke (Christina) Yap | — | Green |
-| Xtalpi, Inc. | JAPAC | $29K | Sophie Wang | Kai Wang | — | Yellow |
-| Vietnam Technological and Commercial Joint Stock Bank | JAPAC | $258K | — | Nattapat Kunawattanakorn | Edward Sin | Red |
-| PT Bank Central Asia Tbk | JAPAC | $258K | — | Renzy Richie | Edward Sin | Yellow |
-| NTT DOCOMO, INC. | JAPAC | $26K | Tetsushi Shimada | - | — | Green |
-| EDELWEISS FINANCIAL SERVICES LIMITED | JAPAC | $25K | Somesh Patil | Chetan Sharma | — | Green |
-| SHIFT SECURITY Inc.(Partner) | JAPAC | $25K | Tetsushi Shimada | - | — | Green |
-| Northern Arc Capital Limited | JAPAC | $24K | Akash Singh | - | — | Green |
-| Daido Life Insurance Company | JAPAC | $24K | Tetsushi Shimada | - | — | Green |
-| Gosoft (Thailand) Company Limited | JAPAC | $234K | — | Nattapat Kunawattanakorn | Edward Sin | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $23K | Tetsushi Shimada | - | — | Green |
-| Net One Systems | JAPAC | $23K | Tetsushi Shimada | - | — | Green |
-| Imagius Japan K.k. | JAPAC | $22K | Tetsushi Shimada | - | — | Green |
-| Flexera Software Pty Limited | JAPAC | $2.0M | — | - | Dominic Caputo | Red |
-| LG Electronics | JAPAC | $200K | — | Raymond Park | Edward Sin | Yellow |
-| Henderson Real Estate Agency Limited | JAPAC | $20K | Shijin Varghese | Kai Wang | — | Red |
-| BAJAJ FINANCE LIMITED | JAPAC | $195K | — | - | Risun Antony | Red |
-| Benefit One | JAPAC | $19K | Tetsushi Shimada | - | — | Yellow |
-| Tata Aia Life Insurance Company Limited | JAPAC | $186K | — | Saurabh Umeshchandra (Saurabh) Sah | Risun Antony | Red |
-| Mitsubishi Heavy Industries, Ltd. | JAPAC | $185K | — | - | Toshihiko Muroi | Green |
-| Lotte Data Communication | JAPAC | $18K | Shijin Varghese | Raymond Park | — | Yellow |
-| Calibo Private Limited | JAPAC | $184K | — | - | Risun Antony | Green |
-| Aditya Birla Management Corporation Ltd. | JAPAC | $18K | — | — | — | Green |
-| Mahindra And Mahindra Limited | JAPAC | $182K | — | - | Risun Antony | Red |
-| PASONA GROUP INC. | JAPAC | $18K | — | Kazuki Hirano | Toshihiko Muroi | Green |
-| PT Super Bank Indonesia | JAPAC | $173K | — | Renzy Richie | Edward Sin | Yellow |
-| Construction Industry Council | JAPAC | $17K | Shijin Varghese | Kai Wang | — | Red |
-| Yile Technology Co., Ltd. | JAPAC | $17K | Shijin Varghese | Lance Lin | — | Yellow |
-| Shoppers Stop Limited | JAPAC | $16K | Somesh Patil | - | — | Green |
-| GODFREY PHILIPS INDIA LIMITED | JAPAC | $16K | Akash Singh | - | — | Green |
-| Global Security Experts K.K. | JAPAC | $16K | Tetsushi Shimada | - | — | Green |
-| Apa Group (victoria) Pty Ltd | JAPAC | $162K | — | — | — | Yellow |
-| Flipkart Internet Private Limited | JAPAC | $159K | — | Meghana Kaul | Risun Antony | Yellow |
-| National Skill Development Corporation (NSDC) | JAPAC | $159K | — | - | Risun Antony | Green |
-| DTS CORPORATION | JAPAC | $16K | Tetsushi Shimada | - | — | Green |
-| Singapore Life Ltd | JAPAC | $153K | — | - | Edward Sin | Yellow |
-| KDDI Iret Inc. | JAPAC | $15K | Tetsushi Shimada | - | — | Green |
-| Hero Fincorp Limited | JAPAC | $15K | Somesh Patil | - | — | Green |
-| Mizuho Bank MGCP | JAPAC | $15K | Tetsushi Shimada | - | — | Green |
-| SONY LIFE INSURANCE CO.,LTD. | JAPAC | $15K | Tetsushi Shimada | - | — | Green |
-| Macnica Solutions Corp. | JAPAC | $15K | Tetsushi Shimada | - | — | Green |
-| Internet Initiative Japan Inc. | JAPAC | $15K | Tetsushi Shimada | - | — | Green |
-| Mavenir Systems Private Limited | JAPAC | $15K | Akash Singh | - | — | Yellow |
-| Daiichi Sankyo Company, Limited | JAPAC | $146K | — | - | Toshihiko Muroi | Green |
-| MACNICA,INC. | JAPAC | $15K | Tetsushi Shimada | - | — | Green |
-| Formosa Energy Management Corporation | JAPAC | $14K | Shijin Varghese | Lance Lin | — | Green |
-| JCB CO.,LTD. | JAPAC | $140K | — | - | Toshihiko Muroi | Green |
-| Mizuho Financial Group, Inc. | JAPAC | $14K | Tetsushi Shimada | - | — | Green |
-| THE ASHIKAGA BANK, LTD. | JAPAC | $14K | Tetsushi Shimada | - | — | Green |
-| NTT Security K.K. | JAPAC | $14K | Tetsushi Shimada | - | — | Green |
-| TIEN PHONG COMMERCIAL JOINT STOCK BANK | JAPAC | $13K | Nikhil Ahuja | - | — | Yellow |
-| Fukuoka Financial Group, Inc. | JAPAC | $127K | — | - | Toshihiko Muroi | Green |
-| NRI SecureTechnologies, Ltd. | JAPAC | $126K | Tetsushi Shimada | - | — | Green |
-| Aichi Prefecture | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| Akrivia Automation Private Limited | JAPAC | $12K | Somesh Patil | - | — | Yellow |
-| JBCC CORPORATION(Partner) | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| Net One Systems (Reseller) | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| Sony Financial Group Inc. | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| Tsubakimoto Chain Corporation | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| THE KIYO BANK, LTD., | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| Timee, Inc. | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| NIPPON LIFE INSURANCE COMPANY | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| ORIX BANK CORPORATION | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| JBCC CORPORATION(Partner) | JAPAC | $12K | Tetsushi Shimada | - | — | Green |
-| Sun Hung Kai Real Estate Agency Limited | JAPAC | $12K | Shijin Varghese | Kai Wang | — | Red |
-| NTT DOCOMO SOLUTIONS, Inc. | JAPAC | $11K | Tetsushi Shimada | - | — | Yellow |
-| YORK Holdings Co., Ltd. | JAPAC | $11K | Tetsushi Shimada | - | — | Green |
-| GLEN EIRA CITY COUNCIL | JAPAC | $11K | Akanchha singh | Kevin Dinh | — | Green |
-| NHK | JAPAC | $108K | Tetsushi Shimada | - | — | Yellow |
-| Japan Digital Design K.K. | JAPAC | $11K | Tetsushi Shimada | - | — | Green |
-| SCSK CORPORATION | JAPAC | $107K | Tetsushi Shimada | - | Toshihiko Muroi | Green |
-| HDFC  LIFE INSURANCE COMPANY LIMITED | JAPAC | $104K | Somesh Patil | Saurabh Umeshchandra (Saurabh) Sah | — | Yellow |
-| ACOM Co., Ltd. | JAPAC | $10K | Tetsushi Shimada | - | — | Green |
-| Cholamandalam Investment & Finance Company Limited | JAPAC | $10K | Somesh Patil | - | — | Green |
-| Mitsui Chemicals, Inc. | JAPAC | $102K | Tetsushi Shimada | - | — | Green |
-| Johnson Electric Industrial Manufactory, Limited | JAPAC | $10K | Shijin Varghese | Kai Wang | — | Yellow |
-| Sony Assurance Inc. | JAPAC | — | Tetsushi Shimada | - | — | Green |
-| Mahindra & Mahindra Financial Services Limited | JAPAC | — | — | - | Risun Antony | Green |
-| NEC Security, Ltd. (Partner) | JAPAC | — | — | - | Toshihiko Muroi | Green |
-| Hexaware Technologies Limited | JAPAC | — | Somesh Patil | Meghana Kaul | — | Yellow |
-| Global Payments Asia-pacific (hong Kong) Limited Taiwan Bran | JAPAC | — | Shijin Varghese | Lance Lin | — | Yellow |
-| Shinko Electric Industries Co., Ltd. | JAPAC | — | — | - | Toshihiko Muroi | Green |
-| Banco Industrial SA | LATAM | $16K | Ariel Nin | - | Luis Castro | Green |
+| XSUP-72501 | 9219-1568 Quebec Inc. | AMER | — | In Progress | XDR-XSIAM Server - Issues Management | Jira wont sync the issue with the first initi |
+| XSUP-69344 | Acuity | AMER | $39K | In Progress | Posture - CSPM Scanner | Issue Statuses Stuck in 'New' or 'Resolved' / |
+| XSUP-73013 | Acuity | AMER | $39K | New | AISPM - Issues and Findings | AI Posture Issue still in New Status even aft |
+| XSUP-73246 | Air Canada | AMER | $380K | In Progress | XDR-XSIAM Server - Reports and Dashboard | POV Issue – XSIAM Command Center Drilldown on |
+| XSUP-68349 | Airspan Networks, Inc. | AMER | $18K | Info Required | cwp_CLI | Cortexcli scans show the sha as the name inst |
+| XSUP-69346 | Allegiant Travel Company | AMER | $238K | Pending Confirmation | cwp_container_registry | Timeout: scan script timed out AWS Registry S |
+| XSUP-71989 | Ally Financial Inc. | AMER | $3.4M | Info Required | Posture - Upgrade Helper | Policies imported through upgrade helper are  |
+| XSUP-68494 | American Express Company | AMER | $1.9M | Info Required | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | Cloud Provider Asset Counts - MISMATCH |
+| XSUP-68701 | American Express Company | AMER | $1.9M | Info Required | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | Tenant performance degraded again after parti |
+| XSUP-70696 | American Express Company | AMER | $1.9M | Pending Customer | cwp_ADS | ADS in state ERROR after whitelisting SAs for |
+| XSUP-71330 | American Express Company | AMER | $1.9M | Under investigation | IDN - Cloud Identity Relationship tab | Relationship Tab in UI for Identities is Extr |
+| XSUP-71652 | American Express Company | AMER | $1.9M | Need Information | IDN - Cloud Identity Relationship tab | Missing last used values for SA |
+| XSUP-72148 | American Express Company | AMER | $1.9M | Info Required | cwp_ADS, Vulnerability - Experience | Incomplete/Incorrect Vulnerable Path Details |
+| XSUP-72152 | American Express Company | AMER | $1.9M | Under investigation | IDN - Cloud Identity Access Table | Identity > Access Table - Not loading |
+| XSUP-72242 | American Express Company | AMER | $1.9M | In Progress | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | Asset Classification Discrepancy with AWS Doc |
+| XSUP-72229 | American Express Company | AMER | $1.9M | Under investigation | DSPM - Cloud Scanning | DSPM Scanning Service Not Working |
+| XSUP-72407 | American Express Company | AMER | $1.9M | New | XDR-XSIAM Server - Reports and Dashboard | Data Security Command Center Dashboard Report |
+| XSUP-72386 | American Express Company | AMER | $1.9M | New | IDN - Cloud Identity Issues | False Positives : User with Administrative Pe |
+| XSUP-72493 | American Express Company | AMER | $1.9M | New | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | AWS ElastiCache Cluster reports node count in |
+| XSUP-72486 | American Express Company | AMER | $1.9M | Info Required | Vulnerability - Experience, XDR-XSIAM Server - Query Builder | XQL Query Does Not Return All Fields When Not |
+| XSUP-72481 | American Express Company | AMER | $1.9M | Under investigation | IDN - Cloud Identity Inventory | Inaccurate Admin Permission Attribute |
+| XSUP-72468 | American Express Company | AMER | $1.9M | Pending Confirmation | Posture - Attack Path Issue | False Positives : Attack Path Rules Relating  |
+| XSUP-72911 | American Express Company | AMER | $1.9M | Info Required | Vulnerability - Intelligence, Accuracy, and Metadata | “Unknown” Vulnerability Severity |
+| XSUP-73300 | American Express Company | AMER | $1.9M | Need Information | IDN - Cloud Identity Issues | [AMEX] Issue evidence is not loaded - missing |
+| XSUP-73328 | American Express Company | AMER | $1.9M | Pending Customer | cwp_KSPM | KSPPM – K8s Connector – Warning State & Insta |
+| XSUP-72249 | American Honda Motor Co., Inc | AMER | $230K | Pending Confirmation | XDR-XSIAM Server - Query Builder, XQL Queries | Seeing significant delays in PANW Firewalls a |
+| XSUP-57881 | Amway Corp. | AMER | $522K | In Progress | XDR-XSIAM Server - Asset Inventory | Dynamic Asset Groups are Not Possible for Org |
+| XSUP-73113 | Assured Guaranty | AMER | $67K | Under investigation | AppSec-Scanners-SCA | SCA scanner is not referencing the customer's |
+| XSUP-71448 | Axway Inc. | AMER | $14K | In Progress | Vulnerability - Experience | Build image scan not showing correct vulnerab |
+| XSUP-66205 | BCD Travel USA LLC | AMER | $144K | Pending Confirmation | cwp_UAI | Deleted Asset Groups persist in selection dro |
+| XSUP-71454 | BJ's Wholesale Club, Inc. | AMER | $222K | Pending Confirmation | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | Customer unable to view any S3 buckets |
+| XSUP-69189 | Bell Canada | AMER | $164K | Pending Confirmation | cwp_Data Collectors | JFrog Artifactory Data Source shows Error – R |
+| XSUP-72606 | Bell Canada | AMER | $164K | Awaiting Deployment | AppSec-Scanners-IDEPlugins | IDE Plugin SCA Results Issue |
+| XSUP-68185 | CDK Global, Inc. | AMER | $539K | Under review | AppSec-Scanners-SCA | Unable to integrate JFrog (on-prem) |
+| XSUP-68974 | CDK Global, Inc. | AMER | $539K | Awaiting Deployment | AppSec-ASPM-Application | Sorting or filtering the “Business Owner” col |
+| XSUP-69213 | CDK Global, Inc. | AMER | $539K | In Progress | cwp_Vulnerability - Cortex Network Scanner | Low number of vulnerabilities reported for li |
+| XSUP-69986 | CDK Global, Inc. | AMER | $539K | Info Required | cwp_Vulnerability - Cortex Network Scanner | [CDK]Exposure Management scans of the same ho |
+| XSUP-70065 | CDK Global, Inc. | AMER | $539K | In Progress | Vulnerability - Cortex Network Scanner | [CDK] Exposure Management network scan result |
+| XSUP-70987 | CDK Global, Inc. | AMER | $539K | Need Information | AppSec-Scanners-SCA | IDE issues related to scan findings and scan  |
+| XSUP-71533 | CDK Global, Inc. | AMER | $539K | In Progress | Posture - Compliance | Cortex Cloud Security Rules cannot be filtere |
+| XSUP-71683 | CDK Global, Inc. | AMER | $539K | In Progress | Posture - Compliance | AWS OOTB CIS compliance standard is assessing |
+| XSUP-72686 | CDK Global, Inc. | AMER | $539K | In Development | AppSec-DCO-Flow, AppSec-Scanners-ScanOps | CI Scans "Scan Health" status |
+| XSUP-72802 | CDK Global, Inc. | AMER | $539K | In Progress | Vulnerability - Cortex Network Scanner | Network Scanner connection left open after sc |
+| XSUP-72805 | CDK Global, Inc. | AMER | $539K | To Do | AppSec-Scanners-ScanOps | Mono Repo fail to produce scan results |
+| XSUP-72892 | CDK Global, Inc. | AMER | $539K | Need Information | AppSec-Scanners-SCA | Cortex CLI scans for Java repos are reporting |
+| XSUP-73089 | CDK Global, Inc. | AMER | $539K | New | Posture - Rules | False Positive Issues for Azure Network Secur |
+| XSUP-73190 | CDK Global, Inc. | AMER | $539K | New | Posture - Rules | False Positive Issues for CloudSec Rule "Azur |
+| XSUP-73345 | CDK Global, Inc. | AMER | $539K | New | Posture - CSPM Scanner, Posture - Rules Query Builder | Request to Enable Cloud Posture Security (als |
+| XSUP-73361 | CDK Global, Inc. | AMER | $539K | Under investigation | AppSec-Scanners-SCA | 39 AppSec CVEs present in Prisma Cloud but no |
+| XSUP-73196 | CIBT, INC. | AMER | $14K | Info Required | API Sec - API Security | API Visibility Issue with AWS API Gateway Int |
+| XSUP-71585 | DXC Technology Company | AMER | $152K | In Progress | cwp_Core- Infrastructure | Customer suspects cortex licensing discrepanc |
+| XSUP-72815 | DaVita Inc. | AMER | $80K | New | Vulnerability - Intelligence, Accuracy, and Metadata | Asset contains multiple vulnerability records |
+| XSUP-73348 | DaVita Inc. | AMER | $80K | In Progress | Vulnerability - Intelligence, Accuracy, and Metadata | Blank Asset Name displayed for multiple asset |
+| XSUP-70663 | Dell Inc. (Sell-to) | AMER | $6.6M | In Progress | XDR-XSIAM Server - Issues Management | Auto-resolved issues do not have enough detai |
+| XSUP-71487 | Dell Inc. (Sell-to) | AMER | $6.6M | Info Required | XDR-XSIAM Server - Agent Policy Management | Unable to bulk attach Cloud Workload Rules to |
+| XSUP-63060 | Dish Network Corporation | AMER | — | Pending Confirmation | XDR-XSIAM Server - Cloud Security Agent | Cloud Security Agent data not surfacing in Po |
+| XSUP-68720 | Dish Network Corporation | AMER | — | Awaiting Deployment | AppSec-DCO-DXCore | PR/MR Scans Exceeding Expected Duration Due t |
+| XSUP-69410 | Dish Network Corporation | AMER | — | In Progress | Vulnerability - Experience | When navigating to Posture Management > Vulne |
+| XSUP-70591 | Dish Network Corporation | AMER | — | Pending Customer | cwp_CLI | CLI scans failing with "500 Internal Server E |
+| XSUP-72885 | Dish Network Corporation | AMER | — | Pending Confirmation | cwp_container_registry | JFrog Integration shows "The workload either  |
+| XSUP-73184 | Dish Network Corporation | AMER | — | In Progress | Vulnerability - Cortex Network Scanner | Network Scan CSV export not returning data // |
+| XSUP-65154 | Early Warning Services, LLC | AMER | $766K | In Progress | cwp_CLI | Unable to scan containers and images using Co |
+| XSUP-71757 | Early Warning Services, LLC | AMER | $766K | Info Required | cwp_container_registry | Unable to scan self-hosted Jfrog registry wit |
+| XSUP-71992 | Early Warning Services, LLC | AMER | $766K | Pending Confirmation | XDR-XSIAM Server - Platform - Cloud - Onboarding | Multiple errors on AWS org integration |
+| XSUP-72392 | Early Warning Services, LLC | AMER | $766K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Audit logs are giving 403 error after onboard |
+| XSUP-67920 | Eisai | AMER | $40K | Under review | AppSec-Scanners-IAC | [Cortex Cloud] GitHub PR scan capturing secre |
+| XSUP-71704 | Eisai | AMER | $40K | Need Information | AppSec-DCO-DataStream | Onboarding AWS CodeCommit/CodeBuild into Cort |
+| XSUP-72005 | FIS Global | AMER | $1.8M | Pending Confirmation | Posture - CSPM Scanner | FIS Custom Baseline Policy Skipping Active Ru |
+| XSUP-73413 | FIS Global | AMER | $1.8M | In Progress | XDR-XSIAM Server - Platform - Cloud - Onboarding | Is there a Method to Onboard Entra ID without |
+| XSUP-72323 | Factory Mutual Insurance Co | AMER | $245K | Awaiting Deployment | AppSec-PostOps-Control | 400 PR comments seen within PR Scan// Factory |
+| XSUP-70345 | Fed-Jasmine5 | AMER | $421K | Info Required | XDR-XSIAM Server - Prisma Pairing | Enable Upgrade Helper |
+| XSUP-70130 | Fidelity National Financial, Inc. | AMER | $1.6M | Pending Confirmation | cwp_KSPM | Not able to "request a scan" from the cluster |
+| XSUP-70960 | Fidelity National Financial, Inc. | AMER | $1.6M | Awaiting Deployment | AppSec-PostOps-Control | Unexpected IaC and SCA finding comments for P |
+| XSUP-71037 | Fontainebleau Las Vegas | AMER | $54K | Info Required | cwp_container_registry | AWS: "Failed to retrieve platform" Registry S |
+| XSUP-72888 | Fontainebleau Las Vegas | AMER | $54K | New | Posture - Rules | Issues with the Default Attack Path Rules |
+| XSUP-70496 | Franklin Templeton Services, LLC | AMER | $212K | In Progress | Posture - CSPM Issue | Default rule "Azure Network Security Group al |
+| XSUP-65428 | Freddie Mac | AMER | $3.0M | In Progress | XDR-XSIAM Server - On-Prem Broker | Broker VM unable to scan JFrog Artificatory |
+| XSUP-69131 | Freddie Mac | AMER | $3.0M | Awaiting Deployment | AppSec-Scanners-IAC | Findings are not being generated for an OOTB  |
+| XSUP-69244 | Freddie Mac | AMER | $3.0M | Awaiting Deployment | AppSec-PostOps-Control | Unable to see the update in Management Audit  |
+| XSUP-71327 | Freddie Mac | AMER | $3.0M | Info Required | cwp_Serverless | Agentless scanning of serverless functions st |
+| XSUP-73198 | Georgia Department of Labor | AMER | $83K | Pending Customer | XDR-XSIAM Server - Platform - Cloud - Onboarding | AWS: Unable to create AWS Outpost // Georgia  |
+| XSUP-71010 | HCL Americas | AMER | $172K | In Progress | XDR-XSIAM Server - Asset Inventory | Discrepancy in Kubernetes cluster, Cloud VMs  |
+| XSUP-71233 | HCL Americas | AMER | $172K | Info Required | cwp_UAI | Sustained Platform Degradation & API Timeouts |
+| XSUP-71300 | HCL Americas | AMER | $172K | Pending Customer | cwp_Agentless-MalwareDetector | All Malware findings are not getting converte |
+| XSUP-72118 | HCL Americas | AMER | $172K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Azure Agentless Disk Scanning is erroring out |
+| XSUP-72185 | HCL Americas | AMER | $172K | Pending Customer | cwp_container_registry | Repositories are reported as scanned, no vuln |
+| XSUP-72241 | HCL Americas | AMER | $172K | Info Required | cwp_container_registry | AWS Registry Scanning continues to report err |
+| XSUP-72234 | HCL Americas | AMER | $172K | Info Required | cwp_container_registry | GCP Registry Scanning continues to report err |
+| XSUP-72607 | HCL Americas | AMER | $172K | Info Required | cwp_KSPM | KSPM host-scanner scanning customer's Persist |
+| XSUP-72798 | HCL Americas | AMER | $172K | Awaiting Deployment | AppSec-PostOps-Control | Performance issues found with Issues pages |
+| XSUP-73388 | HCL Americas | AMER | $172K | Need Information | AppSec-Scanners-SCA | GitHub Enterprise (On-Prem), scan results not |
+| XSUP-69902 | HealthPartners, Inc. | AMER | $297K | Awaiting Deployment | AppSec-DCO-Flow | Severe Latency experienced in the AppSec Modu |
+| XSUP-70906 | Home Trust Company | AMER | $99K | In Progress | Posture - CSPM Issue | Compliance assessment results are showing "No |
+| XSUP-71151 | Honeywell International Inc. | AMER | $179K | Pending Confirmation | cwp_CLI | CLI scans failing with "500 Internal Server E |
+| XSUP-73423 | ISO New England Inc. | AMER | $124K | Pending Confirmation | XDR-XSIAM Server - Gateway and Login | AppProxy error 4030105 when logging in |
+| XSUP-72435 | Informatica LLC (affiliate of Salesforce Inc.) | AMER | $2.8M | In Progress | Vulnerability - Intelligence, Accuracy, and Metadata | discrepancy in the CVSS score in the vulnerab |
+| XSUP-73272 | International Flavors & Fragrances Inc. | AMER | $158K | New | Posture - CSPM Issue | Cortex Cloud Posture Issues still not resolvi |
+| XSUP-73273 | International Flavors & Fragrances Inc. | AMER | $158K | In Progress | Posture - CSPM Issue | False Negative Issue ID 13816184 |
+| XSUP-72774 | Ivanti | AMER | $1.1M | In Progress | Posture - Rules | Custom rule for EC2 Security Groups are missi |
+| XSUP-68976 | Loblaws Inc. | AMER | — | Need Information | DSPM - Cloud Scanning | [DSPM] Private Endpoint disrupting applicatio |
+| XSUP-71328 | Loblaws Inc. | AMER | — | In Progress | cwp_ADS | ADS, failed to get a snapshot client for asse |
+| XSUP-71846 | Loblaws Inc. | AMER | — | In Progress | cwp_ADS | ADS Unsupported and Errors in GCP // Loblaws  |
+| XSUP-71997 | Loblaws Inc. | AMER | — | Pending Confirmation | cwp_ADS | ADS in Pending state, 3 out of 127 Assets sca |
+| XSUP-72074 | Loblaws Inc. | AMER | — | Need Information | DSPM - Cloud Scanning | OCI Compartment DSPM Error |
+| XSUP-72096 | Loblaws Inc. | AMER | — | In Progress | cwp_ADS | ADS targeting Region instead of Resource Grou |
+| XSUP-72698 | Loblaws Inc. | AMER | — | Pending Customer | cwp_KSPM | Kuberneters Connector not being removed from  |
+| XSUP-73092 | Loblaws Inc. | AMER | — | Pending Customer | Vulnerability - Experience | Vulnerabilities are not showing up in uvm_fin |
+| XSUP-73199 | Loblaws Inc. | AMER | — | Pending Confirmation | cwp_KSPM | Request scan button greyed out for all cluste |
+| XSUP-73275 | Loblaws Inc. | AMER | — | New | cwp_CLI | CortexCLI failing with 500 Internal Server Er |
+| XSUP-73343 | Loblaws Inc. | AMER | — | New | Vulnerability - Experience | Duplicate vulnerabilities for container runti |
+| XSUP-70479 | MRC Global Inc. | AMER | $106K | Info Required | XDR-XSIAM Server - Asset Inventory | Azure Tenant: Incomplete Asset Inventory |
+| XSUP-71771 | Mayo Foundation For Medical Education And Research | AMER | $765K | Pending Confirmation | XDR-XSIAM Server - Asset Inventory | Storage Bucket does not show in the Asset Inv |
+| XSUP-72411 | Mayo Foundation For Medical Education And Research | AMER | $765K | Need Information | DSPM - Cloud Scanning | MAYO: SQL Delete Operation happening every da |
+| XSUP-73200 | Mayo Foundation For Medical Education And Research | AMER | $765K | Under investigation | DSPM - Dashboard and UI | Incorrect Info on Data Security Dashboard/ Mi |
+| XSUP-73354 | Medidata US - FedRAMP | AMER | $1.1M | New | cwp_ADS | AWS - ADS Scanner is moving very slow with so |
+| XSUP-71034 | MetLife, Inc. | AMER | $2.2M | Pending Confirmation | cwp_KSPM | K8-Azure Connector not showing vulnerability  |
+| XSUP-71261 | MetLife, Inc. | AMER | $2.2M | To Do | DSPM - Cloud Scanning | DSPM Azure Storage Account scans failing with |
+| XSUP-71434 | MetLife, Inc. | AMER | $2.2M | In Progress | DSPM - Cloud Scanning | Hundreds of Private Endpoints Created in Outp |
+| XSUP-73124 | MetLife, Inc. | AMER | $2.2M | New | DSPM - Issues and Findings | Shadow backup related issues generated with n |
+| XSUP-73269 | MetLife, Inc. | AMER | $2.2M | Under investigation | AppSec-Scanners-IAC | HCP Terraform: Long scan times impacting 'Pro |
+| XSUP-71673 | Mimecast North America, Inc. | AMER | $245K | Pending Confirmation | cwp_ADS | GCP: ADS not working for the customer // Mime |
+| XSUP-72165 | Mimecast North America, Inc. | AMER | $245K | Info Required | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | Customer's discovery engine is not working as |
+| XSUP-72231 | Mimecast North America, Inc. | AMER | $245K | In Progress | cwp_UAI | AWS and GCP Compute asset inventory in Cortex |
+| XSUP-73187 | Mimecast North America, Inc. | AMER | $245K | Pending Confirmation | cwp_ADS | AWS ADS: Failed to find onboarding region for |
+| XSUP-72661 | Movable Ink | AMER | $156K | Pending Confirmation | Posture - Inventory | Daily Ingestion Quota Exceeded Warning Causin |
+| XSUP-72069 | Nationwide Corporation | AMER | — | Pending Confirmation | Agent - CPA | Cortex XDR Agent: OpenSSL <= 3.5.0 Vulnerabil |
+| XSUP-73001 | Nationwide Corporation | AMER | — | New | AES - Identity & access | Instance Admin unable to grant missing permis |
+| XSUP-72498 | New York City Fire Department (FDNY) | AMER | $144K | Under investigation | AppSec-Scanners-SCA | False vulnerabilities are being reported with |
+| XSUP-73237 | New York City Fire Department (FDNY) | AMER | $144K | Need Information | AppSec-Scanners-SCA | Cortex IDE plugin does not return vulnerabili |
+| XSUP-70798 | Novant Health | AMER | $321K | In Progress | Vulnerability - Experience | Customer hits the Vulnerability Issue Creatio |
+| XSUP-71179 | Novant Health | AMER | $321K | Pending Confirmation | XDR-XSIAM Server - Reports and Dashboard | Timeout errors on tenant Novant Prisma Cortex |
+| XSUP-71824 | Novant Health | AMER | $321K | Pending Customer | cwp_CLI | Cortexcli scan fails when scanning big images |
+| XSUP-72097 | Novant Health | AMER | $321K | In Progress | cwp_Compliance | False positives on CIS AKS Compliance checks |
+| XSUP-72266 | Novant Health | AMER | $321K | In Progress | cwp_Compliance | Compliance Assessment returns 'Not Assessed'  |
+| XSUP-72267 | Novant Health | AMER | $321K | In Progress | cwp_Compliance | Compliance Assessment returns findings for no |
+| XSUP-72269 | Novant Health | AMER | $321K | Pending Confirmation | cwp_Compliance | Compliance Assessment only evaluates a subset |
+| XSUP-72433 | Novant Health | AMER | $321K | In Progress | cwp_container_registry | Cloud Workload Policy - Secrets Policy - Not  |
+| XSUP-69073 | Oscar Management Corporation | AMER | — | Awaiting Deployment | AppSec-DCO-DataStream | CortexCLI scans are still showing in UI, even |
+| XSUP-69019 | Palo Alto Networks | AMER | — | Pending Confirmation | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | Poor global UI performance reported by ENGIE |
+| XSUP-72617 | Payworks Inc. | AMER | $48K | Need Information | DSPM - SaaS/DBaaS Scanning | Microsoft 365 Posture integration in Cortex C |
+| XSUP-72602 | Personal Capital Corporation | AMER | $189K | Pending Customer | cwp_KSPM | KSPM Helm release in a pending state // Perso |
+| XSUP-68033 | Radisys | AMER | $15K | In Progress | cwp_CLI | Radisys - CortexCLI Image Scanning Failures |
+| XSUP-66657 | RealPage, Inc. | AMER | $160K | In Progress | cwp_container_registry | Registry scan for AWS - "Timeout: scan script |
+| XSUP-66978 | RealPage, Inc. | AMER | $160K | In Progress | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | GCP: Discovery engine errors with GCP onboard |
+| XSUP-67402 | RealPage, Inc. | AMER | $160K | Pending Confirmation | cwp_container_registry | GCP: Registry error: Failed to retrieve platf |
+| XSUP-72700 | Salesforce.Com, Inc. | AMER | $14.5M | Pending Customer | Posture - Terraform Provider | [Dev ETA: ?] Terraform Provider:  Cannot disa |
+| XSUP-72900 | Salesforce.Com, Inc. | AMER | $14.5M | In Progress | XDR-XSIAM Server - Platform - Cloud - Onboarding | API Endpoint cloud_onboarding/delete_instance |
+| XSUP-73008 | Salesforce.Com, Inc. | AMER | $14.5M | New | XDR-XSIAM Server - Platform - Cloud - Onboarding | Terraform provider: additional _ capabilities |
+| XSUP-73238 | Salesforce.Com, Inc. | AMER | $14.5M | In Progress | Posture - CSPM Issue | Inaccurate API responses on Cortex APIs. // S |
+| XSUP-64249 | Samsung SDS America, Inc. | AMER | $373K | Info Required | cwp_CLI | Cortex CLI when scanning images with an OS di |
+| XSUP-70400 | Samsung SDS America, Inc. | AMER | $373K | Pending Confirmation | cwp_CLI | After the upgrade to 2.1, cortexcli scan resu |
+| XSUP-71059 | Samsung SDS America, Inc. | AMER | $373K | Need Information | cwp_CLI | CortexCLI Scans hang indefinitely with no err |
+| XSUP-67738 | Schlumberger Technology Corporation | AMER | — | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Audit Log Diagnostic Settings Not Applied to  |
+| XSUP-71047 | Schlumberger Technology Corporation | AMER | — | Need Information | AppSec-DCO-Flow | Code Security periodic scans cannot be disabl |
+| XSUP-72683 | Schlumberger Technology Corporation | AMER | — | Info Required | cwp_KSPM | No data is showing in Kubernetes Security mod |
+| XSUP-72932 | Schlumberger Technology Corporation | AMER | — | Need Information | AppSec-PostOps-Control | Mismatch in the number of issue for a reposit |
+| XSUP-72933 | Schlumberger Technology Corporation | AMER | — | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Customer requests the need for additional AWS |
+| XSUP-72937 | Schlumberger Technology Corporation | AMER | — | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Customer requests detailed information on the |
+| XSUP-72938 | Schlumberger Technology Corporation | AMER | — | In Progress | XDR-XSIAM Server - Dataset Management | Duplicate AWS Events being ingested in 'amazo |
+| XSUP-72716 | Schlumberger Technology Corporation | AMER | — | Need Information | AppSec-DCO-Flow | AppSec scan findings API returns Internal Ser |
+| XSUP-65766 | Semiconductor Component Industries, LLC | AMER | $543K | Info Required | cwp_container_registry | Getting 'unexpected internal error' on cortex |
+| XSUP-68381 | Semiconductor Component Industries, LLC | AMER | $543K | Need Information | IDN - Cloud Identity Issues | Cortex Cloud roles are being flagged by Corte |
+| XSUP-71349 | Semiconductor Component Industries, LLC | AMER | $543K | Info Required | Posture - CSPM Issue | Stale alert for Issue "OCI VCN Security list  |
+| XSUP-68036 | Shi International Corp. | AMER | $211K | Pending Confirmation | cwp_CLI | CortexCLI is not detecting secret |
+| XSUP-71840 | Shi International Corp. | AMER | $211K | In Progress | Vulnerability - Experience | Vulnerability Dashboard filters are not worki |
+| XSUP-72999 | St. Elizabeth Medical Center | AMER | $40K | Pending Customer | cwp_Serverless | Serverless Scan back end trigger // St. Eliza |
+| XSUP-72836 | Telus International | AMER | $317K | Pending Confirmation | Agent - WIN LL | XDR is blocking the launch of Epic Games |
+| XSUP-66629 | Teradata Corporation | AMER | $486K | Pending Confirmation | XDR-XSIAM Server - Platform - Cloud - Onboarding | AWS cloud onboarding error "Oops... Something |
+| XSUP-71668 | The Charles Schwab Corporation | AMER | $616K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Customer Requesting Update FF & Hotfix |
+| XSUP-70670 | The Lubrizol Corporation | AMER | $23K | In Progress | AppSec-DCO-DataStream | Post XSIAM tenant upgrade - Azure DevOps conn |
+| XSUP-72889 | Toromont Industries Ltd | AMER | — | In Progress | Vulnerability - Experience | Resolved Vulnerability Issue showing in Vulne |
+| XSUP-71925 | TriNet USA Inc. | AMER | $396K | Pending Confirmation | AgentiX - Server - Agents and Actions | Agentic Assistant not consistent with custom  |
+| XSUP-72168 | TriNet USA Inc. | AMER | $396K | Pending Confirmation | XDR-XSIAM Server - AgentiX | Agentic Assistant something went wrong error |
+| XSUP-71748 | Tyson Foods, Inc. | AMER | $1.1M | Pending Confirmation | ASM - Application | ASM is showing wrong version for Apache HTTP  |
+| XSUP-73093 | Under Armour, Inc. | AMER | $192K | Pending Confirmation | XDR-XSIAM Server - Licensing | Registry Scans are disabled, but license work |
+| XSUP-71665 | UnitedHealth Group | AMER | $9.4M | Pending Customer | Posture - Rules | With Terraform Script, Unable to Recreate a D |
+| XSUP-72769 | UnitedHealth Group | AMER | $9.4M | New | Posture - Policy | Compliance-standard "eligibility" delay break |
+| XSUP-73009 | UnitedHealth Group | AMER | $9.4M | In Progress | Posture - Rules | Terraform Creates the same CloudSec Rule 3 ti |
+| XSUP-72705 | University of Chicago | AMER | $19K | Monitoring | XDR-XSIAM Server - Query Builder, XQL Queries | Beginning today we are seeing errors when con |
+| XSUP-68434 | Vanderbilt Health | AMER | $755K | In Progress | Posture - Vulnerability - Experience | Vulnerable Assets page shows different number |
+| XSUP-73094 | Vanderbilt Health | AMER | $755K | New | DSPM - Classification | Customer stated that they and other users hav |
+| XSUP-72317 | Versana | AMER | $18K | In Progress | cwp_KSPM | Kubernetes Connector - Admission and Monitori |
+| XSUP-71421 | Washington Health Benefit Exchange | AMER | $24K | Info Required | XDR-XSIAM Server - Roles and Permissions | User assigned to a dynamic group cannot see a |
+| XSUP-72908 | Wheels, Inc. | AMER | $46K | In Progress | XDR-XSIAM Server - Platform - Cloud - Onboarding | Permission Warning Persisting even after runn |
+| XSUP-72529 | Zoom Video Communications, Inc. | AMER | $5.3M | Pending Confirmation | Posture - Upgrade Helper | Upgrade Helper fails on Roles and User Groups |
+| XSUP-72894 | Zoom Video Communications, Inc. | AMER | $5.3M | In Progress | XDR-XSIAM Server - Graphic and Display | Slowness across customer's Cortex tenant |
+| XSUP-73208 | Zumiez Inc. | AMER | $79K | Need Information | DSPM - SaaS/DBaaS Scanning | M365 Posture Integration Missing from Custome |
+| XSUP-68047 | Zurich Financial Group AG | AMER | $1.6M | In Progress | XDR-XSIAM Server - Platform - Cloud - Onboarding | (Zurich) Issues with updating exisiting Azure |
+| XSUP-69299 | Zurich Financial Group AG | AMER | $1.6M | New | XDR-XSIAM Server - Licensing | Asset Discovery Discrepancy |
+| XSUP-70340 | Zurich Financial Group AG | AMER | $1.6M | Pending Confirmation | XDR-XSIAM Server - Asset Inventory | Backend block preventing deletion of Asset Gr |
+| XSUP-70999 | Zurich Financial Group AG | AMER | $1.6M | Info Required | cwp_container_registry | Global AWS Registry Scan Failure: "Failed to  |
+| XSUP-72948 | Zurich Financial Group AG | AMER | $1.6M | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | GCP Agentless VM Image Scan Fails: Missing co |
+| XSUP-73091 | Zurich Financial Group AG | AMER | $1.6M | In Progress | cwp_KSPM | Kubernetes Connector upgrade from v1.4.64 res |
+| XSUP-72270 | iconectiv | AMER | $28K | Pending Confirmation | cwp_container_registry | Errors in AWS Registry Scanning - failed to s |
+| XSUP-72818 | iconectiv | AMER | $28K | Info Required | cwp_Serverless | AWS: 404 resource not found in Serverless sca |
+| XSUP-72674 | Aumovio | EMEA | $76K | In Progress | cwp_KSPM | [KSPM/Konnector] cortex-monitoring OTel colle |
+| XSUP-68445 | Barcelo Hotels Spain Sl | EMEA | $91K | To Do | AppSec-Scanners-SCA | The pipeline scan finishes but indicates no v |
+| XSUP-72106 | Baring Investment Services Limited | EMEA | $366K | Awaiting Deployment | AppSec-PostOps-FindingsAndPersist | Cortex XDR 5.1 - Filter options not working a |
+| XSUP-72645 | Cintra Infraestructuras Espana S.l | EMEA | $43K | In Progress | Posture - Inventory | Error tracking Posture Workloads in Azure Dat |
+| XSUP-72000 | DXC Technology - System Integrator (EMEA) | EMEA | $155K | Awaiting Deployment | AppSec-Scanners-SCA | SCA scan show 0 findings // DXC |
+| XSUP-68512 | Elis | EMEA | $29K | Need Information | DSPM - Cloud Scanning | DSPM Scan - Azure SQL scan loop generating or |
+| XSUP-72575 | Emis Group Plc | EMEA | $157K | In Progress | Posture - Terraform Provider | Unexpected duplication when onboarding AWS Ma |
+| XSUP-62172 | Engie | EMEA | $1.6M | Pending Confirmation | cwp_Serverless | Serverless scan fails with "The workload exce |
+| XSUP-69951 | Engie | EMEA | $1.6M | Pending Confirmation | cwp_Vulnerability - Intelligence, Accuracy, and Metadata | Incorrect CVRS Scoring |
+| XSUP-69494 | Engie | EMEA | $1.6M | Awaiting Deployment | AppSec-PostOps-Control | Slow UI performance load AppSec Issues |
+| XSUP-72654 | Engie | EMEA | $1.6M | In Progress | XDR-XSIAM Server - Roles and Permissions | Users/Groups management screen latency |
+| XSUP-72734 | Engie | EMEA | $1.6M | In Progress | cwp_container_registry | Vulnerability information is missing from reg |
+| XSUP-72650 | Engie | EMEA | $1.6M | New | Posture - Content-Compliance | CI/CD pipeline asset misclassification |
+| XSUP-72859 | Engie | EMEA | $1.6M | Pending Confirmation | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | GCP KMS keyrings missing from inventory // En |
+| XSUP-73180 | Engie | EMEA | $1.6M | In Progress | cwp_container_registry | AWS Registry scanning failing with "Failed to |
+| XSUP-73449 | Engie | EMEA | $1.6M | New | XDR-XSIAM Server - Asset Inventory | Asset inventory sub tabs loop indefinitely fo |
+| XSUP-71420 | Groupe Clarins | EMEA | $16K | Pending Confirmation | cwp_ADS | ADS Error 400 ConflictingUserInput Blocks dis |
+| XSUP-72375 | Groupe Clarins | EMEA | $16K | Pending Customer | XDR-XSIAM Server - Platform - Cloud - Onboarding | http status code 400, message: invalid Onboar |
+| XSUP-62578 | Imerys SA | EMEA | $83K | Pending Confirmation | cwp_Agentles-Scanner, cwp_Data Collectors | Attack Path engine flagging Cortex XDR quaran |
+| XSUP-69000 | Imerys SA | EMEA | $83K | Awaiting Deployment | AppSec-PostOps-Control | CLONE - Latency observed in the Application S |
+| XSUP-73458 | Inspiraenterprise | EMEA | $2K | New | Vulnerability - Intelligence, Accuracy, and Metadata | Inconsistent Severity Data for CVE-2026-46331 |
+| XSUP-72534 | Maire Tecnimont Spa | EMEA | $50K | To Do | AISPM - Dashboard and UI | AI models not displaying on AI dashboard // M |
+| XSUP-73024 | Mercadona | EMEA | $244K | In Progress | ASM - Collections | Persistent global error banner "We are experi |
+| XSUP-68578 | Ministry of Health | EMEA | $2K | Pending Confirmation | Posture - AWS Config Ingestion | Broken link in Notifications page for AWS per |
+| XSUP-72651 | National Cyber Security Center (NCSC) | EMEA | $228K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Cloud Log Ingestion Doesn't Work Due AWS Regi |
+| XSUP-73077 | Novo Nordisk A/S | EMEA | $1.1M | Pending Confirmation | XDR-XSIAM Server - Platform - Cloud - Onboarding | Onboarding an Azure tenant using the manual " |
+| XSUP-71799 | The Ardonagh Group Limited | EMEA | $18K | In Progress | XDR-XSIAM Server - ITDR | Admin policies show active attachment count b |
+| XSUP-73245 | Amp Limited | JAPAC | $408K | Pending Confirmation | Research - Security Event Analysis | BTP alert - ioc.solarwinds_sunburst |
+| XSUP-70635 | Bank Of Queensland Limited | JAPAC | $588K | In Progress | ASM -  Security Research | Vulnerabilities detected on ams-test.virginmo |
+| XSUP-71080 | Bank Of Queensland Limited | JAPAC | $588K | Pending Confirmation | Vulnerability - Experience | Asset names are no longer appearing in vulner |
+| XSUP-66321 | C.J.Express Group Co.,ltd | JAPAC | — | Pending Confirmation | cwp_container_registry | Registry scan is done by cloud scanner, recei |
+| XSUP-70413 | CJ Logistics | JAPAC | $44K | Info Required | cwp_ADS | EC2 instances remaining permanently unscanned |
+| XSUP-72924 | Canara HSBC OBC Life Insurance Company Ltd | JAPAC | $33K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Cloud Instance filled with 'The security toke |
+| XSUP-72864 | Computer Age Management Services Private Limited | JAPAC | $12K | Info Required | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | GSU model discovery is still getting performe |
+| XSUP-73442 | Computer Age Management Services Private Limited | JAPAC | $12K | New | cwp_VA | GCP VM instances with Cortex Agentless Scanne |
+| XSUP-67923 | Daikin Industries, Ltd. | JAPAC | $8K | In Progress | Posture - Rules Query Builder | The custom security rule Rule Logic - Advance |
+| XSUP-68317 | Department of Employment and Workplace Relations | JAPAC | $194K | In Progress | cwp_Serverless | Serverless Scanning failed for Azure Function |
+| XSUP-72939 | Department of Employment and Workplace Relations | JAPAC | $194K | Pending Confirmation | XDR-XSIAM Server - Roles and Permissions | SSO authentication issue occurs when Cortex C |
+| XSUP-71129 | GX Bank Berhad | JAPAC | $160K | Pending Confirmation | cwp_UAI | No asset available for Asset Type of Runtime  |
+| XSUP-72634 | GXS BANK PTE. LTD | JAPAC | $108K | Pending Confirmation | XDR-XSIAM Server - Log Forwarding | SQS Notification Forwarding fails to forward  |
+| XSUP-71784 | Hexaware Technologies Limited | JAPAC | — | In Progress | Posture - Asset Details | Blank Asset Name displayed for multiple asset |
+| XSUP-71785 | Hexaware Technologies Limited | JAPAC | — | Pending Confirmation | Vulnerability - Intelligence, Accuracy, and Metadata | Case#04098946 Last Observed Date" filter in V |
+| XSUP-72075 | Hexaware Technologies Limited | JAPAC | — | In Progress | Vulnerability - Experience | OS build details are not visible in the Vulne |
+| XSUP-73433 | Housing & Development Board Singapore | JAPAC | — | New | Posture - CSPM Issue | Issues not getting created |
+| XSUP-72391 | Icici Prudential Life Insurance Company Limited | JAPAC | $19K | Info Required | cwp_container_registry | Cortex cloud AWS registry scanning is failing |
+| XSUP-73322 | Icici Prudential Life Insurance Company Limited | JAPAC | $19K | In Progress | Posture - Compliance | Discrepancy in Cortex Compliance Scoring and  |
+| XSUP-68923 | Infosys Limited | JAPAC | $454K | Pending Confirmation | cwp_container_registry | [Infosys] JFrog Cloud Scans failing with "The |
+| XSUP-73143 | Jsw Steel Limited | JAPAC | $10K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Azure connector repeatedly transitions to "Pe |
+| XSUP-71945 | LG Household & Health Care | JAPAC | $43K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | OCI Cloud Scan onboarding fails during Identi |
+| XSUP-70201 | One 97 Communications Limited | JAPAC | $248K | Pending Confirmation | cwp_Analyzers | Certain rows for the column "Cluster-name" ar |
+| XSUP-73072 | One 97 Communications Limited | JAPAC | $248K | Info Required | Posture - Asset Details | Critical Compliance and Audit Gap in Cortex C |
+| XSUP-67717 | RYMAN HEALTHCARE LIMITED | JAPAC | $12K | Pending Confirmation | cwp_Vulnerability - Intelligence, Accuracy, and Metadata | Vulnerability CVE-2023-23397 affected version |
+| XSUP-69165 | RYMAN HEALTHCARE LIMITED | JAPAC | $12K | In Progress | Vulnerability - Experience | XSIAM Server - Discrepancies observed on buil |
+| XSUP-72581 | SBI LIFE INSURANCE COMPANY LIMITED | JAPAC | $12K | In Progress | Vulnerability - Intelligence, Accuracy, and Metadata | Discrepancy in fix version Reported by Cortex |
+| XSUP-73309 | SBI LIFE INSURANCE COMPANY LIMITED | JAPAC | $12K | Info Required | cwp_Core- Infrastructure | Need Details on the License Utilisation |
+| XSUP-66065 | Samsung C&T Fashion Group | JAPAC | $30K | Pending Customer | Posture - Report | Cortex Cloud does not show "Passed" assets pr |
+| XSUP-73319 | Southern Cross Medical Care Society | JAPAC | $16K | New | XDR-XSIAM Server - Platform - Cloud - Onboarding | Incorrect ARM Template parameter |
+| XSUP-71631 | TRANSURBAN GROUP | JAPAC | $154K | Pending Confirmation | XDR-XSIAM Server - Reports and Dashboard | Vulnerability Dashboards and Findings takes t |
+| XSUP-72724 | TRANSURBAN GROUP | JAPAC | $154K | In Progress | XDR-XSIAM Server - Platform - Cloud - Onboarding | Unable to create AWS Outpost. Internal 500 er |
+| XSUP-70807 | Tata Consultancy Services Limited | JAPAC | $443K | In Progress | XDR-XSIAM Server - Asset Inventory | Inventory > All Assets > Provider = Azure - A |
+| XSUP-70818 | Tata Consultancy Services Limited | JAPAC | $443K | In Progress | Posture - CSPM Issue | Cases & Issues > Issues > All Issues - Remedi |
+| XSUP-70706 | Us Technology International Private Limited | JAPAC | $50K | Pending Confirmation | AES - Discovery | AWS Organization Onboarding – Discovery Engin |
+| XSUP-71284 | Us Technology International Private Limited | JAPAC | $50K | Info Required | cwp_container_registry | Cortex cloud GCP registry scanning is failing |
+| XSUP-71480 | Us Technology International Private Limited | JAPAC | $50K | In Progress | Posture - Compliance, Posture - Policy | Prisma to Cortex Migration Failure - 500 Inte |
+| XSUP-72119 | Wesfarmers Bunnings Limited | JAPAC | $112K | Pending Customer | XDR-XSIAM Server - Issues Management | Policy ID mismatch between Policy UI and Issu |
+| XSUP-72949 | Westcon Solutions Pte Ltd (Singapore) DISTI | JAPAC | — | Pending Confirmation | XDR-XSIAM Server - API Security | Web & API Security (WAAS) Profile Type Missin |
+| XSUP-73294 | nForce Secure Public Company Limited | JAPAC | — | In Progress | cwp_KSPM | AssetScope not taking effect for Admission Co |
+| XSUP-72717 | AFP UNO | LATAM | $65K | Pending Customer | cwp_ADS | Failed to create VPC Endpoint.. for Cloud Sca |
+| XSUP-73106 | Autobuses De Oriente Ado, S.a. De C.v. | LATAM | $118K | Info Required | cwp_container_registry | Registry Error - AWS ECR "Failed to retrieve  |
+| XSUP-72902 | Banco Bice | LATAM | $98K | Need Information | AppSec-Scanners-SCA | SCA findings are not seen within Github Actio |
+| XSUP-73123 | Banco Bice | LATAM | $98K | Need Information | AppSec-DCO-Flow | Severe Latency experienced in the AppSec Modu |
+| XSUP-68000 | Banco Inter | LATAM | $419K | Info Required | Posture - Policy | Possible bug when creating Policy |
+| XSUP-70882 | Banco Inter | LATAM | $419K | Pending Customer | XDR-XSIAM Server - Platform - Collection - Native Collectors | Cortex XSIAM High Slowness UI/platform |
+| XSUP-71054 | Banco Pichincha C.A. | LATAM | $318K | Under investigation | IDN - Cloud Identity Access Graph | Human Identity showing no data for child acco |
+| XSUP-71072 | Banco Pichincha C.A. | LATAM | $318K | In Progress | cwp_CLI | CortexCLI- Debian 13 image reporting 0 findin |
+| XSUP-71091 | Banco Pichincha C.A. | LATAM | $318K | Info Required | XDR-XSIAM Server - Platform - Cloud - Onboarding | Azure: Outpost onboarding shows missing permi |
+| XSUP-71148 | Banco Pichincha C.A. | LATAM | $318K | Info Required | cwp_container_registry | Registry Error - AWS ECR "Failed to retrieve  |
+| XSUP-71446 | Banco Pichincha C.A. | LATAM | $318K | Reopened | IDN - Cloud Identity Inventory | No resources associated with Key Vault showin |
+| XSUP-71976 | Banco Pichincha C.A. | LATAM | $318K | Pending Confirmation | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | Azure Connector Error (Discovery Error) // Ba |
+| XSUP-72013 | Banco Pichincha C.A. | LATAM | $318K | Pending Confirmation | cwp_Serverless | Serverless Scanning not happening for tdd-moc |
+| XSUP-72904 | Banco Pichincha C.A. | LATAM | $318K | In Progress | cwp_Compliance | Custom compliance rule not generating issue |
+| XSUP-72628 | Bancolombia S.A. | LATAM | $495K | In Progress | XDR-XSIAM Server - Platform - Cloud - Onboarding | Bancolombia - API 599 Error When Downloading  |
+| XSUP-73197 | Ci&t Software S/a | LATAM | $46K | Under investigation | AppSec-PostOps-Control | Issues with Secret Scanning // Ci&t Software  |
+| XSUP-73346 | Ci&t Software S/a | LATAM | $46K | To Do | AppSec-Scanners-ScanOps | Obvious False Positives are Detected during S |
+| XSUP-71828 | Colombiana De Comercio S A | LATAM | — | In Progress | Vulnerability - Experience | Issues are not being created for appropriate  |
+| XSUP-72384 | Compartamos Servicios SA de CV | LATAM | $50K | To Do | IDN - Cloud Identity Inventory | Workspace users assigned to groups, but not r |
+| XSUP-73409 | El Puerto de Liverpool, S. A. de C. V. | LATAM | $264K | New | cwp_UAI | Presence of stale VM assets on Cortex Cloud. |
+| XSUP-72004 | FUNDACION SOCIAL | LATAM | $15K | Under review | XDR-XSIAM Server - Asset Inventory | Data Security API Request Body Schema |
+| XSUP-72584 | FUNDACION SOCIAL | LATAM | $15K | Pending Confirmation | XDR-XSIAM Server - Issues Management | Slow performance across Cloud tenant // FUNDA |
+| XSUP-72783 | FUNDACION SOCIAL | LATAM | $15K | To Do | AppSec-DCO-DataStream | ADO Webhook Warnings appeared for many Repos  |
+| XSUP-73259 | FUNDACION SOCIAL | LATAM | $15K | Under investigation | IDN - Cloud Identity Issues | Human Identity not updating after MFA disable |
+| XSUP-70148 | I-MED S.A | LATAM | $85K | Awaiting Deployment | AppSec-PostOps-Control | Performance issue within the tenant while loa |
+| XSUP-73100 | Itau Unibanco Holding S/A. | LATAM | $817K | In Progress | XDR-XSIAM Server - Platform - Cloud - Asset Discovery Collec | IAM roles not fully ingesting into Cortex Clo |
+| XSUP-72322 | Mercado Bitcoin Servicos Digitais | LATAM | $144K | Need Information | IDN - Cloud Identity Inventory | Identity related data not populating for goog |
+| XSUP-73241 | Ministerio de Defensa Nacional (Colombia) | LATAM | $64K | New | IDN - Cloud Identity Detection Rules | Query regarding GCP Telemetry requirements fo |
+| XSUP-71157 | Netdata Cybersecurity Colombia | LATAM | — | Pending Confirmation | cwp_CLI | Cortexcli scans not blocking/preventing/faili |
+| XSUP-73286 | PwC Strategy& Do Brasil Consultoria Empresarial Ltda | LATAM | — | Need Information | AppSec-PostOps-FindingsAndPersist | AppSec Rules are missing // PwC Strategy& Do  |
+| XSUP-72527 | Stone Pagamentos S.a. | LATAM | $444K | Pending Confirmation | cwp_CLI | AppSec policy not blocking build as intended  |
+| XSUP-71834 | Tecnologia Bancaria S/A. | LATAM | $113K | Pending Confirmation | XDR-XSIAM Server - Asset Inventory | Unable to  create Dynamic Asset Groups based  |
+| XSUP-72601 | Tecnologia Bancaria S/A. | LATAM | $113K | Info Required | XDR-XSIAM Server - Issues Management | We identified an inconsistency in the system  |
+| XSUP-70384 | Tenedora De Cines, S.a. De C.v. | LATAM | $129K | Under investigation | IDN - Identity Frontend | Identity Security page does not load any data |
+| XSUP-70600 | Vale S.A. | LATAM | $108K | To Do | DSPM - Issues and Findings | No Issues/Findings generated for Malware stor |
+| XSUP-62988 | nuam exchange | LATAM | $58K | Pending Confirmation | cwp_container_registry | 400 Bad Request errors with Harbor registry s |
 
