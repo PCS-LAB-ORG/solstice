@@ -539,50 +539,19 @@ def _download_live_from_drive() -> dict:
         result["Unified Tracker"] = "⚠️ ADC token empty"
         return result
 
-    _in_docker = Path("/.dockerenv").exists()
-
-    def _stream_xlsx(url: str, dest: Path, label: str) -> str:
-        """Download xlsx to dest.
-        In Docker: googleusercontent.com CDN unreachable — use file pre-downloaded
-        by the Mac host via /api/host-download. Outside Docker: curl direct.
-        """
-        if _in_docker:
-            if dest.exists() and dest.stat().st_size > 0:
-                import time as _t
-
-                age_h = (_t.time() - dest.stat().st_mtime) / 3600
-                age_str = f"{age_h:.0f}h" if age_h < 48 else f"{age_h / 24:.0f}d"
-                return f"ok_cached:{age_str}"
-            return "⚠️ xlsx missing — run setup.sh or host_sync.py on Mac"
-
-        import subprocess as _sub
-
+    def _dl_xlsx(url: str, dest: Path) -> str:
+        """Download xlsx via ADC token — works in Docker and on host."""
         try:
-            r = _sub.run(
-                [
-                    "curl",
-                    "-sL",
-                    "--location-trusted",
-                    "--max-time",
-                    "150",
-                    "--connect-timeout",
-                    "15",
-                    "-H",
-                    f"Authorization: Bearer {token}",
-                    "-o",
-                    str(dest),
-                    "-w",
-                    "%{http_code}",
-                    url,
-                ],
-                capture_output=True,
-                text=True,
-                timeout=160,
+            r = _req.get(
+                url,
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=120,
+                verify=False,
             )
-            code = r.stdout.strip()
-            if code == "200":
-                return "ok"
-            return f"⚠️ Drive returned {code}"
+            if r.status_code != 200:
+                return f"⚠️ Drive returned {r.status_code}"
+            dest.write_bytes(r.content)
+            return "ok"
         except Exception as e:
             return f"⚠️ download failed: {e}"
 
@@ -595,14 +564,12 @@ def _download_live_from_drive() -> dict:
     try:
         unified_file_id = _j.loads(UNIFIED_GSHEET.read_text())["doc_id"]
         unified_dest = DATA_DIR / "unified_tracker2.xlsx"
-        dl = _stream_xlsx(
+        dl = _dl_xlsx(
             f"https://docs.google.com/spreadsheets/d/{unified_file_id}/export?format=xlsx",
             unified_dest,
-            "Unified Tracker",
         )
-        if dl == "ok" or dl.startswith("ok_cached:"):
-            age = f" (cached {dl.split(':')[1]})" if dl.startswith("ok_cached:") else ""
-            result["Unified Tracker"] = f"✅ {unified_dest.stat().st_size // 1024}KB downloaded{age}"
+        if dl == "ok":
+            result["Unified Tracker"] = f"✅ {unified_dest.stat().st_size // 1024}KB downloaded"
         else:
             result["Unified Tracker"] = dl
     except FileNotFoundError:
@@ -622,15 +589,13 @@ def _download_live_from_drive() -> dict:
     try:
         xsup_file_id = _j.loads(XSUP_GSHEET.read_text())["doc_id"]
         xsup_dest = DATA_DIR / "xsup_tracker.xlsx"
-        dl = _stream_xlsx(
+        dl = _dl_xlsx(
             f"https://docs.google.com/spreadsheets/d/{xsup_file_id}/export?format=xlsx",
             xsup_dest,
-            "XSUP Tracker",
         )
-        if dl == "ok" or dl.startswith("ok_cached:"):
-            age = f" (cached {dl.split(':')[1]})" if dl.startswith("ok_cached:") else ""
+        if dl == "ok":
             xsup_rows = _parse_and_store_xsup(xsup_dest)
-            result["XSUP Tracker"] = f"✅ {xsup_rows} open XSUPs synced{age}"
+            result["XSUP Tracker"] = f"✅ {xsup_rows} open XSUPs synced"
         else:
             result["XSUP Tracker"] = dl
     except FileNotFoundError:
@@ -646,16 +611,14 @@ def _download_live_from_drive() -> dict:
     try:
         coe_file_id = _j.loads(COE_GSHEET.read_text())["doc_id"]
         coe_dest = DATA_DIR / "coe_tracker.xlsx"
-        dl = _stream_xlsx(
+        dl = _dl_xlsx(
             f"https://docs.google.com/spreadsheets/d/{coe_file_id}/export?format=xlsx",
             coe_dest,
-            "COE Tracker",
         )
-        if dl == "ok" or dl.startswith("ok_cached:"):
-            age = f" (cached {dl.split(':')[1]})" if dl.startswith("ok_cached:") else ""
+        if dl == "ok":
             coe_counts = _parse_and_store_coe(coe_dest.read_bytes())
             result["COE Tracker"] = (
-                f"✅ {coe_counts[0]} issues + {coe_counts[1]} bugs synced{age}"
+                f"✅ {coe_counts[0]} issues + {coe_counts[1]} bugs synced"
             )
         else:
             result["COE Tracker"] = dl
