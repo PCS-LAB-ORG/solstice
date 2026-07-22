@@ -2685,52 +2685,65 @@ def api_sotu(theatre: str = "", cohort: str = ""):
     th_filter = theatre.upper() if theatre else ""
 
     with get_db() as conn:
-        # ── KPI banner ──────────────────────────────────────────────
-        def _kpi_count(where_extra: str, params: list) -> int:
-            base = f"SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE 1=1 {_cohort_sql()}"
-            base_params = [cohort, cohort]
-            if th_filter:
-                base += " AND UPPER(COALESCE(b.account_theatre,'')) = ?"
-                base_params = base_params + [th_filter]
-            row = conn.execute(
-                base + (" AND " + where_extra if where_extra else ""), base_params + params
-            ).fetchone()
-            return row[0] if row else 0
-
+        # ── Base filter matching Dashboard EXACTLY ───────────────────
+        # NOT SH Only, NOT CC NNL, NOT Churn, NOT Excluded from SPO,
+        # contract > 2025-07-31, cohort filter, theatre filter
         th_cond = "AND UPPER(COALESCE(b.account_theatre,'')) = ?" if th_filter else ""
         th_params = [th_filter] if th_filter else []
 
-        in_scope = _kpi_count("", [])
-        # M9 from blocked_data (same source as wins page) — consistent count
-        m9_complete = _kpi_count("b.m9_complete = 1", [])
-        beat_plan = _kpi_count(
-            "b.m9_complete = 1 AND b.m9_planned != '' AND b.m9_actual < b.m9_planned",
-            [],
-        )
-        # Exclude churn from m8_inflight so KPIs are mutually exclusive
-        m8_inflight = _kpi_count(
-            "b.m8_started = 1 AND b.m9_complete = 0 AND b.subtype != 'churn'", []
-        )
-        churn = _kpi_count("b.subtype = 'churn' AND b.m9_complete = 0", [])
-        # Stuck: has a blocker subtype, not yet in M8, not churn, not done
-        stuck_total = _kpi_count(
-            "b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype != '' AND b.subtype != 'churn'",
-            [],
-        )
-        # Progressing: no subtype, no M8, not churn, not done (unblocked, pre-M8)
-        progressing = _kpi_count(
-            "b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype = ''", []
-        )
+        BASE_FILTER = f"""
+            b.pc_saas_vs_sh != 'SH Only'
+            AND b.pc_cc_migration_status NOT IN ('CC NNL', 'Churn')
+            AND b.excluded_from_spo != 'Excluded'
+            AND b.last_contract_end_date > '2025-07-31'
+            {_cohort_sql()}
+            {th_cond}
+        """
 
-        # ── Stuck reasons (m8_started=0 only — accounts not yet in flight) ───
+        def _count(extra: str = "", params: list = None) -> int:
+            p = params or []
+            sql = f"""SELECT COUNT(*) FROM blocked_data b
+                      JOIN accounts a ON a.account_id = b.account_id
+                      WHERE {BASE_FILTER}
+                      {"AND " + extra if extra else ""}"""
+            return conn.execute(sql, [cohort, cohort] + th_params + p).fetchone()[0]
+
+        # Active SaaS = base filter (matches Dashboard Row 8)
+        active_saas   = _count()
+        # Indicated churn = field indicated churn within Active SaaS (Dashboard Row 9)
+        indicated_churn = _count("b.field_indicated_churn = 'Sales indicated churn'")
+        # To upgrade = Active - indicated churn (Dashboard Row 10 = 1325)
+        in_scope      = active_saas - indicated_churn
+
+        # Milestones within "to upgrade" population (excl field indicated churn)
+        BASE_TO_UPGRADE = BASE_FILTER + " AND b.field_indicated_churn != 'Sales indicated churn'"
+
+        def _ms_count(extra: str = "", params: list = None) -> int:
+            p = params or []
+            sql = f"""SELECT COUNT(*) FROM blocked_data b
+                      JOIN accounts a ON a.account_id = b.account_id
+                      WHERE {BASE_TO_UPGRADE}
+                      {"AND " + extra if extra else ""}"""
+            return conn.execute(sql, [cohort, cohort] + th_params + p).fetchone()[0]
+
+        m9_complete   = _ms_count("b.m9_complete = 1")
+        beat_plan     = _ms_count("b.m9_complete = 1 AND b.m9_planned != '' AND b.m9_actual < b.m9_planned")
+        m8_inflight   = _ms_count("b.m8_started = 1 AND b.m9_complete = 0")
+        pre_m8        = _ms_count("b.m8_started = 0 AND b.m9_complete = 0")
+
+        # Stuck breakdown within pre-M8 (for stuck reason cards)
+        stuck_total   = _ms_count("b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype != ''")
+        progressing   = _ms_count("b.m8_started = 0 AND b.m9_complete = 0 AND b.subtype = ''")
+        churn         = indicated_churn  # rename for template compatibility
+
+        # ── Stuck reasons (pre-M8, to-upgrade population) ───────────
         stuck_sql = f"""
             SELECT b.subtype, b.account_theatre, COUNT(*) as cnt
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
-            WHERE 1=1 {_cohort_sql()}
+            WHERE {BASE_TO_UPGRADE}
               AND b.m9_complete = 0
               AND b.m8_started = 0
-              AND b.subtype != '' AND b.subtype != 'churn'
-              {th_cond}
+              AND b.subtype != ''
             GROUP BY b.subtype, b.account_theatre
             ORDER BY b.subtype, b.account_theatre
         """
@@ -2952,11 +2965,14 @@ def api_sotu(theatre: str = "", cohort: str = ""):
 
     return {
         "kpi": {
-            "in_scope": in_scope,
-            "m9_complete": m9_complete,
+            "active_saas": active_saas,       # Dashboard Row 8
+            "indicated_churn": indicated_churn, # Dashboard Row 9 (field-indicated only)
+            "in_scope": in_scope,              # Dashboard Row 10 = to upgrade = 1325
+            "m9_complete": m9_complete,        # Dashboard Row 20 = 98
             "beat_plan": beat_plan,
-            "m8_inflight": m8_inflight,
-            "churn": churn,
+            "m8_inflight": m8_inflight,        # in-flight (started, not done)
+            "pre_m8": pre_m8,                  # not yet in M8, not done
+            "churn": churn,                    # = indicated_churn (for UI compat)
             "stuck_total": stuck_total,
             "progressing": progressing,
         },

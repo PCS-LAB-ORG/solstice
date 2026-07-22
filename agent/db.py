@@ -144,7 +144,10 @@ def init_db(path: Path = DB_PATH) -> None:
             -- Unified Tracker 2.0 fields
             cortexcloud_renewable_acv TEXT DEFAULT '',
             pc_cc_migration_status TEXT DEFAULT '',
-            field_indicated_churn TEXT DEFAULT ''
+            field_indicated_churn TEXT DEFAULT '',
+            pc_saas_vs_sh TEXT DEFAULT '',
+            excluded_from_spo TEXT DEFAULT '',
+            last_contract_end_date TEXT DEFAULT ''
         );
 
         -- PS engagement data (from PS tracker CSV)
@@ -292,6 +295,18 @@ def _migrate_schema(path: Path = DB_PATH) -> None:
             pass
         try:
             conn.execute("ALTER TABLE blocked_data ADD COLUMN field_indicated_churn TEXT DEFAULT ''")
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE blocked_data ADD COLUMN pc_saas_vs_sh TEXT DEFAULT ''")
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE blocked_data ADD COLUMN excluded_from_spo TEXT DEFAULT ''")
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE blocked_data ADD COLUMN last_contract_end_date TEXT DEFAULT ''")
         except Exception:
             pass
         # xsup_data table — added 2026-05-11

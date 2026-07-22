@@ -430,6 +430,7 @@ def parse_unified_xlsx(xlsx_bytes: bytes, conn) -> dict:
                   cc_rep, cc_dsm, cortexcloud_renewable_acv, pc_cc_migration_status,
                   owner_e2e, dc_assignment, last_edited_by, last_edited_date,
                   current_project_status, field_indicated_churn,
+                  pc_saas_vs_sh, excluded_from_spo, last_contract_end_date,
                   signal, subtype
                 ) VALUES (
                   ?,?,?,?,?,?,
@@ -440,6 +441,7 @@ def parse_unified_xlsx(xlsx_bytes: bytes, conn) -> dict:
                   ?,?,?,?,
                   ?,?,?,?,
                   ?,?,
+                  ?,?,?,
                   ?,?
                 )
             """, (
@@ -476,6 +478,9 @@ def parse_unified_xlsx(xlsx_bytes: bytes, conn) -> dict:
                 _get(row_vals, "Last edited date"),
                 _get(row_vals, "current_project_status"),
                 _get(row_vals, "Field indicated churn (SPO)"),
+                _get(row_vals, "PC_SAAS_vs_SH"),
+                _get(row_vals, "Excluded from SPO"),
+                _get(row_vals, "last_contract_end_date"),
                 signal, subtype,
             ))
             n_accounts += 1

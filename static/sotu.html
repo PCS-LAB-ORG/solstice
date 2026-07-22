@@ -61,21 +61,41 @@
     <span class="pill" data-t="LATAM" onclick="setTheatre(this,'LATAM')">LATAM</span>
   </div>
 
-  <!-- KPI Banner — active accounts (ex-churn) + churn callout on side -->
+  <!-- KPI Banner — matches Dashboard 1-to-1 -->
   <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:.5rem">
     <div class="sotu-kpi" id="sotu-kpi" style="flex:1;margin-bottom:0">
-      <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">Active In Scope</div><div class="kpi-number" id="kpi-scope">—</div><div class="kpi-delta delta-neu" id="kpi-scope-sub">ex-churn</div></div>
-      <div class="kpi-card green"><div class="kpi-label">M9 Complete</div><div class="kpi-number" id="kpi-m9">—</div><div class="kpi-delta delta-pos" id="kpi-beat-sub">Migrations done</div></div>
-      <div class="kpi-card sky"><div class="kpi-label">M8 In-flight</div><div class="kpi-number" id="kpi-m8">—</div><div class="kpi-delta delta-neu">Upgrade started, not done</div></div>
-      <div class="kpi-card" style="background:#fef3c7;border:1px solid #fcd34d"><div class="kpi-label" style="color:#92400e">Stuck (pre-M8)</div><div class="kpi-number" id="kpi-stuck" style="color:#b45309">—</div><div id="kpi-stuck-breakdown" style="font-size:8px;color:#92400e;font-family:var(--mono);line-height:1.7;margin-top:.2rem"></div></div>
-      <div class="kpi-card" style="background:#f0fdf4;border:1px solid #86efac"><div class="kpi-label" style="color:#166534">Progressing</div><div class="kpi-number" id="kpi-prog" style="color:#15803d">—</div><div class="kpi-delta" style="color:#166534">No blocker, pre-M8</div></div>
+      <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)">
+        <div class="kpi-label">To Upgrade</div>
+        <div class="kpi-number" id="kpi-scope">—</div>
+        <div class="kpi-delta delta-neu" id="kpi-scope-sub">active pipeline</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">M9 Complete</div>
+        <div class="kpi-number" id="kpi-m9">—</div>
+        <div class="kpi-delta delta-pos" id="kpi-beat-sub">—</div>
+      </div>
+      <div class="kpi-card sky">
+        <div class="kpi-label">M8 In-flight</div>
+        <div class="kpi-number" id="kpi-m8">—</div>
+        <div class="kpi-delta delta-neu">Upgrade started, not done</div>
+      </div>
+      <div class="kpi-card" style="background:#fef3c7;border:1px solid #fcd34d">
+        <div class="kpi-label" style="color:#92400e">Stuck (pre-M8)</div>
+        <div class="kpi-number" id="kpi-stuck" style="color:#b45309">—</div>
+        <div id="kpi-stuck-breakdown" style="font-size:8px;color:#92400e;font-family:var(--mono);line-height:1.7;margin-top:.2rem"></div>
+      </div>
+      <div class="kpi-card" style="background:#f0fdf4;border:1px solid #86efac">
+        <div class="kpi-label" style="color:#166534">Progressing</div>
+        <div class="kpi-number" id="kpi-prog" style="color:#15803d">—</div>
+        <div class="kpi-delta" style="color:#166534">No blocker, pre-M8</div>
+      </div>
     </div>
-    <!-- Churn callout -->
-    <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:8px;padding:.75rem 1rem;min-width:110px;text-align:center;flex-shrink:0">
-      <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#991b1b;font-family:var(--mono);margin-bottom:.25rem">Churn</div>
+    <!-- Field-indicated churn callout -->
+    <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:8px;padding:.75rem 1rem;min-width:120px;text-align:center;flex-shrink:0">
+      <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#991b1b;font-family:var(--mono);margin-bottom:.25rem">Field Churn</div>
       <div style="font-size:2rem;font-weight:800;color:#dc2626;line-height:1" id="kpi-churn">—</div>
-      <div style="font-size:8px;color:#991b1b;font-family:var(--mono);margin-top:.25rem">confirmed churn</div>
-      <div style="font-size:8px;color:#991b1b;font-family:var(--mono)" id="kpi-churn-pct"></div>
+      <div style="font-size:8px;color:#991b1b;font-family:var(--mono);margin-top:.25rem">sales indicated</div>
+      <div style="font-size:8px;color:#991b1b;font-family:var(--mono);margin-top:.15rem" id="kpi-active-saas"></div>
     </div>
   </div>
   <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:1.5rem" id="kpi-sum-check"></div>
@@ -145,35 +165,37 @@ function render(d) {
 }
 
 function renderKpi(k, stuckList) {
-  var m9    = k.m9_complete  || 0;
-  var m8    = k.m8_inflight  || 0;
-  var stuck = k.stuck_total  || 0;
-  var prog  = k.progressing  || 0;
-  var churn = k.churn        || 0;
-  var total = k.in_scope     || 0;          // includes churn
-  var active = m9 + m8 + stuck + prog;      // ex-churn
+  var scope  = k.in_scope        || 0;  // 1325 — matches Dashboard "To upgrade"
+  var m9     = k.m9_complete     || 0;  // 98
+  var m8     = k.m8_inflight     || 0;  // in-flight
+  var stuck  = k.stuck_total     || 0;
+  var prog   = k.progressing     || 0;
+  var fchurn = k.indicated_churn || 0;  // 141 field-indicated
+  var active_saas = k.active_saas || 0; // 1466
 
-  document.getElementById('kpi-scope').textContent    = active.toLocaleString();
-  document.getElementById('kpi-scope-sub').textContent = 'of ' + total + ' total · ex-churn';
-  document.getElementById('kpi-m9').textContent       = m9.toLocaleString();
-  document.getElementById('kpi-m8').textContent       = m8.toLocaleString();
-  document.getElementById('kpi-stuck').textContent    = stuck.toLocaleString();
-  document.getElementById('kpi-prog').textContent     = prog.toLocaleString();
-  document.getElementById('kpi-churn').textContent    = churn.toLocaleString();
-  var churnPct = total ? Math.round(churn / total * 100) : 0;
-  document.getElementById('kpi-churn-pct').textContent = churnPct + '% of total';
+  document.getElementById('kpi-scope').textContent     = scope.toLocaleString();
+  document.getElementById('kpi-scope-sub').textContent  = 'of ' + active_saas.toLocaleString() + ' active SaaS';
+  document.getElementById('kpi-m9').textContent         = m9.toLocaleString();
+  document.getElementById('kpi-m8').textContent         = m8.toLocaleString();
+  document.getElementById('kpi-stuck').textContent      = stuck.toLocaleString();
+  document.getElementById('kpi-prog').textContent       = prog.toLocaleString();
+  document.getElementById('kpi-churn').textContent      = fchurn.toLocaleString();
+  document.getElementById('kpi-active-saas').textContent = active_saas.toLocaleString() + ' active SaaS';
   var beat = k.beat_plan || 0;
-  document.getElementById('kpi-beat-sub').textContent = beat + ' beat plan date';
+  document.getElementById('kpi-beat-sub').textContent   = beat + ' beat plan date';
   if (stuckList && stuckList.length) {
     document.getElementById('kpi-stuck-breakdown').innerHTML =
       stuckList.map(function(s){ return E(s.label) + ' ' + s.total; }).join('<br>');
   }
-  var ok = (m9 + m8 + stuck + prog + churn) === total;
+  // sum check: to_upgrade = m9 + m8 + pre_m8 = m9 + m8 + stuck + prog
+  var pre_m8 = k.pre_m8 || (stuck + prog);
+  var sum = m9 + m8 + pre_m8;
+  var ok = sum === scope;
   document.getElementById('kpi-sum-check').innerHTML =
-    (ok ? '✓' : '⚠') + ' Active: ' + m9 + ' done + ' + m8 + ' in-flight + ' +
-    stuck + ' stuck + ' + prog + ' progressing = <strong>' + active + '</strong>' +
-    ' · + ' + churn + ' churn = ' + (active + churn) +
-    (ok ? ' ✓' : ' ≠ ' + total + ' — mismatch!');
+    (ok ? '✓' : '⚠') + ' ' + m9 + ' done + ' + m8 + ' in-flight + ' + pre_m8 +
+    ' pre-M8 = <strong>' + sum + '</strong>' +
+    (ok ? ' ✓ matches Dashboard' : ' ≠ ' + scope + ' — mismatch!') +
+    ' · ' + fchurn + ' field-indicated churn excluded';
 }
 
 function renderStuck(stuck) {
