@@ -2798,10 +2798,10 @@ def api_sotu(theatre: str = "", cohort: str = ""):
                    COUNT(*) as cnt
             FROM blocked_data b
             JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.m9_complete = 1
+            WHERE {BASE_TO_UPGRADE}
+              AND b.m9_complete = 1
               AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
               AND substr(b.m9_actual, 1, 7) >= '2026-01'
-              {_cohort_sql()}
               {hist_th_cond}
             GROUP BY month, theatre
             ORDER BY month, theatre
@@ -2874,11 +2874,11 @@ def api_sotu(theatre: str = "", cohort: str = ""):
                    COUNT(*) as cnt
             FROM blocked_data b
             JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.m9_complete = 1
+            WHERE {BASE_TO_UPGRADE}
+              AND b.m9_complete = 1
               AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
               AND substr(b.m9_actual, 1, 7) >= '2026-01'
               AND substr(b.m9_actual, 1, 7) < strftime('%Y-%m', date('now', 'start of month'))
-              {_cohort_sql()}
               {hist_th_cond}
             GROUP BY theatre
         """
@@ -2890,12 +2890,12 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             SELECT COUNT(DISTINCT strftime('%Y-%m', substr(b.m9_actual, 1, 10)))
             FROM blocked_data b
             JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.m9_complete = 1
+            WHERE {BASE_TO_UPGRADE}
+              AND b.m9_complete = 1
               AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
               AND substr(b.m9_actual, 1, 7) >= '2026-01'
               AND substr(b.m9_actual, 1, 7) < strftime('%Y-%m', date('now', 'start of month'))
-              {_cohort_sql()}
-        """, (cohort, cohort)).fetchone()[0]
+        """, [cohort, cohort] + th_params).fetchone()[0]
             or 1
         )
         monthly_rate = {
@@ -2938,13 +2938,13 @@ def api_sotu(theatre: str = "", cohort: str = ""):
             SELECT strftime('%Y-%m', substr(b.m9_actual, 1, 10)) as month, COUNT(*) as cnt
             FROM blocked_data b
             JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.m9_complete = 1
+            WHERE {BASE_TO_UPGRADE}
+              AND b.m9_complete = 1
               AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
               AND substr(b.m9_actual, 1, 7) >= '2026-01'
               AND substr(b.m9_actual, 1, 7) < strftime('%Y-%m', date('now', 'start of month'))
-              {_cohort_sql()}
             GROUP BY month ORDER BY month
-        """, (cohort, cohort)).fetchall()
+        """, [cohort, cohort] + th_params).fetchall()
         mc_sample = [r[1] for r in mc_hist_rows] if mc_hist_rows else [10]
         mc_mean = _stats.mean(mc_sample) if mc_sample else 10
         mc_std  = _stats.stdev(mc_sample) if len(mc_sample) > 1 else 4
@@ -3005,11 +3005,11 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         confirmed_ytd = conn.execute(f"""
             SELECT COUNT(*) FROM blocked_data b
             JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.m9_complete = 1
+            WHERE {BASE_TO_UPGRADE}
+              AND b.m9_complete = 1
               AND b.m9_actual IS NOT NULL AND b.m9_actual != ''
               AND substr(b.m9_actual, 1, 7) >= '2026-01'
-              {_cohort_sql()}
-        """, (cohort, cohort)).fetchone()[0]
+        """, [cohort, cohort] + th_params).fetchone()[0]
 
         fy27_sims = []
         for _ in range(n_sim):
