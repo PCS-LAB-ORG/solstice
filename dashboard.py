@@ -87,6 +87,11 @@ def _ensure_db():
     _populate_db()
 
 
+def _cohort_sql(alias: str = "b") -> str:
+    """Returns SQL fragment for cohort filter. Bind with (cohort_val, cohort_val)."""
+    return f"AND (? = '' OR {alias}.cohort = ?)"
+
+
 def _load_milestones_sla_count() -> list:
     """Fast SLA breach count used by stats."""
     try:
@@ -1155,7 +1160,7 @@ async def api_run_full(request: Request):
     return StreamingResponse(stream(), media_type="text/event-stream")
 
 
-def _load_m9_schedule() -> list:
+def _load_m9_schedule(cohort: str = "") -> list:
     _ensure_db()
     """M9 completion schedule — M3 complete, M9 planned, not yet complete, sorted by date."""
     try:
@@ -1163,14 +1168,14 @@ def _load_m9_schedule() -> list:
 
         today = date.today()
         with get_db() as conn:
-            rows = conn.execute("""
+            rows = conn.execute(f"""
                 SELECT a.customer_name, a.active_cse, a.status, a.live_fire, a.live_fire_dc,
                        b.m9_planned, b.m8_started, b.m9_complete
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE b.m3_complete=1 AND b.m9_planned!='' AND b.m9_complete=0
-                  AND b.cohort='Scale cohort'
+                  {_cohort_sql()}
                 ORDER BY b.m9_planned, a.customer_name
-            """).fetchall()
+            """, (cohort, cohort)).fetchall()
         result = []
         for r in rows:
             try:
@@ -1203,8 +1208,8 @@ def _load_m9_schedule() -> list:
 
 
 @app.get("/api/m9-schedule")
-def api_m9():
-    return _load_m9_schedule()
+def api_m9(cohort: str = ""):
+    return _load_m9_schedule(cohort=cohort)
 
 
 def _load_in_progress() -> list:
@@ -1288,7 +1293,7 @@ def _load_open_actions() -> list:
         return []
 
 
-def _load_milestones(theatre: str = "") -> list:
+def _load_milestones(theatre: str = "", cohort: str = "") -> list:
     _ensure_db()
     """Milestone tracker — full M0-M9 with SLA breach flags. Optional theatre filter."""
     from datetime import datetime
@@ -1310,7 +1315,7 @@ def _load_milestones(theatre: str = "") -> list:
     try:
         with get_db() as conn:
             rows = conn.execute(
-                """
+                f"""
                 SELECT a.account_id, a.customer_name, a.active_cse, a.status, a.live_fire, a.live_fire_dc,
                        a.sales_region,
                        b.team, b.is_cs_team, b.signal, b.subtype, b.milestone_category,
@@ -1326,11 +1331,11 @@ def _load_milestones(theatre: str = "") -> list:
                        COALESCE(a.account_theatre, b.account_theatre, 'EMEA') as account_theatre
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != ''
-                  AND b.cohort='Scale cohort'
+                  {_cohort_sql()}
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA')) = UPPER(?))
                 ORDER BY b.signal, a.customer_name
             """,
-                (theatre, theatre),
+                (cohort, cohort, theatre, theatre),
             ).fetchall()
             result = []
             for r in rows:
@@ -1398,24 +1403,24 @@ def _load_ps() -> dict:
         return {"matched": [], "unmatched": []}
 
 
-def _load_completed(theatre: str = "") -> list:
+def _load_completed(theatre: str = "", cohort: str = "") -> list:
     _ensure_db()
     """Completed accounts — DC M9 complete is source of truth."""
     try:
         with get_db() as conn:
             rows = conn.execute(
-                """
+                f"""
                 SELECT a.customer_name, a.active_cse, a.sales_region,
                        a.live_fire, a.live_fire_dc,
                        b.m9_actual, b.m9_planned, b.dc_progress
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE b.m9_complete=1
-                  AND b.cohort='Scale cohort'
+                  {_cohort_sql()}
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY b.m9_actual DESC, b.m9_planned DESC
             """,
-                (theatre, theatre),
+                (cohort, cohort, theatre, theatre),
             ).fetchall()
         return [dict(r) for r in rows]
     except Exception as e:
@@ -1621,12 +1626,12 @@ def api_open_actions():
 
 
 @app.get("/api/milestones")
-def api_milestones(theatre: str = ""):
-    return _load_milestones(theatre=theatre)
+def api_milestones(theatre: str = "", cohort: str = ""):
+    return _load_milestones(theatre=theatre, cohort=cohort)
 
 
 @app.get("/api/health-summary")
-def api_health_summary():
+def api_health_summary(cohort: str = ""):
     """Theatre health status — green/amber/red per theatre based on blocked count."""
     _ensure_db()
     theatres = ["EMEA", "JAPAC", "AMER", "LATAM"]
@@ -1635,15 +1640,15 @@ def api_health_summary():
         with get_db() as conn:
             for theatre in theatres:
                 rows = conn.execute(
-                    """
+                    f"""
                     SELECT b.signal, b.m9_complete
                     FROM blocked_data b
                     JOIN accounts a ON a.account_id=b.account_id
                     WHERE UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=?
                       AND a.customer_name!=''
-                      AND b.cohort='Scale cohort'
+                      {_cohort_sql()}
                 """,
-                    (theatre,),
+                    (theatre, cohort, cohort),
                 ).fetchall()
                 m9 = sum(1 for r in rows if r[1])
                 blocked = sum(1 for r in rows if r[0] == "blocked" and not r[1])
@@ -1674,7 +1679,7 @@ def api_health_summary():
 
 
 @app.get("/api/cse-workload")
-def api_cse_workload(theatre: str = ""):
+def api_cse_workload(theatre: str = "", cohort: str = ""):
     """Per-CSE account load, blocked/at-risk counts, M9 this month."""
     from datetime import date as _date, datetime as _dt
 
@@ -1705,7 +1710,7 @@ def api_cse_workload(theatre: str = ""):
 
         with get_db() as conn:
             rows = conn.execute(
-                """
+                f"""
                 SELECT a.active_cse as cse,
                        COUNT(*) as account_count,
                        SUM(CASE WHEN b.signal='blocked' AND b.m9_complete=0 THEN 1 ELSE 0 END) as blocked_count,
@@ -1715,12 +1720,12 @@ def api_cse_workload(theatre: str = ""):
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.active_cse!='' AND a.customer_name!=''
-                  AND b.cohort='Scale cohort'
+                  {_cohort_sql()}
                   AND (? = '' OR UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=UPPER(?))
                 GROUP BY a.active_cse, b.m9_complete, b.m9_actual
                 ORDER BY a.active_cse
             """,
-                (theatre, theatre),
+                (cohort, cohort, theatre, theatre),
             ).fetchall()
 
         # Aggregate in Python so DC date parsing works correctly
@@ -1753,7 +1758,7 @@ def api_cse_workload(theatre: str = ""):
 
 
 @app.get("/api/weekly-movements")
-def api_weekly_movements(theatre: str = "", date: str = ""):
+def api_weekly_movements(theatre: str = "", date: str = "", cohort: str = ""):
     """What changed this week — new M9, M8 started, newly blocked, resolved."""
     from datetime import date as _date, timedelta
 
@@ -1773,7 +1778,7 @@ def api_weekly_movements(theatre: str = "", date: str = ""):
             if theatre
             else ""
         )
-        t_params = (theatre,) if theatre else ()
+        t_params = (cohort, cohort, theatre) if theatre else (cohort, cohort)
 
         def _q(sql, params):
             with get_db() as conn:
@@ -1803,7 +1808,7 @@ def api_weekly_movements(theatre: str = "", date: str = ""):
 
         base = f"""
             FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
-            WHERE a.customer_name!='' AND b.cohort='Scale cohort' {t_filter}
+            WHERE a.customer_name!='' {_cohort_sql()} {t_filter}
         """
 
         def _sh_milestone(field_name):
@@ -1816,7 +1821,7 @@ def api_weekly_movements(theatre: str = "", date: str = ""):
                 FROM accounts a
                 JOIN blocked_data b ON a.account_id=b.account_id
                 JOIN status_history sh ON sh.account_id=a.account_id
-                WHERE a.customer_name!='' AND b.cohort='Scale cohort' {t_filter}
+                WHERE a.customer_name!='' {_cohort_sql()} {t_filter}
                   AND sh.field_name=? AND sh.new_status='Y'
                   AND sh.changed_at>=? AND sh.changed_at<=?
                 GROUP BY a.account_id
@@ -1918,7 +1923,7 @@ def api_weekly_movements(theatre: str = "", date: str = ""):
 
 
 @app.get("/api/compare")
-def api_compare():
+def api_compare(cohort: str = ""):
     """4-theatre side-by-side comparison for QBR."""
     from datetime import date as _date, timedelta
 
@@ -1931,21 +1936,21 @@ def api_compare():
         with get_db() as conn:
             for theatre in theatres:
                 rows = conn.execute(
-                    """
+                    f"""
                     SELECT b.signal, b.m9_complete, b.m9_actual
                     FROM blocked_data b
                     JOIN accounts a ON a.account_id=b.account_id
                     WHERE UPPER(COALESCE(b.account_theatre, a.account_theatre,'EMEA'))=?
                       AND a.customer_name!=''
-                      AND b.cohort='Scale cohort'
+                      {_cohort_sql()}
                 """,
-                    (theatre,),
+                    (theatre, cohort, cohort),
                 ).fetchall()
                 m9_total = sum(1 for r in rows if r[1])
                 m9_this_week = sum(1 for r in rows if r[1] and r[2] and r[2] >= monday)
                 blocked = sum(1 for r in rows if r[0] == "blocked" and not r[1])
                 at_risk = sum(1 for r in rows if r[0] == "at_risk" and not r[1])
-                sla_rows = _load_milestones(theatre=theatre)
+                sla_rows = _load_milestones(theatre=theatre, cohort=cohort)
                 sla_overdue = sum(
                     1
                     for r in sla_rows
@@ -1999,18 +2004,18 @@ def api_ps():
 
 
 @app.get("/api/completed")
-def api_completed(theatre: str = ""):
-    return _load_completed(theatre=theatre)
+def api_completed(theatre: str = "", cohort: str = ""):
+    return _load_completed(theatre=theatre, cohort=cohort)
 
 
 @app.get("/api/blockers")
-def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
+def api_blockers(theatre: str = "", region: str = "", cse: str = "", cohort: str = ""):
     """Blocked accounts grouped by blocker type for call prep."""
     _ensure_db()
     try:
         with get_db() as conn:
             rows = conn.execute(
-                """
+                f"""
                 SELECT a.customer_name, a.active_cse, a.sales_region,
                        COALESCE(a.account_theatre,'EMEA') as account_theatre,
                        b.signal, b.subtype, b.status_detail, b.upgrade_notes,
@@ -2031,13 +2036,13 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
                 WHERE a.customer_name != ''
                   AND b.signal IN ('blocked','at_risk')
                   AND b.m9_complete = 0
-                  AND b.cohort = 'Scale cohort'
+                  {_cohort_sql()}
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                   AND (? = '' OR LOWER(a.sales_region) LIKE LOWER(?))
                   AND (? = '' OR a.active_cse = ?)
                 ORDER BY b.subtype, a.sales_region, a.customer_name
             """,
-                (theatre, theatre, region, f"%{region}%", cse, cse),
+                (cohort, cohort, theatre, theatre, region, f"%{region}%", cse, cse),
             ).fetchall()
         known = {
             "churn",
@@ -2107,7 +2112,7 @@ def api_blockers(theatre: str = "", region: str = "", cse: str = ""):
 
 
 @app.get("/api/forecast")
-def api_forecast(theatre: str = ""):
+def api_forecast(theatre: str = "", cohort: str = ""):
     """Next 7 days M8/M9 targets + 4-week velocity."""
     _ensure_db()
     from datetime import datetime, timedelta
@@ -2119,7 +2124,7 @@ def api_forecast(theatre: str = ""):
     try:
         with get_db() as conn:
             targets = conn.execute(
-                """
+                f"""
                 SELECT a.account_id, a.customer_name, a.active_cse, a.sales_region,
                        COALESCE(a.account_theatre,'EMEA') as account_theatre,
                        b.m9_planned, b.m8_planned, b.m8_started, b.m9_complete,
@@ -2127,11 +2132,11 @@ def api_forecast(theatre: str = ""):
                        b.subtype, b.signal
                 FROM accounts a JOIN blocked_data b ON a.account_id=b.account_id
                 WHERE a.customer_name != '' AND b.m9_complete=0
-                  AND b.cohort = 'Scale cohort'
+                  {_cohort_sql()}
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
                 ORDER BY b.m9_planned
             """,
-                (theatre, theatre),
+                (cohort, cohort, theatre, theatre),
             ).fetchall()
 
             def _pdw(s):
@@ -2162,13 +2167,13 @@ def api_forecast(theatre: str = ""):
                 week_end = week_start + timedelta(days=6)
                 # Fetch all and filter in Python — DC dates are M/D/YYYY not ISO
                 wrows = conn.execute(
-                    """
+                    f"""
                     SELECT b.m9_complete, b.m9_actual, b.m8_started, b.m8_actual
                     FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
-                    WHERE b.cohort='Scale cohort'
+                    WHERE 1=1 {_cohort_sql()}
                       AND (? = '' OR UPPER(COALESCE(b.account_theatre,a.account_theatre,'EMEA'))=UPPER(?))
                 """,
-                    (theatre, theatre),
+                    (cohort, cohort, theatre, theatre),
                 ).fetchall()
                 n_m9 = sum(
                     1
@@ -2591,7 +2596,7 @@ async def api_events(request: Request):
 
 
 @app.get("/api/xsup-data")
-def api_xsup_data(theatre: str = "", priority: str = ""):
+def api_xsup_data(theatre: str = "", priority: str = "", cohort: str = ""):
     """Per-account XSUP summary — open XSUPs grouped by account, filterable by theatre/priority."""
     _ensure_db()
     try:
@@ -2653,13 +2658,14 @@ def api_xsup_data(theatre: str = "", priority: str = ""):
         _xpat = _re.compile(r"XSUP-\d+", _re.IGNORECASE)
         with get_db() as conn2:
             _tech_notes = conn2.execute(
-                """
+                f"""
                 SELECT b.upgrade_notes, b.health_notes, b.status_detail,
                        b.m1_details, b.m3_details, b.m5_details
                 FROM blocked_data b
                 WHERE b.subtype = 'tech_blocker'
-                  AND b.cohort='Scale cohort'
-                """
+                  {_cohort_sql()}
+                """,
+                (cohort, cohort),
             ).fetchall()
         _tech_xsup_refs: set = set()
         for _tn in _tech_notes:
@@ -2699,7 +2705,7 @@ def _xsup_synced_at() -> str:
 
 
 @app.get("/api/sotu")
-def api_sotu(theatre: str = ""):
+def api_sotu(theatre: str = "", cohort: str = ""):
     """State of the Union exec dashboard data."""
     from datetime import datetime as _dt
 
@@ -2718,12 +2724,13 @@ def api_sotu(theatre: str = ""):
     with get_db() as conn:
         # ── KPI banner ──────────────────────────────────────────────
         def _kpi_count(where_extra: str, params: list) -> int:
-            base = "SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE b.cohort = 'Scale cohort'"
+            base = f"SELECT COUNT(*) FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id WHERE 1=1 {_cohort_sql()}"
+            base_params = [cohort, cohort]
             if th_filter:
                 base += " AND UPPER(COALESCE(b.account_theatre,'')) = ?"
-                params = [th_filter] + params
+                base_params = base_params + [th_filter]
             row = conn.execute(
-                base + (" AND " + where_extra if where_extra else ""), params
+                base + (" AND " + where_extra if where_extra else ""), base_params + params
             ).fetchone()
             return row[0] if row else 0
 
@@ -2756,7 +2763,7 @@ def api_sotu(theatre: str = ""):
         stuck_sql = f"""
             SELECT b.subtype, b.account_theatre, COUNT(*) as cnt
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.cohort = 'Scale cohort'
+            WHERE 1=1 {_cohort_sql()}
               AND b.m9_complete = 0
               AND b.m8_started = 0
               AND b.subtype != '' AND b.subtype != 'churn'
@@ -2764,7 +2771,7 @@ def api_sotu(theatre: str = ""):
             GROUP BY b.subtype, b.account_theatre
             ORDER BY b.subtype, b.account_theatre
         """
-        stuck_rows = conn.execute(stuck_sql, th_params).fetchall()
+        stuck_rows = conn.execute(stuck_sql, [cohort, cohort] + th_params).fetchall()
 
         stuck_by_type: dict = {}
         for subtype, theatre_val, cnt in stuck_rows:
@@ -2806,12 +2813,12 @@ def api_sotu(theatre: str = ""):
             WHERE h.field_name = 'M9 Upgrade Complete'
               AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
-              AND b.cohort = 'Scale cohort'
+              {_cohort_sql()}
               {hist_th_cond}
             GROUP BY month, theatre
             ORDER BY month, theatre
         """
-        hist_rows = conn.execute(hist_sql, th_params).fetchall()
+        hist_rows = conn.execute(hist_sql, [cohort, cohort] + th_params).fetchall()
 
         comp_by_month: dict = {}
         for month, theatre_val, cnt in hist_rows:
@@ -2834,13 +2841,13 @@ def api_sotu(theatre: str = ""):
         fcast_sql = f"""
             SELECT b.m9_planned, b.account_theatre
             FROM blocked_data b JOIN accounts a ON a.account_id = b.account_id
-            WHERE b.cohort = 'Scale cohort'
+            WHERE 1=1 {_cohort_sql()}
               AND b.m9_complete = 0
               AND b.subtype != 'churn'
               AND b.m9_planned IS NOT NULL AND b.m9_planned != ''
               {fcast_th_cond}
         """
-        fcast_rows = conn.execute(fcast_sql, th_params).fetchall()
+        fcast_rows = conn.execute(fcast_sql, [cohort, cohort] + th_params).fetchall()
 
         fcast_by_month: dict = {}
         for m9p, theatre_val in fcast_rows:
@@ -2876,15 +2883,15 @@ def api_sotu(theatre: str = ""):
               AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
               AND h.changed_at < date('now','start of month')
-              AND b.cohort = 'Scale cohort'
+              {_cohort_sql()}
               {hist_th_cond}
             GROUP BY theatre
         """
-        rate_rows = conn.execute(rate_sql, th_params).fetchall()
+        rate_rows = conn.execute(rate_sql, [cohort, cohort] + th_params).fetchall()
         rate_by_theatre = {r[0]: r[1] for r in rate_rows if r[0] in THEATRES}
         # Count completed full months
         n_rate_months = (
-            conn.execute("""
+            conn.execute(f"""
             SELECT COUNT(DISTINCT strftime('%Y-%m', h.changed_at))
             FROM status_history h
             JOIN accounts a ON a.account_id = h.account_id
@@ -2892,8 +2899,8 @@ def api_sotu(theatre: str = ""):
             WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
               AND h.changed_at < date('now','start of month')
-              AND b.cohort = 'Scale cohort'
-        """).fetchone()[0]
+              {_cohort_sql()}
+        """, (cohort, cohort)).fetchone()[0]
             or 1
         )
         monthly_rate = {
@@ -2915,16 +2922,16 @@ def api_sotu(theatre: str = ""):
         # Bootstrap from all completed months in 2026 (up to last full month)
         import random as _random
 
-        mc_hist_rows = conn.execute("""
+        mc_hist_rows = conn.execute(f"""
             SELECT strftime('%Y-%m', h.changed_at) as month, COUNT(*) as cnt
             FROM status_history h
             JOIN accounts a ON a.account_id = h.account_id
             LEFT JOIN blocked_data b ON b.account_id = h.account_id
             WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01' AND h.changed_at < date('now','start of month')
-              AND b.cohort = 'Scale cohort'
+              {_cohort_sql()}
             GROUP BY month ORDER BY month
-        """).fetchall()
+        """, (cohort, cohort)).fetchall()
         mc_sample = [r[1] for r in mc_hist_rows] if mc_hist_rows else [10]
 
         def _pct(data, p):
@@ -2948,14 +2955,14 @@ def api_sotu(theatre: str = ""):
         }
 
         # Year-end 2026: confirmed so far (Scale cohort) + Aug–Dec simulation
-        confirmed_ytd = conn.execute("""
+        confirmed_ytd = conn.execute(f"""
             SELECT COUNT(*) FROM status_history h
             JOIN accounts a ON a.account_id = h.account_id
             LEFT JOIN blocked_data b ON b.account_id = h.account_id
             WHERE h.field_name = 'M9 Upgrade Complete' AND h.new_status = 'Y'
               AND h.changed_at >= '2026-01-01'
-              AND b.cohort = 'Scale cohort'
-        """).fetchone()[0]
+              {_cohort_sql()}
+        """, (cohort, cohort)).fetchone()[0]
         dec26_indices = [
             i
             for i, row in enumerate(adjusted_forecast)
@@ -2999,7 +3006,7 @@ def api_sotu(theatre: str = ""):
 
 
 @app.get("/api/velocity")
-def api_velocity(weeks: int = 12, theatre: str = ""):
+def api_velocity(weeks: int = 12, theatre: str = "", cohort: str = ""):
     """Milestone velocity — this week summary + N-week history by region."""
     from datetime import date as _date, timedelta, datetime as _dt, timezone
 
@@ -3047,10 +3054,10 @@ def api_velocity(weeks: int = 12, theatre: str = ""):
                       AND sh.new_status = 'Y'
                       AND sh.changed_at >= ?
                       AND sh.changed_at < ?
-                      AND b.cohort='Scale cohort'
+                      {_cohort_sql()}
                       {t_clause}
                     """,
-                    (ms, mon_s, next_monday_s) + t_params,
+                    (ms, mon_s, next_monday_s, cohort, cohort) + t_params,
                 ).fetchone()
                 cnt = row["cnt"] if row else 0
                 if cnt:
@@ -3171,7 +3178,7 @@ def dashboard_pc_cc():
 
 
 @app.get("/api/pc-cc-accounts")
-def api_pc_cc_accounts():
+def api_pc_cc_accounts(cohort: str = ""):
     import csv as _csv
 
     data_dir = Path(__file__).parent / "data"
@@ -3207,10 +3214,10 @@ def api_pc_cc_accounts():
             mig = acc.get("PC_CC_Migration_status", "").strip()
 
             db_row = conn.execute(
-                "SELECT a.active_cse FROM accounts a "
-                "JOIN blocked_data b ON a.account_id=b.account_id "
-                "WHERE LOWER(a.account_id)=? AND b.cohort='Scale cohort'",
-                (sid,),
+                f"SELECT a.active_cse FROM accounts a "
+                f"JOIN blocked_data b ON a.account_id=b.account_id "
+                f"WHERE LOWER(a.account_id)=? {_cohort_sql()}",
+                (sid, cohort, cohort),
             ).fetchone()
 
             rm = region_map.get(_norm(region), {})
@@ -3248,13 +3255,13 @@ def dashboard_scope():
 
 
 @app.get("/api/scope")
-def api_scope(theatre: str = ""):
-    """Scale cohort in-scope accounts — not churned, M9 not complete. Empty theatre = all."""
+def api_scope(theatre: str = "", cohort: str = ""):
+    """In-scope accounts — not churned, M9 not complete. Empty theatre/cohort = all."""
     _ensure_db()
     try:
         with get_db() as conn:
             rows = conn.execute(
-                """
+                f"""
                 SELECT b.account_id,
                        a.customer_name, a.active_cse, a.sales_region, a.status,
                        b.account_theatre, b.cohort, b.area, b.dc_progress, b.signal, b.subtype,
@@ -3269,14 +3276,14 @@ def api_scope(theatre: str = ""):
                        b.next_renewal_date, b.current_project_status
                 FROM blocked_data b
                 JOIN accounts a ON a.account_id = b.account_id
-                WHERE b.cohort = 'Scale cohort'
+                WHERE 1=1 {_cohort_sql()}
                   AND (? = '' OR UPPER(b.account_theatre) = UPPER(?))
                   AND (a.status IS NULL OR a.status != 'Churning/Churned')
                   AND (b.status_detail IS NULL OR b.status_detail NOT LIKE '%decided to churn%')
                   AND (b.m9_complete IS NULL OR b.m9_complete != 1)
                 ORDER BY b.account_theatre, a.active_cse, a.customer_name
                 """,
-                (theatre, theatre),
+                (cohort, cohort, theatre, theatre),
             ).fetchall()
         return [dict(r) for r in rows]
     except Exception as e:
@@ -3292,7 +3299,7 @@ def dashboard_compare():
 
 
 @app.get("/api/daily-brief")
-def api_daily_brief(date: str = "", theatre: str = ""):
+def api_daily_brief(date: str = "", theatre: str = "", cohort: str = ""):
     """Leadership daily briefing — movements for a given date + 7-day trend."""
     _ensure_db()
     from datetime import datetime, timedelta
@@ -3309,7 +3316,7 @@ def api_daily_brief(date: str = "", theatre: str = ""):
         with get_db() as conn:
             # All movements for this day
             day_rows = conn.execute(
-                """
+                f"""
                 SELECT sh.account_id, sh.field_name, sh.old_status, sh.new_status,
                        sh.changed_at, sh.file_source,
                        CASE WHEN sh.account_id='unmatched_dc' THEN sh.new_status
@@ -3324,7 +3331,7 @@ def api_daily_brief(date: str = "", theatre: str = ""):
                 LEFT JOIN blocked_data b ON b.account_id=sh.account_id
                 WHERE sh.changed_at >= ? AND sh.changed_at < ?
                   AND sh.source IN ('pipeline','backfill')
-                  AND (sh.account_id='unmatched_dc' OR b.cohort='Scale cohort')
+                  AND (sh.account_id='unmatched_dc' OR {_cohort_sql()})
                   AND (? = ''
                        OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?)
                        OR (sh.account_id='unmatched_dc' AND (
@@ -3337,6 +3344,8 @@ def api_daily_brief(date: str = "", theatre: str = ""):
                 (
                     date + "T00:00:00",
                     date + "T23:59:59",
+                    cohort,
+                    cohort,
                     theatre,
                     theatre,
                     theatre,
@@ -3393,14 +3402,14 @@ def api_daily_brief(date: str = "", theatre: str = ""):
             theatre_totals = {}
             for t in ["EMEA", "JAPAC", "AMER", "LATAM"]:
                 tr = conn.execute(
-                    """
+                    f"""
                     SELECT SUM(b.m8_started) m8, SUM(b.m9_complete) m9,
                            SUM(b.m3_complete) m3, COUNT(*) accounts
                     FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
                     WHERE UPPER(COALESCE(a.account_theatre,'EMEA'))=?
-                      AND b.cohort='Scale cohort'
+                      {_cohort_sql()}
                 """,
-                    (t,),
+                    (t, cohort, cohort),
                 ).fetchone()
                 theatre_totals[t] = {
                     "m8": tr[0] or 0,
@@ -3411,16 +3420,16 @@ def api_daily_brief(date: str = "", theatre: str = ""):
 
             # Cumulative totals (filtered or global)
             totals = conn.execute(
-                """
+                f"""
                 SELECT
                   SUM(b.m8_started) m8, SUM(b.m9_complete) m9,
                   SUM(b.m3_complete) m3, SUM(b.m5_complete) m5,
                   COUNT(*) accounts
                 FROM blocked_data b JOIN accounts a ON a.account_id=b.account_id
-                WHERE b.cohort='Scale cohort'
+                WHERE 1=1 {_cohort_sql()}
                   AND (? = '' OR UPPER(COALESCE(a.account_theatre,'EMEA'))=UPPER(?))
             """,
-                (theatre, theatre),
+                (cohort, cohort, theatre, theatre),
             ).fetchone()
 
         movements = [dict(r) for r in day_rows]
