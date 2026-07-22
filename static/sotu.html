@@ -302,8 +302,8 @@ function _mcBadge(val, band) {
 }
 
 // Release uptick months — marked with ▲
-// ▲ = release uptick months: Jul release → Sep/Oct · Nov release → Dec/Jan
-var RELEASE_MONTHS = {'2026-09':1,'2026-10':1,'2026-12':1,'2027-01':1};
+// ▲ = release uptick: Jul release → Sep/Oct · Nov release → Dec/Jan · next Jul → Sep/Oct
+var RELEASE_MONTHS = {'2026-09':1,'2026-10':1,'2026-12':1,'2027-01':1,'2027-09':1,'2027-10':1};
 
 function renderForecast(rows, runRate, runRateTotal, runRateMonths, mc) {
   if (!rows || !rows.length) {
@@ -373,7 +373,7 @@ function renderForecast(rows, runRate, runRateTotal, runRateMonths, mc) {
   var out = '';
   if (ye) {
     out += '<div style="margin-top:.5rem;font-size:9px;font-family:var(--mono);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">'
-      + '<span style="color:var(--muted)">Year-end 2026 total:</span>';
+      + '<span style="color:var(--muted)">' + E((ye.label || 'FY27 end') + ' total:') + '</span>';
     MC_BANDS.forEach(function(b){
       out += '<span title="' + E(b.title) + '" style="background:' + b.bg + ';color:' + b.color
         + ';padding:2px 8px;border-radius:3px;font-weight:700;cursor:default">'

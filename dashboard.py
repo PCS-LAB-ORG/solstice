@@ -2904,12 +2904,21 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         }
         total_rate = sum(monthly_rate.values())
 
+        # FY27: Aug 2026 → Aug 2027 (13 months)
+        _fy27_months = [
+            f"{y}-{m:02d}"
+            for y, m in [
+                (2026,8),(2026,9),(2026,10),(2026,11),(2026,12),
+                (2027,1),(2027,2),(2027,3),(2027,4),(2027,5),(2027,6),(2027,7),(2027,8),
+            ]
+        ]
+        # Pull any existing planned data; fill missing months with flat rate
+        planned_by_month = {row["month"]: row for row in forecast}
         adjusted_forecast = []
-        for row in forecast:
-            if row["month"] > "2026-12":
-                continue
+        for ym in _fy27_months:
+            base = planned_by_month.get(ym, {})
             adj = {t: monthly_rate[t] for t in THEATRES}
-            adj["month"] = row["month"]
+            adj["month"] = ym
             adj["total"] = total_rate
             adjusted_forecast.append(adj)
 
@@ -2988,7 +2997,7 @@ def api_sotu(theatre: str = "", cohort: str = ""):
         first_ym = adjusted_forecast[0]["month"] if adjusted_forecast else "2026-07"
         mc_per_month = mc_per_month_by_month.get(first_ym, {"p10":6,"p30":9,"p50":13,"p70":16,"p90":19})
 
-        # Year-end 2026: confirmed so far + Aug-Dec simulated (correlated runs)
+        # FY27 end (Aug 2027): confirmed so far + all 13 months simulated
         confirmed_ytd = conn.execute(f"""
             SELECT COUNT(*) FROM blocked_data b
             JOIN accounts a ON a.account_id = b.account_id
@@ -2998,22 +3007,22 @@ def api_sotu(theatre: str = "", cohort: str = ""):
               {_cohort_sql()}
         """, (cohort, cohort)).fetchone()[0]
 
-        dec26_months = [r["month"] for r in adjusted_forecast if "2026-08" <= r["month"] <= "2026-12"]
-        year_sums = []
+        fy27_sims = []
         for _ in range(n_sim):
             total = confirmed_ytd
-            for ym in dec26_months:
-                rate = _month_rate(ym)
+            for row in adjusted_forecast:
+                rate = _month_rate(row["month"])
                 total += max(0, round(_random.gauss(rate, mc_std * 0.6)))
-            year_sums.append(total)
+            fy27_sims.append(total)
 
         mc_year_end = {
             "confirmed": confirmed_ytd,
-            "p10": _pct(year_sums, 10),
-            "p30": _pct(year_sums, 30),
-            "p50": _pct(year_sums, 50),
-            "p70": _pct(year_sums, 70),
-            "p90": _pct(year_sums, 90),
+            "label": "FY27 end (Aug 2027)",
+            "p10": _pct(fy27_sims, 10),
+            "p30": _pct(fy27_sims, 30),
+            "p50": _pct(fy27_sims, 50),
+            "p70": _pct(fy27_sims, 70),
+            "p90": _pct(fy27_sims, 90),
         }
         mc_sample_mean = round(mc_mean, 1)
         mc_sample_n = len(mc_sample)
