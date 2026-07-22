@@ -140,3 +140,22 @@
 - Global account search, account detail modal
 - SLA framework (M3→M8 ≤14d, M8→M9 ≤28d)
 - Theatre health bar, sync summary toast
+
+---
+
+## v3.0.0 — Unified Tracker 2.0 migration (2026-07-22)
+
+### Breaking
+- Primary data source changed from DC CSE Tracker CSV → Unified Tracker 2.0 xlsx (IT Connected Sheet, Combined Database tab)
+- DB rebuilt: 1065 Scale-only rows → 2933 rows across all cohorts
+
+### New
+- **Global cohort selector** on every page: All / Scale cohort / 101-650 / Top 100
+- **`?cohort=` param** on all 19 API endpoints (default `""` = all cohorts)
+- **`parse_unified_xlsx()`** — new parser for 265-column Unified Tracker 2.0
+- **`wipe_account_data()`** — safe DB wipe preserving status_history, COE, XSUP
+- **`field_indicated_churn`** new column in blocked_data
+
+### Numbers (all cohorts)
+- In scope: 2933 | M9 done: 104 | M8 in-flight: 268 | Churn: 304
+- Scale cohort: 2279 | M9: 71
